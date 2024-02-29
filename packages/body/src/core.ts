@@ -8,7 +8,7 @@ const useAgentSmith = (initParams: AgentSpec) => {
     //public state
     const state = map({
         text: "",
-        component: "",
+        component: "AgentBaseText",
         isVisible: false,
         isInteracting: false,
     });
@@ -41,8 +41,6 @@ const useAgentSmith = (initParams: AgentSpec) => {
         }
         if (component) {
             state.setKey("component", component);
-        } else {
-            state.setKey("component", `${name}BaseText`);
         }
         state.setKey("text", text);
         state.setKey("isInteracting", true);
