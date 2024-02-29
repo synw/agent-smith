@@ -74,3 +74,11 @@ await bob.brain.discover();
 const _prompt = "list the planets of the solar sytem";
 await bob.think(_prompt, { temperature: 0.2 });
 ```
+
+## Libraries
+
+Powered by:
+
+- [Nanostores](https://github.com/nanostores/nanostores) for the state management and reactive variables
+- [LocalLm](https://github.com/synw/locallm) for the inference servers management
+- [Modprompt](https://github.com/synw/modprompt) for the templates management
