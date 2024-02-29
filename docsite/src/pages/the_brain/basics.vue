@@ -5,8 +5,12 @@
         </div>
         <div class="flex flex-col space-y-5 mt-5">
             <div>The brain module manages connections to inference servers. It is usable independently
-                of the body. In this example we are going to use a local Koboldcpp server. Start a local
-                server with Mistral Instruct 7B to run the interactive examples on this page.
+                of the body. In this example we are going to use a local Koboldcpp server. </div>
+            <div>Start a local Koboldcpp server with <a
+                    href="https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF">Tinyllama
+                    Chat</a> (1B)
+                to run the interactive examples on this page. We are using a small model so that this example can run with
+                a small memory and on CPU only.
             </div>
             <div>First let's declare our brain module with one expert:</div>
             <div>
@@ -18,12 +22,12 @@
             </div>
             <div>Let's ping our server to check if it's up:</div>
             <div>
-                <button class="btn light" @click="brain.discover()">Ping server</button>
+                <button class="btn light" @click="discover()">Ping server</button>
             </div>
             <div>Server is up:
                 <code :class="brainState.isOn ? 'txt-success' : 'txt-warning'">
-                                                                                                                                                                                                                                                                                                                                                                                                                                {{ brainState.isOn }}
-                                                                                                                                                                                                                                                                                                                                                                                                                            </code>
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        {{ brainState.isOn }}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </code>
             </div>
             <div>The template part:</div>
             <div>
@@ -98,6 +102,7 @@
             <div>
                 <static-code-block :hljs="hljs" :code="code8" lang="ts"></static-code-block>
             </div>
+            <AgentJoeV3></AgentJoeV3>
             <div>Check the <a href="https://github.com/synw/modprompt">Modprompt</a> library for more details.</div>
             <div class="pt-5">
                 <a href="javascript:openLink('/the_brain/options')">Next: options</a>
@@ -107,11 +112,13 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import Textarea from 'primevue/textarea';
 import { StaticCodeBlock } from "@docdundee/vue";
 import { hljs } from "@/conf";
-import { brain, brainState, brainStream } from "@/agent/agent";
+import { brain, brainState, brainStream, joe } from "@/agent/agent";
+import AgentJoeV3 from '@/agent/AgentJoeV3.vue';
+import { discover } from './utils';
 
 const runningQuery = ref<"q1" | "q2">("q1");
 const q1 = ref("Write a short list of the planets names of the solar system");
@@ -122,7 +129,7 @@ async function runQ2() {
     await brain.think(q2.value, {
         temperature: 0,
         min_p: 0.05,
-        max_tokens: 500,
+        max_tokens: 200,
     })
 }
 
@@ -132,7 +139,7 @@ import { useLmExpert, useAgentBrain } from "@agent-smith/brain";
 const expert = useLmExpert({
     name: "default",
     localLm: "koboldcpp",
-    templateName: "mistral",
+    templateName: "zephyr",
 });
 // map the brain to the body (optional)
 const joe = useAgentSmith({
@@ -174,7 +181,7 @@ const code5 = `async function runQuery() {
     await brain.think(q2.value, {
         temperature: 0,
         min_p: 0.05,
-        max_tokens: 500,
+        max_tokens: 200,
     })
 }`;
 
@@ -183,4 +190,6 @@ const code6 = `brain.ex.template.toJson()`;
 const code7 = `brain.ex.template.render()`;
 
 const code8 = `brain.ex.template.prompt("Write a short list of...")`;
+
+onBeforeMount(() => joe.state.setKey("component", "AgentBaseText"))
 </script>

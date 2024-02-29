@@ -48,8 +48,8 @@
         </div>
         <AgentJoeV2></AgentJoeV2>
         <div class="mt-8">
-            <a href="javascript:openLink('/the_body/interactions/dynamic_component')">Next:
-                map a dynamic component on the agent interaction
+            <a href="javascript:openLink('/the_body/interactions/components')">Next:
+                map components on the agent interactions
             </a>
         </div>
     </div>

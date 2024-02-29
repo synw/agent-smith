@@ -45,16 +45,19 @@
             <div class="pt-5">
                 <a href="javascript:openLink('/the_brain/multiple_experts')">Next: multiple experts</a>
             </div>
+            <AgentJoeV3></AgentJoeV3>
         </div>
     </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { onBeforeMount, ref } from 'vue';
 import Textarea from 'primevue/textarea';
 import { StaticCodeBlock } from "@docdundee/vue";
 import { hljs } from "@/conf";
-import { brain, brainStream } from "@/agent/agent";
+import { brain, brainStream, joe } from "@/agent/agent";
+import { discover } from './utils';
+import AgentJoeV3 from '@/agent/AgentJoeV3.vue';
 
 const q1 = ref("Write a list of the planets names of the solar system");
 const grammar1 = `interface Grammar {
@@ -63,11 +66,7 @@ const grammar1 = `interface Grammar {
 
 async function runQ1() {
     if (!brain.state.get().isOn) {
-        const found = await brain.discover();
-        if (!found) {
-            console.warn("Can not run query: the inference server is down")
-            return
-        }
+        await discover();
     }
     await brain.think(q1.value,
         {
@@ -113,5 +112,7 @@ const code4 = `await brain.think("is the sky blue?"
         grammar: grammar, 
         parseJson: false 
     },
-)`
+)`;
+
+onBeforeMount(() => joe.state.setKey("component", "AgentBaseText"))
 </script>

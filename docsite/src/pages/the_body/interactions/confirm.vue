@@ -14,6 +14,10 @@
             <div>
                 <static-code-block :hljs="hljs" :code="code2" lang="ts"></static-code-block>
             </div>
+            <div>In the agent code map the component to the state:</div>
+            <div>
+                <static-code-block :hljs="hljs" :code="code5" lang="html"></static-code-block>
+            </div>
             <div>Let's prepare the confirm action:</div>
             <div>
                 <static-code-block :hljs="hljs" :code="code3" lang="ts"></static-code-block>
@@ -108,6 +112,11 @@ onMounted(() => {
     joe.show();
     joe.interactions.setKey("click", setConfirmAction);
 })`;
+
+const code5 = `<div v-if="joeState.isInteracting === true" class="bubble bubble-bottom-left mr-5 txt-light">
+    <agent-base-text v-if="joeState.component == 'AgentBaseText'"></agent-base-text>
+    <agent-confirm v-else-if="joeState.component == 'AgentConfirm'"></agent-confirm>
+</div>`;
 
 onMounted(() => {
     joe.show();

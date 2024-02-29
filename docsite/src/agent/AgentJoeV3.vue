@@ -2,7 +2,8 @@
     <div class="fixed bottom-12 right-8 flex flex-row items-end z-50">
         <template v-if="joeState.isVisible">
             <div v-if="joeState.isInteracting === true" class="bubble bubble-bottom-left mr-5 txt-light">
-                <component :is="AgentContent"></component>
+                <agent-base-text v-if="joeState.component == 'AgentBaseText'"></agent-base-text>
+                <agent-confirm v-else-if="joeState.component == 'AgentConfirm'"></agent-confirm>
             </div>
             <robot-icon class="text-5xl cursor-pointer" :class="color" @click="joe.toggleInteract()"></robot-icon>
         </template>
@@ -10,13 +11,11 @@
 </template>
 
 <script setup lang="ts">
-import { computed, defineAsyncComponent, onBeforeUnmount } from "vue";
+import { computed, onBeforeMount } from "vue";
 import { joe, joeState } from "./agent";
 import RobotIcon from "../widgets/RobotIcon.vue";
-
-let AgentContent = defineAsyncComponent(() =>
-    import('./widgets/AgentBaseText.vue')
-);
+import AgentBaseText from "./widgets/AgentBaseText.vue";
+import AgentConfirm from "./widgets/AgentConfirm.vue";
 
 const color = computed(() => {
     let c = "txt-lighter";
@@ -31,28 +30,6 @@ const color = computed(() => {
     }
     return c
 });
-
-const unbindListener = joe.state.listen((state, oldState, changed) => {
-    if (changed == "component") {
-        console.log("** component:", oldState.component, state.component)
-        if (state.component != "") {
-            let _comp = state.component;
-            if (!state.component.endsWith(".vue")) {
-                _comp = state.component + ".vue"
-            }
-            AgentContent = defineAsyncComponent(() =>
-                import(/* @vite-ignore */ `./widgets/${_comp}`)
-            )
-        }
-    }
-    if (changed == "runningTask") {
-        console.log("** runningTask:", oldState.runningTask?.name, "=>", state.runningTask?.name)
-    }
-});
-
-onBeforeUnmount(() => {
-    unbindListener();
-})
 </script>
 
 <style>

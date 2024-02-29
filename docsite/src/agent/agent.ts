@@ -8,7 +8,7 @@ import { useStore } from '@nanostores/vue';
 const expert = useLmExpert({
     name: "default",
     localLm: "koboldcpp",
-    templateName: "mistral",
+    templateName: "zephyr",
 });
 const brainModule = useAgentBrain([expert]);
 const joe = useAgentSmith({
