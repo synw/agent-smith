@@ -5,7 +5,6 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build && cd ./dist && ln -s index.html 404.html",
-    "buildgh": "vite build && rm -rf ../docs/* && cp -R ./dist/* ../docs && cd ../docs && ln -s index.html 404.html",
     "preview": "vite preview",
     "wdoc": "node ./node_modules/@docdundee/docnav/bin/docnav.mjs",
     "tdoc": "node ./node_modules/@docdundee/docnav/bin/docnav.mjs -t",
