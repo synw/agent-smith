@@ -80,5 +80,5 @@ await bob.think(_prompt, { temperature: 0.2 });
 Powered by:
 
 - [Nanostores](https://github.com/nanostores/nanostores) for the state management and reactive variables
-- [LocalLm](https://github.com/synw/locallm) for the inference servers management
-- [Modprompt](https://github.com/synw/modprompt) for the templates management
+- [Locallm](https://github.com/synw/locallm) for the inference servers management
+- [Modprompt](https://github.com/synw/modprompt) for the prompt templates management
