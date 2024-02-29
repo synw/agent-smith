@@ -1,0 +1,1 @@
+import{j as e}from"./agent-BFtiMqbc.js";import{d as t,o as n,c as o,u as r}from"./index-CboZIT6v.js";import"./lm-BizhkHiD.js";import"./index-BZxdWYOY.js";const a=["innerHTML"],f=t({__name:"AgentBaseText",setup(s){return(c,i)=>(n(),o("div",{innerHTML:r(e).text},null,8,a))}});export{f as default};
