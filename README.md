@@ -10,7 +10,7 @@ An api to create local first human friendly agents in the browser or Nodejs
 
 An agent is an anthropomorphic representation of a bot. It has these basic habilities:
 
-- **Interact with the user**: the agent can perform interactions like to talk or to ask the user to confirm or decline an action
+- **Interact with the user**: the agent can perform interactions and get input and feedback from the user
 - **Think**: interact with some language model servers to perform inference queries
 
 ## Packages
