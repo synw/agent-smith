@@ -1,0 +1,43 @@
+{
+  "name": "@agent-smith/body",
+  "version": "0.0.1",
+  "description": "An api to ceate human friendly agents",
+  "repository": "https://github.com/synw/agent-smith",
+  "scripts": {
+    "build": "rm -rf dist/* && rollup -c",
+    "test": "jest --coverage",
+    "docs": "typedoc --entryPointStrategy expand"
+  },
+  "dependencies": {
+    "nanostores": "^0.10.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-terser": "^0.4.4",
+    "@rollup/plugin-typescript": "^11.1.5",
+    "@types/node": "^20.10.3",
+    "markdown-it-replace-link": "^1.2.0",
+    "rollup": "^4.6.1",
+    "tslib": "^2.6.2",
+    "typedoc": "^0.25.4",
+    "typedoc-plugin-markdown": "^3.17.1",
+    "typedoc-plugin-rename-defaults": "^0.7.0",
+    "typescript": "^5.3.2"
+  },
+  "files": [
+    "dist"
+  ],
+  "module": "./dist/api.es.js",
+  "types": "./dist/main.d.ts",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/api.es.js"
+    }
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "license": "MIT"
+}

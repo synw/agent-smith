@@ -1,0 +1,1 @@
+import{d as n,o as s,k as o,u as e,H as t,G as l,I as r,J as u}from"./index-CboZIT6v.js";const _=n({__name:"[...all]",setup(p){return(a,i)=>(s(),o(e(u),{hljs:e(t),nav:e(l),url:a.$route.path,"on-open":a.$router.push,"base-title":e(r)},null,8,["hljs","nav","url","on-open","base-title"]))}});export{_ as default};

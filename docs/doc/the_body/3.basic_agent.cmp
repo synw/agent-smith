@@ -1,0 +1,24 @@
+# Basic agent
+
+Create an minimal agent:
+
+```ts
+import { useAgentSmith } from "@agentsmith/body";
+
+const joe = useAgentSmith({
+    name: "Bob",
+});
+```
+
+## Interactions
+
+The agent can manage the state of user intactions. This uses reactive variables
+and is suitable to work in frontend.
+
+### Talk
+
+This moves the state of the agent to talking. 
+
+```ts
+joe.talk("Hello, I am joe", 5);
+```
