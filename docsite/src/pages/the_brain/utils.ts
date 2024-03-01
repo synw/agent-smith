@@ -3,6 +3,7 @@ import { brain, joe } from "@/agent/agent";
 
 async function discover() {
     const isUp = await brain.discover();
+    joe.state.setKey("component", "AgentBaseText");
     console.log("Is up", isUp);
     joe.show();
     if (!isUp) {
