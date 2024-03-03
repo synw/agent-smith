@@ -1,9 +1,9 @@
 import { useAgentSmith } from "@agent-smith/body";
 import { useLmExpert, useAgentBrain } from "@agent-smith/brain";
+/*import { useAgentSmith } from "../../../packages/body/src/core";
+import { useLmExpert } from "../../../packages/brain/src/lm";
+import { useAgentBrain } from "../../../packages/brain/src/brain";*/
 import { Lm } from "@locallm/api";
-/*import { useAgentSmith } from "@/packages/body/core";
-import { useLmExpert } from "@/packages/brain/lm";
-import { useAgentBrain } from "@/packages/brain/brain";*/
 
 const kid = useLmExpert({
     name: "kid",
@@ -22,11 +22,9 @@ const corrector = useLmExpert({
     templateName: "phi",
 });
 
-const brainModule = useAgentBrain([kid, corrector]);
-
 const bob = useAgentSmith({
     name: "Bob",
-    modules: [brainModule],
+    brain: useAgentBrain([kid, corrector]),
 });
 
 export { bob }

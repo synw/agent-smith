@@ -13,7 +13,7 @@
             </div>
             <div>The template rendering:</div>
             <div class="txt-light">
-                <pre>{{ joe.ex.template.render() }}</pre>
+                <pre>{{ joe.brain.ex.template.render() }}</pre>
             </div>
         </div>
     </div>
@@ -41,7 +41,7 @@ function createPrompt() {
             assistant: "neutral",
         },
     ];
-    shots.forEach((s) => joe.ex.template.addShot(s.user, s.assistant));
+    shots.forEach((s) => joe.brain.ex.template.addShot(s.user, s.assistant));
 }
 
 const code1 = `import { TurnBlock } from "modprompt";
@@ -60,7 +60,7 @@ const shots: Array<TurnBlock> = [
         assistant: "neutral",
     },
 ];
-shots.forEach((s) => joe.ex.template.addShot(s.user, s.assistant));`;
+shots.forEach((s) => joe.brain.ex.template.addShot(s.user, s.assistant));`;
 
 onBeforeMount(() => createPrompt())
 </script>

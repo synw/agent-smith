@@ -1,8 +1,8 @@
 import { useAgentSmith } from "@agent-smith/body";
 import { useLmExpert, useAgentBrain } from "@agent-smith/brain";
-/*import { useAgentSmith } from "@/packages/body/core";
-import { useLmExpert } from "@/packages/brain/lm";
-import { useAgentBrain } from "@/packages/brain/brain";*/
+/*import { useAgentSmith } from "../../../packages/body/src/core";
+import { useLmExpert } from "../../../packages/brain/src/lm";
+import { useAgentBrain } from "../../../packages/brain/src/brain";*/
 import { useStore } from '@nanostores/vue';
 
 const expert = useLmExpert({
@@ -10,13 +10,12 @@ const expert = useLmExpert({
     localLm: "koboldcpp",
     templateName: "zephyr",
 });
-const brainModule = useAgentBrain([expert]);
+const brain = useAgentBrain([expert]);
 const joe = useAgentSmith({
     name: "Joe",
-    modules: [brainModule],
+    brain: brain,
 });
 const joeState = useStore(joe.state);
-const brain = brainModule.brain;
 // this part is to get reactive variables in the ui template
 const brainState = useStore(brain.state);
 const brainStream = useStore(brain.stream);

@@ -13,11 +13,10 @@
             </div>
             <div class="prose">
                 <ul>
-                    <li><a href="https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF">Tinyllama Chat</a> (1B) on
-                        the
-                        first one, as "the kid" expert</li>
-                    <li><a href="https://huggingface.co/TheBloke/phi-2-GGUF">Phi 2</a> (3B) on the first one, as "the kid"
-                        expert
+                    <li><a href="https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF">Tinyllama Chat</a> (1B)
+                        as "the kid" expert</li>
+                    <li><a href="https://huggingface.co/TheBloke/phi-2-GGUF">Phi 2</a> (3B) as "the
+                        corrector" expert that will fix the mistakes of the first model
                     </li>
                 </ul>
             </div>
@@ -29,7 +28,8 @@
             <div>We now have two experts:</div>
             <div>
                 <div v-for="(expert, i) in bob.brain.experts" class="txt-light">
-                    {{ i + 1 }}. {{ expert.name }} <span v-if="expert.name == bob.brain.ex.name">(current default)</span>
+                    {{ i + 1 }}. {{ expert.name }} <span v-if="expert.name == bob.brain.ex.name">(current
+                        default)</span>
                 </div>
             </div>
             <div>
@@ -140,12 +140,12 @@ async function check(): Promise<boolean> {
 async function runQ1(expertName: string) {
     await check();
     runningQ.value = "q1";
-    await bob.thinkx(expertName,
+    await bob.brain.thinkx(expertName,
         q1.value,
         {
             temperature: 0,
             min_p: 0.05,
-            repeatPenalty: 1.1,
+            repeat_penalty: 1.1,
             max_tokens: 200,
         },
         {
@@ -169,7 +169,7 @@ async function fixJson(text: string): Promise<string> {
 \`\`\`
 ${text}
 \`\`\``;
-    const resp = await bob.thinkx("corrector",
+    const resp = await bob.brain.thinkx("corrector",
         _prompt,
         {
             temperature: 0,
@@ -220,7 +220,7 @@ async function runQ2() {
     status.result = "";
     status.operation = ""
     console.log("Step 1: query with the kid");
-    const resp = await bob.thinkx("kid",
+    const resp = await bob.brain.thinkx("kid",
         q2.value,
         {
             temperature: 0,
@@ -285,7 +285,7 @@ async function check(): Promise<boolean> {
 
 async function runQ1(expertName: string) {
     await check();
-    await bob.thinkx(expertName,
+    await bob.brain.thinkx(expertName,
         q1.value, // the prompt from the textarea
         {
             temperature: 0,
@@ -325,7 +325,7 @@ async function fixJson(text: string): Promise<string> {
 \`\`\`
 \${text}
 \`\`\`\`;
-    const resp = await bob.thinkx("corrector",
+    const resp = await bob.brain.thinkx("corrector",
         _prompt,
         {
             temperature: 0,
@@ -382,7 +382,7 @@ const code7 = `async function runQ2() {
     status.result = "";
     status.operation = ""
     console.log("Step 1: query with the kid");
-    const resp = await bob.thinkx("kid",
+    const resp = await bob.brain.thinkx("kid",
         q2.value,  // the prompt
         {
             temperature: 0,

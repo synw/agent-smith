@@ -32,14 +32,17 @@ const code = `const expert = useLmExpert({
     templateName: "mistral",
     onToken: (t) => process.stdout.write(t),
 });
-const brain = useAgentBrain([expert]);
+
 const bob = useAgentSmith({
     name: "Bob",
-    modules: [brain],
+    brain: useAgentBrain([expert]),
 });
+
 // auto discover if expert's inference servers are up
-await bob.brain.discover();
-// run an inference query
-const _prompt = "list the planets of the solar sytem";
-await bob.think(_prompt, { temperature: 0.2 });`;
+const isUp = await bob.brain.discover();
+if (isUp) {
+  // run an inference query
+  const _prompt = "list the planets of the solar sytem";
+  await bob.brain.think(_prompt, { temperature: 0.2 });
+}`;
 </script>
