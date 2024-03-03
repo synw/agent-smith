@@ -1,6 +1,7 @@
-import { LmProviderType } from "@locallm/types";
+import { InferenceParams, InferenceResult, LmProviderType } from "@locallm/types";
 import { PromptTemplate } from "modprompt";
-import { useLmExpert } from "./lm.js";
+import { Lm } from "@locallm/api";
+import { MapStore, Store } from "nanostores";
 
 interface LmBackendSpec {
     name: string;
@@ -28,6 +29,63 @@ interface LmThinkingOptionsSpec {
     onToken?: (t: string) => void;
 }
 
-type LmExpert = ReturnType<typeof useLmExpert>;
+interface AgentBrainExpertState {
+    isUp: boolean;
+    isStreaming: boolean;
+    isThinking: boolean;
+}
 
-export { LmBackendSpec, LmExpertSpec, LmExpert, LmThinkingOptionsSpec }
+interface AgentBrainState {
+    isOn: boolean;
+}
+
+interface LmExpert {
+    stream: Store<string>;
+    name: string;
+    description: string;
+    lm: Lm;
+    template: PromptTemplate;
+    state: MapStore<AgentBrainExpertState>;
+    probe: ProbeFunctionType;
+    think: ThinkFunctionType;
+    abortThinking: () => Promise<void>;
+}
+
+interface AgentBrain {
+    stream: Store<string>,
+    state: MapStore<AgentBrainState>;
+    experts: LmExpert[];
+    ex: Readonly<LmExpert>;
+    discover: (isVerbose?: boolean) => Promise<boolean>;
+    think: ThinkFunctionType;
+    thinkx: ThinkxFunctionType;
+    abortThinking: () => Promise<void>;
+    expert: (name: string) => LmExpert;
+}
+
+type ThinkFunctionType = (
+    prompt: string,
+    inferenceParams?: InferenceParams,
+    options?: LmThinkingOptionsSpec
+) => Promise<InferenceResult>;
+
+type ThinkxFunctionType = (
+    expertName: string,
+    prompt: string,
+    inferenceParams?: InferenceParams,
+    options?: LmThinkingOptionsSpec
+) => Promise<InferenceResult>;
+
+type ProbeFunctionType = (isVerbose?: boolean) => Promise<boolean>;
+
+export {
+    LmBackendSpec,
+    LmExpertSpec,
+    LmExpert,
+    LmThinkingOptionsSpec,
+    ThinkFunctionType,
+    ProbeFunctionType,
+    AgentBrain,
+    AgentBrainExpertState,
+    AgentBrainState,
+}

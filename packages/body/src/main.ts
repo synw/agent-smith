@@ -1,17 +1,17 @@
 import { useAgentSmith } from "./core.js";
 import {
     AgentSpec,
-    Agent,
+    AgentSmith,
     JsonData,
     ConfirmFunction,
     ConfirmOptions,
     TalkFunction,
-} from "./interfaces.js";
+} from "./bodyinterfaces.js";
 
 export {
     useAgentSmith,
     AgentSpec,
-    Agent,
+    AgentSmith,
     JsonData,
     ConfirmFunction,
     ConfirmOptions,

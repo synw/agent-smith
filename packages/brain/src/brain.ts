@@ -1,8 +1,8 @@
 import { map } from 'nanostores';
 import { InferenceParams, InferenceResult } from "@locallm/types";
-import { LmExpert, LmThinkingOptionsSpec } from "./interfaces.js";
+import { AgentBrain, LmExpert, LmThinkingOptionsSpec } from "./interfaces.js";
 
-const useAgentBrain = (experts: Array<LmExpert>) => {
+const useAgentBrain = (experts: Array<LmExpert>): AgentBrain => {
     const _experts = experts;
     if (experts.length == 0) {
         throw new Error("Provide a least one expert")
@@ -65,24 +65,18 @@ const useAgentBrain = (experts: Array<LmExpert>) => {
         return res
     };
 
-    const brain = {
+    return {
         stream,
         state,
-        ex: _currentExpert,
+        get ex() {
+            return _currentExpert
+        },
         experts: _experts,
         discover,
         think,
         thinkx,
         abortThinking,
         expert,
-    }
-
-    return {
-        ex: _currentExpert,
-        brain,
-        think,
-        thinkx,
-        abortThinking,
     }
 }
 

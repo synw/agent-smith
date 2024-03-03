@@ -1,4 +1,14 @@
-import { LmBackendSpec, LmExpertSpec, LmExpert } from "@/interfaces.js";
+import {
+    LmBackendSpec,
+    LmExpertSpec,
+    LmExpert,
+    LmThinkingOptionsSpec,
+    ThinkFunctionType,
+    ProbeFunctionType,
+    AgentBrain,
+    AgentBrainExpertState,
+    AgentBrainState,
+} from "@/interfaces.js";
 import { useAgentBrain } from "./brain.js";
 import { useLmExpert } from "./lm.js";
 
@@ -7,5 +17,11 @@ export {
     useLmExpert,
     LmBackendSpec,
     LmExpertSpec,
-    LmExpert
+    LmExpert,
+    LmThinkingOptionsSpec,
+    ThinkFunctionType,
+    ProbeFunctionType,
+    AgentBrain,
+    AgentBrainExpertState,
+    AgentBrainState,
 }

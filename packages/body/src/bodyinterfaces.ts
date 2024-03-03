@@ -1,4 +1,5 @@
-import { useAgentSmith } from "./core.js";
+import { MapStore } from "nanostores";
+import { AgentBrain } from "@agent-smith/brain"
 
 /**
  * Interface for the specification of an agent.
@@ -12,6 +13,7 @@ interface AgentSpec {
     name: string;
     props?: Record<string, any>;
     modules?: Array<Record<string, any>>;
+    brain?: AgentBrain;
 }
 
 /**
@@ -27,6 +29,39 @@ interface ConfirmOptions {
     pop?: boolean;
 }
 
+
+interface AgentInteractions {
+    confirm: () => void;
+    decline: () => void;
+    click: (() => void) | null;
+}
+
+interface AgentState {
+    text: StructuredSerializeOptions,
+    component: string,
+    isVisible: boolean,
+    isInteracting: boolean,
+}
+
+interface AgentSmith {
+    // props
+    name: string;
+    props: Record<string, any>;
+    // state
+    state: MapStore<AgentState>;
+    interactions: MapStore<AgentInteractions>;
+    // modules
+    brain: AgentBrain;
+    // methods
+    show: () => void;
+    hide: () => void;
+    talk: TalkFunction;
+    confirm: ConfirmFunction;
+    toggleInteract: () => void;
+    mute: () => void;
+    [k: string]: any;
+}
+
 /**
  * Type for the function to confirm something.
  */
@@ -36,25 +71,18 @@ type ConfirmFunction = (text: string, onConfirm: () => Promise<void>, options?: 
  * Type for the function to talk.
  */
 type TalkFunction = (text: string, duration?: number, component?: string) => Promise<void>;
-
-/**
- * Type for an agent.
- */
-type Agent = ReturnType<typeof useAgentSmith>;
-
 /**
  * Type for JSON data.
  */
 type JsonData = Record<string, any> | Array<any>;
 
-/**
- * Export all the interfaces and types.
- */
 export {
+    AgentSmith,
     AgentSpec,
-    Agent,
     JsonData,
     ConfirmFunction,
     ConfirmOptions,
     TalkFunction,
+    AgentState,
+    AgentInteractions,
 }

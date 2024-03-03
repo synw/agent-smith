@@ -4,9 +4,9 @@ import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import { Lm } from "@locallm/api";
 import { InferenceParams, InferenceResult } from "@locallm/types";
 import { defaultLocalBackends } from "./const.js";
-import { LmExpertSpec, LmThinkingOptionsSpec } from "@/interfaces.js";
+import { LmExpert, LmExpertSpec, LmThinkingOptionsSpec } from "@/interfaces.js";
 
-const useLmExpert = (spec: LmExpertSpec) => {
+const useLmExpert = (spec: LmExpertSpec): LmExpert => {
     let _lm: Lm;
     let onToken = spec?.onToken;
     if (spec.localLm) {

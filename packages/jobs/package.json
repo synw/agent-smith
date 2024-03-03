@@ -1,7 +1,7 @@
 {
-  "name": "@agent-smith/brain",
-  "version": "0.0.3",
-  "description": "An api to ceate human friendly agents: the AI brain module",
+  "name": "@agent-smith/jobs",
+  "version": "0.0.1",
+  "description": "An api to ceate human friendly agents: the jobs management module",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {
     "buildrl": "rm -rf dist/* && rollup -c",
@@ -10,10 +10,7 @@
     "docs": "typedoc --entryPointStrategy expand"
   },
   "dependencies": {
-    "@intrinsicai/gbnfgen": "^0.11.0",
-    "@locallm/api": "^0.0.29",
-    "nanostores": "^0.10.0",
-    "modprompt": "^0.5.0"
+    "nanostores": "^0.10.0"
   },
   "devDependencies": {
     "@locallm/types": "^0.0.14",

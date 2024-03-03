@@ -1,10 +1,12 @@
 import { map } from 'nanostores'
-import { type AgentSpec, type ConfirmFunction, type ConfirmOptions } from "./interfaces.js";
+import { AgentSmith, type AgentSpec, type ConfirmFunction, type ConfirmOptions } from "./bodyinterfaces.js";
+import { AgentBrain } from '@agent-smith/brain';
 
-const useAgentSmith = (initParams: AgentSpec) => {
+const useAgentSmith = (initParams: AgentSpec): AgentSmith => {
     const name = initParams.name;
     const props = initParams.props ?? {};
     const modules = initParams.modules;
+    const brain: AgentBrain = initParams.brain ?? {} as AgentBrain;
     //public state
     const state = map({
         text: "",
@@ -143,6 +145,7 @@ const useAgentSmith = (initParams: AgentSpec) => {
         name,
         interactions,
         props,
+        brain,
         show,
         hide,
         talk,
@@ -155,7 +158,7 @@ const useAgentSmith = (initParams: AgentSpec) => {
         modules.forEach((m) => rt = { ...m, ...rt });
     }
 
-    return rt
+    return rt as AgentSmith
 }
 
 export { useAgentSmith }

@@ -1,7 +1,7 @@
 {
   "name": "@agent-smith/body",
-  "version": "0.0.2",
-  "description": "An api to ceate human friendly agents",
+  "version": "0.0.4",
+  "description": "An api to create human friendly agents",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {
     "build": "rm -rf dist/* && rollup -c",
@@ -12,6 +12,7 @@
     "nanostores": "^0.10.0"
   },
   "devDependencies": {
+    "@agent-smith/brain": "^0.0.3",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.5",
