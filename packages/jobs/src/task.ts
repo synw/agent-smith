@@ -1,36 +1,59 @@
 import { map } from 'nanostores';
-import { AgentTask, type AgentTaskSpec } from "./interfaces.js";
+import { AgentTask, AgentTaskState, type AgentTaskSpec } from "./jobsinterfaces.js";
 
 
 const useAgentTask = (spec: AgentTaskSpec): AgentTask => {
     //console.log("Init task:", JSON.stringify(spec, null, "  "));
     //console.log("F", spec.run)
-    let data = {};
-    const name = spec.name;
-    const title = spec.title;
-    const description = spec.description;
+    const id = spec.id;
+    const title = spec.title ?? "";
+    const description = spec.description ?? "";
     const runFunc = spec.run;
     const abortFunc = spec.abort;
     //const actions = spec.actions;
-    const state = map({
+    const state = map<AgentTaskState>({
         isRunning: false,
         isCompleted: false,
+        data: null,
     });
 
-    const run = async (params: any): Promise<Record<string, any>> => {
-        //console.log("TASK run task", name, JSON.stringify(params, null, "  "));
+    const _run = async (params: any, autoComplete: boolean): Promise<Record<string, any>> => {
+        console.log("TASK run task", id, autoComplete, params);
         //console.log("RUN F", runFunc.name);
         state.setKey("isRunning", true);
-        const d = await runFunc(params);
+        let data: Record<string, any> = {};
+        if (runFunc) {
+            const d = await runFunc(params);
+            data = d;
+        }
+        if (autoComplete) {
+            console.log("AUTOCOMPLETE TASK", id);
+            state.setKey("isRunning", false);
+            state.setKey("isCompleted", true);
+        }
+        return data
+    }
+
+    const run = async (params: any): Promise<Record<string, any>> => {
+        return _run(params, true)
+    }
+
+    const start = async (params: any): Promise<Record<string, any>> => {
+        return _run(params, false)
+    }
+
+    const finish = (completed: boolean, data?: any): void => {
+        console.log("TASK finish task", id, completed, data);
         state.setKey("isRunning", false);
-        data = d;
-        state.setKey("isCompleted", true);
-        return d
+        state.setKey("isCompleted", completed);
+        if (data) {
+            state.setKey("data", data)
+        }
     }
 
     const abort = async (params: any = null) => {
         if (!abortFunc) {
-            console.warn(`The task ${name} has no abort method`)
+            console.warn(`The task ${id} has no abort method`)
             return
         }
         if (!state.get().isRunning) {
@@ -39,17 +62,18 @@ const useAgentTask = (spec: AgentTaskSpec): AgentTask => {
         await abortFunc(params);
         state.setKey("isRunning", false);
         state.setKey("isCompleted", false);
-        data = {};
+        state.setKey("data", null);
     }
 
     return {
-        name,
+        id,
         title,
         description,
         state,
-        data,
         run,
         abort,
+        start,
+        finish,
     }
 };
 
