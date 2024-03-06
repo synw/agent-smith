@@ -1,5 +1,6 @@
 import { MapStore } from "nanostores";
 import { AgentBrain } from "@agent-smith/brain"
+import { AgentJob } from "../../jobs/src/jobsinterfaces.js";
 
 /**
  * Interface for the specification of an agent.
@@ -14,6 +15,7 @@ interface AgentSpec {
     props?: Record<string, any>;
     modules?: Array<Record<string, any>>;
     brain?: AgentBrain;
+    jobs?: Array<AgentJob>;
 }
 
 /**
@@ -37,7 +39,7 @@ interface AgentInteractions {
 }
 
 interface AgentState {
-    text: StructuredSerializeOptions,
+    text: string,
     component: string,
     isVisible: boolean,
     isInteracting: boolean,
@@ -52,6 +54,7 @@ interface AgentSmith {
     interactions: MapStore<AgentInteractions>;
     // modules
     brain: AgentBrain;
+    jobs: Array<AgentJob>;
     // methods
     show: () => void;
     hide: () => void;

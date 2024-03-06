@@ -1,14 +1,16 @@
 import { map } from 'nanostores'
-import { AgentSmith, type AgentSpec, type ConfirmFunction, type ConfirmOptions } from "./bodyinterfaces.js";
+import { AgentSmith, AgentState, type AgentSpec, type ConfirmFunction, type ConfirmOptions } from "./bodyinterfaces.js";
 import { AgentBrain } from '@agent-smith/brain';
+import { AgentJob } from "../../jobs/src/jobsinterfaces.js";
 
 const useAgentSmith = (initParams: AgentSpec): AgentSmith => {
     const name = initParams.name;
     const props = initParams.props ?? {};
     const modules = initParams.modules;
-    const brain: AgentBrain = initParams.brain ?? {} as AgentBrain;
+    const brain: AgentBrain = initParams?.brain ?? {} as AgentBrain;
+    const jobs: Array<AgentJob> = initParams?.jobs ?? new Array<AgentJob>();
     //public state
-    const state = map({
+    const state = map<AgentState>({
         text: "",
         component: "AgentBaseText",
         isVisible: false,
@@ -146,6 +148,7 @@ const useAgentSmith = (initParams: AgentSpec): AgentSmith => {
         interactions,
         props,
         brain,
+        jobs,
         show,
         hide,
         talk,
