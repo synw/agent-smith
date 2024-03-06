@@ -1,6 +1,7 @@
 import { map } from 'nanostores';
+import { TaskMem, TmemJobs } from "@agent-smith/tmem-jobs";
+//import { TaskMem, TmemJobs } from '../../tmem-jobs/src/tmemjobsinterfaces.js';
 import { AgentJob, AgentJobSpec, AgentJobState, AgentTask } from "./jobsinterfaces.js";
-import { TaskMem } from '../../tmem/src/tmeminterfaces.js';
 import { useAgentTask } from './task.js';
 
 const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
@@ -11,7 +12,7 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
         _tasks[_t.id] = _t
     });
     const _title = initParams.title;
-    const tmem = initParams.tmem;
+    const tmem = initParams.tmem ?? {} as TmemJobs;
     //console.log("INIT JOB", _tasks.map((t) => t.name));
     const state = map<AgentJobState>({
         isRunning: false,

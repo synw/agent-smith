@@ -1,3 +1,4 @@
+import 'localforage';
 interface Tmem<S extends Record<string, any>> {
     db: LocalForage;
     init: () => Promise<void>;

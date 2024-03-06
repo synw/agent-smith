@@ -24,6 +24,5 @@ export default {
       main: true,
       browser: true,
     }),
-    //isProduction && terser({ format: { comments: false } }),
   ],
 };

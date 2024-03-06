@@ -1,5 +1,6 @@
-import { useTmem } from "../../tmem/src/tmem";
-import { JobMem, TaskMem, TmemJobs } from "./tmemjobsinterfaces";
+import { useTmem } from "@agent-smith/tmem";
+//import { useTmem } from "../../tmem/src/tmem";
+import { JobMem, TaskMem, TmemJobs } from "./tmemjobsinterfaces.js";
 
 const useTmemJobs = (isVerbose = false): TmemJobs => {
     const jMem = useTmem<JobMem>("job", {

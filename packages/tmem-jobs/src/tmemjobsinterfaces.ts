@@ -1,4 +1,5 @@
-import { Tmem } from "../../tmem/src/tmeminterfaces";
+import { Tmem } from "@agent-smith/tmem";
+//import { Tmem } from "../../tmem/src/tmeminterfaces"
 
 interface JobMem {
     isRunning: boolean;

@@ -9,11 +9,8 @@
     "test": "jest --coverage",
     "docs": "typedoc --entryPointStrategy expand"
   },
-  "dependencies": {
-    "nanostores": "^0.10.0"
-  },
   "devDependencies": {
-    "@locallm/types": "^0.0.14",
+    "@agent-smith/tmem-jobs": "^0.0.2",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",

@@ -1,5 +1,6 @@
 import { MapStore } from "nanostores";
-import { TmemJobs } from "../../tmem/src/tmeminterfaces";
+import { TmemJobs } from "@agent-smith/tmem-jobs";
+//import { TmemJobs } from "../../tmem-jobs/src/tmemjobsinterfaces.js";
 
 interface AgentTaskSpec {
     id: string;
@@ -45,7 +46,7 @@ interface AgentJob {
     title: string;
     state: MapStore<AgentJobState>;
     tasks: Record<string, AgentTask>;
-    tmem?: TmemJobs;
+    tmem: TmemJobs;
     runTask: (name: string, params?: any) => Promise<Record<string, any>>;
     continueTask: (params?: any) => Promise<Record<string, any>>;
     startTask: (name: string, params?: any) => Promise<void>;
