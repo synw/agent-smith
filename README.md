@@ -15,14 +15,18 @@ An agent is an anthropomorphic representation of a bot. It has these basic habil
 
 ## Packages
 
-| Version | Name | Description |
-| --- | --- | --- |
-| [![pub package](https://img.shields.io/npm/v/@agent-smith/body)](https://www.npmjs.com/package/@agent-smith/body) | [@agent-smith/body](https://github.com/synw/agent-smith/tree/main/packages/body) | The body |
-| [![pub package](https://img.shields.io/npm/v/@agent-smith/brain)](https://www.npmjs.com/package/@agent-smith/brain) | [@agent-smith/brain](https://github.com/synw/agent-smith/tree/main/packages/brain) | The brain |
+| Version | Name | Description | Nodejs | Browser |
+| --- | --- | --- | --- | --- |
+| [![pub package](https://img.shields.io/npm/v/@agent-smith/body)](https://www.npmjs.com/package/@agent-smith/body) | [@agent-smith/body](https://github.com/synw/agent-smith/tree/main/packages/body) | The body | :white_check_mark: | :white_check_mark:
+| [![pub package](https://img.shields.io/npm/v/@agent-smith/brain)](https://www.npmjs.com/package/@agent-smith/brain) | [@agent-smith/brain](https://github.com/synw/agent-smith/tree/main/packages/brain) | The brain | :white_check_mark: | :white_check_mark:
+| [![pub package](https://img.shields.io/npm/v/@agent-smith/jobs)](https://www.npmjs.com/package/@agent-smith/jobs) | [@agent-smith/jobs](https://github.com/synw/agent-smith/tree/main/packages/jobs) | Jobs | :white_check_mark: | :white_check_mark:
+| [![pub package](https://img.shields.io/npm/v/@agent-smith/tmem)](https://www.npmjs.com/package/@agent-smith/tmem) | [@agent-smith/tmem](https://github.com/synw/agent-smith/tree/main/packages/tmem) | Transient memory | :x: | :white_check_mark:
+| [![pub package](https://img.shields.io/npm/v/@agent-smith/tmem-jobs)](https://www.npmjs.com/package/@agent-smith/tmem-jobs) | [@agent-smith/tmem-jobs](https://github.com/synw/agent-smith/tree/main/packages/tmem-jobs) | Jobs transient memory | :x: | :white_check_mark:
+| [![pub package](https://img.shields.io/npm/v/@agent-smith/smem)](https://www.npmjs.com/package/@agent-smith/smem) | [@agent-smith/smem](https://github.com/synw/agent-smith/tree/main/packages/smem) | Semantic memory | :white_check_mark: | :x:
 
 ## FAQ
 
-- What local inference servers can I use?
+- What local or remote inference servers can I use?
 
 Actually it works with Llama.cpp and Koboldcpp. Ollama support is planned.
 
