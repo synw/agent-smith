@@ -1,6 +1,7 @@
 import { MapStore } from "nanostores";
 import { AgentBrain } from "@agent-smith/brain"
-import { AgentJob } from "../../jobs/src/jobsinterfaces.js";
+//import { AgentJob } from "../../jobs/src/jobsinterfaces.js";
+import { AgentJob } from "@agent-smith/jobs";
 
 /**
  * Interface for the specification of an agent.

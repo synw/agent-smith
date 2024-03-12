@@ -1,7 +1,6 @@
 import { map } from 'nanostores';
 import { AgentTask, AgentTaskState, type AgentTaskSpec } from "./jobsinterfaces.js";
 
-
 const useAgentTask = (spec: AgentTaskSpec): AgentTask => {
     //console.log("Init task:", JSON.stringify(spec, null, "  "));
     //console.log("F", spec.run)
@@ -18,7 +17,7 @@ const useAgentTask = (spec: AgentTaskSpec): AgentTask => {
     });
 
     const _run = async (params: any, autoComplete: boolean): Promise<Record<string, any>> => {
-        console.log("TASK run task", id, autoComplete, params);
+        //console.log("TASK run task", id, autoComplete, params);
         //console.log("RUN F", runFunc.name);
         state.setKey("isRunning", true);
         let data: Record<string, any> = {};
@@ -27,7 +26,7 @@ const useAgentTask = (spec: AgentTaskSpec): AgentTask => {
             data = d;
         }
         if (autoComplete) {
-            console.log("AUTOCOMPLETE TASK", id);
+            //console.log("AUTOCOMPLETE TASK", id);
             state.setKey("isRunning", false);
             state.setKey("isCompleted", true);
         }
@@ -43,7 +42,7 @@ const useAgentTask = (spec: AgentTaskSpec): AgentTask => {
     }
 
     const finish = (completed: boolean, data?: any): void => {
-        console.log("TASK finish task", id, completed, data);
+        //console.log("TASK finish task", id, completed, data);
         state.setKey("isRunning", false);
         state.setKey("isCompleted", completed);
         if (data) {

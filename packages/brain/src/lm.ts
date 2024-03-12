@@ -74,8 +74,6 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
                 delete completionParams.stop;
             }
         }
-        console.log("Params", inferenceParams);
-        console.log("Options", options);
         if (options?.tsGrammar) {
             completionParams.grammar = serializeGrammar(await compile(options.tsGrammar, "Grammar"));
         }
@@ -103,7 +101,9 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
             throw new Error(msg)
         };
         if (options?.verbose) {
-            console.log("Inference params", JSON.stringify(completionParams, null, "  "));
+            console.log("Params", completionParams);
+            console.log("Options", options);
+            //console.log("Inference params", JSON.stringify(completionParams, null, "  "));
         }
         const p = template.prompt(prompt);
         state.setKey("isThinking", true);
@@ -112,9 +112,18 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
             _parseJson = options.parseJson
         }
         let parseJsonFunc = (t: string) => JSON.parse(t);
-        // dirty patch
-        if (template.name == "chatml") {
-            parseJsonFunc = (t: string) => JSON.parse(t.replace("<|im_end|>", ""));
+        if (_parseJson) {
+            if (_lm.providerType == "koboldcpp") {
+                parseJsonFunc = (t: string) => {
+                    //console.log("Start T", t);
+                    let s = t.replace(/\\_/g, '_');
+                    if (template.stop) {
+                        s = s.replace(template.stop[0], "");
+                    }
+                    //console.log("End T", s, [t].includes('\\_'));
+                    return JSON.parse(s)
+                };
+            }
         }
         const respData = await _lm.infer(p, completionParams, _parseJson, parseJsonFunc);
         state.setKey("isStreaming", false);

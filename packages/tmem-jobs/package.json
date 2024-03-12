@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/tmem-jobs",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "An api to ceate human friendly agents: the transient memory for jobs",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {
@@ -10,8 +10,7 @@
     "docs": "typedoc --entryPointStrategy expand"
   },
   "dependencies": {
-    "@agent-smith/tmem": "^0.0.2",
-    "localforage": "^1.10.0"
+    "@agent-smith/tmem": "^0.0.3"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^15.2.3",

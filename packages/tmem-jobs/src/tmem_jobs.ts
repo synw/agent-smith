@@ -33,7 +33,7 @@ const useTmemJobs = (isVerbose = false): TmemJobs => {
         await jMem.set("isRunning", false);
     }
 
-    const _runTask = async (id: string, params: Record<string, any>, isRestart: boolean) => {
+    const _runTask = async (id: string, params: any, isRestart: boolean) => {
         //console.log("TMEM run task", id, params);
         const t = await tMem.get<TaskMem>(id);
         // update the job state
@@ -50,7 +50,7 @@ const useTmemJobs = (isVerbose = false): TmemJobs => {
         //console.log("RES", JSON.stringify(res, null, "  "))
     }
 
-    const runTask = async (id: string, params: Record<string, any>) => {
+    const runTask = async (id: string, params: any) => {
         return await _runTask(id, params, false)
     }
 

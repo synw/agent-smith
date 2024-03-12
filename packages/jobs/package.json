@@ -1,13 +1,16 @@
 {
   "name": "@agent-smith/jobs",
-  "version": "0.0.1",
-  "description": "An api to ceate human friendly agents: the jobs management module",
+  "version": "0.0.2",
+  "description": "An api to create human friendly agents: the jobs management module",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {
     "buildrl": "rm -rf dist/* && rollup -c",
     "build": "rm -rf dist/* && tsc",
     "test": "jest --coverage",
     "docs": "typedoc --entryPointStrategy expand"
+  },
+  "dependencies": {
+    "nanostores": "^0.10.0"
   },
   "devDependencies": {
     "@agent-smith/tmem-jobs": "^0.0.2",

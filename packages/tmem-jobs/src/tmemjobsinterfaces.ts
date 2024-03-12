@@ -9,7 +9,7 @@ interface JobMem {
 
 interface TaskMem {
     isCompleted: boolean;
-    params: Record<string, any>;
+    params: any;
     data: any;
 }
 
@@ -19,7 +19,7 @@ interface TmemJobs {
     init: () => Promise<void>;
     start: (name: string, tasks: Array<Record<string, any>>) => Promise<void>;
     finish: () => Promise<void>;
-    runTask: (id: string, params: Record<string, any>) => Promise<void>;
+    runTask: (id: string, params: any) => Promise<void>;
     reRunTask: (id: string) => Promise<void>;
     finishTask: (id: string, completed: boolean, data?: any) => Promise<void>;
 }

@@ -1,7 +1,9 @@
 import * as localForage from "localforage";
 import { Tmem } from "./tmeminterfaces.js";
 
-const useTmem = <S extends Record<string, any> = Record<string, any>>(name: string, initial: S, verbose = false) => {
+const useTmem = <S extends Record<string, any> = Record<string, any>>(
+    name: string, initial: S, verbose = false
+): Tmem<S> => {
     const db = localForage.createInstance({
         name: "tmem",
         driver: localForage.INDEXEDDB,

@@ -22,7 +22,7 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
     });
 
     const _runTask = async (t: AgentTask, params: any, autoComplete: boolean): Promise<Record<string, any>> => {
-        console.log("JOB RUN TASK", t.id, autoComplete, params);
+        //console.log("JOB RUN TASK", t.id, autoComplete, params);
         //console.log("JOB running task:", t.name);
         try {
             let res: Record<string, any> = {};
@@ -61,7 +61,7 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
     }
 
     const continueTask = async (params: any = {}): Promise<Record<string, any>> => {
-        console.log("JOB TASK CONTINUE -------- TASK PARAMS", params);
+        //console.log("JOB TASK CONTINUE -------- TASK PARAMS", params);
         if (!state.get().isRunningTask) {
             throw new Error('No task is running, can not continue');
         }
@@ -70,7 +70,7 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
     }
 
     const runTask = async (name: string, params: any = {}): Promise<Record<string, any>> => {
-        console.log("JOB TASK RUN -------- TASK PARAMS", params);
+        //console.log("JOB TASK RUN -------- TASK PARAMS", params);
         if (state.get().isRunningTask) {
             throw new Error('A task is already running');
         }
@@ -80,7 +80,7 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
     }
 
     const startTask = async (name: string, params: any = {}) => {
-        console.log("JOB TASK START -------- TASK PARAMS", params);
+        //console.log("JOB TASK START -------- TASK PARAMS", params);
         if (state.get().isRunningTask) {
             throw new Error('A task is already running');
         }
@@ -88,7 +88,7 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
     }
 
     const reStartTask = async (name: string) => {
-        console.log("JOB TASK RERSTART", name);
+        //console.log("JOB TASK RERSTART", name);
         if (state.get().isRunningTask) {
             throw new Error('A task is already running');
         }
@@ -96,7 +96,7 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
     }
 
     const finishTask = async (completed: boolean, data?: any) => {
-        console.log("FINISH TASK", data);
+        //console.log("FINISH TASK", data);
         const task = getTaskById(state.get().runningTask);
         task.finish(completed, data);
         state.setKey("isRunningTask", false);
