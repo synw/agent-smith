@@ -4,7 +4,45 @@ An api to create local first human friendly agents in the browser or Nodejs
 
 ![Agent Smith](docsite/public/img/agentsmith.png)
 
-:books: [Documentation](https://synw.github.io/agent-smith/)
+<details>
+<summary>:books: Read the <a href="https://synw.github.io/agent-smith">documentation</a></summary>
+
+ - [The body](https://synw.github.io/agent-smith/the_body)
+    - [Overview](https://synw.github.io/agent-smith/the_body/overview)
+    - [Install](https://synw.github.io/agent-smith/the_body/install)
+    - [Basic agent](https://synw.github.io/agent-smith/the_body/basic_agent)
+     - [Interactions](https://synw.github.io/agent-smith/the_body/interactions)
+        - [Talk](https://synw.github.io/agent-smith/the_body/interactions/talk)
+        - [Components](https://synw.github.io/agent-smith/the_body/interactions/components)
+        - [Confirm](https://synw.github.io/agent-smith/the_body/interactions/confirm)
+ - [The brain](https://synw.github.io/agent-smith/the_brain)
+    - [Overview](https://synw.github.io/agent-smith/the_brain/overview)
+    - [Install](https://synw.github.io/agent-smith/the_brain/install)
+    - [Basics](https://synw.github.io/agent-smith/the_brain/basics)
+    - [Options](https://synw.github.io/agent-smith/the_brain/options)
+    - [Grammars](https://synw.github.io/agent-smith/the_brain/grammars)
+    - [Multiple experts](https://synw.github.io/agent-smith/the_brain/multiple_experts)
+     - [Templates](https://synw.github.io/agent-smith/the_brain/templates)
+        - [Basics](https://synw.github.io/agent-smith/the_brain/templates/basics)
+        - [History](https://synw.github.io/agent-smith/the_brain/templates/history)
+        - [Few shots](https://synw.github.io/agent-smith/the_brain/templates/few_shots)
+ - [Jobs](https://synw.github.io/agent-smith/jobs)
+    - [Get started](https://synw.github.io/agent-smith/jobs/get_started)
+    - [Create a job](https://synw.github.io/agent-smith/jobs/create_a_job)
+    - [Config](https://synw.github.io/agent-smith/jobs/config)
+    - [State management](https://synw.github.io/agent-smith/jobs/state_management)
+    - [Memory](https://synw.github.io/agent-smith/jobs/memory)
+ - [Transient memory](https://synw.github.io/agent-smith/transient_memory)
+    - [Get started](https://synw.github.io/agent-smith/transient_memory/get_started)
+    - [Usage](https://synw.github.io/agent-smith/transient_memory/usage)
+    - [Api](https://synw.github.io/agent-smith/transient_memory/api)
+ - [Semantic memory](https://synw.github.io/agent-smith/semantic_memory)
+    - [Get started](https://synw.github.io/agent-smith/semantic_memory/get_started)
+    - [Initialize](https://synw.github.io/agent-smith/semantic_memory/initialize)
+    - [Write operations](https://synw.github.io/agent-smith/semantic_memory/write_operations)
+    - [Read operations](https://synw.github.io/agent-smith/semantic_memory/read_operations)
+
+</details>
 
 ## What is an agent?
 
@@ -35,28 +73,6 @@ Actually it works with Llama.cpp and Koboldcpp. Ollama support is planned.
 - Can I use this with OpenAI or other big apis?
 
 Sorry no: this library favours local first or private remote inference servers
-
-## Documentation
-
-- [The body](https://synw.github.io/agent-smith/the_body)
-- [Overview](https://synw.github.io/agent-smith/the_body/overview)
-- [Install](https://synw.github.io/agent-smith/the_body/install)
-- [Basic agent](https://synw.github.io/agent-smith/the_body/basic_agent)
-    - [Interactions](https://synw.github.io/agent-smith/the_body/interactions)
-    - [Talk](https://synw.github.io/agent-smith/the_body/interactions/talk)
-    - [Dynamic component](https://synw.github.io/agent-smith/the_body/interactions/dynamic_component)
-    - [Confirm](https://synw.github.io/agent-smith/the_body/interactions/confirm)
-- [The brain](https://synw.github.io/agent-smith/the_brain)
-- [Overview](https://synw.github.io/agent-smith/the_brain/overview)
-- [Install](https://synw.github.io/agent-smith/the_brain/install)
-- [Basics](https://synw.github.io/agent-smith/the_brain/basics)
-- [Options](https://synw.github.io/agent-smith/the_brain/options)
-- [Grammars](https://synw.github.io/agent-smith/the_brain/grammars)
-- [Multiple experts](https://synw.github.io/agent-smith/the_brain/multiple_experts)
-    - [Templates](https://synw.github.io/agent-smith/the_brain/templates)
-    - [Basics](https://synw.github.io/agent-smith/the_brain/templates/basics)
-    - [History](https://synw.github.io/agent-smith/the_brain/templates/history)
-    - [Few shots](https://synw.github.io/agent-smith/the_brain/templates/few_shots)
 
 ## Example
 
