@@ -42,12 +42,12 @@ import { StaticCodeBlock } from "@docdundee/vue";
 import AgentJoeV3 from '@/agent/AgentJoeV3.vue';
 import { joe } from '@/agent/agent';
 
-const confirmAction = () => {
+const confirmAction = async () => {
     alert("action is confirmed");
     joe.mute();
 };
 
-const declineAction = () => {
+const declineAction = async () => {
     console.log("action is declined");
     joe.mute();
 };
@@ -74,22 +74,22 @@ const code1 = `<div class="flex flex-col">
 
 const code2 = `import { joe, joeState } from "../agent";
 
-function declineAction() {
+async function declineAction() {
     joe.interactions.get().decline()
 }
 
-function confirmAction() {
+async function confirmAction() {
     joe.interactions.get().confirm()
 }`;
 
 const code3 = `import { joe } from '@/agent/agent';
 
-const confirmAction = () => {
+const confirmAction = async () => {
     alert("action is confirmed");
     joe.mute();
 };
 
-const declineAction = () => {
+const declineAction = async () => {
     console.log("action is declined");
     joe.mute();
 };

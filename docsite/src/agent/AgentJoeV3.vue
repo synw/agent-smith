@@ -11,7 +11,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onBeforeMount } from "vue";
+import { computed } from "vue";
 import { joe, joeState } from "./agent";
 import RobotIcon from "../widgets/RobotIcon.vue";
 import AgentBaseText from "./widgets/AgentBaseText.vue";
@@ -19,13 +19,7 @@ import AgentConfirm from "./widgets/AgentConfirm.vue";
 
 const color = computed(() => {
     let c = "txt-lighter";
-    if (joeState.value.isRunningJob) {
-        c = "txt-semilight";
-    }
-    else if (joeState.value.isRunningTask) {
-        c = "txt-success";
-    }
-    else if (joeState.value.isInteracting) {
+    if (joeState.value.isInteracting) {
         c = "txt-light"
     }
     return c

@@ -23,8 +23,11 @@ import { RenderMd } from "@docdundee/vue";
 import { StaticCodeBlock } from "@docdundee/vue";
 
 const side = `### What can Agent Smith do?
-- **Interact with the user**: it provides some state management primitives to use in a UI
-- **Think**: interact with some language model servers to perform inference queries`;
+
+- **Interact**: the agent can perform interactions with the user and get input and feedback
+- **Think**: interact with some language model servers to perform inference queries
+- **Run jobs**: manage long running jobs with multiple tasks
+- **Remember**: use it's transient or semantic memory to store data`;
 
 const code = `const expert = useLmExpert({
     name: "default",

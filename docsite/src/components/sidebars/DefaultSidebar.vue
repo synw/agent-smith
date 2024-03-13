@@ -1,5 +1,6 @@
 <template>
-  <auto-nav-children :node="nav.tree" class="space-y-1 nav-panel" :on-open="$router.push"></auto-nav-children>
+  <auto-nav-children :node="nav.tree" class="space-y-1 nav-panel" :on-open="$router.push"
+    start-state="collapsed"></auto-nav-children>
 </template>
 
 <script setup lang="ts">

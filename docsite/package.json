@@ -11,9 +11,11 @@
     "docmap": "node ./node_modules/@docdundee/docnav/bin/navmap.mjs"
   },
   "dependencies": {
-    "@agent-smith/body": "^0.0.4",
-    "@agent-smith/brain": "^0.0.3",
-    "@agentsmith/body": "file:../packages/body",
+    "@agent-smith/body": "^0.0.5",
+    "@agent-smith/brain": "^0.0.5",
+    "@agent-smith/jobs": "^0.0.3",
+    "@agent-smith/tmem": "^0.0.3",
+    "@agent-smith/tmem-jobs": "^0.0.3",
     "@docdundee/vue": "^0.0.21",
     "@locallm/api": "^0.0.29",
     "@nanostores/vue": "^0.10.0",

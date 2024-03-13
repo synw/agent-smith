@@ -1,7 +1,12 @@
 <template>
   <the-header :lib-title="libTitle" :links="links"></the-header>
-  <div id="main" class="absolute p-5 pb-16 md:w-[calc(100%_-_20rem)] top-16 md:left-80 main-h">
-    <router-view></router-view>
+  <div id="main" class="absolute p-5 pb-16 md:w-[calc(100%_-_20rem)] top-16 md:left-80 main-h flex flex-col">
+    <div id="router" class="flex-grow">
+      <router-view></router-view>
+    </div>
+    <div id="footer" class="mt-8 text-right text-sm txt-semilight mr-8">
+      Documentation made with <a href="https://github.com/synw/docdundee">Docdundee</a>
+    </div>
   </div>
   <the-sidebar class="fixed left-0 hidden p-3 overflow-y-auto w-80 top-16 md:block secondary main-h"></the-sidebar>
 </template>
@@ -40,7 +45,7 @@ a, a:visited, a:active
     @apply text-neutral-200
     & h1, h2, h3, h4, h5, a
       @apply text-neutral-400
-.static-code
+.static-code, #router, #footer
   @apply max-w-screen-lg
 .main-h
   height: calc(100vh - 4rem)
@@ -48,4 +53,3 @@ a, a:visited, a:active
 .p-inputtext
   @apply background bord-lighter
 </style>
-

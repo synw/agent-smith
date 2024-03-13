@@ -1,0 +1,1 @@
+import{_ as e}from"./_plugin-vue_export-helper-DlAUqK2U.js";import{c as o,o as t,a as s}from"./index-CweHuPTs.js";const c={},a={class:"flex justify-around h-full w-full"},n=s("div",{class:"text-3xl"},"Page not found",-1),_=[n];function r(f,l){return t(),o("div",a,_)}const u=e(c,[["render",r]]);export{u as default};
