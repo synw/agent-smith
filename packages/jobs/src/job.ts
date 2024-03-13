@@ -13,6 +13,7 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
     });
     const _title = initParams.title;
     const tmem = initParams.tmem ?? {} as TmemJobs;
+    const hasTmem = initParams.tmem !== undefined;
     //console.log("INIT JOB", _tasks.map((t) => t.name));
     const state = map<AgentJobState>({
         isRunning: false,
@@ -42,7 +43,7 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
     const _startTask = async (name: string, params: any, isRestart: boolean) => {
         state.setKey("isRunningTask", true);
         state.setKey("runningTask", name);
-        if (tmem) {
+        if (hasTmem) {
             if (isRestart) {
                 await tmem.reRunTask(name);
             } else {
@@ -55,7 +56,7 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
         state.setKey("isRunningTask", false);
         state.setKey("runningTask", "");
         task.finish(completed, res);
-        if (tmem) {
+        if (hasTmem) {
             await tmem.finishTask(task.id, completed, res)
         }
     }
@@ -101,7 +102,7 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
         task.finish(completed, data);
         state.setKey("isRunningTask", false);
         state.setKey("runningTask", "");
-        if (tmem) {
+        if (hasTmem) {
             await tmem.finishTask(task.id, completed, data)
         }
     }
@@ -125,7 +126,7 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
         } finally {
             state.setKey("isRunningTask", false);
             state.setKey("runningTask", "");
-            if (tmem) {
+            if (hasTmem) {
                 await tmem.finishTask(task.id, false)
             }
         }
@@ -134,7 +135,7 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
     const start = async () => {
         state.setKey("isRunning", true);
         state.setKey("isCompleted", false);
-        if (tmem) {
+        if (hasTmem) {
             await tmem.start(_name, Object.values(_tasks))
         }
     }
@@ -142,7 +143,7 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
     const finish = async (success: boolean) => {
         state.setKey("isRunning", false);
         state.setKey("isCompleted", success);
-        if (tmem) {
+        if (hasTmem) {
             await tmem.finish()
         }
         Object.values(_tasks).forEach((t) => {
@@ -161,7 +162,7 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
 
 
     const syncMem = async () => {
-        if (tmem) {
+        if (hasTmem) {
             await tmem.init();
             // sync the state from the transient memory
             const isRunning = await tmem.job.get<boolean>("isRunning");
