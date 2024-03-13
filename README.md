@@ -13,7 +13,7 @@ An agent is an anthropomorphic representation of a bot. It has these basic habil
 - **Interact**: the agent can perform interactions with the user and get input and feedback
 - **Think**: interact with some language model servers to perform inference queries
 - **Run jobs**: manage long running jobs with multiple tasks
-- **Remember**: use the transient memory or the semantic memory to store data
+- **Remember**: use it's transient or semantic memory to store data
 
 ## Packages
 
