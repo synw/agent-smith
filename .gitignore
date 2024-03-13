@@ -10,3 +10,4 @@ yarn-error.log
 /dev
 .vscode
 package-lock.json
+examples/data
