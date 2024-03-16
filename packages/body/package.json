@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/body",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "description": "An api to create human friendly agents",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {
@@ -12,8 +12,10 @@
     "nanostores": "^0.10.0"
   },
   "devDependencies": {
-    "@agent-smith/brain": "^0.0.3",
-    "@agent-smith/jobs": "^0.0.1",
+    "@locallm/types": "^0.0.14",
+    "@agent-smith/brain": "^0.0.7",
+    "@agent-smith/jobs": "^0.0.4",
+    "@agent-smith/tmem-jobs": "^0.0.3",
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.5",

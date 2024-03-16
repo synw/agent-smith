@@ -8,7 +8,7 @@ import {
     AgentBrain,
     AgentBrainExpertState,
     AgentBrainState,
-} from "@/interfaces.js";
+} from "./interfaces.js";
 import { useAgentBrain } from "./brain.js";
 import { useLmExpert } from "./lm.js";
 

@@ -16,7 +16,7 @@ interface LmExpertSpec {
     description?: string;
     templateName?: string;
     template?: PromptTemplate;
-    localLm?: "koboldcpp" | "llamacpp";
+    localLm?: LmProviderType;
     backend?: LmBackendSpec;
     onToken?: (t: string) => void;
 }

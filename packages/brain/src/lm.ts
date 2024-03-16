@@ -4,7 +4,7 @@ import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import { Lm } from "@locallm/api";
 import { InferenceParams, InferenceResult } from "@locallm/types";
 import { defaultLocalBackends } from "./const.js";
-import { LmExpert, LmExpertSpec, LmThinkingOptionsSpec } from "@/interfaces.js";
+import { LmExpert, LmExpertSpec, LmThinkingOptionsSpec } from "./interfaces.js";
 
 const useLmExpert = (spec: LmExpertSpec): LmExpert => {
     let _lm: Lm;
@@ -26,9 +26,16 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
                     apiKey: defaultLocalBackends[0].apiKey,
                     onToken: (t: string) => { stream.set(stream.get() + t) },
                 });
+            case "ollama":
+                _lm = new Lm({
+                    providerType: defaultLocalBackends[2].providerType,
+                    serverUrl: defaultLocalBackends[2].serverUrl,
+                    apiKey: defaultLocalBackends[2].apiKey,
+                    onToken: (t: string) => { stream.set(stream.get() + t) },
+                });
         }
     } else if (spec.backend) {
-        if (!["llama.cpp", "koboldcpp"].includes(spec.backend.providerType)) {
+        if (!["llama.cpp", "koboldcpp", "ollama"].includes(spec.backend.providerType)) {
             throw new Error(`Provider ${spec.backend.providerType} is not supported`)
         }
         _lm = new Lm({
@@ -111,6 +118,7 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
         if (options?.parseJson) {
             _parseJson = options.parseJson
         }
+        // remove the EOS token for json parsing
         let parseJsonFunc = (t: string) => JSON.parse(t);
         if (_parseJson) {
             if (_lm.providerType == "koboldcpp") {
@@ -123,8 +131,17 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
                     //console.log("End T", s, [t].includes('\\_'));
                     return JSON.parse(s)
                 };
+            } else {
+                parseJsonFunc = (t: string) => {
+                    let s = t;
+                    if (template.stop) {
+                        s = t.replace(template.stop[0], "");
+                    }
+                    return JSON.parse(s)
+                }
             }
         }
+
         const respData = await _lm.infer(p, completionParams, _parseJson, parseJsonFunc);
         state.setKey("isStreaming", false);
         state.setKey("isThinking", false);
@@ -176,8 +193,8 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
                 }
                 break;
             case "ollama":
-                console.warn("The Ollama provider is not yet supported");
-                break;
+                //console.warn("The Ollama provider is not yet supported");
+                //break;
                 try {
                     await _lm.modelsInfo();
                     if (isVerbose) {
