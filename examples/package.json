@@ -1,6 +1,20 @@
 {
   "type": "module",
+  "scripts": {
+    "vector": "tsc vectordb.ts",
+    "test": "tsc test.ts && node test.js"
+  },
+  "dependencies": {
+    "@agent-smith/body": "^0.0.7",
+    "@agent-smith/brain": "^0.0.7",
+    "@agent-smith/smem": "^0.0.1",
+    "@xenova/transformers": "^2.16.0",
+    "vectordb": "^0.4.12"
+  },
   "devDependencies": {
-    "@types/node": "^20.8.2"
+    "@locallm/types": "^0.0.14",
+    "@types/node": "^20.8.2",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.2"
   }
 }
