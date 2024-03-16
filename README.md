@@ -66,11 +66,12 @@ An agent is an anthropomorphic representation of a bot. It has these basic habil
 
 ## FAQ
 
-- What local or remote inference servers can I use?
+- *What local or remote inference servers can I use?*
 
-Actually it works with Llama.cpp and Koboldcpp. Ollama support is planned.
+Actually it works with [Llama.cpp](https://github.com/ggerganov/llama.cpp/tree/master/examples/server),
+[Koboldcpp](https://github.com/LostRuins/koboldcpp) and [Ollama](https://github.com/ollama/ollama).
 
-- Can I use this with OpenAI or other big apis?
+- *Can I use this with OpenAI or other big apis?*
 
 Sorry no: this library favours local first or private remote inference servers
 
