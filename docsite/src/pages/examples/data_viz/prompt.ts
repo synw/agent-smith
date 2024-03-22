@@ -1,3 +1,4 @@
+import { template } from "@/agent/state";
 import { PromptTemplate } from "modprompt";
 
 //return an Altair chart to show the {prompt}. Always use the Altair internal types. Always return the chart object without printing it
@@ -19,7 +20,7 @@ Please create a chart using Altair. Instructions for the code design:
 Plot {prompt}
 `;
 
-const tpl = new PromptTemplate("deepseek");
+const tpl = new PromptTemplate(template.value);
 tpl.replaceSystem(`You are an AI programming assistant, specialized in data visualization in Python. You always output only one code block and only that. Do not explain
 `);
 
@@ -65,8 +66,6 @@ chart
     stop.push("```\n");
     tpl.stop = stop;
 }
-
-
 
 function createChartPrompt(p: string, data: string) {
     prepareTemplate();
