@@ -26,6 +26,7 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
                     apiKey: defaultLocalBackends[0].apiKey,
                     onToken: (t: string) => { stream.set(stream.get() + t) },
                 });
+                break;
             case "ollama":
                 _lm = new Lm({
                     providerType: defaultLocalBackends[2].providerType,
@@ -33,6 +34,9 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
                     apiKey: defaultLocalBackends[2].apiKey,
                     onToken: (t: string) => { stream.set(stream.get() + t) },
                 });
+                break;
+            default:
+                throw new Error(`Unknown provider type ${spec.localLm}`)
         }
     } else if (spec.backend) {
         if (!["llama.cpp", "koboldcpp", "ollama"].includes(spec.backend.providerType)) {
@@ -47,14 +51,15 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
     } else {
         throw new Error("Provide a backend or a localLm parameter to initialize the expert");
     }
-    let template: PromptTemplate;
+    let template: PromptTemplate = new PromptTemplate("none");
     if (spec.template) {
         template = spec.template;
     } else if (spec.templateName) {
         template = new PromptTemplate(spec.templateName);
-    } else {
-        throw new Error("Provide either a templateName or a template parameter for the expert")
     }
+    /*else {
+        throw new Error("Provide either a templateName or a template parameter for the expert")
+    }*/
     const name = spec.name ?? _lm.name;
     const description = spec.description ?? "";
     const stream = atom("");
@@ -214,16 +219,34 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
         return isUp
     }
 
+    const setTemplate = (tpl: string | PromptTemplate) => {
+        //console.log("SET TEMPLATE", tpl);
+        switch (typeof tpl) {
+            case "string":
+                template = new PromptTemplate(tpl)
+                break;
+            default:
+                template = tpl
+                break;
+        }
+    }
+
+    const setOnToken = (func: (t: string) => void) => {
+        onToken = func
+    }
+
     return {
         stream: stream,
         name: name,
         description: description,
         lm: _lm,
-        template,
+        get template() { return template },
         state,
         probe,
         think,
         abortThinking,
+        setTemplate,
+        setOnToken,
     }
 }
 
