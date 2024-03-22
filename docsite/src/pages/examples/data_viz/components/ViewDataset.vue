@@ -53,7 +53,7 @@
 import { py } from "@/py";
 import Textarea from 'primevue/textarea';
 import { onMounted, reactive, ref } from "vue";
-import { createChartPrompt, tpl } from "../prompt";
+import { createChartPrompt } from "../prompt";
 import { ChartQuery, datasets } from "../datasets";
 import ChartTab from "./tabs/ChartTab.vue";
 import CodeTab from "./tabs/CodeTab.vue";
@@ -94,6 +94,7 @@ const html = ref("");
 const csv = ref("");
 const hasChart = ref(false);
 const queries = reactive(new Array<ChartQuery>());
+const stop = ref(new Array<string>());
 
 const code1 = `from vega_datasets import data
 
@@ -126,8 +127,9 @@ async function init() {
 
 function selectQuery(q: string) {
     data.query = q;
-    const p = createChartPrompt(q, csv.value);
-    data.finalPrompt = p;
+    const { _prompt, tpl } = createChartPrompt(q, csv.value);
+    stop.value = tpl.stop ?? [];
+    data.finalPrompt = _prompt;
     activeTab.value = "prompt"
 }
 
@@ -138,7 +140,7 @@ async function createChart() {
     activeTab.value = "code";
     document.getElementById("tabs")?.scrollIntoView();
     const res = await brain.think(data.finalPrompt, {
-        temperature: 0, max_tokens: 500, top_p: 0.35, top_k: 40, stop: tpl.stop
+        temperature: 0, max_tokens: 500, top_p: 0.35, top_k: 40, stop: stop.value
     });
     //console.log("R", res.text);
     let code = "";

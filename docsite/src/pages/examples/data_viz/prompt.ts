@@ -20,11 +20,10 @@ Please create a chart using Altair. Instructions for the code design:
 Plot {prompt}
 `;
 
-const tpl = new PromptTemplate(template.value);
-tpl.replaceSystem(`You are an AI programming assistant, specialized in data visualization in Python. You always output only one code block and only that. Do not explain
-`);
-
 function prepareTemplate() {
+    const tpl = new PromptTemplate(template.value);
+    tpl.replaceSystem(`You are an AI programming assistant, specialized in data visualization in Python. You always output only one code block and only that. Do not explain
+`);
     tpl.shots = [];
     const user1 = _prompt.replace("{data}", `date,precipitation,temp_max,temp_min,wind,weather
 2012-01-01,0.0,12.8,5.0,4.7,drizzle
@@ -65,13 +64,14 @@ chart
     const stop = tpl.stop ?? new Array<string>();
     stop.push("```\n");
     tpl.stop = stop;
+    return tpl
 }
 
 function createChartPrompt(p: string, data: string) {
-    prepareTemplate();
+    const tpl = prepareTemplate();
     const _p = tpl.prompt(_prompt.replace("{prompt}", p).replace("{data}", data))
-    console.log(_p)
-    return _p
+    console.log("PROMPT:", _p)
+    return { _prompt: _p, tpl }
 }
 
-export { createChartPrompt, tpl }
+export { createChartPrompt }
