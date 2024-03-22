@@ -41,6 +41,8 @@ An api to create local first human friendly agents in the browser or Nodejs
     - [Initialize](https://synw.github.io/agent-smith/semantic_memory/initialize)
     - [Write operations](https://synw.github.io/agent-smith/semantic_memory/write_operations)
     - [Read operations](https://synw.github.io/agent-smith/semantic_memory/read_operations)
+ - [Examples](https://synw.github.io/agent-smith/examples)
+    - [Data viz](https://synw.github.io/agent-smith/examples/data_viz)
 
 </details>
 
