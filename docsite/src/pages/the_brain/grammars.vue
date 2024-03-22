@@ -21,7 +21,7 @@
             <div>
                 <button class="btn semilight" @click="runQ1()">Run the query</button>
             </div>
-            <pre class="font-light"><code>{{ brainStream }}</code></pre>
+            <pre class="font-light" v-if="isReady"><code>{{ brainStream }}</code></pre>
             <div>The button click is mapped on this code:</div>
             <div>
                 <static-code-block :hljs="hljs" :code="code2" lang="ts"></static-code-block>
@@ -55,14 +55,28 @@ import { onBeforeMount, ref } from 'vue';
 import Textarea from 'primevue/textarea';
 import { StaticCodeBlock } from "@docdundee/vue";
 import { hljs } from "@/conf";
-import { brain, brainStream, joe } from "@/agent/agent";
+import { brain, agent } from "@/agent/agent";
 import { discover } from './utils';
-import AgentJoeV3 from '@/agent/AgentJoeV3.vue';
+import AgentJoeV3 from '@/agent/AgentV3.vue';
+import { useStore } from '@nanostores/vue';
+import { initLm } from '@/agent/state';
+
+let brainStream = useStore(brain.stream);
+const isReady = ref(false);
 
 const q1 = ref("Write a list of the planets names of the solar system");
 const grammar1 = `interface Grammar {
     planet_names: Array<string>;
 }`;
+
+async function init() {
+    agent.state.setKey("component", "AgentBaseText");
+    if (!brain.state.get().isOn) {
+        await initLm()
+    }
+    brainStream = useStore(brain.ex.stream);
+    isReady.value = true
+}
 
 async function runQ1() {
     if (!brain.state.get().isOn) {
@@ -114,5 +128,5 @@ const code4 = `await brain.think("is the sky blue?"
     },
 )`;
 
-onBeforeMount(() => joe.state.setKey("component", "AgentBaseText"))
+onBeforeMount(() => init())
 </script>

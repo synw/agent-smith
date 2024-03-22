@@ -11,21 +11,21 @@
             <div>
                 <static-code-block :hljs="hljs" :code="code1" lang="css"></static-code-block>
             </div>
-            <div>Modify to component to add the css and map the current <kbd>joeState.text</kbd>
-                (a reactive variable) to the component content, and <kbd>joeState.toggleInteract</kbd>
+            <div>Modify to component to add the css and map the current <kbd>state.text</kbd>
+                (a reactive variable) to the component content, and <kbd>state.toggleInteract</kbd>
                 to the click action of the component:</div>
             <div>
                 <static-code-block :hljs="hljs" :code="code2" lang="html"></static-code-block>
             </div>
             <div>Now our agent can talk:</div>
             <div>
-                <button class="btn light" @click="joe.talk('Hi, I am Joe, your demo agent', 3)">Talk</button>
+                <button class="btn light" @click="agent.talk('Hi, I am Joe, your demo agent', 3)">Talk</button>
             </div>
             <div>
                 <static-code-block :hljs="hljs" :code="code3" lang="html"></static-code-block>
             </div>
             <div>
-                The second parameter of <kbd>joe.talk</kbd> is the number of seconds it is talking. The duration is
+                The second parameter of <kbd>agent.talk</kbd> is the number of seconds it is talking. The duration is
                 optional: it will stay forever by default. Now let's map a ui behavior: the agent will change color when
                 talking.
                 Add this to the script part:
@@ -46,7 +46,7 @@
                 <static-code-block :hljs="hljs" :code="code6" lang="ts"></static-code-block>
             </div>
         </div>
-        <AgentJoeV2></AgentJoeV2>
+        <AgentV2></AgentV2>
         <div class="mt-8">
             <a href="javascript:openLink('/the_body/interactions/components')">Next:
                 map components on the agent interactions
@@ -59,8 +59,8 @@
 import { onBeforeMount } from 'vue';
 import { hljs } from "@/conf";
 import { StaticCodeBlock } from "@docdundee/vue";
-import AgentJoeV2 from '@/agent/AgentJoeV2.vue';
-import { joe } from '@/agent/agent';
+import AgentV2 from '@/agent/AgentV2.vue';
+import { agent } from '@/agent/agent';
 
 const code1 = `.bubble {
     z-index: 20;
@@ -88,45 +88,45 @@ const code1 = `.bubble {
 }`;
 
 const code2 = `<div class="fixed bottom-12 right-8 flex flex-row items-end z-50">
-    <template v-if="joeState.isVisible">
-        <div v-if="joeState.isInteracting === true" 
+    <template v-if="state.isVisible">
+        <div v-if="state.isInteracting === true" 
             class="bubble bubble-bottom-left mr-5 txt-light"
-            v-html="joeState.text">
+            v-html="state.text">
         </div>
-        <robot-icon class="text-5xl cursor-pointer" @click="joe.toggleInteract()"></robot-icon>
+        <robot-icon class="text-5xl cursor-pointer" @click="agent.toggleInteract()"></robot-icon>
     </template>
 </div>`;
 
-const code3 = `<button class="btn light" @click="joe.talk('Hi, I am Joe, your demo agent', 3)">Talk</button>`;
+const code3 = `<button class="btn light" @click="agent.talk('Hi, I am your demo agent', 3)">Talk</button>`;
 
 const code4 = `import { computed } from "vue";
 
 const color = computed(() => {
     let c = "txt-lighter";
-    if (joeState.value.isInteracting) {
+    if (state.value.isInteracting) {
         c = "txt-light"
     }
     return c
 });`;
 
 const code5 = `<robot-icon class="text-5xl cursor-pointer" 
-    :class="color" @click="joe.toggleInteract()"></robot-icon>`;
+    :class="color" @click="agent.toggleInteract()"></robot-icon>`;
 
 const code6 = `import { onBeforeMount } from 'vue';
 
 onBeforeMount(() => {
-    joe.show();
-    joe.interactions.setKey(
+    agent.show();
+    agent.interactions.setKey(
         "click",
-        () => joe.talk('Hi, I am Joe, your demo agent', 3)
+        () => agent.talk('Hi, I am your demo agent', 3)
     );
 })`;
 
 onBeforeMount(() => {
-    joe.show();
-    joe.interactions.setKey(
+    agent.show();
+    agent.interactions.setKey(
         "click",
-        () => joe.talk('Hi, I am Joe, your demo agent', 3)
+        () => agent.talk('Hi, I am your demo agent', 3)
     );
 })
 </script>

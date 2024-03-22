@@ -9,7 +9,8 @@
             <div>Start a local Koboldcpp server with <a
                     href="https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF">Tinyllama
                     Chat</a> (1B)
-                to run the interactive examples on this page. We are using a small model so that this example can run with
+                to run the interactive examples on this page. We are using a small model so that this example can run
+                with
                 a small memory and on CPU only.
             </div>
             <div>First let's declare our brain module with one expert:</div>
@@ -26,8 +27,8 @@
             </div>
             <div>Server is up:
                 <code :class="brainState.isOn ? 'txt-success' : 'txt-warning'">
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        {{ brainState.isOn }}
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    </code>
+                {{ brainState.isOn }}
+                </code>
             </div>
             <div>The template part:</div>
             <div>
@@ -39,9 +40,11 @@
                 <Textarea class="w-[50rem] mt-3" v-model="q1" :rows="1" />
             </div>
             <div>
-                <button class="btn semilight" @click="brain.think(q1);" :disabled="!brainState.isOn">Run the query</button>
+                <button class="btn semilight" @click="runQ1()" :disabled="!brainState.isOn">Run the
+                    query</button>
             </div>
-            <div v-if="runningQuery == 'q1'" v-html="brainStream.replaceAll('\n', '<br />')" class="font-light"></div>
+            <div v-if="runningQuery == 'q1' && isReady" v-html="brainStream.replaceAll('\n', '<br />')"
+                class="font-light"></div>
             <div>
                 <static-code-block :hljs="hljs" :code="code3" lang="html"></static-code-block>
             </div>
@@ -56,7 +59,8 @@
                 The prompt above uses default server inference parameters. It is possible to
                 configure the inference parameters for each prompt. Agent Smith uses the
                 <a href="https://github.com/synw/locallm">LocalLm</a> library. See all the available
-                inference params in the <a href="https://synw.github.io/locallm/types/interfaces/InferenceParams.html">api
+                inference params in the <a
+                    href="https://synw.github.io/locallm/types/interfaces/InferenceParams.html">api
                     doc</a>.
                 Example with a few params:
             </div>
@@ -67,7 +71,7 @@
                 <button class="btn semilight" @click="runQ2()" :disabled="!brainState.isOn">Run
                     the query</button>
             </div>
-            <div v-if="runningQuery == 'q2'">
+            <div v-if="runningQuery == 'q2' && isReady">
                 <pre class="font-light">{{ brainStream }}</pre>
             </div>
             <div>
@@ -102,7 +106,7 @@
             <div>
                 <static-code-block :hljs="hljs" :code="code8" lang="ts"></static-code-block>
             </div>
-            <AgentJoeV3></AgentJoeV3>
+            <AgentWidget></AgentWidget>
             <div>Check the <a href="https://github.com/synw/modprompt">Modprompt</a> library for more details.</div>
             <div class="pt-5">
                 <a href="javascript:openLink('/the_brain/options')">Next: options</a>
@@ -116,9 +120,15 @@ import { onBeforeMount, ref } from 'vue';
 import Textarea from 'primevue/textarea';
 import { StaticCodeBlock } from "@docdundee/vue";
 import { hljs } from "@/conf";
-import { brain, brainState, brainStream, joe } from "@/agent/agent";
-import AgentJoeV3 from '@/agent/AgentJoeV3.vue';
+import { brain, agent } from "@/agent/agent";
+import { initLm } from '@/agent/state';
+import AgentWidget from '@/agent/AgentWidget.vue';
 import { discover } from './utils';
+import { useStore } from '@nanostores/vue';
+
+let brainStream = useStore(brain.stream);
+let brainState = useStore(brain.state);
+const isReady = ref(false);
 
 const runningQuery = ref<"q1" | "q2">("q1");
 const q1 = ref("Write a short list of the planets names of the solar system");
@@ -130,7 +140,25 @@ async function runQ2() {
         temperature: 0,
         min_p: 0.05,
         max_tokens: 200,
-    })
+    }, { verbose: true })
+}
+
+async function runQ1() {
+    runningQuery.value = "q1";
+    await brain.think(q1.value, {
+        temperature: 0,
+        min_p: 0.05,
+        max_tokens: 200,
+    }, { verbose: true })
+}
+
+async function init() {
+    agent.state.setKey("component", "AgentBaseText");
+    if (!brain.state.get().isOn) {
+        await initLm()
+    }
+    brainStream = useStore(brain.ex.stream);
+    isReady.value = true
 }
 
 const code1 = `import { useStore } from '@nanostores/vue';
@@ -142,7 +170,7 @@ const expert = useLmExpert({
     templateName: "zephyr",
 });
 // map the brain to the body (optional)
-const joe = useAgentSmith({
+const agent = useAgentSmith({
     name: "Joe",
     jobs: jobs,
     modules: [brainModule],
@@ -191,5 +219,7 @@ const code7 = `brain.ex.template.render()`;
 
 const code8 = `brain.ex.template.prompt("Write a short list of...")`;
 
-onBeforeMount(() => joe.state.setKey("component", "AgentBaseText"))
+onBeforeMount(() => {
+    init()
+})
 </script>

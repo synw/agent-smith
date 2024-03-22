@@ -11,7 +11,7 @@
             </div>
             <div>Let's add some history turns:</div>
             <div class="txt-light">
-                <pre>{{ joe.brain.ex.template.render() }}</pre>
+                <pre>{{ expert.template.render() }}</pre>
             </div>
             <div>
                 <static-code-block :hljs="hljs" :code="code2" lang="ts"></static-code-block>
@@ -33,7 +33,7 @@
 <script setup lang="ts">
 import { StaticCodeBlock } from "@docdundee/vue";
 import { hljs } from "@/conf";
-import { joe } from "@/agent/agent4";
+import { expert } from "@/agent/agent4";
 import { onBeforeMount } from "vue";
 import { HistoryTurn } from "modprompt";
 
@@ -48,23 +48,18 @@ function addTurns() {
             assistant: "I am AI assistant xyz"
         },
     ];
-    turns.forEach((t) => joe.brain.ex.template.pushToHistory(t))
+    turns.forEach((t) => expert.template.pushToHistory(t))
 }
 
-const code1 = `import { useAgentSmith } from "@agent-smith/body";
-import { useLmExpert, useAgentBrain } from "@agent-smith/brain";
+const code1 = `import { useLmExpert } from "@agent-smith/brain";
 
 const expert = useLmExpert({
     name: "default",
     localLm: "koboldcpp",
     templateName: "alpaca",
 });
-const joe = useAgentSmith({
-    name: "Joe",
-    modules: [useAgentBrain([expert])],
-});
 
-export { joe }`;
+export { expert }`;
 
 const code2 = `import { HistoryTurn } from "modprompt";
 
@@ -78,12 +73,12 @@ const turns: Array<HistoryTurn> = [
         assistant: "I am AI assistant xyz"
     },
 ];
-turns.forEach((t) => joe.brain.ex.template.pushToHistory(t));
-const finalTemplate = joe.brain.ex.template.render();`;
+turns.forEach((t) => expert.template.pushToHistory(t));
+const finalTemplate = expert.template.render();`;
 
 const code3 = `const _prompt = "What is your name?"
-const res = await joe.think(_prompt);
-joe.ex.template.pushToHistory({user: _prompt, assistant: res.text});`
+const res = await expert.think(_prompt);
+expert.pushToHistory({user: _prompt, assistant: res.text});`
 
 onBeforeMount(() => {
     addTurns();

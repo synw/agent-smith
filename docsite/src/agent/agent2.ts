@@ -1,9 +1,5 @@
 import { useAgentSmith } from "@agent-smith/body";
-import { useLmExpert, useAgentBrain } from "@agent-smith/brain";
-/*import { useAgentSmith } from "../../../packages/body/src/core";
-import { useLmExpert } from "../../../packages/brain/src/lm";
-import { useAgentBrain } from "../../../packages/brain/src/brain";*/
-import { Lm } from "@locallm/api";
+import { useLmExpert, useAgentBrain, LmBackendSpec } from "@agent-smith/brain";
 
 const kid = useLmExpert({
     name: "kid",
@@ -11,11 +7,13 @@ const kid = useLmExpert({
     templateName: "zephyr",
 });
 
-const lm = new Lm({
+const lm: LmBackendSpec = {
+    name: "Corrector",
     providerType: "koboldcpp",
     serverUrl: "http://localhost:5002",
-    onToken: (t) => { },
-});
+    enabled: false,
+    apiKey: "",
+};
 const corrector = useLmExpert({
     name: "corrector",
     backend: lm,

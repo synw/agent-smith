@@ -6,9 +6,7 @@ const links: Array<{ href: string; name: string }> = [
   // { href: "/python", name: "Python api" },
 ];
 
-// python runtime
-const pipPackages = [];
-const pyodidePackages = [];
+
 const examplesExtension = "py";
 
 async function loadHljsTheme(isDark: boolean) {
@@ -34,18 +32,12 @@ hljs.registerLanguage('html', xml);
 hljs.registerLanguage('css', css);
 //hljs.registerLanguage('json', json);
 
-// some Python code to run after install
-const initCode: string | undefined = undefined;
-
 export {
   libName,
   libTitle,
   repoUrl,
-  pipPackages,
   examplesExtension,
-  pyodidePackages,
   links,
   hljs,
-  initCode,
   loadHljsTheme
 }

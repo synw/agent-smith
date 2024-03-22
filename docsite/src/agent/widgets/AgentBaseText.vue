@@ -1,7 +1,7 @@
 <template>
-    <div v-html="joeState.text"></div>
+    <div v-html="state.text"></div>
 </template>
 
 <script setup lang="ts">
-import { joeState } from "../agent";
+import { state } from "../agent";
 </script>

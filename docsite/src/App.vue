@@ -52,4 +52,6 @@ a, a:visited, a:active
   @apply overflow-y-auto
 .p-inputtext
   @apply background bord-lighter
+.pystatus .ficon
+  font-size: 1.8rem !important
 </style>

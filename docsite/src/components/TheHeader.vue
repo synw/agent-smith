@@ -25,7 +25,10 @@
       <div class="flex flex-row items-center justify-end h-full">
         <button v-for="link in links" class="border-none btn" @click="closeMenu(); $router.push(link.href)"
           v-html="link.name"></button>
-        <!-- py-status :py="py"></py-status -->
+        <py-status :py="py" v-if="$route.path.startsWith('/examples/data_viz')" class=""></py-status>
+        <button class="btn" @click="$router.push('/server_conf')">
+          <prompt-icon class="text-3xl"></prompt-icon>
+        </button>
         <a :href="repoUrl" class="btn">
           <i-fa-brands:github class="text-2xl" @click=""></i-fa-brands:github>
         </a>
@@ -38,7 +41,7 @@
   </sw-header>
   <sw-mobile-menu :is-visible="isMenuVisible" class="absolute left-0 z-30 w-full lighter top-14">
     <div class="flex flex-col p-3 space-y-5">
-      <button v-for="link in links" class="border-none btn" @click="closeMenu(); $router.push(link.href)"
+      <button v-for=" link  in  links " class="border-none btn" @click="closeMenu(); $router.push(link.href)"
         v-html="link.name"></button>
       <div class="pr-5 text-lg" @click="closeMenu(); toggleDarkMode()">
         <i-fa-solid:moon v-if="!user.isDarkMode.value"></i-fa-solid:moon>
@@ -51,10 +54,12 @@
 <script setup lang="ts">
 import { ref, computed } from "vue";
 import { SwHeader, SwMobileMenu } from "@snowind/header";
-import { PyStatus } from "vuepython"
-import { user, py } from "@/state";
+import { user } from "@/state";
 import { libTitle, repoUrl } from "@/conf";
 import { useRouter } from "vue-router";
+import { PyStatus } from "vuepython";
+import { py } from "@/py";
+import PromptIcon from "@/widgets/PromptIcon.vue";
 
 defineProps({
   css: {

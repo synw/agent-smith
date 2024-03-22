@@ -13,7 +13,7 @@
             </div>
             <div>The template rendering:</div>
             <div class="txt-light">
-                <pre>{{ joe.brain.ex.template.render() }}</pre>
+                <pre>{{ expert.template.render() }}</pre>
             </div>
         </div>
     </div>
@@ -22,7 +22,7 @@
 <script setup lang="ts">
 import { StaticCodeBlock } from "@docdundee/vue";
 import { hljs } from "@/conf";
-import { joe } from "@/agent/agent4";
+import { expert } from "@/agent/agent4";
 import { TurnBlock } from "modprompt";
 import { onBeforeMount } from "vue";
 
@@ -41,7 +41,7 @@ function createPrompt() {
             assistant: "neutral",
         },
     ];
-    shots.forEach((s) => joe.brain.ex.template.addShot(s.user, s.assistant));
+    shots.forEach((s) => expert.template.addShot(s.user, s.assistant));
 }
 
 const code1 = `import { TurnBlock } from "modprompt";
@@ -60,7 +60,7 @@ const shots: Array<TurnBlock> = [
         assistant: "neutral",
     },
 ];
-shots.forEach((s) => joe.brain.ex.template.addShot(s.user, s.assistant));`;
+shots.forEach((s) => expert.template.addShot(s.user, s.assistant));`;
 
 onBeforeMount(() => createPrompt())
 </script>

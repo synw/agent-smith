@@ -28,7 +28,7 @@
                 <static-code-block :hljs="hljs" :code="code4" lang="ts"></static-code-block>
             </div>
         </div>
-        <AgentJoeV3></AgentJoeV3>
+        <AgentV3></AgentV3>
         <div class="pt-5">
             <a href="javascript:openLink('/the_brain/overview')">Next: the brain: overview</a>
         </div>
@@ -39,17 +39,17 @@
 import { onMounted } from "vue";
 import { hljs } from "@/conf";
 import { StaticCodeBlock } from "@docdundee/vue";
-import AgentJoeV3 from '@/agent/AgentJoeV3.vue';
-import { joe } from '@/agent/agent';
+import AgentV3 from '@/agent/AgentV3.vue';
+import { agent } from '@/agent/agent';
 
 const confirmAction = async () => {
     alert("action is confirmed");
-    joe.mute();
+    agent.mute();
 };
 
 const declineAction = async () => {
     console.log("action is declined");
-    joe.mute();
+    agent.mute();
 };
 
 const options = {
@@ -58,40 +58,40 @@ const options = {
 };
 
 const setConfirmAction = () => {
-    joe.confirm("Do you confirm this action?",
+    agent.confirm("Do you confirm this action?",
         confirmAction,
         options,
     )
 };
 
 const code1 = `<div class="flex flex-col">
-    <div v-html="joeState.text"></div>
+    <div v-html="state.text"></div>
     <div class="flex flex-row mt-3 space-x-2 text-sm">
         <button class="btn warning" @click="declineAction()">No</button>
         <button class="btn success" @click="confirmAction()">Yes</button>
     </div>
 </div>`;
 
-const code2 = `import { joe, joeState } from "../agent";
+const code2 = `import { agent, state } from "../agent";
 
 async function declineAction() {
-    joe.interactions.get().decline()
+    agent.interactions.get().decline()
 }
 
 async function confirmAction() {
-    joe.interactions.get().confirm()
+    agent.interactions.get().confirm()
 }`;
 
-const code3 = `import { joe } from '@/agent/agent';
+const code3 = `import { agent } from '@/agent/agent';
 
 const confirmAction = async () => {
     alert("action is confirmed");
-    joe.mute();
+    agent.mute();
 };
 
 const declineAction = async () => {
     console.log("action is declined");
-    joe.mute();
+    agent.mute();
 };
 
 const options = {
@@ -100,7 +100,7 @@ const options = {
 };
 
 const setConfirmAction = () => {
-    joe.confirm("Do you confirm this action?",
+    agent.confirm("Do you confirm this action?",
         confirmAction,
         options,
     )
@@ -109,17 +109,17 @@ const setConfirmAction = () => {
 const code4 = `import { onMounted } from "vue";
 
 onMounted(() => {
-    joe.show();
-    joe.interactions.setKey("click", setConfirmAction);
+    agent.show();
+    agent.interactions.setKey("click", setConfirmAction);
 })`;
 
-const code5 = `<div v-if="joeState.isInteracting === true" class="bubble bubble-bottom-left mr-5 txt-light">
-    <agent-base-text v-if="joeState.component == 'AgentBaseText'"></agent-base-text>
-    <agent-confirm v-else-if="joeState.component == 'AgentConfirm'"></agent-confirm>
+const code5 = `<div v-if="state.isInteracting === true" class="bubble bubble-bottom-left mr-5 txt-light">
+    <agent-base-text v-if="state.component == 'AgentBaseText'"></agent-base-text>
+    <agent-confirm v-else-if="state.component == 'AgentConfirm'"></agent-confirm>
 </div>`;
 
 onMounted(() => {
-    joe.show();
-    joe.interactions.setKey("click", setConfirmAction);
+    agent.show();
+    agent.interactions.setKey("click", setConfirmAction);
 })
 </script>

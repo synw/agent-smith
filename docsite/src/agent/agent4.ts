@@ -1,8 +1,4 @@
-import { useAgentSmith } from "@agent-smith/body";
-import { useLmExpert, useAgentBrain } from "@agent-smith/brain";
-/*import { useAgentSmith } from "../../../packages/body/src/core";
-import { useLmExpert } from "../../../packages/brain/src/lm";
-import { useAgentBrain } from "../../../packages/brain/src/brain";*/
+import { useLmExpert } from "@agent-smith/brain";
 
 const expert = useLmExpert({
     name: "default",
@@ -10,9 +6,4 @@ const expert = useLmExpert({
     templateName: "alpaca",
 });
 
-const joe = useAgentSmith({
-    name: "Joe",
-    brain: useAgentBrain([expert]),
-});
-
-export { joe }
+export { expert }

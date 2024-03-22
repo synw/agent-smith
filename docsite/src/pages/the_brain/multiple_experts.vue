@@ -237,9 +237,8 @@ async function runQ2() {
     }
 }
 
-const code1 = `import { Lm } from "@locallm/api";
-import { useAgentSmith } from "@agent-smith/body";
-import { useLmExpert, useAgentBrain } from "@agent-smith/brain";
+const code1 = `import { useAgentSmith } from "@agent-smith/body";
+import { useLmExpert, useAgentBrain, LmBackendSpec } from "@agent-smith/brain";
 
 // first expert
 const kid = useLmExpert({
@@ -248,11 +247,13 @@ const kid = useLmExpert({
     templateName: "zephyr",
 });
 // second expert
-const lm = new Lm({
+const lm: LmBackendSpec = {
+    name: "Corrector",
     providerType: "koboldcpp",
     serverUrl: "http://localhost:5002",
-    onToken: (t) => { },
-});
+    enabled: false,
+    apiKey: "",
+};
 const corrector = useLmExpert({
     name: "corrector",
     backend: lm,
