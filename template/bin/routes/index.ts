@@ -1,0 +1,3 @@
+const extraRoutes = [];
+
+export { extraRoutes }
