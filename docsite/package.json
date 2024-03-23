@@ -23,7 +23,6 @@
     "@locallm/api": "^0.0.29",
     "@nanostores/vue": "^0.10.0",
     "@snowind/header": "^0.1.0",
-    "@snowind/subviews": "^0.1.0",
     "highlight.js": "^11.9.0",
     "markdown-it": "^14.0.0",
     "modprompt": "^0.5.0",
