@@ -46,6 +46,8 @@ An api to create local first human friendly agents in the browser or Nodejs
 
 </details>
 
+Check the :computer: [Starter template](https://github.com/synw/agetn-smith/template)
+
 ## What is an agent?
 
 An agent is an anthropomorphic representation of a bot. It has these basic habilities:
