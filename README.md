@@ -46,7 +46,7 @@ An api to create local first human friendly agents in the browser or Nodejs
 
 </details>
 
-Check the :computer: [Starter template](https://github.com/synw/agetn-smith/template)
+Check the :computer: [Starter template](https://github.com/synw/agent-smith/tree/main/template)
 
 ## What is an agent?
 
