@@ -57,7 +57,8 @@
                 </div>
             </div>
             <div v-else class="flex flex-col">
-                <div>The inference server is down</div>
+                <div>The inference server is down: please run a local Llama.cpp, Koboldcpp or Ollama instance and try
+                    again</div>
                 <div>
                     <button class="btn warning mt-5" @click="init()">Try again</button>
                 </div>
