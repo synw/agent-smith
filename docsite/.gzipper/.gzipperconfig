@@ -15,12 +15,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/AgentV3.vue_vue_type_style_index_0_lang-DZOd6rb7.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/AgentV3.vue_vue_type_style_index_0_lang-CJ3oBY-s.js": {
         "revisions": [
           {
-            "lastChecksum": "d45c4707095d0f8fb69e01598a4ba12e",
-            "fileId": "c98fdcec-6348-4465-8ebc-65f95031241c",
-            "date": "2024-03-24T14:23:52.658Z",
+            "lastChecksum": "e147e08ea8c62eb6997601c33c1f2fb8",
+            "fileId": "4f948433-aef3-46b6-a958-3d3915c23168",
+            "date": "2024-04-06T12:27:37.624Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -28,12 +28,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/ChartTab.vue_vue_type_script_setup_true_lang-BaBXpjZC.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/ChartTab.vue_vue_type_script_setup_true_lang-BFYrC0PT.js": {
         "revisions": [
           {
-            "lastChecksum": "c1b074931a7fdd67ef3d50e3e3201b5f",
-            "fileId": "c6a9887b-c4f8-41fd-9a8f-769d570dc37e",
-            "date": "2024-03-24T14:23:52.716Z",
+            "lastChecksum": "fd77a36305b218e7e5519993d41db843",
+            "fileId": "8ec0740e-fe5b-4ada-96ec-a732920e0473",
+            "date": "2024-04-06T12:27:37.686Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -41,12 +41,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/InferParamsTab.vue_vue_type_style_index_0_lang-BL28D--I.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/InferParamsTab.vue_vue_type_style_index_0_lang-wttd3uEO.js": {
         "revisions": [
           {
-            "lastChecksum": "34e8c32493e62566269e2f1555a3b268",
-            "fileId": "53fa2231-2057-4120-b8fd-30ff4db34e34",
-            "date": "2024-03-24T14:23:53.892Z",
+            "lastChecksum": "930dbddca05e7c8a4d90f359f238a596",
+            "fileId": "17e01be3-62aa-4a83-aaaa-f91ca5a846f6",
+            "date": "2024-04-06T12:27:38.837Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -171,12 +171,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/RobotIcon-DervH3hN.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/RobotIcon-BGbJYAEB.js": {
         "revisions": [
           {
-            "lastChecksum": "f16374cb230eb114c415c2fdecb8c10f",
-            "fileId": "517f1ba8-9972-435c-a89b-9f617ae7e524",
-            "date": "2024-03-24T14:23:52.700Z",
+            "lastChecksum": "f74828e84e70d13c8ba85f0b7aaf6a7d",
+            "fileId": "aa5ecb43-9950-4a15-aab8-e895617f0f4e",
+            "date": "2024-04-06T12:27:37.661Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -184,12 +184,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/ViewDataset.vue_vue_type_style_index_0_lang-Cwga9UXy.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/ViewDataset.vue_vue_type_style_index_0_lang-Bc_0anRo.js": {
         "revisions": [
           {
-            "lastChecksum": "a35061eb43f44771d47bfc34b2d43cd7",
-            "fileId": "bbc61651-db58-4798-8cfc-1c7325a8f64d",
-            "date": "2024-03-24T14:23:52.710Z",
+            "lastChecksum": "b6e9aa48120b33dc05a9e84636409a55",
+            "fileId": "0a5dbe15-c750-439f-93d7-03b2fcff863a",
+            "date": "2024-04-06T12:27:37.670Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -197,12 +197,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/basic_agent-Cl5wSx3x.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/basic_agent-BZNsY8xH.js": {
         "revisions": [
           {
-            "lastChecksum": "bab68d69b6961cb94f325abcbe38f75d",
-            "fileId": "928a7cf3-a9cb-4a8c-a164-4105fa8c5119",
-            "date": "2024-03-24T14:23:52.723Z",
+            "lastChecksum": "dd7a1ab115c476d9eb1882cdb56386b8",
+            "fileId": "9e055e06-40b5-4304-9796-5ecbfe54cd66",
+            "date": "2024-04-06T12:27:37.682Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -210,12 +210,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/basics-B9oF_sb0.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/basics-BLcbDInW.js": {
         "revisions": [
           {
-            "lastChecksum": "d26dfc53c4af9593f3781b9795be5489",
-            "fileId": "5c7edf64-14be-4f1d-9852-5f1f098af0ca",
-            "date": "2024-03-24T14:23:52.699Z",
+            "lastChecksum": "2a3e08cd1c7e7c38cb5d8af3716cb048",
+            "fileId": "6ea3eca6-3cac-4d67-86fc-81a399bdacc7",
+            "date": "2024-04-06T12:27:37.659Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -223,12 +223,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/basics-D2h_jbL5.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/basics-CGn-dFVR.js": {
         "revisions": [
           {
-            "lastChecksum": "1f9979ce58e022020e6f96116c6c9253",
-            "fileId": "c4750601-2d31-4527-a893-2b3f638296e3",
-            "date": "2024-03-24T14:23:52.733Z",
+            "lastChecksum": "9fc34ff79ace36392b3f28ad50129d33",
+            "fileId": "dbe5be46-bad9-4311-bbff-a0b553e71db9",
+            "date": "2024-04-06T12:27:37.690Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -236,12 +236,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/components-CNX6-SsD.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/components-BgxQviLV.js": {
         "revisions": [
           {
-            "lastChecksum": "ce81924bf3759d435fde9848096a50ca",
-            "fileId": "23dd2a70-042a-4b02-b813-7e96d2d1e80a",
-            "date": "2024-03-24T14:23:52.750Z",
+            "lastChecksum": "b0f8059c8bbe8d96cac81aac04c98a9b",
+            "fileId": "622dc6b9-8849-4955-a5c6-4dbe519dfaa5",
+            "date": "2024-04-06T12:27:37.710Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -249,12 +249,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/confirm-DNoWT34u.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/confirm-DFGKU_ow.js": {
         "revisions": [
           {
-            "lastChecksum": "5262f70bcbc1dda83b0dee8c9d53af89",
-            "fileId": "564f213b-52ec-4388-b9a8-186684b1ae81",
-            "date": "2024-03-24T14:23:52.755Z",
+            "lastChecksum": "a4d8ad31324f220771d40ebbb08cb7a4",
+            "fileId": "8dc9a130-00cb-473b-a4b6-1d4c111784f1",
+            "date": "2024-04-06T12:27:37.722Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -288,12 +288,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/create_a_job-DbmlrAOq.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/create_a_job-BOeBlkEj.js": {
         "revisions": [
           {
-            "lastChecksum": "15a2c955d66e8a1fbc59533a58c42a00",
-            "fileId": "ffb43b34-1ac9-4c5d-b43b-52d45b639521",
-            "date": "2024-03-24T14:23:52.696Z",
+            "lastChecksum": "4bd2f4349f88d69e4b43d3e527b04227",
+            "fileId": "0dddb4dd-a64b-4656-99b2-2f0c445f8f6d",
+            "date": "2024-04-06T12:27:37.657Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -301,12 +301,64 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/data_viz-Aea2CwKX.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/data_viz-Csrq1rgs.js": {
         "revisions": [
           {
-            "lastChecksum": "c12cf21209dc96ad38eb09dd8e1a812a",
-            "fileId": "8610aff8-5556-4a7d-beee-9ab7c4623bda",
-            "date": "2024-03-24T14:23:52.717Z",
+            "lastChecksum": "5fc46d1ab4d7641a344299cfa39c28b9",
+            "fileId": "6284578c-239f-4501-8927-11defcc22478",
+            "date": "2024-04-06T12:27:37.675Z",
+            "compressionType": "BROTLI",
+            "options": {
+              "0": 2
+            }
+          }
+        ]
+      },
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/few_shots-Do9I0ynn.js": {
+        "revisions": [
+          {
+            "lastChecksum": "79da23e705723d29c64ca61e6127146d",
+            "fileId": "117ddf8b-cad3-4939-b79c-bce87b7ab101",
+            "date": "2024-04-06T12:27:37.684Z",
+            "compressionType": "BROTLI",
+            "options": {
+              "0": 2
+            }
+          }
+        ]
+      },
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/grammars-CLM50HIj.js": {
+        "revisions": [
+          {
+            "lastChecksum": "e77fdc5e08e71916eee48705af43b8d7",
+            "fileId": "0ad2f5bc-37a5-4d3c-b51b-fbd6a229cc28",
+            "date": "2024-04-06T12:27:37.713Z",
+            "compressionType": "BROTLI",
+            "options": {
+              "0": 2
+            }
+          }
+        ]
+      },
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/history-e3YQhG6l.js": {
+        "revisions": [
+          {
+            "lastChecksum": "3763fcb6e10d5f8bddf3a875d0c98ae4",
+            "fileId": "45ce0edc-55c8-4b4f-a4b8-7b4fc00598f8",
+            "date": "2024-04-06T12:27:37.725Z",
+            "compressionType": "BROTLI",
+            "options": {
+              "0": 2
+            }
+          }
+        ]
+      },
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/index-C1UhW6KS.js": {
+        "revisions": [
+          {
+            "lastChecksum": "7fa5be82f5c28208658407fc7aa5744f",
+            "fileId": "30b5bce7-0bbd-4760-b360-8df4d3a4d46a",
+            "date": "2024-04-06T12:27:37.741Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -327,45 +379,6 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/few_shots-gf041cVv.js": {
-        "revisions": [
-          {
-            "lastChecksum": "6898f090da2ef5e2eb12d20c72b51c1b",
-            "fileId": "9bf59cd6-9b99-4d07-ae72-87903293da53",
-            "date": "2024-03-24T14:23:52.679Z",
-            "compressionType": "BROTLI",
-            "options": {
-              "0": 2
-            }
-          }
-        ]
-      },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/grammars-_bbYJODX.js": {
-        "revisions": [
-          {
-            "lastChecksum": "fe13d3fbb096797444e26ecc94ac0827",
-            "fileId": "7ffc33ad-051d-4573-9a94-1a2b0e521603",
-            "date": "2024-03-24T14:23:52.710Z",
-            "compressionType": "BROTLI",
-            "options": {
-              "0": 2
-            }
-          }
-        ]
-      },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/history-BxvRECxo.js": {
-        "revisions": [
-          {
-            "lastChecksum": "91b84e26b92bd3afcd80ffa045822dec",
-            "fileId": "5651d07b-ec4d-42f8-8463-2a36e8e404ed",
-            "date": "2024-03-24T14:23:52.730Z",
-            "compressionType": "BROTLI",
-            "options": {
-              "0": 2
-            }
-          }
-        ]
-      },
       "/home/ggg/dev/js/agent-smith/docsite/dist/assets/material-darker-BBiF7GHD.css": {
         "revisions": [
           {
@@ -379,12 +392,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/index-m-2cGltN.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/memory-DEi6BvY3.js": {
         "revisions": [
           {
-            "lastChecksum": "5f2f437ec27bbd5d5d52e20ad1d69f84",
-            "fileId": "1669285f-3f43-4f03-aa02-c8bf2cee3f09",
-            "date": "2024-03-24T14:23:52.748Z",
+            "lastChecksum": "42602a257a056c7ca64a0c455179700d",
+            "fileId": "1933dd52-2e96-4f16-b605-40d7802e7e19",
+            "date": "2024-04-06T12:27:37.675Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -392,25 +405,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/memory-BXvtxXPd.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/multiple_experts-pqFBUjN6.js": {
         "revisions": [
           {
-            "lastChecksum": "ea87133ae0b29b0b5f8b9ae177919fe7",
-            "fileId": "f133f7e0-886f-41d2-867e-3de50308e857",
-            "date": "2024-03-24T14:23:59.478Z",
-            "compressionType": "BROTLI",
-            "options": {
-              "0": 2
-            }
-          }
-        ]
-      },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/multiple_experts-d9ANlALw.js": {
-        "revisions": [
-          {
-            "lastChecksum": "56f5d4d9248e75fcab059cd41e5ba7af",
-            "fileId": "3ee90f33-055e-465d-89ed-f5bb117b8c0a",
-            "date": "2024-03-24T14:23:59.485Z",
+            "lastChecksum": "a6325a971ae0631c22307d23d692bf47",
+            "fileId": "ec93b93c-c171-4576-b233-aa074b85087e",
+            "date": "2024-04-06T12:27:37.693Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -431,12 +431,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/overview-Bm7DCCb_.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/overview-BcLE5RVc.js": {
         "revisions": [
           {
-            "lastChecksum": "6305634868b198e2109d83c1c25d286f",
-            "fileId": "ab6315cd-f007-4f64-bceb-ace8d46a13dd",
-            "date": "2024-03-24T14:23:52.700Z",
+            "lastChecksum": "d9ddcd7ae5e3c219a08210e495dbaf8b",
+            "fileId": "d09fc5a2-aef3-42e4-a0f2-2fb7fb8d78a2",
+            "date": "2024-04-06T12:27:37.657Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -444,12 +444,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/prompt-BHDjtE5x.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/prompt-Bium2rCA.js": {
         "revisions": [
           {
-            "lastChecksum": "afbc4e0886d2faa252bb0f80e30fc78d",
-            "fileId": "d0886417-60bd-44d9-8cb8-745a1d4f5e60",
-            "date": "2024-03-24T14:23:52.738Z",
+            "lastChecksum": "0031561b340bedb77259453ca71395ee",
+            "fileId": "9545422f-28c9-439c-8aab-0697536abc9b",
+            "date": "2024-04-06T12:27:37.690Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -457,12 +457,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/state_management-CeLT3Djx.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/state_management-uwENmgmQ.js": {
         "revisions": [
           {
-            "lastChecksum": "ce43bad19ea651918a0e8cbcab7b37d0",
-            "fileId": "9b4e0a67-6598-4382-82ff-8e099683251e",
-            "date": "2024-03-24T14:23:52.746Z",
+            "lastChecksum": "a759127313e32e1355850e258b8053be",
+            "fileId": "8e6fb06f-ce13-4e67-8d96-40c827cf558e",
+            "date": "2024-04-06T12:27:37.699Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -470,12 +470,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/talk-BDfQe0Li.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/talk-DP1G5t-R.js": {
         "revisions": [
           {
-            "lastChecksum": "681c03054f85a7b31078f1e7df531ee5",
-            "fileId": "e7bfbe47-cd8b-44c9-a8a7-118e5e597cfc",
-            "date": "2024-03-24T14:23:52.690Z",
+            "lastChecksum": "1d688e6b9e8d7ce91a39829c3c7b783c",
+            "fileId": "3d2bfd9e-f71d-440c-9dc8-dfce82cc73b0",
+            "date": "2024-04-06T12:27:37.699Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -483,12 +483,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/task1-BlcXdMYC.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/task1-SgqxstHm.js": {
         "revisions": [
           {
-            "lastChecksum": "15f03ccce8377acd1e60b98427671454",
-            "fileId": "2cd62d37-1852-48e5-a7f2-4f254b003f3e",
-            "date": "2024-03-24T14:23:52.708Z",
+            "lastChecksum": "e11dbd110e2e32e7052082db67b8f797",
+            "fileId": "5644dd09-f5be-4751-956b-21da6d080a42",
+            "date": "2024-04-06T12:27:37.724Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -496,12 +496,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/textarea.esm-BGLLK6DP.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/textarea.esm-BO_HKFMZ.js": {
         "revisions": [
           {
-            "lastChecksum": "14ced63559120877d734e4fdef98f2ed",
-            "fileId": "214eb29b-c2d2-4168-8767-05ff94a23533",
-            "date": "2024-03-24T14:23:52.724Z",
+            "lastChecksum": "32c4fd3d89ce65e10e89ee5723268203",
+            "fileId": "ea5387f3-def4-4052-befb-379c88d8616d",
+            "date": "2024-04-06T12:27:37.731Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2
@@ -509,12 +509,12 @@
           }
         ]
       },
-      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/usage-Bacudyth.js": {
+      "/home/ggg/dev/js/agent-smith/docsite/dist/assets/usage-WLz-tzpo.js": {
         "revisions": [
           {
-            "lastChecksum": "13a00d3835f1a69957dd6b9d32a1021f",
-            "fileId": "a29628e0-8048-45db-b8ed-707b35e93154",
-            "date": "2024-03-24T14:23:52.733Z",
+            "lastChecksum": "d1ba61a03d29fc6e9464e93928106ce6",
+            "fileId": "9e3de8eb-bca0-4c74-bf57-8439edbc78f4",
+            "date": "2024-04-06T12:27:37.735Z",
             "compressionType": "BROTLI",
             "options": {
               "0": 2

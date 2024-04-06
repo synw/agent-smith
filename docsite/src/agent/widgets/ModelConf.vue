@@ -58,7 +58,9 @@
             </div>
             <div v-else class="flex flex-col">
                 <div>The inference server is down: please run a local Llama.cpp, Koboldcpp or Ollama instance and try
-                    again</div>
+                    again. <br />Note for Ollama: you need to allow the cors origin using an env variable:<br /><br />
+                    <code>export OLLAMA_ORIGINS="http://0.0.0.0,https://synw.github.io"</code>
+                </div>
                 <div>
                     <button class="btn warning mt-5" @click="init()">Try again</button>
                 </div>

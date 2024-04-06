@@ -1,1 +1,0 @@
-import{d as t,o as e,c as o,u as s,s as r,B as a,h as c}from"./index-m-2cGltN.js";import{R as n}from"./RobotIcon-DervH3hN.js";const i={class:"fixed bottom-12 right-8 z-50"},u=t({__name:"AgentWidget",setup(m){return(_,p)=>(e(),o("div",i,[s(r).isVisible?(e(),a(n,{key:0,class:"text-5xl cursor-pointer"})):c("",!0)]))}});export{u as _};
