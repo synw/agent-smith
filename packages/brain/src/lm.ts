@@ -2,6 +2,7 @@ import { map, atom } from 'nanostores';
 import { PromptTemplate } from "modprompt";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import { Lm } from "@locallm/api";
+//import { Lm } from "../../../../locallm/packages/api/src/api";
 import { InferenceParams, InferenceResult } from "@locallm/types";
 import { defaultLocalBackends } from "./const.js";
 import { LmExpert, LmExpertSpec, LmThinkingOptionsSpec } from "./interfaces.js";
