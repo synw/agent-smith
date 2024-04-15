@@ -20,15 +20,14 @@ const useAgentTask = (spec: AgentTaskSpec): AgentTask => {
         //console.log("TASK run task", id, autoComplete, params);
         //console.log("RUN F", runFunc.name);
         state.setKey("isRunning", true);
+        state.setKey("data", null);
         let data: Record<string, any> = {};
         if (runFunc) {
             const d = await runFunc(params);
             data = d;
         }
         if (autoComplete) {
-            //console.log("AUTOCOMPLETE TASK", id);
-            state.setKey("isRunning", false);
-            state.setKey("isCompleted", true);
+            finish(true, data)
         }
         return data
     }

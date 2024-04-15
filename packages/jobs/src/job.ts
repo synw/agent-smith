@@ -146,10 +146,10 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
         if (hasTmem) {
             await tmem.finish()
         }
-        Object.values(_tasks).forEach((t) => {
+        /*Object.values(_tasks).forEach((t) => {
             t.state.setKey("data", {});
             t.state.setKey("isCompleted", false)
-        });
+        });*/
     }
 
     const getTaskById = (id: string): AgentTask => {
