@@ -118,7 +118,12 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
             console.log("Options", options);
             //console.log("Inference params", JSON.stringify(completionParams, null, "  "));
         }
-        const p = template.prompt(prompt);
+        let p = "";
+        if (options.skipTemplate === true) {
+            p = prompt
+        } else {
+            p = template.prompt(prompt)
+        }
         state.setKey("isThinking", true);
         let _parseJson = (options?.tsGrammar !== undefined) || (options?.grammar !== undefined);
         if (options?.parseJson) {

@@ -55,6 +55,7 @@ interface LmThinkingOptionsSpec {
     tsGrammar?: string,
     grammar?: string,
     parseJson?: boolean,
+    skipTemplate?: boolean,
     onToken?: (t: string) => void;
 }
 
