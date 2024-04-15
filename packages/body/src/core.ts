@@ -1,7 +1,8 @@
 import { map } from 'nanostores'
 import { AgentBrain } from '@agent-smith/brain';
-//import { AgentJob } from "../../jobs/src/jobsinterfaces.js";
 import { AgentJob } from "@agent-smith/jobs";
+//import { AgentBrain } from '../../brain/src/interfaces';
+//import { AgentJob } from "../../jobs/src/jobsinterfaces.js";
 import { AgentSmith, AgentState, type AgentSpec, type ConfirmFunction, type ConfirmOptions } from "./bodyinterfaces.js";
 
 const useAgentSmith = (initParams: AgentSpec): AgentSmith => {
