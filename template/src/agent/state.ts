@@ -1,6 +1,6 @@
 import { InferenceParams, ModelConf } from "@locallm/types";
 import { Ref, reactive, ref } from "vue";
-import { useTemplateForModel } from "./tfm";
+import { useTemplateForModel } from "./modelconf/tfm";
 import { brain } from "./agent";
 
 const defaultInferenceParams: InferenceParams = {
@@ -20,6 +20,7 @@ const tfm = useTemplateForModel();
 async function initLm(isTrying: Ref<boolean> | null = null) {
     if (isTrying) {
         isTrying.value = true;
+
     }
     brain.resetExperts();
     await brain.discoverExperts();
@@ -47,4 +48,4 @@ async function initLm(isTrying: Ref<boolean> | null = null) {
     }
 }
 
-export { inferenceParams, template, tfm, model, initLm }
+export { }

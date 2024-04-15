@@ -17,7 +17,9 @@
     </template>
     <template #menu>
       <div class="flex flex-row items-center justify-end w-full h-full space-x-1">
-        <!-- button class="border-none btn" @click="$router.push('/page')">Page 1</button -->
+        <button class="border-none btn" @click="$router.push(`/conf?from=${$route.path}`)">
+          <model-state class="text-3xl"></model-state>
+        </button>
         <div class="pr-5 text-lg cursor-pointer txt-lighter dark:txt-light" @click="user.toggleDarkMode()">
           <i-fa-solid:moon v-if="!user.isDarkMode.value"></i-fa-solid:moon>
           <i-fa-solid:sun v-else></i-fa-solid:sun>
@@ -48,6 +50,7 @@ import { SwTopbar, useTopbar } from "@snowind/header";
 import { user } from "@/state";
 import { useRouter } from 'vue-router';
 import { baseTitle } from "@/conf";
+import ModelState from '@/agent/modelconf/ModelState.vue';
 
 const isMenuVisible = ref(false);
 const router = useRouter()

@@ -10,13 +10,13 @@ const routes: Array<RouteRecordRaw> = [
       title: "Home"
     }
   },
-  /*{
-    path: "/page",
-    component: () => import("./views/PageView.vue"),
+  {
+    path: "/conf",
+    component: () => import("./views/ConfView.vue"),
     meta: {
-      title: "Page"
+      title: "Model conf"
     }
-  }*/
+  }
 ]
 
 const router = createRouter({

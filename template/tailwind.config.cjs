@@ -1,4 +1,5 @@
 const colors = require('tailwindcss/colors');
+const { addDynamicIconSelectors } = require('@iconify/tailwind');
 
 module.exports = {
   content: [
@@ -14,7 +15,8 @@ module.exports = {
     require('@tailwindcss/forms'),
     require('@snowind/plugin'),
     require('tailwindcss-semantic-colors'),
-    require('@tailwindcss/typography')
+    require('@tailwindcss/typography'),
+    addDynamicIconSelectors(),
   ],
   theme: {
     extend: {
