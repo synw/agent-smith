@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/brain",
-  "version": "0.0.11",
+  "version": "0.0.12",
   "description": "An api to create human friendly agents: the AI brain module",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {
@@ -13,7 +13,7 @@
     "@intrinsicai/gbnfgen": "^0.11.0",
     "@locallm/api": "^0.0.30",
     "nanostores": "^0.10.2",
-    "modprompt": "^0.6.1"
+    "modprompt": "^0.7.0"
   },
   "devDependencies": {
     "@locallm/types": "^0.0.15",

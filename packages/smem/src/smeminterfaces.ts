@@ -23,6 +23,7 @@ interface Smem {
     node: (name: string, schema: SmemNodeSchema, vectorSourceCol: string) => Promise<SmemNode>;
     nodeNames: () => Promise<string[]>;
     nodeFromSchema: (name: string, schema: Schema, vectorSourceCol: string) => Promise<SmemNode>;
+    nodeFromData: (name: string, data: Array<Record<string, unknown>>, vectorSourceCol: string) => Promise<SmemNode>;
     openTable: (name: string, sourceCol: string) => Promise<Table>;
     vector: (text: string) => Promise<number[]>;
     embed: (data: unknown[]) => Promise<number[][]>;

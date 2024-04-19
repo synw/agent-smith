@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/smem",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "An api to create human friendly agents: the semantic memory",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {

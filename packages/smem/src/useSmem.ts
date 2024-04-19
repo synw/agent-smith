@@ -41,7 +41,15 @@ const useSmem = (isVerbose = true): Smem => {
         schema: Schema,
         vectorSourceCol: string
     ): Promise<SmemNode> => {
-        return await _initNode(name, schema, vectorSourceCol)
+        return await _initNode(name, vectorSourceCol, schema)
+    }
+
+    const nodeFromData = async (
+        name: string,
+        data: Array<Record<string, unknown>>,
+        vectorSourceCol: string,
+    ): Promise<SmemNode> => {
+        return await _initNode(name, vectorSourceCol, undefined, data)
     }
 
     const node = async (
@@ -49,7 +57,7 @@ const useSmem = (isVerbose = true): Smem => {
         schema: SmemNodeSchema,
         vectorSourceCol: string
     ): Promise<SmemNode> => {
-        return await _initNode(name, _createSchema(schema), vectorSourceCol)
+        return await _initNode(name, vectorSourceCol, _createSchema(schema))
     }
 
     const nodeNames = async () => {
@@ -57,7 +65,7 @@ const useSmem = (isVerbose = true): Smem => {
         return db.tableNames()
     }
 
-    const openTable = async (name: string, sourceCol: string): Promise<Table> => {
+    const openTable = async (name: string): Promise<Table> => {
         _assertDbIsConnected("Open table");
         return await db.openTable(name);
     }
@@ -66,8 +74,9 @@ const useSmem = (isVerbose = true): Smem => {
 
     const _initNode = async (
         name: string,
-        schema: Schema,
-        vectorSourceCol: string
+        vectorSourceCol: string,
+        schema?: Schema,
+        data?: Array<Record<string, unknown>>,
     ): Promise<SmemNode> => {
         _assertDbIsConnected("Init node");
         if (isVerbose) {
@@ -83,10 +92,18 @@ const useSmem = (isVerbose = true): Smem => {
             tables[tbl.name] = t;
             return t
         }
+        let tbl: Table<unknown>;
         if (isVerbose) {
             console.log("Creating node")
         }
-        const tbl = await db.createTable({ name: name, schema: schema });
+        if (schema) {
+            tbl = await db.createTable({ name: name, schema: schema });
+        } else if (data) {
+            tbl = await db.createTable({ name: name, data: data });
+        } else {
+            throw new Error("Provide a schema or data to init a node")
+        }
+
         const t = useSnode(db, tbl, vectorSourceCol, vector, isVerbose);
         tables[name] = t;
         return t
@@ -133,6 +150,7 @@ const useSmem = (isVerbose = true): Smem => {
         node,
         nodeNames,
         nodeFromSchema,
+        nodeFromData,
         openTable,
         vector,
         embed,
