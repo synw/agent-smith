@@ -1,7 +1,5 @@
 #!/usr/bin/env node
-//import { useAgentSmith } from "@agent-smith/body";
-//import { useAgentBrain, useLmExpert } from "@agent-smith/brain";
-import { useAgentBrain } from "../packages/brain/src/brain.js";
+import { useAgentBrain } from "@agent-smith/brain";
 
 // run a local Koboldcpp/Llama.cpp/Ollama instance before running this example
 // set your template name below:
