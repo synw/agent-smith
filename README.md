@@ -91,15 +91,14 @@ const expert = useLmExpert({
     onToken: (t) => process.stdout.write(t),
 });
 const brain = useAgentBrain([expert]);
-const bob = useAgentSmith({
-    name: "Bob",
-    modules: [brain],
-});
 // auto discover if expert's inference servers are up
-await bob.brain.discover();
+await brain.discover();
 // run an inference query
 const _prompt = "list the planets of the solar sytem";
-await bob.think(_prompt, { temperature: 0.2 });
+await brain.think(_prompt, { 
+   temperature: 0.2, 
+   min_p: 0.05 
+});
 ```
 
 ## Libraries
@@ -107,5 +106,5 @@ await bob.think(_prompt, { temperature: 0.2 });
 Powered by:
 
 - [Nanostores](https://github.com/nanostores/nanostores) for the state management and reactive variables
-- [Locallm](https://github.com/synw/locallm) for the inference servers management
+- [Locallm](https://github.com/synw/locallm) for the inference api servers management
 - [Modprompt](https://github.com/synw/modprompt) for the prompt templates management
