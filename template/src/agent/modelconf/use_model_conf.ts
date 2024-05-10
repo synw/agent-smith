@@ -1,7 +1,7 @@
 import { ModelConf } from "@locallm/types";
 import { LmTemplate } from "modprompt";
 import { Ref, computed, reactive, ref } from "vue";
-import { useTemplateForModel } from "./tfm";
+import { useTemplateForModel } from "@agent-smith/tfm";
 import { AgentBrain } from "@agent-smith/brain";
 
 const useModelConf = (brain: AgentBrain) => {
