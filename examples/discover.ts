@@ -2,9 +2,10 @@
 import { useAgentBrain } from "@agent-smith/brain";
 
 // run a local Koboldcpp/Llama.cpp/Ollama instance before running this example
-// set your template name below:
+// node  --loader ts-node/esm discover.ts
 
 const templateName = "mistral";
+const model = "mistral:instruct"; // for Ollama
 const prompt = "Give me a short list of the planets names in the solar system";
 
 async function initAgent() {
@@ -14,6 +15,10 @@ async function initAgent() {
     console.log("Current expert:", brain.ex.name);
     brain.ex.setOnToken((t) => process.stdout.write(t));
     brain.ex.setTemplate(templateName);
+    // load model if relevant
+    if (brain.ex.lm.providerType == "ollama") {
+        await brain.ex.lm.loadModel(model, 8192)
+    }
     // prompt
     const params = { temperature: 0.2 };
     console.log(prompt, "\n\nAnswer:\n")

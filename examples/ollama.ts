@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 import { useAgentBrain, useLmExpert } from "@agent-smith/brain";
 
+// run a local Ollama instance before running this example
+// node  --loader ts-node/esm ollama.ts
+
 const model = "mistral:instruct";
 const ctx = 8192;
 const templateName = "mistral";
