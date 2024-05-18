@@ -32,7 +32,7 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
         return isOn
     }
 
-    const discoverExperts = async () => {
+    const discoverExperts = async (verbose = false) => {
         const ex = new Array<LmExpert>();
         const kobold = useLmExpert({
             name: "koboldcpp",
@@ -47,9 +47,9 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
             localLm: "ollama",
         });
         const [isKobUp, isLamUp, isOlamUp] = await Promise.all([
-            kobold.probe(true),
-            llamacpp.probe(true),
-            ollama.probe(true),
+            kobold.probe(verbose),
+            llamacpp.probe(verbose),
+            ollama.probe(verbose),
         ]);
         if (isKobUp) {
             ex.push(kobold)
