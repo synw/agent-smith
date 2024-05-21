@@ -5,9 +5,7 @@ import { useLmExpert } from './lm.js';
 
 const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
     let _experts = experts;
-    /*if (experts.length == 0) {
-        throw new Error("Provide a least one expert")
-    }*/
+    const _expertsForModels: Record<string, string> = {};
     let _dummyExpert = useLmExpert({
         name: "dummydefault",
         localLm: "koboldcpp",
@@ -19,6 +17,22 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
     const state = map({
         isOn: false,
     });
+
+    const initLocal = async (verbose = false): Promise<boolean> => {
+        const isUp = await discoverLocal(verbose);
+        if (isUp) {
+            await expertsForModelsInfo()
+        }
+        return isUp
+    }
+
+    const init = async (verbose = false): Promise<boolean> => {
+        const isUp = await discover(verbose);
+        if (isUp) {
+            await expertsForModelsInfo()
+        }
+        return isUp
+    }
 
     const discover = async (isVerbose = false): Promise<boolean> => {
         let isOn = false;
@@ -32,7 +46,7 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
         return isOn
     }
 
-    const discoverExperts = async (verbose = false) => {
+    const discoverLocal = async (verbose = false): Promise<boolean> => {
         const ex = new Array<LmExpert>();
         const kobold = useLmExpert({
             name: "koboldcpp",
@@ -52,13 +66,22 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
             ollama.probe(verbose),
         ]);
         if (isKobUp) {
-            ex.push(kobold)
+            const expertExists = _experts.find(x => x.name === "koboldcpp") !== undefined;
+            if (!expertExists) {
+                ex.push(kobold)
+            }
         }
         if (isLamUp) {
-            ex.push(llamacpp)
+            const expertExists = _experts.find(x => x.name === "llamacpp") !== undefined;
+            if (!expertExists) {
+                ex.push(llamacpp)
+            }
         }
         if (isOlamUp) {
-            ex.push(ollama)
+            const expertExists = _experts.find(x => x.name === "ollama") !== undefined;
+            if (!expertExists) {
+                ex.push(ollama)
+            }
         }
         if (ex.length > 0) {
             state.setKey("isOn", true);
@@ -72,6 +95,31 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
         }
         //console.log("DISCOV EX", _experts.map(e => e.name));
         //console.log("DISCOV CURRENT EX", _currentExpert.name)
+        return state.get().isOn
+    }
+
+    const expertsForModelsInfo = async () => {
+        experts.forEach(async (ex) => {
+            if (ex.state.get().isUp) {
+                if (ex.lm.providerType == "ollama") {
+                    await ex.lm.modelsInfo();
+                    ex.lm.models.forEach((m) => _expertsForModels[m.name] = ex.name);
+                } else if (ex.lm.providerType == "koboldcpp") {
+                    _expertsForModels[ex.lm.model.name.replace("koboldcpp/", "")] = ex.name;
+                } else {
+                    _expertsForModels[ex.lm.model.name] = ex.name;
+                }
+                //console.log(_expertsForModels);
+            }
+        });
+    }
+
+    const getExpertForModel = (model: string): string | null => {
+        let ex: string | null = null;
+        if (model in _expertsForModels) {
+            ex = _expertsForModels[model];
+        }
+        return ex
     }
 
     const think = async (
@@ -130,8 +178,15 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
         get experts() {
             return _experts
         },
+        get expertsForModels() {
+            return _expertsForModels
+        },
+        init,
+        initLocal,
         discover,
-        discoverExperts,
+        discoverLocal,
+        expertsForModelsInfo,
+        getExpertForModel,
         think,
         thinkx,
         abortThinking,

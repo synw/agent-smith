@@ -82,19 +82,41 @@ interface AgentBrainState {
 }
 
 /**
- * Represents an expert in the agent's brain.
+ * Represents a language model expert.
  * 
- * @property {Store<string>} stream - The stream of output from the expert.
+ * This interface provides the main functionality of a language model expert, which includes:
+ * - Initialization of the expert.
+ * - Discovery of the expert.
+ * - Thinking with the expert.
+ * - Aborting thinking with the expert.
+ * - Resetting the expert.
+ * 
  * @property {string} name - The name of the expert.
- * @property {string} description - The description of the expert.
- * @property {Lm} lm - The local language model.
- * @property {PromptTemplate} template - The prompt template.
- * @property {MapStore<AgentBrainExpertState>} state - The state of the expert.
- * @property {ProbeFunctionType} probe - The function to probe the expert.
- * @property {ThinkFunctionType} think - The function to think with the expert.
- * @property {() => Promise<void>} abortThinking - The function to abort thinking with the expert.
- * @property {(tpl: string | PromptTemplate) => void} setTemplate - The function to set the prompt template.
- * @property {(func: (t: string) => void) => void} setOnToken - The function to set the function to call when a token is generated.
+ * @property {string} model - The model of the expert.
+ * 
+ * @method init
+ * Initializes the expert.
+ * @param {boolean} [isVerbose] - Whether to enable verbose mode.
+ * @returns {Promise<boolean>} - Whether the initialization was successful.
+ * 
+ * @method discover
+ * Discovers the expert.
+ * @param {boolean} [isVerbose] - Whether to enable verbose mode.
+ * @returns {Promise<boolean>} - Whether the discovery was successful.
+ * 
+ * @method think
+ * Allows the expert to think with a given prompt, inference parameters, and options.
+ * @param {string} prompt - The prompt to think with.
+ * @param {InferenceParams} [inferenceParams] - The inference parameters.
+ * @param {LmThinkingOptionsSpec} [options] - The thinking options.
+ * @returns {Promise<InferenceResult>} - The result of the thinking.
+ * 
+ * @method abortThinking
+ * Aborts thinking with the expert.
+ * @returns {Promise<void>} - A promise that resolves when thinking is aborted.
+ * 
+ * @method reset
+ * Resets the expert to its initial state.
  */
 interface LmExpert {
     stream: Store<string>;
@@ -113,25 +135,88 @@ interface LmExpert {
 /**
  * Represents the agent's brain.
  * 
- * @property {Store<string>} stream - The stream of output from the brain.
- * @property {MapStore<AgentBrainState>} state - The state of the brain.
- * @property {LmExpert[]} experts - The experts in the brain.
- * @property {Readonly<LmExpert>} ex - The current expert.
- * @property {(isVerbose?: boolean) => Promise<boolean>} discover - The function to discover experts.
- * @property {() => Promise<void>} discoverExperts - The function to discover experts.
- * @property {ThinkFunctionType} think - The function to think with the brain.
- * @property {ThinkxFunctionType} thinkx - The function to think with a specific expert.
- * @property {() => Promise<void>} abortThinking - The function to abort thinking with the brain.
- * @property {(name: string) => LmExpert} expert - The function to get a specific expert.
- * @property {() => void} resetExperts - The function to reset the experts.
+ * This interface provides the main functionality of the agent's brain, which includes:
+ * - Initialization of the brain and its local experts.
+ * - Discovery of experts.
+ * - Streaming of output from the experts.
+ * - Thinking with the experts.
+ * - Aborting thinking with the experts.
+ * - Getting a specific expert.
+ * - Resetting the experts.
+ * 
+ *  @property {Store<string>} stream - The stream of output from the brain.
+ *  @property {MapStore<AgentBrainState>} state - The state of the brain.
+ *  @property {Readonly<LmExpert[]>} experts - The experts in the brain.
+ *  @property {Readonly<LmExpert>} ex - The current expert.
+ *  @property {Readonly<Record<string, string>>} expertsForModels - The mapping of models to experts.
+ * 
+ *  @method init
+ *  Initializes the brain and its local experts.
+ *  @param {boolean} [isVerbose] - Whether to enable verbose mode.
+ *  @returns {Promise<boolean>} - Whether the initialization was successful.
+ * 
+ *  @method initLocal
+ *  Initializes the local experts.
+ *  @param {boolean} [isVerbose] - Whether to enable verbose mode.
+ *  @returns {Promise<boolean>} - Whether the initialization was successful.
+ * 
+ *  @method discover
+ *  Discovers experts.
+ *  @param {boolean} [isVerbose] - Whether to enable verbose mode.
+ *  @returns {Promise<boolean>} - Whether the discovery was successful.
+ * 
+ *  @method discoverLocal
+ *  Discovers local experts.
+ *  @returns {Promise<boolean>} - Whether the discovery was successful.
+ * 
+ *  @method expertsForModelsInfo
+ *  Retrieves information about the mapping of models to experts.
+ *  @returns {Promise<void>} - A promise that resolves when the information is retrieved.
+ * 
+ *  @method getExpertForModel
+ *  Retrieves a specific expert for a given model.
+ *  @param {string} model - The name of the model.
+ *  @returns {string | null} - The name of the expert, or null if no expert is found.
+ * 
+ *  @method think
+ *  Allows the brain to think with a given prompt, inference parameters, and options.
+ *  @param {string} prompt - The prompt to think with.
+ *  @param {InferenceParams} [inferenceParams] - The inference parameters.
+ *  @param {LmThinkingOptionsSpec} [options] - The thinking options.
+ *  @returns {Promise<InferenceResult>} - The result of the thinking.
+ * 
+ *  @method thinkx
+ *  Allows a specific expert to think with a given prompt, inference parameters, and options.
+ *  @param {string} expertName - The name of the expert.
+ *  @param {string} prompt - The prompt to think with.
+ *  @param {InferenceParams} [inferenceParams] - The inference parameters.
+ *  @param {LmThinkingOptionsSpec} [options] - The thinking options.
+ *  @returns {Promise<InferenceResult>} - The result of the thinking.
+ * 
+ *  @method abortThinking
+ *  Aborts thinking with the current expert.
+ *  @returns {Promise<void>} - A promise that resolves when thinking is aborted.
+ * 
+ *  @method expert
+ *  Retrieves a specific expert by name.
+ *  @param {string} name - The name of the expert.
+ *  @returns {LmExpert} - The expert.
+ * 
+ *  @method resetExperts
+ *  Resets the experts to their initial state.
  */
 interface AgentBrain {
     stream: Store<string>,
     state: MapStore<AgentBrainState>;
-    experts: LmExpert[];
+    experts: Readonly<LmExpert[]>;
     ex: Readonly<LmExpert>;
+    expertsForModels: Readonly<Record<string, string>>;
+    init: (isVerbose?: boolean) => Promise<boolean>;
+    initLocal: (isVerbose?: boolean) => Promise<boolean>;
     discover: (isVerbose?: boolean) => Promise<boolean>;
-    discoverExperts: () => Promise<void>;
+    discoverLocal: () => Promise<boolean>;
+    expertsForModelsInfo: () => Promise<void>;
+    getExpertForModel: (model: string) => string | null;
     think: ThinkFunctionType;
     thinkx: ThinkxFunctionType;
     abortThinking: () => Promise<void>;
