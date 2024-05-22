@@ -138,9 +138,8 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
         if (!ex) {
             throw new Error(`Expert ${expertName} not found`)
         }
-        _currentExpert = ex;
-        stream = _currentExpert.stream;
-        return await _currentExpert.think(prompt, inferenceParams, options);
+        stream = ex.stream;
+        return await ex.think(prompt, inferenceParams, options);
     }
 
     const abortThinking = async () => {
@@ -156,6 +155,14 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
         return ex
     }
 
+    const setDefaultExpert = (ex: LmExpert | string) => {
+        if (typeof ex == "string") {
+            _currentExpert = expert(ex);
+        } else {
+            _currentExpert = ex;
+        }
+    }
+
     const resetExperts = () => {
         _experts = [];
         _currentExpert = _dummyExpert;
@@ -163,9 +170,10 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
 
     const _checkExpert = (_ex: LmExpert) => {
         if (_ex.name == "dummydefault") {
-            //console.warn("ERR EX", _experts.map(e => e.name));
-            //console.log("ERR CEX", _ex.name);
             throw new Error("No expert is configured")
+        }
+        if (!_ex.state.get().isUp) {
+            throw new Error(`Expert ${_ex.name} is down, can not abort`)
         }
     }
 
@@ -186,6 +194,7 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
         discover,
         discoverLocal,
         expertsForModelsInfo,
+        setDefaultExpert,
         getExpertForModel,
         think,
         thinkx,

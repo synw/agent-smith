@@ -216,6 +216,7 @@ interface AgentBrain {
     discover: (isVerbose?: boolean) => Promise<boolean>;
     discoverLocal: () => Promise<boolean>;
     expertsForModelsInfo: () => Promise<void>;
+    setDefaultExpert: (ex: LmExpert | string) => void;
     getExpertForModel: (model: string) => string | null;
     think: ThinkFunctionType;
     thinkx: ThinkxFunctionType;
