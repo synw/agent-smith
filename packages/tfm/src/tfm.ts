@@ -12,11 +12,11 @@ const useTemplateForModel = (): TemplateForModel => {
     const list = () => Object.keys(templates);
 
     const guess = (model: string): string => {
-        if (model.includes("deepseek")) {
-            return "deepseek"
-        }
         if (model.includes("hermes") || model.includes("dolphin")) {
             return "chatml"
+        }
+        if (model.includes("deepseek")) {
+            return "deepseek"
         }
         if (model.includes("mistral") || model.includes("mixtral")) {
             return "mistral"
@@ -24,10 +24,10 @@ const useTemplateForModel = (): TemplateForModel => {
         if (model.includes("phi2")) {
             return "phi"
         }
-        if (model.includes("phi3")) {
+        if (model.includes("phi3") || model.includes("phi-3")) {
             return "phi3"
         }
-        if (model.includes("llama3")) {
+        if (model.includes("llama3") || model.includes("llama-3")) {
             return "llama3"
         }
         if (model.includes("command-r")) {
