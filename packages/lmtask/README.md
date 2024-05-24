@@ -131,14 +131,6 @@ if (task) {
 }
 ```
 
-Based on the provided library code, it appears that the section can be improved to provide more information to developers. Here are some suggestions:
-
-1. **Add more descriptive comments**: The code is quite concise, but adding more descriptive comments can help developers understand the purpose and functionality of each method and property.
-2. **Provide examples**: Including examples of how to use each method and property can help developers understand how to implement them in their own code.
-3. **Document any constraints or assumptions**: If there are any constraints or assumptions that need to be considered when using these methods and properties, it would be helpful to document them.
-4. **Link to related documentation**: If there are other related documentation or resources that can provide more information, it would be helpful to link to them.
-5. **Consider adding a "Why" section**: Explaining the reasoning behind the design of these methods and properties can help developers understand the underlying principles and make more informed decisions.
-
 ## API Documentation
 
 ### `useLmTask(brain: AgentBrain) => { read: (taskPath: string) => LmTask }`
