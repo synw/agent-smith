@@ -8,55 +8,8 @@ Yaml defined language models tasks for Nodejs
 npm install @agent-smith/lmtask
 ```
 
-## Create a task
-
-**Task YAML File Structure**
-
-A task YAML file is a configuration file that defines a task for the AI model to perform. It consists of several key-value pairs that provide information about the task, such as the task name, description, template, and model parameters.
-
-**Parameters**
-
-Here are the parameters that can be included in a task YAML file:
-
-* **name**: The name of the task.
-* **description**: A brief description of the task.
-Here is the detailed `template` section:
-
-* **template**: The template for the task, which defines the format and structure of the output.
-  + **name**: The name of the template.
-  + **system**: A brief description of the task.
-  + **stop**: A list of stop words or phrases to halt predictions.
-      - **|-**: A separator indicating the start of the stop words or phrases.
-  + **assistant**: The starting text to complete after the assistant template tag.
-* **model**: The AI model to be used for the task.
-  + **name**: The name of the model.
-  + **ctx**: The context size of the model.
-* **inferParams**: The inference parameters for the model.
-  + **stream**: Indicates if results should be streamed progressively.
-  + **model**: The model configuration details for inference.
-  + **template**: The template to use, for the backends that support it.
-  + **max_tokens**: The number of predictions to return.
-  + **top_k**: Limits the result set to the top K results.
-  + **top_p**: Filters results based on cumulative probability.
-  + **min_p**: The minimum probability for a token to be considered, relative to the probability of the most likely token.
-  + **temperature**: Adjusts randomness in sampling; higher values mean more randomness.
-  + **repeat_penalty**: Adjusts penalty for repeated tokens.
-  + **tfs**: Set the tail free sampling value.
-  + **stop**: List of stop words or phrases to halt predictions.
-  + **grammar**: The gnbf grammar to use for grammar-based sampling.
-  + **image_data**: The base64 images data (for multimodal models).
-  + **extra**: Extra parameters to include in the payload.
-* **shots**: A list of examples or "shots" that the model can use to fine-tune its output.
-    - **user**: The user's input or prompt.
-        + **|-**: A separator indicating the start of the user's input.
-    - **assistant**: The expected output or response.
-        + **|-**: A separator indicating the start of the output.
-
-Note: The `shots` section provides examples of input and output pairs that the model can use to fine-tune its output. In this case, the model is tasked with fixing invalid JSON input and providing a corrected JSON output.
-
 **Example YAML File**
 
-Here is an example YAML file for a task:
 ```yaml
 name: fix_json
 description: Fix broken json
@@ -108,6 +61,52 @@ To write a YAML task, follow these steps:
 5. Provide examples of input and output pairs in the "shots" section.
 
 By following these steps, you can create a YAML task file that defines a task for the AI model to perform.
+
+## Create a task
+
+**Task YAML File Structure**
+
+A task YAML file is a configuration file that defines a task for the AI model to perform. It consists of several key-value pairs that provide information about the task, such as the task name, description, template, and model parameters.
+
+**Parameters**
+
+Here are the parameters that can be included in a task YAML file:
+
+* **name**: The name of the task.
+* **description**: A brief description of the task.
+Here is the detailed `template` section:
+
+* **template**: The template for the task, which defines the format and structure of the output.
+  + **name**: The name of the template.
+  + **system**: A brief description of the task.
+  + **stop**: A list of stop words or phrases to halt predictions.
+      - **|-**: A separator indicating the start of the stop words or phrases.
+  + **assistant**: The starting text to complete after the assistant template tag.
+* **model**: The AI model to be used for the task.
+  + **name**: The name of the model.
+  + **ctx**: The context size of the model.
+* **inferParams**: The inference parameters for the model.
+  + **stream**: Indicates if results should be streamed progressively.
+  + **model**: The model configuration details for inference.
+  + **template**: The template to use, for the backends that support it.
+  + **max_tokens**: The number of predictions to return.
+  + **top_k**: Limits the result set to the top K results.
+  + **top_p**: Filters results based on cumulative probability.
+  + **min_p**: The minimum probability for a token to be considered, relative to the probability of the most likely token.
+  + **temperature**: Adjusts randomness in sampling; higher values mean more randomness.
+  + **repeat_penalty**: Adjusts penalty for repeated tokens.
+  + **tfs**: Set the tail free sampling value.
+  + **stop**: List of stop words or phrases to halt predictions.
+  + **grammar**: The gnbf grammar to use for grammar-based sampling.
+  + **image_data**: The base64 images data (for multimodal models).
+  + **extra**: Extra parameters to include in the payload.
+* **shots**: A list of examples or "shots" that the model can use to fine-tune its output.
+    - **user**: The user's input or prompt.
+        + **|-**: A separator indicating the start of the user's input.
+    - **assistant**: The expected output or response.
+        + **|-**: A separator indicating the start of the output.
+
+Note: The `shots` section provides examples of input and output pairs that the model can use to fine-tune its output. In this case, the model is tasked with fixing invalid JSON input and providing a corrected JSON output.
 
 ## Usage
 
@@ -194,7 +193,6 @@ const task = new LmTask({
     stop: ['stop', 'halt'],
     assistant: 'This is an assistant message'
   },
-  variables: ['var1', 'var2'],
   inferParams: {
     // inference parameters
   },
