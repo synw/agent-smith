@@ -10,7 +10,7 @@ const prompt = "Give me a short list of the planets names in the solar system";
 
 async function initAgent() {
     const brain = useAgentBrain();
-    await brain.discoverExperts();
+    await brain.discoverLocal();
     console.log("Experts:", brain.experts.map(e => e.name));
     console.log("Current expert:", brain.ex.name);
     brain.ex.setOnToken((t) => process.stdout.write(t));
