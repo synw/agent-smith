@@ -30,7 +30,7 @@ function readTasksDir(dir: string): Array<string> {
  * If no task is found at the provided path, an empty `LmTask` object will be returned.
  *
  * @example
- * const {task, found} = readTask('/path/to/your/task');
+ * const {task, found} = readTask('/path/to/your/task.yml');
  * if (found) {
  *   console.log('Task Found:', task);
  * } else {
