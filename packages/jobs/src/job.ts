@@ -6,7 +6,7 @@ import { useAgentTask } from './task.js';
 
 const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
     const _name = initParams.name;
-    const _tasks: Record<string, AgentTask> = {};
+    let _tasks: Record<string, AgentTask> = {};
     initParams.tasks.forEach((ts) => {
         const _t = useAgentTask(ts);
         _tasks[_t.id] = _t
@@ -23,8 +23,11 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
     });
 
     const _runTask = async (t: AgentTask, params: any, autoComplete: boolean): Promise<Record<string, any>> => {
-        //console.log("JOB RUN TASK", t.id, autoComplete, params);
-        //console.log("JOB running task:", t.name);
+        /*try {
+            console.log("JOB RUN TASK", t.id, autoComplete, params[0].substring(0, 100));
+        } catch (e) {
+            console.log("JOB RUN TASK", t.id, autoComplete, params);
+        }*/
         try {
             let res: Record<string, any> = {};
             if (autoComplete) {
@@ -191,7 +194,8 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
         name: _name,
         title: _title,
         state,
-        tasks: _tasks,
+        get tasks() { return _tasks },
+        set tasks(t: Record<string, AgentTask>) { _tasks = t },
         tmem,
         runTask,
         continueTask,
