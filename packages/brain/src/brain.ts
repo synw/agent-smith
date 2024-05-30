@@ -94,12 +94,14 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
             state.setKey("isOn", false);
         }
         //console.log("DISCOV EX", _experts.map(e => e.name));
+        experts.push(..._experts);
         //console.log("DISCOV CURRENT EX", _currentExpert.name)
         return state.get().isOn
     }
 
     const expertsForModelsInfo = async () => {
-        experts.forEach(async (ex) => {
+        //console.log("Experts:", experts)
+        for (const ex of experts) {
             if (ex.state.get().isUp) {
                 if (ex.lm.providerType == "ollama") {
                     await ex.lm.modelsInfo();
@@ -109,9 +111,9 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
                 } else {
                     _expertsForModels[ex.lm.model.name] = ex.name;
                 }
-                //console.log(_expertsForModels);
             }
-        });
+        }
+        //console.log("MODELS", _expertsForModels);
     }
 
     const getExpertForModel = (model: string): string | null => {
