@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 import { useAgentSmith } from "@agent-smith/body";
 import { useAgentBrain, useLmExpert } from "@agent-smith/brain";
+//import { useAgentBrain } from "../packages/brain/dist/brain.js";
+//import { useLmExpert } from "../packages/brain/dist/lm.js";
 
 // run a local Koboldcpp instance before running this example
 // set your template name below:
@@ -42,7 +44,7 @@ async function main() {
         params,
     );
     console.log("\n\nDone");
-    //console.log(res);
+    console.log(res.stats);
 
 }
 
