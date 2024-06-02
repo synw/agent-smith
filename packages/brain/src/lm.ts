@@ -2,7 +2,6 @@ import { map, atom } from 'nanostores';
 import { PromptTemplate } from "modprompt";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import { Lm } from "@locallm/api";
-//import { Lm } from "../../../../locallm/packages/api/src/api";
 import { InferenceParams, InferenceResult } from "@locallm/types";
 import { defaultLocalBackends } from "./const.js";
 import { LmExpert, LmExpertSpec, LmThinkingOptionsSpec } from "./interfaces.js";
@@ -10,6 +9,7 @@ import { LmExpert, LmExpertSpec, LmThinkingOptionsSpec } from "./interfaces.js";
 const useLmExpert = (spec: LmExpertSpec): LmExpert => {
     let _lm: Lm;
     let onToken = spec?.onToken;
+    let onStartEmit = spec?.onStartEmit;
     if (spec.localLm) {
         switch (spec.localLm) {
             case "koboldcpp":
@@ -18,6 +18,7 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
                     serverUrl: defaultLocalBackends[1].serverUrl,
                     apiKey: defaultLocalBackends[1].apiKey,
                     onToken: (t: string) => { stream.set(stream.get() + t) },
+                    onStartEmit: onStartEmit,
                 });
                 break;
             case "llamacpp":
@@ -26,6 +27,7 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
                     serverUrl: defaultLocalBackends[0].serverUrl,
                     apiKey: defaultLocalBackends[0].apiKey,
                     onToken: (t: string) => { stream.set(stream.get() + t) },
+                    onStartEmit: onStartEmit,
                 });
                 break;
             case "ollama":
@@ -34,6 +36,7 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
                     serverUrl: defaultLocalBackends[2].serverUrl,
                     apiKey: defaultLocalBackends[2].apiKey,
                     onToken: (t: string) => { stream.set(stream.get() + t) },
+                    onStartEmit: onStartEmit,
                 });
                 break;
             default:
@@ -48,6 +51,7 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
             serverUrl: spec.backend.serverUrl,
             apiKey: spec.backend.apiKey,
             onToken: (t: string) => { stream.set(stream.get() + t) },
+            onStartEmit: onStartEmit,
         });
     } else {
         throw new Error("Provide a backend or a localLm parameter to initialize the expert");
@@ -106,6 +110,9 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
         }
         _lm.onStartEmit = (s) => {
             state.setKey("isStreaming", true);
+            if (onStartEmit) {
+                onStartEmit();
+            }
             //console.log("Start emit", s);
         };
         _lm.onError = (msg: string) => {
@@ -152,7 +159,6 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
                 }
             }
         }
-
         const respData = await _lm.infer(p, completionParams, _parseJson, parseJsonFunc);
         state.setKey("isStreaming", false);
         state.setKey("isThinking", false);
@@ -241,6 +247,10 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
         onToken = func
     }
 
+    const setOnStartEmit = (func: () => void) => {
+        onStartEmit = func
+    }
+
     return {
         stream: stream,
         name: name,
@@ -253,6 +263,7 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
         abortThinking,
         setTemplate,
         setOnToken,
+        setOnStartEmit,
     }
 }
 

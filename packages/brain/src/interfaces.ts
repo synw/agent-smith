@@ -30,6 +30,7 @@ interface LmBackendSpec {
  * @property {LmProviderType} [localLm] - The local language model.
  * @property {LmBackendSpec} [backend] - The backend configuration.
  * @property {(t: string) => void} [onToken] - The function to call when a token is generated.
+ * @property {() => void} [onStartEmit] - The function to call just before the first token is generated.
  */
 interface LmExpertSpec {
     name: string;
@@ -39,6 +40,7 @@ interface LmExpertSpec {
     localLm?: LmProviderType;
     backend?: LmBackendSpec;
     onToken?: (t: string) => void;
+    onStartEmit?: () => void;
 }
 
 /**
@@ -130,6 +132,7 @@ interface LmExpert {
     abortThinking: () => Promise<void>;
     setTemplate: (tpl: string | PromptTemplate) => void;
     setOnToken: (func: (t: string) => void) => void;
+    setOnStartEmit: (func: () => void) => void;
 }
 
 /**
