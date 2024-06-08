@@ -1,0 +1,41 @@
+{
+  "name": "@agent-smith/cli",
+  "description": "Agent Smith: terminal client for agents",
+  "version": "0.0.1",
+  "scripts": {
+    "build": "tsc -p .",
+    "cli": "node --loader ts-node/esm bin/index.ts",
+    "watch": "tsc -p . -w"
+  },
+  "dependencies": {
+    "@agent-smith/brain": "^0.0.18",
+    "@agent-smith/jobs": "^0.0.6",
+    "@agent-smith/lmtask": "^0.0.5",
+    "@inquirer/prompts": "^5.0.5",
+    "@inquirer/select": "^2.3.5",
+    "@vue/reactivity": "^3.4.27",
+    "better-sqlite3": "^11.0.0",
+    "clipboardy": "^4.0.0",
+    "log-update": "^6.0.0",
+    "marked": "^12.0.2",
+    "marked-terminal": "^7.0.0",
+    "modprompt": "^0.7.2",
+    "python-shell": "^5.0.0",
+    "yaml": "^2.4.3"
+  },
+  "devDependencies": {
+    "@agent-smith/tmem-jobs": "^0.0.3",
+    "@commander-js/extra-typings": "^12.1.0",
+    "@locallm/types": "^0.0.17",
+    "@types/better-sqlite3": "^7.6.10",
+    "@types/node": "^20.13.0",
+    "ts-node": "^10.9.2",
+    "tslib": "2.6.2",
+    "typescript": "^5.4.5"
+  },
+  "type": "module",
+  "preferGlobal": true,
+  "bin": {
+    "lm": "./dist/index.js"
+  }
+}

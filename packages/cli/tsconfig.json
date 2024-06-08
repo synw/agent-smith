@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "esnext",
+    "moduleResolution": "Node",
+    "strict": true,
+    "jsx": "preserve",
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "noImplicitAny": false,
+    "allowSyntheticDefaultImports": true,
+    "allowJs": true,
+    "outDir": "dist",
+    "lib": [
+      "esnext"
+    ],
+    "types": [
+      "node"
+    ],
+    "baseUrl": ".",
+  },
+  "include": [
+    "bin/**/*.ts"
+  ]
+}
