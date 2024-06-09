@@ -21,16 +21,16 @@
     "marked-terminal": "^7.0.0",
     "modprompt": "^0.7.2",
     "python-shell": "^5.0.0",
-    "yaml": "^2.4.3"
+    "yaml": "^2.4.5"
   },
   "devDependencies": {
     "@agent-smith/tmem-jobs": "^0.0.3",
     "@commander-js/extra-typings": "^12.1.0",
     "@locallm/types": "^0.0.17",
     "@types/better-sqlite3": "^7.6.10",
-    "@types/node": "^20.13.0",
+    "@types/node": "^20.14.2",
     "ts-node": "^10.9.2",
-    "tslib": "2.6.2",
+    "tslib": "2.6.3",
     "typescript": "^5.4.5"
   },
   "type": "module",
