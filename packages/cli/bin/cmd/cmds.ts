@@ -1,9 +1,9 @@
 import { Command } from "@commander-js/extra-typings";
 import { Cmd, FeatureType } from "../interfaces.js";
-import { lastCmd, runMode } from "../state/state.js";
+import { formatMode, lastCmd, runMode } from "../state/state.js";
 import { modes } from "./options/modes.js";
 import { executeTaskCmd } from "./lib/execute_task.js";
-import { initAgent, taskReader } from "../agent.js";
+import { clearOutput, initAgent, marked, taskReader } from "../agent.js";
 import { executeActionCmd } from "./lib/execute_action.js";
 import { executeJobCmd, readJob } from "./lib/execute_job.js";
 import { readCmds } from "./sys/read_cmds.js";
@@ -166,6 +166,12 @@ async function _executeTaskCmd(args: Array<string> = [], options: any): Promise<
     const { ok, data, error } = await executeTaskCmd(args);
     if (!ok) {
         console.warn(error)
+    }
+    clearOutput();
+    if (formatMode.value == "markdown") {
+        console.log((marked.parse(data) as string).trim())
+    } else {
+        console.log(data)
     }
     return data
     //console.log("ENDRES", t);

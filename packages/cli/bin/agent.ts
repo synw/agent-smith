@@ -26,6 +26,10 @@ async function initExperts() {
     });
 }
 
+function clearOutput() {
+    logUpdate.clear();
+}
+
 async function initAgent(mode: RunMode) {
     if (!brain.state.get().isOn) {
         brain.resetExperts();
@@ -48,4 +52,4 @@ async function initAgent(mode: RunMode) {
     }
 }
 
-export { brain, initAgent, modelsForExpert, taskReader };
+export { brain, initAgent, clearOutput, marked, modelsForExpert, taskReader };
