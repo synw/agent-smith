@@ -1,4 +1,4 @@
-import { FeatureType } from "../interfaces.js";
+import { FeatureExtension, FeatureSpec, FeatureType } from "../interfaces.js";
 import { db } from "./db.js";
 
 function readFeaturePaths(): Array<string> {
@@ -40,15 +40,22 @@ function readFeatures(): Record<FeatureType, Record<string, string>> {
     return feats
 }
 
-function readFeature(name: string, type: FeatureType): { found: boolean, data: Record<string, string> } {
+function readFeature(name: string, type: FeatureType): { found: boolean, feature: FeatureSpec } {
     const q = `SELECT id, path, ext FROM ${type} WHERE name='${name}'`;
     //console.log(q);
     const stmt = db.prepare(q);
     const result = stmt.get() as Record<string, string>;
     if (result?.id) {
-        return { found: true, data: result }
+        return {
+            found: true,
+            feature: {
+                name: result.name,
+                path: result.path,
+                ext: result.ext as FeatureExtension,
+            }
+        }
     }
-    return { found: false, data: {} }
+    return { found: false, feature: {} as FeatureSpec }
 }
 
 

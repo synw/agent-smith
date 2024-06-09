@@ -4,10 +4,10 @@ interface Cmd {
     args?: string;
 }
 
-interface Feature {
+interface FeatureSpec {
     name: string;
     path: string;
-    ext: TaskExtension | JobExtension | CmdExtension | ActionExtension;
+    ext: FeatureExtension;
 }
 
 interface Features {
@@ -30,10 +30,11 @@ type RunMode = "cli" | "cmd";
 type FormatMode = "text" | "markdown";
 
 type FeatureType = "task" | "job" | "action" | "cmd";
-type ActionExtension = "js" | "python" | "system";
+type ActionExtension = "js" | "py" | "yml";
 type TaskExtension = "yml";
 type JobExtension = "yml";
 type CmdExtension = "js";
+type FeatureExtension = TaskExtension | JobExtension | CmdExtension | ActionExtension;
 
 export {
     Cmd,
@@ -46,7 +47,8 @@ export {
     TaskExtension,
     JobExtension,
     CmdExtension,
-    Feature,
+    FeatureSpec,
     Features,
     ConfigFile,
+    FeatureExtension,
 }

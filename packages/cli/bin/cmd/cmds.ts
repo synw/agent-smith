@@ -8,7 +8,7 @@ import { executeActionCmd } from "./lib/execute_action.js";
 import { executeJobCmd, readJob } from "./lib/execute_job.js";
 import { readCmds } from "./sys/read_cmds.js";
 import { processOutput, setOptions } from "./lib/utils.js";
-import { getFeaturePath, readFeaturesDirs } from "../state/features.js";
+import { getFeatureSpec, readFeaturesDirs } from "../state/features.js";
 import { readFeatures } from "../db/read.js";
 import { insertFeaturesPathIfNotExists, insertPluginIfNotExists, updateFeatures } from "../db/write.js";
 import { readConf } from "./sys/read_conf.js";
@@ -192,11 +192,11 @@ async function _readTaskCmd(args: Array<string> = [], options: any): Promise<any
         console.warn("Provide a task name");
         return
     }
-    const { found, fpath } = getFeaturePath(args[0], "task" as FeatureType);
+    const { found, path } = getFeatureSpec(args[0], "task" as FeatureType);
     if (!found) {
         console.warn(`FeatureType ${args[0]} not found`)
     }
-    const t = taskReader.read(fpath);
+    const t = taskReader.read(path);
     console.log(t);
 }
 

@@ -2,7 +2,7 @@ import YAML from 'yaml';
 import { default as fs } from "fs";
 import { AgentJob, AgentTask, useAgentJob } from "@agent-smith/jobs";
 import { brain, taskReader } from '../../agent.js';
-import { getFeaturePath } from '../../state/features.js';
+import { getFeatureSpec } from '../../state/features.js';
 import { FeatureType } from '../../interfaces.js';
 
 async function _createJob(name: string): Promise<{ found: boolean, job: AgentJob }> {
@@ -19,18 +19,18 @@ async function _createJob(name: string): Promise<{ found: boolean, job: AgentJob
     //console.log("Create job. Feats:", feats);
     for (const t of data.tasks) {
         if (t.type == "action") {
-            const { found, fpath } = getFeaturePath(t.name, "action" as FeatureType);
+            const { found, path } = getFeatureSpec(t.name, "action" as FeatureType);
             if (!found) {
                 return { found: false, job: {} as AgentJob };
             }
-            const { action } = await import(fpath);
+            const { action } = await import(path);
             tasks[t.name] = action;
         } else {
-            const { found, fpath } = getFeaturePath(t.name, "task" as FeatureType);
+            const { found, path } = getFeatureSpec(t.name, "task" as FeatureType);
             if (!found) {
                 return { found: false, job: {} as AgentJob };
             }
-            const at = taskReader.read(fpath);
+            const at = taskReader.read(path);
             tasks[t.name] = at
         }
     }
@@ -58,14 +58,14 @@ async function executeJobCmd(name: string, args: Array<any> = []) {
 
 async function readJob(name: string): Promise<{ found: boolean, data: Record<string, any> }> {
     //const fp = path.join(jobsPath, `${name}.yml`);
-    const { found, fpath } = getFeaturePath(name, "job" as FeatureType);
+    const { found, path } = getFeatureSpec(name, "job" as FeatureType);
     if (!found) {
         return { found: false, data: {} };
     }
-    if (!fs.existsSync(fpath)) {
+    if (!fs.existsSync(path)) {
         return { data: {} as AgentJob, found: false }
     }
-    const file = fs.readFileSync(fpath, 'utf8');
+    const file = fs.readFileSync(path, 'utf8');
     const data = YAML.parse(file);
     return { data: data, found: true }
 }

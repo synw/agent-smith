@@ -1,6 +1,6 @@
 import { default as path } from "path";
 import { readFeaturesDir } from "../cmd/sys/read_features.js";
-import { FeatureType, Features } from "../interfaces.js";
+import { FeatureExtension, FeatureType, Features } from "../interfaces.js";
 import { readFeature } from "../db/read.js";
 
 function readFeaturesDirs(featuresPaths: Array<string>): Features {
@@ -21,17 +21,17 @@ function readFeaturesDirs(featuresPaths: Array<string>): Features {
     return feats
 }
 
-function getFeaturePath(name: string, type: FeatureType): { found: boolean, fpath: string } {
+function getFeatureSpec(name: string, type: FeatureType): { found: boolean, path: string, ext: FeatureExtension } {
     //console.log("GFP", name, type);
-    const { found, data } = readFeature(name, type);
+    const { found, feature } = readFeature(name, type);
     if (!found) {
-        return { found: false, fpath: "" }
+        return { found: false, path: "", ext: "yml" }
     }
-    const f = path.join(data.path, name + "." + data.ext);
-    return { found: true, fpath: f }
+    const f = path.join(feature.path, name + "." + feature.ext);
+    return { found: true, path: f, ext: feature.ext }
 }
 
 export {
     readFeaturesDirs,
-    getFeaturePath,
+    getFeatureSpec,
 }
