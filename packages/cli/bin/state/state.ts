@@ -1,4 +1,5 @@
 import { reactive, ref } from "@vue/reactivity";
+import { PythonShell } from 'python-shell';
 import { InputMode, RunMode, FormatMode } from "../interfaces.js";
 import { checkConf, confDir } from "../conf.js";
 import { initDb, dbPopulateDefaults } from "../db/db.js";
@@ -6,6 +7,8 @@ import { readFeaturePaths } from "../db/read.js";
 import { updateFeatures } from "../db/write.js";
 import { readFeaturesDirs } from "./features.js";
 import { readPluginsPaths } from "./plugins.js";
+
+let pyShell: PythonShell;
 
 const inputMode = ref<InputMode>("manual");
 const runMode = ref<RunMode>("cmd");
@@ -53,4 +56,5 @@ export {
     promptfile,
     initState,
     initFeatures,
+    pyShell,
 }

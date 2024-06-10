@@ -1,4 +1,4 @@
-import { Feature, FeatureType, Features } from "../interfaces.js";
+import { FeatureSpec, FeatureType, Features } from "../interfaces.js";
 import { db } from "./db.js";
 
 const defaultFilepaths = {
@@ -34,7 +34,7 @@ function insertPluginIfNotExists(n: string): boolean {
     return false
 }
 
-function upsertAndCleanFeatures(feats: Array<Feature>, type: FeatureType) {
+function upsertAndCleanFeatures(feats: Array<FeatureSpec>, type: FeatureType) {
     const stmt = db.prepare(`SELECT name FROM ${type}`);
     const rows = stmt.all() as Array<Record<string, any>>;
     const names = rows.map(row => row.name);
