@@ -1,6 +1,6 @@
 import { Command } from "@commander-js/extra-typings";
 import { Cmd, FeatureType } from "../interfaces.js";
-import { formatMode, lastCmd, runMode } from "../state/state.js";
+import { formatMode, initFeatures, lastCmd, runMode } from "../state/state.js";
 import { modes } from "./options/modes.js";
 import { executeTaskCmd } from "./lib/execute_task.js";
 import { clearOutput, initAgent, marked, taskReader } from "../agent.js";
@@ -52,7 +52,7 @@ let cmds: Record<string, Cmd> = {
         description: "execute an action",
         args: "arguments: \n-action (required): the task name\n-args: other arguments if any for the action"
     },
-    addfeat: {
+    /*addfeat: {
         cmd: _addFeaturesPathCmd,
         description: "add a features path",
         args: "arguments: \n-path (required): the absolute path to the features directory"
@@ -61,11 +61,15 @@ let cmds: Record<string, Cmd> = {
         cmd: _addPluginCmd,
         description: "add a plugin",
         args: "arguments: \n-name (required): the name of the plugin npm package"
-    },
+    },*/
     conf: {
         cmd: _updateConfCmd,
         description: "process config file",
         args: "arguments: \n-path (required): the path to the config.yml file"
+    },
+    update: {
+        cmd: _updateFeaturesCmd,
+        description: "reparse the features dirs and update the list",
     }
 }
 
@@ -87,7 +91,7 @@ async function initCmds() {
     //console.log("CMDS", cmds);
 }
 
-async function _addFeaturesPathCmd(args: Array<string> = [], options: any): Promise<any> {
+/*async function _addFeaturesPathCmd(args: Array<string> = [], options: any): Promise<any> {
     if (args.length == 0) {
         console.warn("Provide a path");
         return
@@ -111,6 +115,11 @@ async function _addPluginCmd(args: Array<string> = [], options: any): Promise<an
         return
     }
     console.log("Plugin inserted");
+}*/
+
+async function _updateFeaturesCmd(args: Array<string> = [], options: any): Promise<any> {
+    await initFeatures();
+    console.log("Features updated")
 }
 
 async function _updateConfCmd(args: Array<string> = [], options: any): Promise<any> {
@@ -144,7 +153,7 @@ async function _updateConfCmd(args: Array<string> = [], options: any): Promise<a
             }
         })
     }
-    const feats = readFeaturesDirs(p)
+    const feats = readFeaturesDirs(p);
     //console.log("CMD FEATS", feats);
     updateFeatures(feats);
 }

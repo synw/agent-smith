@@ -1,7 +1,7 @@
 import { reactive, ref } from "@vue/reactivity";
 import { PythonShell } from 'python-shell';
 import { InputMode, RunMode, FormatMode } from "../interfaces.js";
-import { checkConf, confDir } from "../conf.js";
+import { createConfDirIfNotExists, confDir } from "../conf.js";
 import { initDb, dbPopulateDefaults } from "../db/db.js";
 import { readFeaturePaths } from "../db/read.js";
 import { updateFeatures } from "../db/write.js";
@@ -21,12 +21,12 @@ const lastCmd = reactive<{ name: string, args: Array<string> }>({
 });
 
 function initConf() {
-    const exists = checkConf();
+    const exists = createConfDirIfNotExists();
     if (!exists) {
-        console.log("Created configuration file in", confDir);
+        console.log("Created configuration directory", confDir);
         initDb();
         dbPopulateDefaults();
-        initConf();
+        //initConf();
     } else {
         initDb();
     }
@@ -44,7 +44,7 @@ async function initFeatures() {
 
 async function initState() {
     initConf();
-    await initFeatures()
+    //await initFeatures()
     //console.log("State ready, available features:", readFeatures())
 }
 

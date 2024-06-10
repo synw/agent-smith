@@ -3,7 +3,8 @@
   "description": "Agent Smith: terminal client for agents",
   "version": "0.0.1",
   "scripts": {
-    "build": "tsc -p .",
+    "buildrl": "rm -rf dist/* && rollup -c",
+    "build": "rm -rf dist/* && tsc",
     "cli": "node --loader ts-node/esm bin/index.ts",
     "watch": "tsc -p . -w"
   },
@@ -28,6 +29,7 @@
     "@commander-js/extra-typings": "^12.1.0",
     "@locallm/types": "^0.0.17",
     "@types/better-sqlite3": "^7.6.10",
+    "@types/marked-terminal": "^6.1.1",
     "@types/node": "^20.14.2",
     "ts-node": "^10.9.2",
     "tslib": "2.6.3",
@@ -35,6 +37,7 @@
   },
   "type": "module",
   "preferGlobal": true,
+  "main": "./dist/main.js",
   "bin": {
     "lm": "./dist/index.js"
   }

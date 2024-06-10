@@ -1,12 +1,12 @@
 import { useAgentBrain } from "@agent-smith/brain";
 import { useLmTask } from "@agent-smith/lmtask";
 import logUpdate from 'log-update';
-import { marked } from 'marked';
+import { MarkedExtension, marked } from 'marked';
 import { markedTerminal } from 'marked-terminal';
 import { RunMode } from "./interfaces.js";
 import { formatMode } from "./state/state.js";
 
-marked.use(markedTerminal());
+marked.use(markedTerminal() as MarkedExtension);
 
 let brain = useAgentBrain();
 const modelsForExpert: Record<string, string> = {};

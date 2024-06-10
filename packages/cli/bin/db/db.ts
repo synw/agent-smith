@@ -1,11 +1,11 @@
 import DatabaseConstructor, { Database } from "better-sqlite3";
 import { schemas } from "./schemas.js";
-import { checkConf, dbPath } from "../conf.js";
+import { createConfDirIfNotExists, dbPath } from "../conf.js";
 import { insertDefaultFilepaths } from "./write.js";
 
 
-checkConf()
-let db = new DatabaseConstructor(dbPath,
+createConfDirIfNotExists();
+let db: Database = new DatabaseConstructor(dbPath,
     //{ verbose: console.log }
 );
 

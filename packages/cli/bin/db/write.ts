@@ -3,6 +3,7 @@ import { db } from "./db.js";
 
 const defaultFilepaths = {
     prompt: "",
+    override: "",
 }
 
 function insertDefaultFilepaths() {

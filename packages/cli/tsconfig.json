@@ -1,25 +1,40 @@
 {
   "compilerOptions": {
-    "target": "esnext",
-    "module": "esnext",
-    "moduleResolution": "Node",
+    "target": "ES2020",
+    "module": "ES2020",
+    "moduleResolution": "node",
     "strict": true,
-    "jsx": "preserve",
+    "sourceMap": false,
     "resolveJsonModule": true,
     "esModuleInterop": true,
-    "noImplicitAny": false,
+    "declaration": true,
     "allowSyntheticDefaultImports": true,
+    "outDir": "./dist",
     "allowJs": true,
-    "outDir": "dist",
-    "lib": [
-      "esnext"
-    ],
+    "removeComments": true,
+    "strictFunctionTypes": true,
     "types": [
       "node"
     ],
+    "lib": [
+      "ES2020"
+    ],
     "baseUrl": ".",
+    "paths": {
+      "bin/*": [
+        "bin/*"
+      ],
+      "*": [
+        "node_modules/*"
+      ]
+    }
   },
   "include": [
     "bin/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "test"
   ]
 }

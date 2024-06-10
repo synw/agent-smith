@@ -5,7 +5,7 @@ import { default as fs } from "fs";
 const confDir = path.join(process.env.HOME, ".config/agent-smith/cli");
 const dbPath = path.join(confDir, "config.db");
 
-function checkConf(): boolean {
+function createConfDirIfNotExists(): boolean {
     //console.log(confDir, fs.existsSync(confDir));
     if (!fs.existsSync(confDir)) {
         fs.mkdirSync(confDir, { recursive: true });
@@ -17,5 +17,5 @@ function checkConf(): boolean {
 export {
     confDir,
     dbPath,
-    checkConf,
+    createConfDirIfNotExists,
 }
