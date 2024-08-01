@@ -1,0 +1,165 @@
+name: commit_msg
+description: Create a commit message from a git diff
+prompt: |-
+      Create a commit message from this git diff:
+
+      ```
+      {prompt}
+      ```
+
+      Important: output only the commit message. Think carefully before you write your commit message.
+
+template: 
+    name: llama3
+    system: |- 
+        You are an AI programmer assistant. Your task is to write a commit message from a git diff.
+
+        Instructions for the commit messages writing:
+      
+        - Write short commit messages
+        - The first line should be a short and descriptive summary of the changes
+        - Remember to mention the files that were changed, and what was changed
+        - Focus on what was changed and why, rather than how it was changed
+        - Use bullet points for multiple changes
+        - Tone: concise and professional
+        - If there are no changes or the input is blank then return a blank string      
+        
+        This is the output format that we need:
+
+        ```
+        A descriptive summary of the main purpose of the changes
+        
+        - A short description of the first change 
+        - A short description of the second change in file2
+        ```
+    stop:
+        - |-
+            ```
+    assistant: |-
+            Here is the commit message:
+            
+            ```plain
+shots:
+    - user: |-
+        Create a commit message from this git diff:
+
+        ```
+        diff --git a/packages/types/package.json b/packages/types/package.json
+        index 1746d59..17f6b04 100644
+        --- a/packages/types/package.json
+        +++ b/packages/types/package.json
+        @@ -1,6 +1,6 @@
+        {
+        "name": "@locallm/types",
+        -  "version": "0.0.16",
+        +  "version": "0.0.17",
+        "description": "Shared data types for the LocalLm api",
+        "repository": "https://github.com/synw/locallm",
+        "scripts": {
+        @@ -8,17 +8,17 @@
+            "docs": "typedoc --entryPointStrategy expand"
+        },
+        "devDependencies": {
+        -    "restmix": "^0.4.0",
+        +    "restmix": "^0.5.0",
+            "@rollup/plugin-node-resolve": "^15.2.3",
+        -    "@rollup/plugin-typescript": "^11.1.5",
+        -    "@types/node": "^20.10.3",
+        -    "rollup": "^4.6.1",
+        -    "ts-node": "^10.9.1",
+        +    "@rollup/plugin-typescript": "^11.1.6",
+        +    "@types/node": "^20.13.0",
+        +    "rollup": "^4.18.0",
+        +    "ts-node": "^10.9.2",
+            "tslib": "^2.6.2",
+        -    "typedoc": "^0.25.4",
+        -    "typedoc-plugin-markdown": "^3.17.1",
+        +    "typedoc": "^0.25.13",
+        +    "typedoc-plugin-markdown": "^4.0.3",
+            "typedoc-plugin-rename-defaults": "^0.7.0",
+        -    "typescript": "^5.3.2"
+        +    "typescript": "^5.4.5"
+        },
+        "type": "module",
+        "files": [
+        diff --git a/packages/types/src/interfaces.ts b/packages/types/src/interfaces.ts
+        index 68d96ca..a234712 100644
+        --- a/packages/types/src/interfaces.ts
+        +++ b/packages/types/src/interfaces.ts
+        @@ -58,17 +58,44 @@ interface InferenceParams {
+        extra?: Record<string, any>;
+        }
+        
+        +/**
+        + * Represents the statistics of an inference.
+        + *
+        + * @interface InferenceStats
+        + * @property {number} ingestionTime - The time taken to ingest the input data in milliseconds.
+        + * @property {number} inferenceTime - The time taken to perform the inference in milliseconds.
+        + * @property {number} totalTime - The total time taken to perform the inference in milliseconds.
+        + * @property {number} ingestionTimeSeconds - The time taken to ingest the input data in seconds.
+        + * @property {number} inferenceTimeSeconds - The time taken to perform the inference in seconds.
+        + * @property {number} totalTimeSeconds - The total time taken to perform the inference in seconds.
+        + * @property {number} totalTokens - The total number of tokens processed.
+        + * @property {number} tokensPerSecond - The number of tokens processed per second.
+        + */
+        +interface InferenceStats {
+        +  ingestionTime: number;
+        +  inferenceTime: number;
+        +  totalTime: number;
+        +  ingestionTimeSeconds: number;
+        +  inferenceTimeSeconds: number;
+        +  totalTimeSeconds: number;
+        +  totalTokens: number;
+        +  tokensPerSecond: number;
+        +}
+        +
+        /**
+        * Represents the result returned after an inference request.
+        *
+        * @interface InferenceResult
+        * @property {string} text - The textual representation of the generated inference.
+        - * @property {Record<string, any> | undefined} stats - Additional statistics or metadata related to the inference.
+        + * @property {Record<string, any> | undefined} data - Additional data related to the inference.
+        + * @property {InferenceStats} stats - Additional statistics or metadata related to the inference.
+        + * @property {Record<string, any>} serverStats - Additional server-related statistics.
+        */
+        interface InferenceResult {
+        text: string;
+        data: Record<string, any>;
+        -  stats: Record<string, any>;
+        +  stats: InferenceStats;
+        +  serverStats: Record<string, any>;
+        }
+        
+        /**
+        @@ -204,6 +231,7 @@ export {
+        ModelConf,
+        InferenceParams,
+        InferenceResult,
+        +  InferenceStats,
+        LmProvider,
+        LmProviderType,
+        LmParams,
+        ```
+      assistant: |-
+        Here is the commit message:
+            
+            ```plain
+            Update documentation and interfaces for LocalLm types
+
+            - Update packages versions in packages.json
+            - Add `InferenceStats` and update `InferenceResult` in interfaces.ts
+            ```
+    - user: |-
+        Create a commit message from this git diff:
+
+        ```
+        ```
+      assistant: ""
+model:
+    name: Meta-Llama-3.1-8B-Instruct-Q8_0
+    ctx: 8192
+inferParams:
+    min_p: 0.05
+    temperature: 0.2

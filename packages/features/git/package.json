@@ -1,0 +1,24 @@
+{
+  "name": "@agent-smith/feat-git",
+  "version": "0.0.1",
+  "description": "Git features for Agent Smith",
+  "main": "index.js",
+  "scripts": {
+    "buildrl": "rm -rf dist/* && rollup -c",
+    "build": "rm -rf dist/* && tsc"
+  },
+  "dependencies": {
+    "@agent-smith/cli": "file:/home/ggg/dev/js/agent-smith/packages/cli",
+    "@agent-smith/jobs": "^0.0.5",
+    "@inquirer/select": "^2.3.4"
+  },
+  "devDependencies": {
+    "@commander-js/extra-typings": "^12.1.0",
+    "@locallm/types": "^0.0.16",
+    "@types/node": "^20.12.12",
+    "ts-node": "^10.9.2",
+    "tslib": "2.6.2",
+    "typescript": "^5.4.5"
+  },
+  "type": "module"
+}
