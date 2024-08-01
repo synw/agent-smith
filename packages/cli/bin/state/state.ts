@@ -36,9 +36,9 @@ async function initFeatures() {
     const fp = readFeaturePaths();
     const pp = await readPluginsPaths();
     const p = [...fp, ...pp];
-    //console.log("STATE FPATHS", p);
+    console.log("STATE FPATHS", p);
     const feats = readFeaturesDirs(p);
-    //console.log("STATE FEATS", feats);
+    console.log("STATE FEATS", feats);
     updateFeatures(feats);
 }
 

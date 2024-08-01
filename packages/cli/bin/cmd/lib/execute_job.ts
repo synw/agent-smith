@@ -10,6 +10,7 @@ async function _createJob(name: string): Promise<{ found: boolean, job: AgentJob
     if (!found) {
         throw new Error(`Job ${name} not found`)
     }
+    //console.log("READJ", data);
     const job = useAgentJob({
         name: name,
         title: data.title,
@@ -30,7 +31,7 @@ async function _createJob(name: string): Promise<{ found: boolean, job: AgentJob
             if (!found) {
                 return { found: false, job: {} as AgentJob };
             }
-            const at = taskReader.read(path);
+            const at = taskReader.init(path);
             tasks[t.name] = at
         }
     }
@@ -67,6 +68,7 @@ async function readJob(name: string): Promise<{ found: boolean, data: Record<str
     }
     const file = fs.readFileSync(path, 'utf8');
     const data = YAML.parse(file);
+    data.name = name;
     return { data: data, found: true }
 }
 

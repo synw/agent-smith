@@ -86,12 +86,20 @@ const useLmTask = (brain: AgentBrain): {
         if (!found) {
             throw new Error(`Task ${taskPath} not found`)
         }
-        //console.log("TASK", task);        
+        //console.log("TASK", task);
         const ts: AgentTaskSpec = {
             id: task.name,
             title: task.description,
-            run: async (params: { prompt: string }) => {
-                //console.log("Running", task.name, "params:", params);
+            run: async (params: Record<string, string>) => {
+                if (!params?.prompt) {
+                    throw new Error("Please provide a prompt parameter");
+                }
+                let prompt = params.prompt;
+                const tvars = params;
+                delete tvars.prompt;
+                //console.log("Running task", task.name, ", params:", params);
+                //console.log("Prompt", prompt);
+                //console.log("Vars", tvars);
                 const expert = brain.getExpertForModel(task.model.name);
                 if (!expert) {
                     return { error: `Expert for model ${task.model.name} not found` }
@@ -101,6 +109,8 @@ const useLmTask = (brain: AgentBrain): {
                     if (ex.lm.model.name != task.model.name) {
                         await ex.lm.loadModel(task.model.name);
                     }
+                } else if (ex.lm.model.name != task.model.name) {
+                    throw new Error(`The ${task.model.name} model is not loaded on server (currently ${ex.lm.model.name})`)
                 }
                 const tpl = new PromptTemplate(task.template.name);
                 if (task.template?.stop) {
@@ -117,9 +127,13 @@ const useLmTask = (brain: AgentBrain): {
                     task.shots.forEach((s) => tpl.addShot(s.user, s.assistant));
                 }
                 //const _p = task.prompt.replace("{prompt}", args[0]);
+                for (const [k, v] of Object.entries(tvars)) {
+                    task.prompt = task.prompt.replace(`{${k}}`, v);
+                }
                 tpl.replacePrompt(task.prompt)
-                const pr = tpl.prompt(params.prompt);
+                const pr = tpl.prompt(prompt);
                 //console.log("PR", pr);
+                //console.log("PARAMS", task.inferParams)
                 const res = await ex.think(pr, { ...task.inferParams, stream: true });
                 return res
             },

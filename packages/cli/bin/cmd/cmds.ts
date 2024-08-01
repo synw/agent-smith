@@ -132,6 +132,7 @@ async function _updateConfCmd(args: Array<string> = [], options: any): Promise<a
         console.warn(`Config file ${args[0]} not found`);
     }
     const p = new Array<string>();
+    console.log(data)
     if ("features" in data) {
         p.push(...data.features);
         const fts = new Array<string>();
@@ -168,6 +169,7 @@ async function _readJobCmd(args: Array<string> = [], options: any): Promise<any>
 }
 
 async function _executeTaskCmd(args: Array<string> = [], options: any): Promise<any> {
+    //console.log("ETA", args);
     if (args.length == 0) {
         console.warn("Provide a task name");
         return

@@ -11,7 +11,7 @@
   "dependencies": {
     "@agent-smith/brain": "^0.0.18",
     "@agent-smith/jobs": "^0.0.6",
-    "@agent-smith/lmtask": "^0.0.5",
+    "@agent-smith/lmtask": "^0.0.6",
     "@inquirer/prompts": "^5.0.5",
     "@inquirer/select": "^2.3.5",
     "@vue/reactivity": "^3.4.27",
@@ -20,7 +20,7 @@
     "log-update": "^6.0.0",
     "marked": "^12.0.2",
     "marked-terminal": "^7.0.0",
-    "modprompt": "^0.7.2",
+    "modprompt": "^0.7.5",
     "python-shell": "^5.0.0",
     "yaml": "^2.4.5"
   },
@@ -38,7 +38,13 @@
   "type": "module",
   "preferGlobal": true,
   "main": "./dist/main.js",
+  "exports": {
+    ".": {
+      "import": "./dist/main.js"
+    }
+  },
   "bin": {
     "lm": "./dist/index.js"
-  }
+  },
+  "license": "MIT"
 }

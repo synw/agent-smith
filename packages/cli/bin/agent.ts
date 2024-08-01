@@ -1,5 +1,6 @@
 import { useAgentBrain } from "@agent-smith/brain";
 import { useLmTask } from "@agent-smith/lmtask";
+//import { useLmTask } from "../../lmtask/src/lmtask.js";
 import logUpdate from 'log-update';
 import { MarkedExtension, marked } from 'marked';
 import { markedTerminal } from 'marked-terminal';
