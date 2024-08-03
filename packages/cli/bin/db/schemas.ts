@@ -11,7 +11,8 @@ const featurespaths = `CREATE TABLE IF NOT EXISTS featurespath (
 
 const plugins = `CREATE TABLE IF NOT EXISTS plugin (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL
+    name TEXT UNIQUE NOT NULL,
+    path TEXT NOT NULL
 );`;
 
 const tasks = `CREATE TABLE IF NOT EXISTS task (

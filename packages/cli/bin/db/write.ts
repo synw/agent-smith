@@ -24,14 +24,14 @@ function insertFeaturesPathIfNotExists(path: string): boolean {
     return false
 }
 
-function insertPluginIfNotExists(n: string): boolean {
+function insertPluginIfNotExists(n: string, p: string): boolean {
     const stmt1 = db.prepare("SELECT * FROM plugin WHERE name = ?");
     const result = stmt1.get(n) as Record<string, any>;
     if (result?.id) {
         return true;
     }
-    const stmt = db.prepare("INSERT INTO plugin (name) VALUES (?)");
-    stmt.run(n);
+    const stmt = db.prepare("INSERT INTO plugin (name, path) VALUES (?,?)");
+    stmt.run(n, p);
     return false
 }
 

@@ -26,6 +26,7 @@ interface ConfigFile {
 type CmdExecutor = (args: Array<string>, options: any) => Promise<any>;
 
 type InputMode = "manual" | "promptfile" | "clipboard";
+type OutputMode = "txt" | "clipboard";
 type RunMode = "cli" | "cmd";
 type FormatMode = "text" | "markdown";
 
@@ -40,6 +41,7 @@ export {
     Cmd,
     CmdExecutor,
     InputMode,
+    OutputMode,
     RunMode,
     FormatMode,
     FeatureType,

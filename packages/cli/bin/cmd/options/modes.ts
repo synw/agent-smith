@@ -1,41 +1,48 @@
 import { Cmd } from "../../interfaces.js";
-import { formatMode, inputMode, runMode } from "../../state/state.js";
+import { formatMode, inputMode, outputMode, runMode } from "../../state/state.js";
 
 const modes: Record<string, Cmd> = {
-    "-f": {
+    "-if": {
         cmd: async () => {
             inputMode.value = "promptfile";
-            if (runMode.value == "cli") { console.log("Prompt file inputMode on") }
+            if (runMode.value == "cli") { console.log("Prompt file input mode is on") }
         },
-        description: "use promptfile inputMode",
+        description: "use promptfile input mode",
     },
-    "-c": {
+    "-ic": {
         cmd: async () => {
             inputMode.value = "clipboard";
-            if (runMode.value == "cli") { console.log("Clipboard inputMode on") }
+            if (runMode.value == "cli") { console.log("Clipboard input mode is on") }
         },
-        description: "use clipboard inputMode"
+        description: "use clipboard input mode"
     },
-    "-m": {
+    "-im": {
         cmd: async () => {
             inputMode.value = "manual";
             if (runMode.value == "cli") { console.log("Manual inputMode") }
         },
-        description: "use manual inputMode (default)"
+        description: "use manual input mode (default)"
     },
-    "-md": {
+    "-oc": {
+        cmd: async () => {
+            outputMode.value = "clipboard";
+            if (runMode.value == "cli") { console.log("Clipboard output mode is on") }
+        },
+        description: "use clipboard output mode"
+    },
+    "-omd": {
         cmd: async () => {
             formatMode.value = "markdown";
             if (runMode.value == "cli") { console.log("Markdown output mode") }
         },
-        description: "use manual markdown output (default)"
+        description: "use markdown output (default)"
     },
-    "-txt": {
+    "-otxt": {
         cmd: async () => {
             formatMode.value = "text";
             if (runMode.value == "cli") { console.log("Text output mode") }
         },
-        description: "use manual text output "
+        description: "use text output "
     },
 };
 

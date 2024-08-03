@@ -1,5 +1,5 @@
 import { default as fs } from "fs";
-import { promptfile } from "../../state/state.js";
+import { outputMode, promptfile } from "../../state/state.js";
 import { inputMode, runMode } from "../../state/state.js";
 import { readClipboard, writeToClipboard } from "../sys/clipboard.js";
 import { modes } from "../options/modes.js";
@@ -31,7 +31,7 @@ function readPromptFile(): string {
 async function processOutput(res: string) {
     //console.log("MODE", inputMode.value);
     //console.log("OUTPUT", res);
-    if (inputMode.value == "clipboard") {
+    if (outputMode.value == "clipboard") {
         //console.log("Writing to kb", res)
         await writeToClipboard(res);
     }

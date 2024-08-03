@@ -1,6 +1,6 @@
 import { reactive, ref } from "@vue/reactivity";
 import { PythonShell } from 'python-shell';
-import { InputMode, RunMode, FormatMode } from "../interfaces.js";
+import { InputMode, RunMode, FormatMode, OutputMode } from "../interfaces.js";
 import { createConfDirIfNotExists, confDir } from "../conf.js";
 import { initDb, dbPopulateDefaults } from "../db/db.js";
 import { readFeaturePaths } from "../db/read.js";
@@ -11,6 +11,7 @@ import { readPluginsPaths } from "./plugins.js";
 let pyShell: PythonShell;
 
 const inputMode = ref<InputMode>("manual");
+const outputMode = ref<OutputMode>("txt");
 const runMode = ref<RunMode>("cmd");
 const formatMode = ref<FormatMode>("markdown");
 const promptfile = ref("");
@@ -36,9 +37,9 @@ async function initFeatures() {
     const fp = readFeaturePaths();
     const pp = await readPluginsPaths();
     const p = [...fp, ...pp];
-    console.log("STATE FPATHS", p);
+    //console.log("STATE FPATHS", p);
     const feats = readFeaturesDirs(p);
-    console.log("STATE FEATS", feats);
+    //console.log("STATE FEATS", feats);
     updateFeatures(feats);
 }
 
@@ -50,6 +51,7 @@ async function initState() {
 
 export {
     inputMode,
+    outputMode,
     runMode,
     formatMode,
     lastCmd,

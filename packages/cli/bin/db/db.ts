@@ -1,7 +1,7 @@
 import DatabaseConstructor, { Database } from "better-sqlite3";
 import { schemas } from "./schemas.js";
 import { createConfDirIfNotExists, dbPath } from "../conf.js";
-import { insertDefaultFilepaths } from "./write.js";
+//import { insertDefaultFilepaths } from "./write.js";
 
 
 createConfDirIfNotExists();
@@ -19,7 +19,7 @@ function initDb(isVerbose = false) {
 }
 
 function dbPopulateDefaults() {
-    insertDefaultFilepaths()
+    //insertDefaultFilepaths()
 }
 
 export {

@@ -11,12 +11,12 @@ function readFeaturePaths(): Array<string> {
     return f
 }
 
-function readPluginNames(): Array<string> {
-    const stmt = db.prepare("SELECT name FROM plugin");
+function readPlugins(): Array<Record<string, string>> {
+    const stmt = db.prepare("SELECT name, path FROM plugin");
     const data = stmt.all() as Array<Record<string, any>>;
-    let f = new Array<string>();
+    let f = new Array<Record<string, string>>();
     data.forEach((row) => {
-        f.push(row.name)
+        f.push({ name: row.name, path: row.path })
     });
     return f
 }
@@ -59,4 +59,4 @@ function readFeature(name: string, type: FeatureType): { found: boolean, feature
 }
 
 
-export { readFeatures, readFeaturePaths, readFeature, readPluginNames }
+export { readFeatures, readFeaturePaths, readFeature, readPlugins }

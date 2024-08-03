@@ -12,7 +12,7 @@ import { getFeatureSpec, readFeaturesDirs } from "../state/features.js";
 import { readFeatures } from "../db/read.js";
 import { insertFeaturesPathIfNotExists, insertPluginIfNotExists, updateFeatures } from "../db/write.js";
 import { readConf } from "./sys/read_conf.js";
-import { readPluginsPaths } from "../state/plugins.js";
+import { buildPluginsPaths } from "../state/plugins.js";
 
 let cmds: Record<string, Cmd> = {
     q: {
@@ -37,17 +37,17 @@ let cmds: Record<string, Cmd> = {
         description: "read a job",
         args: "arguments: \n-job (required): the job name"
     },
-    et: {
+    t: {
         cmd: _executeTaskCmd,
         description: "execute a task",
         args: "arguments: \n-task (required): the task name\n-args: prompt and other arguments if any for the task"
     },
-    ej: {
+    j: {
         cmd: _executeJobCmd,
         description: "execute a job",
         args: "arguments: \n-job (required): the job name\n-args: arguments if any for the job"
     },
-    ac: {
+    a: {
         cmd: executeActionCmd,
         description: "execute an action",
         args: "arguments: \n-action (required): the task name\n-args: other arguments if any for the action"
@@ -132,7 +132,7 @@ async function _updateConfCmd(args: Array<string> = [], options: any): Promise<a
         console.warn(`Config file ${args[0]} not found`);
     }
     const p = new Array<string>();
-    console.log(data)
+    //console.log(data)
     if ("features" in data) {
         p.push(...data.features);
         const fts = new Array<string>();
@@ -144,15 +144,11 @@ async function _updateConfCmd(args: Array<string> = [], options: any): Promise<a
         });
     }
     if ("plugins" in data) {
-        const pp = await readPluginsPaths(data.plugins);
-        p.push(...pp);
-        const fts = new Array<string>();
-        pp.forEach((f) => {
-            if (!fts.includes(f)) {
-                insertPluginIfNotExists(f);
-                fts.push(f)
-            }
-        })
+        const plugins = await buildPluginsPaths(data.plugins);
+        plugins.forEach((_pl) => {
+            p.push(_pl.path);
+            insertPluginIfNotExists(_pl.name, _pl.path);
+        });
     }
     const feats = readFeaturesDirs(p);
     //console.log("CMD FEATS", feats);

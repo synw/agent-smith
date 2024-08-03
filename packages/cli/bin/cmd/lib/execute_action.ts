@@ -32,7 +32,7 @@ function _pythonAction(path: string): AgentTask {
                 pyShell,
                 "python3",
                 path,
-                [args],
+                args,
             )
             return { data: out[0], error: "", ok: true }
         }
