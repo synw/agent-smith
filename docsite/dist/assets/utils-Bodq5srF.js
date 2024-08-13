@@ -1,1 +1,0 @@
-import{z as a,k as s}from"./index-oQ1hFXLf.js";async function o(){const e=await a.discover();s.state.setKey("component","AgentBaseText"),console.log("Is up",e),s.show(),e?s.talk("✅ My brain is up, I'm ready to answer queries",3):s.talk('⭕ <span class="txt-danger">My brain is down</span>: please check if your local Koboldcpp server is running!',5)}export{o as discover};
