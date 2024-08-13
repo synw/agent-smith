@@ -93,7 +93,15 @@ Sorry no: this library favours local first or private remote inference servers
 
 ## Example
 
-Quick Nodejs example:
+### Terminal client
+
+Generate a commit message in a git repository (using the `@agent-smith/feat-cli` plugin):
+
+```bash
+lm commit .
+```
+
+### Nodejs
 
 ```ts
 const expert = useLmExpert({
