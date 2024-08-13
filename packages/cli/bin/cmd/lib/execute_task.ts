@@ -1,9 +1,11 @@
-import { taskReader } from "../../agent.js";
+import { initAgent, taskReader } from "../../agent.js";
 import logUpdate from "log-update";
 import { getFeatureSpec } from "../../state/features.js";
 import { FeatureType } from "../../interfaces.js";
+import { runMode } from "../../state/state.js";
 
 async function executeTaskCmd(args: Array<string> = [], options: any = {}): Promise<any> {
+    await initAgent(runMode.value);
     const name = args.shift()!;
     //console.log("Task Args", args);
     const { found, path } = getFeatureSpec(name, "task" as FeatureType);

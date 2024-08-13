@@ -20,8 +20,8 @@ let cmds: Record<string, Cmd> = {
         description: "exit the cli"
     },
     ping: {
-        cmd: async () => await initAgent(runMode.value),
-        description: "Ping inference servers",
+        cmd: async () => pingCmd,
+        description: "ping inference servers",
     },
     lt: {
         cmd: _listTasksCmd,
@@ -226,6 +226,15 @@ async function runCmd(cmdName: string, args: Array<string> = []) {
     lastCmd.args = args;
 }
 
+async function pingCmd(args: Array<string> = [], options: any): Promise<boolean> {
+    let _isVerbose = false;
+    if (args.length > 0) {
+        _isVerbose = args[0] == "verbose"
+    }
+    const isUp = await initAgent(runMode.value, _isVerbose);
+    return isUp
+}
+
 async function buildCmds(): Promise<Command> {
     const program = new Command();
     for (const [name, spec] of Object.entries(cmds)) {
@@ -263,4 +272,4 @@ async function parseCmd() {
     await program.parseAsync();
 }
 
-export { initCmds, runCmd, buildCmds, parseCmd }
+export { initCmds, runCmd, buildCmds, parseCmd, pingCmd }

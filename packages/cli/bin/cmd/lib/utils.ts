@@ -28,12 +28,21 @@ function readPromptFile(): string {
     return res
 }
 
-async function processOutput(res: string) {
+async function processOutput(res: any) {
+    let data = "";
+    if (typeof res == "object") {
+        if (!res?.data) {
+            throw new Error(`No data in res: ${res}`);
+        }
+        data = res.data;
+    } else {
+        data = res;
+    }
     //console.log("MODE", inputMode.value);
-    //console.log("OUTPUT", res);
+    //console.log("OUTPUT", typeof res, res);
     if (outputMode.value == "clipboard") {
         //console.log("Writing to kb", res)
-        await writeToClipboard(res);
+        await writeToClipboard(data);
     }
 }
 

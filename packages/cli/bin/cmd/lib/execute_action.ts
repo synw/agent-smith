@@ -66,7 +66,7 @@ async function executeActionCmd(args: Array<string> = [], options: any = {}, qui
     if (!quiet) {
         console.log(res.data);
     }
-    await processOutput(res.data);
+    //await processOutput(res.data);
     return { ok: true, data: res.data, error: "" }
 }
 

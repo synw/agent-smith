@@ -31,26 +31,25 @@ function clearOutput() {
     logUpdate.clear();
 }
 
-async function initAgent(mode: RunMode) {
+async function initAgent(mode: RunMode, isVerbose = false): Promise<boolean> {
     if (!brain.state.get().isOn) {
         brain.resetExperts();
         await brain.discoverLocal();
         await initExperts();
         await brain.expertsForModelsInfo();
-        //console.log("Models:", brain.expertsForModels);
     }
-    //console.log("Experts:", brain.experts);
-    if (!brain.state.get().isOn) {
-        console.log("❌ No experts found for inference");
-        /*if (mode == "cmd") {
-            exit(0)
-        }*/
+    const brainUp = brain.state.get().isOn;
+    if (isVerbose) {
+        if (!brainUp) {
+            console.log("❌ No experts found for inference");
+        }
+        else {
+            brain.experts.forEach((ex) => {
+                console.log(`✅ Expert ${ex.name} is up`)
+            })
+        }
     }
-    if (mode == "cli") {
-        brain.experts.forEach((ex) => {
-            console.log(`✅ Expert ${ex.name} is up`)
-        })
-    }
+    return brainUp
 }
 
 export { brain, initAgent, clearOutput, marked, modelsForExpert, taskReader };
