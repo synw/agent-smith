@@ -24,6 +24,7 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
         }
     })
     logUpdate("Ingesting prompt ...");
+    //console.log("Vars", vars);
     const data = await task.run({ prompt: pr, ...vars }) as Record<string, any>;
     if (data?.error) {
         return { ok: false, data: {}, error: `Error executing task: ${data.error}` }

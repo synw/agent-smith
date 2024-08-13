@@ -11,7 +11,7 @@
   "dependencies": {
     "@agent-smith/brain": "^0.0.18",
     "@agent-smith/jobs": "^0.0.6",
-    "@agent-smith/lmtask": "^0.0.7",
+    "@agent-smith/lmtask": "^0.0.9",
     "@inquirer/prompts": "^5.3.8",
     "@inquirer/select": "^2.4.7",
     "@vue/reactivity": "^3.4.36",

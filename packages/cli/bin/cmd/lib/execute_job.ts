@@ -1,5 +1,5 @@
 import YAML from 'yaml';
-import { default as fs, read } from "fs";
+import { default as fs } from "fs";
 import { AgentJob, AgentTask, useAgentJob } from "@agent-smith/jobs";
 import { brain, taskReader } from '../../agent.js';
 import { getFeatureSpec } from '../../state/features.js';
