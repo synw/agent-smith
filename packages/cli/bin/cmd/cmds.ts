@@ -20,7 +20,7 @@ let cmds: Record<string, Cmd> = {
         description: "exit the cli"
     },
     ping: {
-        cmd: async () => pingCmd,
+        cmd: async () => pingCmd(["verbose"], undefined),
         description: "ping inference servers",
     },
     lt: {
@@ -202,9 +202,10 @@ async function _readTaskCmd(args: Array<string> = [], options: any): Promise<any
     const { found, path } = getFeatureSpec(args[0], "task" as FeatureType);
     if (!found) {
         console.warn(`FeatureType ${args[0]} not found`)
+        return
     }
-    const t = taskReader.read(path);
-    console.log(t);
+    const r = taskReader.read(path);
+    console.log(r.task);
 }
 
 async function _listTasksCmd(args: Array<string> = [], options: any): Promise<any> {

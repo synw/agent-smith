@@ -7,7 +7,12 @@ import { FeatureType } from '../../interfaces.js';
 
 async function executeJobCmd(name: string, args: Array<any> = []) {
     const { job, found } = await _dispatchReadJob(name);
-    //console.log("JOB", job);
+    //console.log("F", found);
+    if (!found) {
+        console.log(`Job ${name} not found`);
+        return ""
+    }
+    //console.log("JOB", job.tasks);
     await job.start();
     let params = args;
     let res: Record<string, any> = {};

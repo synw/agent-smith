@@ -11,7 +11,7 @@ async function main() {
     }
     await initState();
     await initCmds();
-    //await initAgent(runMode.value);
+    await initAgent(runMode.value);
     switch (runMode.value) {
         case "cli":
             await query()
