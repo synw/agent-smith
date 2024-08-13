@@ -32,6 +32,8 @@ An api to create local first human friendly agents in the browser or Nodejs
     - [Config](https://synw.github.io/agent-smith/jobs/config)
     - [State management](https://synw.github.io/agent-smith/jobs/state_management)
     - [Memory](https://synw.github.io/agent-smith/jobs/memory)
+ - [Lm task](https://synw.github.io/agent-smith/lm_task)
+    - [Readme](https://synw.github.io/agent-smith/lm_task/readme)
  - [Transient memory](https://synw.github.io/agent-smith/transient_memory)
     - [Get started](https://synw.github.io/agent-smith/transient_memory/get_started)
     - [Usage](https://synw.github.io/agent-smith/transient_memory/usage)
@@ -41,6 +43,13 @@ An api to create local first human friendly agents in the browser or Nodejs
     - [Initialize](https://synw.github.io/agent-smith/semantic_memory/initialize)
     - [Write operations](https://synw.github.io/agent-smith/semantic_memory/write_operations)
     - [Read operations](https://synw.github.io/agent-smith/semantic_memory/read_operations)
+ - [Terminal client](https://synw.github.io/agent-smith/terminal_client)
+    - [Install](https://synw.github.io/agent-smith/terminal_client/install)
+    - [Overview](https://synw.github.io/agent-smith/terminal_client/overview)
+    - [Config](https://synw.github.io/agent-smith/terminal_client/config)
+    - [Commands](https://synw.github.io/agent-smith/terminal_client/commands)
+    - [Options](https://synw.github.io/agent-smith/terminal_client/options)
+    - [Plugins](https://synw.github.io/agent-smith/terminal_client/plugins)
  - [Examples](https://synw.github.io/agent-smith/examples)
     - [Data viz](https://synw.github.io/agent-smith/examples/data_viz)
 
@@ -69,6 +78,7 @@ An agent is an anthropomorphic representation of a bot. It has these basic habil
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/smem)](https://www.npmjs.com/package/@agent-smith/smem) | [@agent-smith/smem](https://github.com/synw/agent-smith/tree/main/packages/smem) | Semantic memory | :white_check_mark: | :x:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/tfm)](https://www.npmjs.com/package/@agent-smith/tfm) | [@agent-smith/tfm](https://github.com/synw/agent-smith/tree/main/packages/tfm) | Templates for models | :x: | :white_check_mark:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/lmtask)](https://www.npmjs.com/package/@agent-smith/lmtask) | [@agent-smith/lmtask](https://github.com/synw/agent-smith/tree/main/packages/lmtask) | Yaml model task | :white_check_mark: | :x:
+| [![pub package](https://img.shields.io/npm/v/@agent-smith/cli)](https://www.npmjs.com/package/@agent-smith/cli) | [@agent-smith/cli](https://github.com/synw/agent-smith/tree/main/packages/cli) | Terminal client | :white_check_mark: | :x:
 
 ## FAQ
 
