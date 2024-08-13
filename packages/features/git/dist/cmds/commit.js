@@ -1,6 +1,6 @@
 import { writeFileSync } from "fs";
 import select from '@inquirer/select';
-import { execute, executeJobCmd, writeToClipboard } from "@agent-smith/cli";
+import { execute, executeJobCmd, writeToClipboard, pingCmd } from "@agent-smith/cli";
 
 const choices = [
     {
@@ -31,6 +31,10 @@ const choices = [
 ];
 
 async function runCmd(args = [], options) {
+    const isUp = await pingCmd();
+    if (!isUp) {
+        throw new Error("No inference server found, canceling")
+    }
     console.log("Generating a commit message ...");
     const res = await executeJobCmd("git_commit", args);
     const final = res.text.replace("```", "").trim();
