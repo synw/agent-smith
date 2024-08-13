@@ -22,7 +22,7 @@ async function initLm(isTrying: Ref<boolean> | null = null) {
         isTrying.value = true;
     }
     await brain.resetExperts();
-    await brain.discoverExperts();
+    await brain.discoverLocal();
     console.log("Experts:", brain.experts);
     if (isTrying) {
         isTrying.value = false;

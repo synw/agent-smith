@@ -24,13 +24,17 @@ import css from 'highlight.js/lib/languages/css';
 //import bash from 'highlight.js/lib/languages/bash';
 import typescript from 'highlight.js/lib/languages/typescript';
 import xml from 'highlight.js/lib/languages/xml';
-//import json from 'highlight.js/lib/languages/json';
+import bash from 'highlight.js/lib/languages/bash';
+import yaml from 'highlight.js/lib/languages/yaml';
+import javascript from 'highlight.js/lib/languages/javascript';
 hljs.registerLanguage('python', python);
 hljs.registerLanguage('typescript', typescript);
+hljs.registerLanguage('javascript', javascript);
 //hljs.registerLanguage('bash', bash);
 hljs.registerLanguage('html', xml);
 hljs.registerLanguage('css', css);
-//hljs.registerLanguage('json', json);
+hljs.registerLanguage('yaml', yaml);
+hljs.registerLanguage('bash', bash);
 
 export {
   libName,

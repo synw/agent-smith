@@ -1,0 +1,1 @@
+import{_ as e,c as s,o as t,a as o}from"./index-oQ1hFXLf.js";const c={},a={class:"flex justify-around h-full w-full"},n=o("div",{class:"text-3xl"},"Page not found",-1),_=[n];function r(l,d){return t(),s("div",a,_)}const i=e(c,[["render",r]]);export{i as default};
