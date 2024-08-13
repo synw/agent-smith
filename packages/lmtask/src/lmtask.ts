@@ -97,22 +97,34 @@ const useLmTask = (brain: AgentBrain): {
                 let prompt = params.prompt;
                 const tvars = params;
                 delete tvars.prompt;
+                let overrideModel = false;
+                const modelOverride = { model: "", template: "" };
+                if (tvars?.m) {
+                    overrideModel = true;
+                    const _s = tvars.m.split("/");
+                    modelOverride.model = _s[0];
+                    modelOverride.template = _s[1];
+                    delete tvars.m;
+                    //console.log("MO", modelOverride);
+                }
                 //console.log("Running task", task.name, ", params:", params);
                 //console.log("Prompt", prompt);
                 //console.log("Vars", tvars);
-                const expert = brain.getExpertForModel(task.model.name);
+                const modelName = overrideModel ? modelOverride.model : task.model.name;
+                const expert = brain.getExpertForModel(modelName);
                 if (!expert) {
-                    return { error: `Expert for model ${task.model.name} not found` }
+                    return { error: `Expert for model ${modelName} not found` }
                 }
                 const ex = brain.expert(expert);
                 if (ex.lm.providerType == "ollama") {
-                    if (ex.lm.model.name != task.model.name) {
-                        await ex.lm.loadModel(task.model.name);
+                    if (ex.lm.model.name != modelName) {
+                        await ex.lm.loadModel(modelName);
                     }
-                } else if (ex.lm.model.name != task.model.name) {
-                    throw new Error(`The ${task.model.name} model is not loaded on server (currently ${ex.lm.model.name})`)
+                } else if (ex.lm.model.name != modelName) {
+                    throw new Error(`The ${modelName} model is not loaded on server (currently ${ex.lm.model.name})`)
                 }
-                const tpl = new PromptTemplate(task.template.name);
+                const templateName = overrideModel ? modelOverride.template : task.template.name;
+                const tpl = new PromptTemplate(templateName);
                 if (task.template?.stop) {
                     const defaultStop = tpl?.stop ?? [];
                     tpl.stop = [...defaultStop, ...task.template.stop];
