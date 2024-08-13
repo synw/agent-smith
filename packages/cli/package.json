@@ -1,7 +1,8 @@
 {
   "name": "@agent-smith/cli",
-  "description": "Agent Smith: terminal client for agents",
-  "version": "0.0.1",
+  "description": "Agent Smith: terminal client for language model agents",
+  "repository": "https://github.com/synw/agent-smith",
+  "version": "0.0.2",
   "scripts": {
     "buildrl": "rm -rf dist/* && rollup -c",
     "build": "rm -rf dist/* && tsc",
@@ -17,6 +18,7 @@
     "@vue/reactivity": "^3.4.36",
     "better-sqlite3": "^11.1.2",
     "clipboardy": "^4.0.0",
+    "commander": "^12.1.0",
     "log-update": "^6.1.0",
     "marked-terminal": "^7.1.0",
     "modprompt": "^0.7.5",
@@ -24,15 +26,15 @@
     "yaml": "^2.5.0"
   },
   "devDependencies": {
-    "rollup": "^4.20.0",
-    "@rollup/plugin-node-resolve": "^15.2.3",
-    "@rollup/plugin-typescript": "^11.1.6",
     "@agent-smith/tmem-jobs": "^0.0.3",
     "@commander-js/extra-typings": "^12.1.0",
     "@locallm/types": "^0.0.17",
+    "@rollup/plugin-node-resolve": "^15.2.3",
+    "@rollup/plugin-typescript": "^11.1.6",
     "@types/better-sqlite3": "^7.6.11",
     "@types/marked-terminal": "^6.1.1",
     "@types/node": "^22.1.0",
+    "rollup": "^4.20.0",
     "ts-node": "^10.9.2",
     "tslib": "2.6.3",
     "typescript": "^5.5.4"
@@ -45,8 +47,15 @@
       "import": "./dist/main.js"
     }
   },
+  "files": [
+    "dist"
+  ],
   "bin": {
     "lm": "./dist/index.js"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   },
   "license": "MIT"
 }

@@ -1,4 +1,4 @@
-import { Command } from "@commander-js/extra-typings";
+import { Command } from "commander";
 import { Cmd, FeatureType } from "../interfaces.js";
 import { formatMode, initFeatures, lastCmd, runMode } from "../state/state.js";
 import { modes } from "./options/modes.js";
