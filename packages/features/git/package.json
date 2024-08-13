@@ -1,10 +1,8 @@
 {
   "name": "@agent-smith/feat-git",
   "version": "0.0.1",
-  "description": "Git features for Agent Smith",
-  "main": "index.js",
+  "description": "Git features for Agent Smith cli",
   "scripts": {
-    "buildrl": "rm -rf dist/* && rollup -c",
     "build": "rm -rf dist/* && tsc"
   },
   "dependencies": {
