@@ -59,10 +59,10 @@ Check the :computer: [Starter template](https://github.com/synw/agent-smith/tree
 
 ## What is an agent?
 
-An agent is an anthropomorphic representation of a bot. It has these basic habilities:
+An agent is an anthropomorphic representation of a bot. It has these habilities:
 
-- **Interact**: the agent can perform interactions with the user and get input and feedback
 - **Think**: interact with some language model servers to perform inference queries
+- **Interact**: the agent can perform interactions with the user and get input and feedback
 - **Work**: manage long running jobs with multiple tasks, use custom terminal commands
 - **Remember**: use it's transient or semantic memory to store data
 
