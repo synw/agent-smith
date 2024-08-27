@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/lmtask",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "An api to create human friendly agents: the language model tasks module",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {
@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@agent-smith/jobs": "^0.0.7",
-    "modprompt": "^0.7.5",
+    "modprompt": "^0.7.6",
     "yaml": "^2.5.0"
   },
   "devDependencies": {

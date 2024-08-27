@@ -146,6 +146,14 @@ const useLmTask = (brain: AgentBrain): {
                 const pr = tpl.prompt(prompt);
                 //console.log("PR", pr);
                 //console.log("PARAMS", task.inferParams)
+                if (ex.lm.providerType == "ollama") {
+                    // tell Ollama to apply no template
+                    if (!task.inferParams?.extra) {
+                        task.inferParams.extra = { "raw": true }
+                    } else {
+                        task.inferParams.extra["raw"] = true
+                    }
+                }
                 const res = await ex.think(pr, { ...task.inferParams, stream: true });
                 return res
             },
