@@ -35,12 +35,24 @@ async function runCmd(args = [], options) {
     if (!isUp) {
         throw new Error("No inference server found, canceling")
     }
+    let job = "git_commit";
+    let hasMsg = false;
+    let gitArgs = [];
+    for (const arg of args) {
+        if (arg.startsWith("msg=")) {
+            job = "git_commit_details";
+            hasMsg = true;
+        } else {
+            gitArgs.push(arg)
+        }
+    }
     console.log("Generating a commit message ...");
-    const res = await executeJobCmd("git_commit", args);
+    const res = await executeJobCmd(job, args);
     const final = res.text.replace("```", "").trim();
-    console.log("\n--------------------------------------------------------");
+    /* console.log("\n--------------------------------------------------------");
     console.log(final);
-    console.log("--------------------------------------------------------\n");
+    console.log("--------------------------------------------------------\n");*/
+    console.log("\n");
     const answer = await select({
         message: 'Select an action',
         default: "commit",
@@ -48,8 +60,8 @@ async function runCmd(args = [], options) {
     });
     //console.log(answer);
     let flagPath = ["-a"];
-    if (args.length) {
-        flagPath = args;
+    if (gitArgs.length > 0) {
+        flagPath = gitArgs;
     }
     switch (answer) {
         case "copy":

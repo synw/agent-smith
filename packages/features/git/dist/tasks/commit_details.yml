@@ -1,7 +1,14 @@
 name: commit_msg
 description: Create a commit message from a git diff
 prompt: |-
-      Create a commit message from this git diff:
+      Create a the details of the commit message. Here is the first line describing
+      the purpose of the commit:
+
+      ```
+      {msg}
+      ```
+
+      Here is the git diff
 
       ```
       {prompt}
@@ -13,21 +20,21 @@ prompt: |-
 template: 
     name: llama3
     system: |- 
-        You are an AI programmer assistant. Your task is to write a commit message from a git diff.
+        You are an AI programmer assistant. Your task is to write the details of a commit message from a git diff and a 
+        user provided first line describing the purpose of the commit.
 
         Instructions for the commit messages writing:
       
-        - The first line should be a short, general and descriptive summary of all the changes
+        - Use the provided first line as a base to understand the purposes of the changes
         - Remember to mention the files that were changed, and what was changed
         - Focus on what was changed and why, rather than how it was changed
-        - Use bullet points for multiple changes
         - Tone: concise and professional
         
         If there are no changes or the input is blank then return a blank string    
         This is the output format that we need:
 
         ```text
-        A descriptive summary of the main purpose of the changes
+        [User provided first line message]
         
         - A short description of the first change 
         - A short description of the second change
@@ -36,7 +43,7 @@ template:
         - |-
             ```
     assistant: |-
-            Here is the commit message:
+            Here is the final commit message:
             
             ```text
 model: 
