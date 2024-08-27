@@ -16,7 +16,7 @@ const taskReader = useLmTask(brain);
 
 async function initExperts() {
     brain.experts.forEach((ex) => {
-        ex.setOnStartEmit(() => console.log("Start emitting"))
+        ex.setOnStartEmit(() => console.log(""))
         ex.setOnToken((t) => {
             if (formatMode.value == "markdown") {
                 logUpdate((marked.parse(ex.stream.get() + t) as string).trim())

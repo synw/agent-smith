@@ -190,7 +190,8 @@ async function _executeJobCmd(args: Array<string> = [], options: any): Promise<a
         return
     }
     const name = args.shift()!;
-    const t = await executeJobCmd(name, args);
+    const res = await executeJobCmd(name, args);
+    return res
     //console.log("ENDRES", t);
 }
 
@@ -244,6 +245,7 @@ async function buildCmds(): Promise<Command> {
             //console.log("CMD OPTS", options);
             const _args = await setOptions(options, args);
             const res = await spec.cmd(_args, options);
+            //console.log("RES", res);
             await processOutput(res);
             return res
         }

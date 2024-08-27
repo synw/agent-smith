@@ -20,11 +20,18 @@ async function executeJobCmd(name: string, args: Array<any> = []) {
         //console.log("TASK RUN", name, params);
         brain.expertsForModelsInfo()
         //console.log("EFM", brain.expertsForModels);
-        res = await job.runTask(name, params);
+        try {
+            res = await job.runTask(name, params);
+        }
+        catch (err) {
+            console.log("ERR", err);
+            throw new Error(`Error executing task ${name}: ${err}`)
+        }
         //console.log("RES", res);
         params = res.data;
     }
     await job.finish(true);
+    //console.log("JOB RES", res)
     return res
 }
 

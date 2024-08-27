@@ -30,11 +30,20 @@ function readPromptFile(): string {
 
 async function processOutput(res: any) {
     let data = "";
+    //console.log("Process OUTPUT", typeof res, res);
     if (typeof res == "object") {
-        if (!res?.data) {
+        let hasOutput = false;
+        if (res?.data) {
+            data = res.data;
+            hasOutput = true;
+        }
+        if (res?.text) {
+            data = res.text;
+            hasOutput = true;
+        }
+        if (!hasOutput) {
             throw new Error(`No data in res: ${res}`);
         }
-        data = res.data;
     } else {
         data = res;
     }
