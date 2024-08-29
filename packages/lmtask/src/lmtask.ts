@@ -4,6 +4,7 @@ import YAML from 'yaml';
 import { type AgentBrain } from "@agent-smith/brain";
 import { AgentTask, AgentTaskSpec, useAgentTask } from "@agent-smith/jobs";
 import { PromptTemplate } from "modprompt";
+import { useTemplateForModel } from "@agent-smith/tfm";
 import { LmTask } from "./interfaces.js";
 
 /**
@@ -27,6 +28,7 @@ const useLmTask = (brain: AgentBrain): {
     read: (taskPath: string) => { found: boolean, task: LmTask },
     readDir: (dir: string) => Array<string>
 } => {
+    const tfm = useTemplateForModel();
     /**
      * Reads all files in a directory that have a .yml extension and returns an array of their filenames.
      * @param {string} dir - The path to the directory containing the yaml files.
@@ -101,9 +103,19 @@ const useLmTask = (brain: AgentBrain): {
                 const modelOverride = { model: "", template: "" };
                 if (tvars?.m) {
                     overrideModel = true;
-                    const _s = tvars.m.split("/");
-                    modelOverride.model = _s[0];
-                    modelOverride.template = _s[1];
+                    if (tvars.m.includes("/")) {
+                        const _s = tvars.m.split("/");
+                        modelOverride.model = _s[0];
+                        modelOverride.template = _s[1];
+                    } else {
+                        // try to guess the template
+                        const gt = tfm.guess(tvars.m);
+                        if (gt == "none") {
+                            throw new Error(`Unable to guess the template for ${tvars.m}: please provide a template name: m="modelname/templatename"`)
+                        }
+                        modelOverride.model = tvars.m;
+                        modelOverride.template = gt;
+                    }
                     delete tvars.m;
                     //console.log("MO", modelOverride);
                 }
