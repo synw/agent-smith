@@ -1,5 +1,8 @@
 import path from "path";
 import { default as fs } from "fs";
+import { readConf } from "./cmd/sys/read_conf.js";
+import { insertFeaturesPathIfNotExists, insertPluginIfNotExists } from "./db/write.js";
+import { buildPluginsPaths } from "./state/plugins.js";
 
 // @ts-ignore
 const confDir = path.join(process.env.HOME, ".config/agent-smith/cli");
@@ -14,8 +17,37 @@ function createConfDirIfNotExists(): boolean {
     return true
 }
 
+async function updateConf(confPath: string): Promise<Array<string>> {
+    const { found, data } = readConf(confPath);
+    if (!found) {
+        console.warn(`Config file ${confPath} not found`);
+    }
+    //console.log(data)
+    const allPaths = new Array<string>();
+    // features and plugins from conf
+    if ("features" in data) {
+        allPaths.push(...data.features);
+        const fts = new Array<string>();
+        data.features.forEach((f) => {
+            if (!fts.includes(f)) {
+                insertFeaturesPathIfNotExists(f);
+                fts.push(f)
+            }
+        });
+    }
+    if ("plugins" in data) {
+        const plugins = await buildPluginsPaths(data.plugins);
+        plugins.forEach((_pl) => {
+            allPaths.push(_pl.path);
+            insertPluginIfNotExists(_pl.name, _pl.path);
+        });
+    }
+    return allPaths
+}
+
 export {
     confDir,
     dbPath,
     createConfDirIfNotExists,
+    updateConf,
 }

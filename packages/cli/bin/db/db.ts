@@ -1,15 +1,11 @@
 import DatabaseConstructor, { Database } from "better-sqlite3";
 import { schemas } from "./schemas.js";
-import { createConfDirIfNotExists, dbPath } from "../conf.js";
-//import { insertDefaultFilepaths } from "./write.js";
+import { dbPath } from "../conf.js";
 
-
-createConfDirIfNotExists();
-let db: Database = new DatabaseConstructor(dbPath,
-    //{ verbose: console.log }
-);
+let db: Database;
 
 function initDb(isVerbose = false) {
+    db = new DatabaseConstructor(dbPath);
     schemas.forEach((s) => {
         db.exec(s);
         if (isVerbose) {
@@ -18,12 +14,7 @@ function initDb(isVerbose = false) {
     });
 }
 
-function dbPopulateDefaults() {
-    //insertDefaultFilepaths()
-}
-
 export {
     db,
     initDb,
-    dbPopulateDefaults,
 }

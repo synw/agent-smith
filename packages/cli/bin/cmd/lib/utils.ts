@@ -2,7 +2,7 @@ import { default as fs } from "fs";
 import { outputMode, promptfile } from "../../state/state.js";
 import { inputMode, runMode } from "../../state/state.js";
 import { readClipboard, writeToClipboard } from "../sys/clipboard.js";
-import { modes } from "../options/modes.js";
+import { modes } from "../clicmds/modes.js";
 
 async function setOptions(
     options: Record<string, any>, args: Array<string> = []

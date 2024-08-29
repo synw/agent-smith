@@ -2,7 +2,7 @@ import { reactive, ref } from "@vue/reactivity";
 import { PythonShell } from 'python-shell';
 import { InputMode, RunMode, FormatMode, OutputMode } from "../interfaces.js";
 import { createConfDirIfNotExists, confDir } from "../conf.js";
-import { initDb, dbPopulateDefaults } from "../db/db.js";
+import { initDb } from "../db/db.js";
 import { readFeaturePaths } from "../db/read.js";
 import { updateFeatures } from "../db/write.js";
 import { readFeaturesDirs } from "./features.js";
@@ -25,12 +25,8 @@ function initConf() {
     const exists = createConfDirIfNotExists();
     if (!exists) {
         console.log("Created configuration directory", confDir);
-        initDb();
-        dbPopulateDefaults();
-        //initConf();
-    } else {
-        initDb();
     }
+    initDb();
 }
 
 async function initFeatures() {

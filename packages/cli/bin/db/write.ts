@@ -55,7 +55,6 @@ function upsertAndCleanFeatures(feats: Array<FeatureSpec>, type: FeatureType) {
             deleteStmt.run(name);
         }
     });
-
 }
 
 function updateFeatures(feats: Features) {
