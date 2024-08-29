@@ -1,6 +1,5 @@
-import { MapStore } from "nanostores";
-import { TmemJobs } from "@agent-smith/tmem-jobs";
-//import { TmemJobs } from "../../tmem-jobs/src/tmemjobsinterfaces.js";
+import type { MapStore } from "nanostores";
+import type { TmemJobs } from "@agent-smith/tmem-jobs";
 
 interface AgentTaskSpec {
     id: string;
