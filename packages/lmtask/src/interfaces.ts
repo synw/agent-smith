@@ -25,20 +25,20 @@ interface TemplateSpec {
  * @param {string} description - The description of the task.
  * @param {string} prompt - The prompt for the task.
  * @param {TemplateSpec} template - The template specification for the task.
- * @param {Array<string>} [variables] - The variables for the task.
  * @param {InferenceParams} inferParams - The inference parameters for the task.
  * @param {ModelConf} model - The model configuration for the task.
  * @param {Array<TurnBlock>} shots - The dialogue turns for the task.
+ * @param {{ required?: Array<string>, optional?: Array<string> }} [variables] - The variables for the task.
  */
 interface LmTask {
   name: string;
   description: string;
   prompt: string;
   template: TemplateSpec;
-  variables?: Array<string>;
   inferParams: InferenceParams;
   model: ModelConf;
   shots: Array<TurnBlock>;
+  variables?: { required?: Array<string>, optional?: Array<string> };
 }
 
 export { LmTask, TemplateSpec };

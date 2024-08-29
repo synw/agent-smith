@@ -138,9 +138,26 @@ const useLmTask = (brain: AgentBrain): {
                 if (task.shots) {
                     task.shots.forEach((s) => tpl.addShot(s.user, s.assistant));
                 }
-                //const _p = task.prompt.replace("{prompt}", args[0]);
+                // check task variables
+                if (task?.variables) {
+                    if (task.variables?.required) {
+                        for (const reqvar of task.variables.required) {
+                            if (!(reqvar in tvars)) {
+                                throw new Error(`The variable ${reqvar} is required to run this task`)
+                            }
+                        }
+                    }
+                    if (task.variables?.optional) {
+                        for (const optvar of task.variables.optional) {
+                            if (!(optvar in tvars)) {
+                                task.prompt = task.prompt.replaceAll(`{${optvar}}`, "");
+                            }
+                        }
+                    }
+                }
+                // apply variables
                 for (const [k, v] of Object.entries(tvars)) {
-                    task.prompt = task.prompt.replace(`{${k}}`, v);
+                    task.prompt = task.prompt.replaceAll(`{${k}}`, v);
                 }
                 tpl.replacePrompt(task.prompt)
                 const pr = tpl.prompt(prompt);
