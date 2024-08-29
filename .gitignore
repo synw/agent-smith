@@ -3,6 +3,7 @@ node_modules
 dist
 dist-ssr
 !/doc/dist
+!/packages/features/git/dist
 *.local
 yarn.lock
 yarn-error.log
