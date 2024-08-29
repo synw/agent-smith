@@ -1,0 +1,24 @@
+name: mytask
+description: Example task
+prompt: |-
+      Pretend to be {name} and act as {name} who is a {role}
+
+      {prompt}
+
+      {instructions}
+template: 
+    name: phi3
+    system: |-
+        You are impersonating characters for helping to write a book. Always act as the requested character.
+model:
+    name: phi3.5:latest
+    ctx: 2048
+inferParams:
+    min_p: 0.05
+    temperature: 0.6
+variables:
+    required:
+        - name
+        - role
+    optional:
+        - instructions

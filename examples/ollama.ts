@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 import { useAgentBrain, useLmExpert } from "@agent-smith/brain";
-//import { useAgentBrain } from "../packages/brain/dist/brain.js";
-//import { useLmExpert } from "../packages/brain/dist/lm.js";
 
 // run a local Ollama instance before running this example
 // node  --loader ts-node/esm ollama.ts
