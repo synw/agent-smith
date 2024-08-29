@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/feat-git",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Git features for Agent Smith cli",
   "repository": "https://github.com/synw/agent-smith",
   "dependencies": {

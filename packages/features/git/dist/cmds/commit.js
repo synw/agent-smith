@@ -48,11 +48,14 @@ async function runCmd(args = [], options) {
     }
     console.log("Generating a commit message ...");
     const res = await executeJobCmd(job, args);
+    if ("error" in res) {
+        throw new Error(`Job execution error: ${res.error}`)
+    }
+    //console.log("JOB RES", res);
     const final = res.text.replace("```", "").trim();
     /* console.log("\n--------------------------------------------------------");
     console.log(final);
     console.log("--------------------------------------------------------\n");*/
-    console.log("\n");
     const answer = await select({
         message: 'Select an action',
         default: "commit",
