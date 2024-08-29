@@ -1,8 +1,7 @@
-import { initAgent, taskReader } from "../../agent.js";
-import logUpdate from "log-update";
+import { initAgent, marked, taskReader } from "../../agent.js";
 import { getFeatureSpec } from "../../state/features.js";
 import { FeatureType } from "../../interfaces.js";
-import { runMode } from "../../state/state.js";
+import { formatMode, runMode } from "../../state/state.js";
 
 async function executeTaskCmd(args: Array<string> = [], options: any = {}): Promise<any> {
     await initAgent(runMode.value);
@@ -23,7 +22,7 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
             vars[t[0]] = t[1];
         }
     })
-    logUpdate("Ingesting prompt ...");
+    console.log("Ingesting prompt ...");
     //console.log("Vars", vars);
     const data = await task.run({ prompt: pr, ...vars }) as Record<string, any>;
     if (data?.error) {

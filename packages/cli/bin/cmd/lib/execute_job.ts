@@ -1,9 +1,10 @@
 import YAML from 'yaml';
 import { default as fs } from "fs";
 import { AgentJob, AgentTask, useAgentJob } from "@agent-smith/jobs";
-import { brain, taskReader } from '../../agent.js';
+import { brain, marked, taskReader } from '../../agent.js';
 import { getFeatureSpec } from '../../state/features.js';
 import { FeatureType } from '../../interfaces.js';
+import { formatMode } from '../../state/state.js';
 
 async function executeJobCmd(name: string, args: Array<any> = []) {
     const { job, found } = await _dispatchReadJob(name);
@@ -22,6 +23,12 @@ async function executeJobCmd(name: string, args: Array<any> = []) {
         //console.log("EFM", brain.expertsForModels);
         try {
             res = await job.runTask(name, params);
+            if ("text" in res) {
+                if (formatMode.value == "markdown") {
+                    console.log("\n\n------------------\n");
+                    console.log((marked.parse(res.text) as string).trim())
+                }
+            }
         }
         catch (err) {
             console.log("ERR", err);

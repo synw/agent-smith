@@ -5,7 +5,7 @@ import { readFeatures } from "../../db/read.js";
 import { updateFeatures } from "../../db/write.js";
 import { updateConf } from "../../conf.js";
 import { executeActionCmd } from "../lib/execute_action.js";
-import { clearOutput, initAgent, marked, taskReader } from "../../agent.js";
+import { initAgent, marked, taskReader } from "../../agent.js";
 import { executeJobCmd, readJob } from "../lib/execute_job.js";
 import { executeTaskCmd } from "../lib/execute_task.js";
 import { readCmds } from "../sys/read_cmds.js";
@@ -114,11 +114,11 @@ async function _executeTaskCmd(args: Array<string> = [], options: any): Promise<
     if (!ok) {
         console.warn(error)
     }
-    clearOutput();
     if (formatMode.value == "markdown") {
+        console.log("\n\n------------------\n");
         console.log((marked.parse(data) as string).trim())
     } else {
-        console.log(data)
+        console.log()
     }
     return data
     //console.log("ENDRES", t);

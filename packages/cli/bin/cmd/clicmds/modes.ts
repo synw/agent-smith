@@ -35,12 +35,12 @@ const modes: Record<string, Cmd> = {
             formatMode.value = "markdown";
             if (runMode.value == "cli") { console.log("Markdown output mode") }
         },
-        description: "use markdown output (default)"
+        description: "use markdown output"
     },
     "-otxt": {
         cmd: async () => {
             formatMode.value = "text";
-            if (runMode.value == "cli") { console.log("Text output mode") }
+            if (runMode.value == "cli") { console.log("Text output mode (default)") }
         },
         description: "use text output "
     },

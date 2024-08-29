@@ -1,11 +1,8 @@
 import { useAgentBrain } from "@agent-smith/brain";
-import { useLmTask } from "@agent-smith/lmtask";
-//import { useLmTask } from "../../lmtask/src/lmtask.js";
-import logUpdate from 'log-update';
+import { useLmTask } from "@agent-smith/lmtask";;
 import { MarkedExtension, marked } from 'marked';
 import { markedTerminal } from 'marked-terminal';
 import { RunMode } from "./interfaces.js";
-import { formatMode } from "./state/state.js";
 
 marked.use(markedTerminal() as MarkedExtension);
 
@@ -18,17 +15,9 @@ async function initExperts() {
     brain.experts.forEach((ex) => {
         ex.setOnStartEmit(() => console.log(""))
         ex.setOnToken((t) => {
-            if (formatMode.value == "markdown") {
-                logUpdate((marked.parse(ex.stream.get() + t) as string).trim())
-            } else {
-                logUpdate((ex.stream.get() + t).trim())
-            }
+            process.stdout.write(t)
         });
     });
-}
-
-function clearOutput() {
-    logUpdate.clear();
 }
 
 async function initAgent(mode: RunMode, isVerbose = false): Promise<boolean> {
@@ -52,4 +41,4 @@ async function initAgent(mode: RunMode, isVerbose = false): Promise<boolean> {
     return brainUp
 }
 
-export { brain, initAgent, clearOutput, marked, modelsForExpert, taskReader };
+export { brain, initAgent, marked, modelsForExpert, taskReader };

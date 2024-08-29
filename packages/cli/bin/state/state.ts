@@ -13,7 +13,7 @@ let pyShell: PythonShell;
 const inputMode = ref<InputMode>("manual");
 const outputMode = ref<OutputMode>("txt");
 const runMode = ref<RunMode>("cmd");
-const formatMode = ref<FormatMode>("markdown");
+const formatMode = ref<FormatMode>("text");
 const promptfile = ref("");
 
 const lastCmd = reactive<{ name: string, args: Array<string> }>({

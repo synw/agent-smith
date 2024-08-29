@@ -42,7 +42,7 @@ async function processOutput(res: any) {
             hasOutput = true;
         }
         if (!hasOutput) {
-            throw new Error(`No data in res: ${res}`);
+            throw new Error(`No data in res: ${JSON.stringify(res, null, "  ")}`);
         }
     } else {
         data = res;
