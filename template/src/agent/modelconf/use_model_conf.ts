@@ -13,7 +13,7 @@ const useModelConf = (brain: AgentBrain) => {
     const getTemplate = async () => {
         let templ = "none";
         try {
-            templ = await _tfm.get(brain.ex.lm.model.name);
+            //templ = await _tfm.get(brain.ex.lm.model.name);
         } catch (e) { }
         if (templ == "none") {
             templ = _tfm.guess(brain.ex.lm.model.name);
@@ -33,7 +33,7 @@ const useModelConf = (brain: AgentBrain) => {
             isTrying.value = true;
         }
         brain.resetExperts();
-        await brain.discoverExperts();
+        await brain.discoverLocal();
         //console.log("Experts:", brain.experts);
         if (isTrying) {
             isTrying.value = false;
@@ -74,7 +74,7 @@ const useModelConf = (brain: AgentBrain) => {
     const persistTemplate = async (templ: string) => {
         if (templ.length > 0 && templ !== "none") {
             // persist state
-            await _tfm.set(templ, brain.ex.lm.model.name)
+            //await _tfm.set(templ, brain.ex.lm.model.name)
         }
     }
 

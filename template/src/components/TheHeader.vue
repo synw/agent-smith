@@ -4,20 +4,20 @@
       <i-ion-arrow-back-outline class="inline-flex ml-2 text-3xl" v-if="!isHome"></i-ion-arrow-back-outline>
     </template>
     <template #mobile-branding>
-      <div class="inline-flex flex-row items-center h-full pt-1 ml-2 text-2xl truncate" @click="$router.push('/')">
+      <div class="inline-flex flex-row items-center h-full pt-1 ml-2 text-2xl truncate" @click="router.push('/')">
         <img alt="" src="@/assets/logo.png" v-if="isHome" class="h-14 inline-block mx-3" />
         <span class="text-lg">{{ baseTitle }}</span>
       </div>
     </template>
     <template #branding>
-      <div class="flex flex-row items-center h-full cursor-pointer" @click="$router.push('/')">
+      <div class="flex flex-row items-center h-full cursor-pointer" @click="router.push('/')">
         <img alt="" src="@/assets/logo.png" class="h-14 inline-block mx-3 overflow-ellipsis" />
         <span class="text-lg">{{ baseTitle }}</span>
       </div>
     </template>
     <template #menu>
       <div class="flex flex-row items-center justify-end w-full h-full space-x-1">
-        <button class="border-none btn" @click="$router.push(`/conf?from=${$route.path}`)">
+        <button class="border-none btn" @click="router.push(`/conf?from=${router.currentRoute.value.path}`)">
           <model-state class="text-3xl"></model-state>
         </button>
         <div class="pr-5 text-lg cursor-pointer txt-lighter dark:txt-light" @click="user.toggleDarkMode()">
@@ -29,7 +29,7 @@
     <template #mobile-menu>
       <div class="flex flex-col p-3 pb-5 space-y-3 lighter border-y-2 bord-primary">
         <!-- div>
-          <button class="border-none btn" @click="$router.push('/page'); topBar.closeMenu()">Page 1</button>
+          <button class="border-none btn" @click="router.push('/page'); topBar.closeMenu()">Page 1</button>
         </div -->
         <div class="text-lg cursor-pointer" @click=" user.toggleDarkMode(); topBar.closeMenu()">
           <template v-if="!user.isDarkMode.value">

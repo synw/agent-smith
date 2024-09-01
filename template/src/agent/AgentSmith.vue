@@ -1,11 +1,11 @@
 <template>
     <div class="fixed bottom-12 right-8 flex flex-row items-end z-50">
-        <template v-if="state.isVisible">
-            <div v-if="state.isInteracting === true" class="bubble bubble-bottom-left mr-5 txt-light">
-                <agent-base-text v-if="state.component == 'AgentBaseText'" :agent="agent" :state="state"></agent-base-text>
-                <agent-confirm v-else-if="state.component == 'AgentConfirm'" :agent="agent" :state="state"></agent-confirm>
-                <agent-confirm-cancel v-else-if="state.component == 'AgentConfirmCancel'" :agent="agent"
-                    :state="state"></agent-confirm-cancel>
+        <template v-if="agent.state.get().isVisible">
+            <div v-if="agent.state.get().isInteracting === true" class="bubble bubble-bottom-left mr-5 txt-light">
+                <agent-base-text v-if="agent.state.get().component == 'AgentBaseText'" :agent="agent"></agent-base-text>
+                <agent-confirm v-else-if="agent.state.get().component == 'AgentConfirm'" :agent="agent"></agent-confirm>
+                <agent-confirm-cancel v-else-if="agent.state.get().component == 'AgentConfirmCancel'"
+                    :agent="agent"></agent-confirm-cancel>
             </div>
             <robot-icon class="text-5xl cursor-pointer" :class="color" @click="agent.toggleInteract()"></robot-icon>
         </template>
@@ -14,7 +14,7 @@
 
 <script setup lang="ts">
 import { computed } from "vue";
-import { agent, state } from "./agent";
+import { agent } from "./agent";
 import RobotIcon from "../widgets/RobotIcon.vue";
 import AgentBaseText from "./widgets/AgentBaseText.vue";
 import AgentConfirm from "./widgets/AgentConfirm.vue";
@@ -22,7 +22,7 @@ import AgentConfirmCancel from "./widgets/AgentConfirmCancel.vue";
 
 const color = computed(() => {
     let c = "txt-lighter";
-    if (state.value.isInteracting) {
+    if (agent.state.get().isInteracting) {
         c = "txt-light"
     }
     return c
