@@ -1,10 +1,11 @@
 import YAML from 'yaml';
 import { default as fs } from "fs";
 import { AgentJob, AgentTask, useAgentJob } from "@agent-smith/jobs";
-import { brain, marked, taskReader } from '../../agent.js';
+import { brain, marked, taskBuilder } from '../../agent.js';
 import { getFeatureSpec } from '../../state/features.js';
 import { FeatureType } from '../../interfaces.js';
 import { formatMode } from '../../state/state.js';
+import { readTask } from './utils.js';
 
 async function executeJobCmd(name: string, args: Array<any> = []) {
     const { job, found } = await _dispatchReadJob(name);
@@ -86,7 +87,11 @@ async function _createJobFromSpec(spec: Record<string, any>): Promise<{ found: b
             if (!found) {
                 return { found: false, job: {} as AgentJob };
             }
-            const at = taskReader.init(path);
+            const res = readTask(path);
+            if (!res.found) {
+                throw new Error(`Task ${t.name}, ${path} not found`)
+            }
+            const at = taskBuilder.fromYaml(res.ymlTask);
             tasks[t.name] = at
         }
     }

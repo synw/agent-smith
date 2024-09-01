@@ -1,7 +1,8 @@
-import { initAgent, marked, taskReader } from "../../agent.js";
+import { initAgent, taskBuilder } from "../../agent.js";
 import { getFeatureSpec } from "../../state/features.js";
 import { FeatureType } from "../../interfaces.js";
-import { formatMode, runMode } from "../../state/state.js";
+import { runMode } from "../../state/state.js";
+import { readTask } from "./utils.js";
 
 async function executeTaskCmd(args: Array<string> = [], options: any = {}): Promise<any> {
     await initAgent(runMode.value);
@@ -12,7 +13,11 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
         return { ok: false, data: {}, error: `Task ${name} not found` };
     }
     //console.log("EFM", brain.expertsForModels);
-    const task = taskReader.init(path);
+    const res = readTask(path);
+    if (!res.found) {
+        throw new Error(`Task ${name}, ${path} not found`)
+    }
+    const task = taskBuilder.fromYaml(res.ymlTask);
     //console.log("TB", task.b)
     const pr = args.shift()!;
     const vars: Record<string, string> = {};

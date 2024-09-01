@@ -1,5 +1,5 @@
 import { useAgentBrain } from "@agent-smith/brain";
-import { useLmTask } from "@agent-smith/lmtask";;
+import { LmTaskBuilder } from "@agent-smith/lmtask";;
 import { MarkedExtension, marked } from 'marked';
 import { markedTerminal } from 'marked-terminal';
 import { RunMode } from "./interfaces.js";
@@ -9,7 +9,7 @@ marked.use(markedTerminal() as MarkedExtension);
 let brain = useAgentBrain();
 const modelsForExpert: Record<string, string> = {};
 
-const taskReader = useLmTask(brain);
+const taskBuilder = new LmTaskBuilder(brain);
 
 async function initExperts() {
     brain.experts.forEach((ex) => {
@@ -41,4 +41,4 @@ async function initAgent(mode: RunMode, isVerbose = false): Promise<boolean> {
     return brainUp
 }
 
-export { brain, initAgent, marked, modelsForExpert, taskReader };
+export { brain, initAgent, marked, modelsForExpert, taskBuilder };

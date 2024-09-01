@@ -5,10 +5,11 @@ import { readFeatures } from "../../db/read.js";
 import { updateFeatures } from "../../db/write.js";
 import { updateConf } from "../../conf.js";
 import { executeActionCmd } from "../lib/execute_action.js";
-import { initAgent, marked, taskReader } from "../../agent.js";
+import { initAgent, marked, taskBuilder } from "../../agent.js";
 import { executeJobCmd, readJob } from "../lib/execute_job.js";
 import { executeTaskCmd } from "../lib/execute_task.js";
 import { readCmds } from "../sys/read_cmds.js";
+import { readTask } from "../lib/utils.js";
 
 let cmds: Record<string, Cmd> = {
     q: {
@@ -145,8 +146,12 @@ async function _readTaskCmd(args: Array<string> = [], options: any): Promise<any
         console.warn(`FeatureType ${args[0]} not found`)
         return
     }
-    const r = taskReader.read(path);
-    console.log(r.task);
+    const res = readTask(path);
+    if (!res.found) {
+        throw new Error(`Task ${args[0]}, ${path} not found`)
+    }
+    const ts = taskBuilder.readFromYaml(path);
+    console.log(ts);
 }
 
 async function _listTasksCmd(args: Array<string> = [], options: any): Promise<any> {
