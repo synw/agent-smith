@@ -1,8 +1,8 @@
-import { useLmTask } from "./lmtask.js";
 import { TemplateSpec, LmTask } from "./interfaces.js";
+import { LmTaskBuilder } from "./task.js";
 
 export {
-    useLmTask,
+    LmTaskBuilder,
     TemplateSpec,
     LmTask,
 }

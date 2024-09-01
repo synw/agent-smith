@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/lmtask",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "An api to create human friendly agents: the language model tasks module",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {
@@ -23,9 +23,9 @@
     "@rollup/plugin-node-resolve": "^15.2.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^11.1.6",
-    "@types/node": "^22.5.1",
+    "@types/node": "^22.5.2",
     "markdown-it-replace-link": "^1.2.1",
-    "rollup": "^4.21.1",
+    "rollup": "^4.21.2",
     "tslib": "^2.7.0",
     "typedoc": "^0.26.6",
     "typedoc-plugin-markdown": "^4.2.6",

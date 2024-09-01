@@ -1,5 +1,3 @@
-import { default as fs } from "fs";
-import { default as path } from "path";
 import YAML from 'yaml';
 import { type AgentBrain } from "@agent-smith/brain";
 import { AgentTask, AgentTaskSpec, useAgentTask } from "@agent-smith/jobs";
@@ -7,88 +5,26 @@ import { PromptTemplate } from "modprompt";
 import { useTemplateForModel } from "@agent-smith/tfm";
 import { LmTask } from "./interfaces.js";
 
-/**
- * `useLmTask` is a function that provides a set of utilities for managing language model tasks.
- *
- * @param {AgentBrain} brain - The brain object that contains the language model experts.
- * @returns {{
- *   init: (taskPath: string) => AgentTask,
- *   read: (taskPath: string) => { found: boolean, task: LmTask },
- *   readDir: (dir: string) => Array<string>
- * }} An object containing the `init`, `read`, and `readDir` functions.
- *
- * @example
- * const lmTask = useLmTask(brain);
- * const task = lmTask.init('path/to/task');
- * const {task, found} = lmTask.read('path/to/task');
- * const tasks = lmTask.readDir('path/to/directory');
- */
-const useLmTask = (brain: AgentBrain): {
-    init: (taskPath: string) => AgentTask,
-    read: (taskPath: string) => { found: boolean, task: LmTask },
-    readDir: (dir: string) => Array<string>
-} => {
-    const tfm = useTemplateForModel();
-    /**
-     * Reads all files in a directory that have a .yml extension and returns an array of their filenames.
-     * @param {string} dir - The path to the directory containing the yaml files.
-     * @returns {Array<string>} An array of filenames with a .yml extension found in the specified directory.
-     */
-    const readDir = (dir: string): Array<string> => {
-        const tasks = new Array<string>();
-        fs.readdirSync(dir).forEach((filename) => {
-            const filepath = path.join(dir, filename);
-            const isDir = fs.statSync(filepath).isDirectory();
-            if (!isDir) {
-                if (filename.endsWith(".yml")) {
-                    tasks.push(filename)
-                }
-            }
-        });
-        return tasks
+const tfm = useTemplateForModel();
+
+class LmTaskBuilder {
+    brain: AgentBrain;
+
+    constructor(agentBrain: AgentBrain) {
+        this.brain = agentBrain;
     }
 
-    /**
-     * Reads a task from a file.
-     *
-     * @param {string} taskpath - The path to the task file.
-     * @returns {{ found: boolean, task: LmTask }} An object containing whether or not the task was found and the task data itself. 
-     * If no task is found at the provided path, an empty `LmTask` object will be returned.
-     *
-     * @example
-     * const {task, found} = readTask('/path/to/your/task.yml');
-     * if (found) {
-     *   console.log('Task Found:', task);
-     * } else {
-     *   console.log('No Task Found at the provided path.');
-     * }
-     */
-    const read = (taskpath: string): { found: boolean, task: LmTask } => {
-        if (!fs.existsSync(taskpath)) {
-            return { task: {} as LmTask, found: false }
-        }
-        const file = fs.readFileSync(taskpath, 'utf8');
-        const data = YAML.parse(file);
-        //console.log("READ TASK", data);
-        return { task: data, found: true }
+    readFromYaml(txt: string): LmTask {
+        const data = YAML.parse(txt);
+        return data
     }
 
-    /**
-     * Reads a language model task from a file and returns an AgentTask object.
-     * 
-     * @param {string} taskPath - The path to the task file.
-     * @returns {AgentTask}
-     * @throws Will throw an error if the task is not found at the given path.
-     * @example
-     * const lmTask = useLmTask(brain);
-     * const task = lmTask.read('path/to/task');
-     */
-    const init = (taskPath: string): AgentTask => {
-        const { found, task } = read(taskPath);
-        if (!found) {
-            throw new Error(`Task ${taskPath} not found`)
-        }
-        //console.log("TASK", task);
+    fromYaml(txt: string): AgentTask {
+        const data = YAML.parse(txt);
+        return this.init(data);
+    }
+
+    init(task: LmTask): AgentTask {
         const ts: AgentTaskSpec = {
             id: task.name,
             title: task.description,
@@ -123,11 +59,11 @@ const useLmTask = (brain: AgentBrain): {
                 //console.log("Prompt", prompt);
                 //console.log("Vars", tvars);
                 const modelName = overrideModel ? modelOverride.model : task.model.name;
-                const expert = brain.getExpertForModel(modelName);
+                const expert = this.brain.getExpertForModel(modelName);
                 if (!expert) {
                     return { error: `Expert for model ${modelName} not found` }
                 }
-                const ex = brain.expert(expert);
+                const ex = this.brain.expert(expert);
                 if (ex.lm.providerType == "ollama") {
                     if (ex.lm.model.name != modelName) {
                         await ex.lm.loadModel(modelName);
@@ -187,23 +123,17 @@ const useLmTask = (brain: AgentBrain): {
                 return res
             },
             abort: async (): Promise<void> => {
-                const expert = brain.getExpertForModel(task.model.name);
+                const expert = this.brain.getExpertForModel(task.model.name);
                 if (!expert) {
                     console.error(`Expert for model ${task.model.name} not found, can not abort`);
                     return
                 }
-                const ex = brain.expert(expert);
+                const ex = this.brain.expert(expert);
                 await ex.abortThinking()
             }
         }
-        return useAgentTask(ts);
-    }
-
-    return {
-        init,
-        read,
-        readDir,
+        return useAgentTask(ts)
     }
 }
 
-export { useLmTask };
+export { LmTaskBuilder }
