@@ -36,6 +36,7 @@ type TaskExtension = "yml";
 type JobExtension = "yml";
 type CmdExtension = "js";
 type FeatureExtension = TaskExtension | JobExtension | CmdExtension | ActionExtension;
+type AliasType = "task" | "action" | "job";
 
 export {
     Cmd,
@@ -53,4 +54,5 @@ export {
     Features,
     ConfigFile,
     FeatureExtension,
+    AliasType,
 }

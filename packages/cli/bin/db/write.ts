@@ -1,4 +1,4 @@
-import { FeatureSpec, FeatureType, Features } from "../interfaces.js";
+import { AliasType, FeatureSpec, FeatureType, Features } from "../interfaces.js";
 import { db } from "./db.js";
 
 const defaultFilepaths = {
@@ -35,6 +35,32 @@ function insertPluginIfNotExists(n: string, p: string): boolean {
     return false
 }
 
+function _updateAlias(existingAliases: Array<string>, name: string, type: AliasType) {
+    if (!existingAliases.includes(name)) {
+        const insertStmt = db.prepare("INSERT INTO aliases (name, type) VALUES (?, ?)");
+        insertStmt.run(name, type);
+    } else {
+        console.log("Can not create command alias", name, ": duplicate name")
+    }
+    existingAliases.push(name);
+    return existingAliases
+}
+
+function updateAliases(feats: Features) {
+    const deleteStmt = db.prepare("DELETE FROM aliases");
+    deleteStmt.run();
+    let existingAliases = new Array<string>();
+    feats.task.forEach((feat) => {
+        existingAliases = _updateAlias(existingAliases, feat.name, "task")
+    });
+    feats.action.forEach((feat) => {
+        existingAliases = _updateAlias(existingAliases, feat.name, "action")
+    });
+    feats.job.forEach((feat) => {
+        existingAliases = _updateAlias(existingAliases, feat.name, "job")
+    });
+}
+
 function upsertAndCleanFeatures(feats: Array<FeatureSpec>, type: FeatureType) {
     const stmt = db.prepare(`SELECT name FROM ${type}`);
     const rows = stmt.all() as Array<Record<string, any>>;
@@ -69,4 +95,5 @@ export {
     insertFeaturesPathIfNotExists,
     insertPluginIfNotExists,
     updateFeatures,
+    updateAliases,
 }

@@ -1,4 +1,4 @@
-import { FeatureExtension, FeatureSpec, FeatureType } from "../interfaces.js";
+import { AliasType, FeatureExtension, FeatureSpec, FeatureType } from "../interfaces.js";
 import { db } from "./db.js";
 
 function readFeaturePaths(): Array<string> {
@@ -40,6 +40,16 @@ function readFeatures(): Record<FeatureType, Record<string, string>> {
     return feats
 }
 
+function readAliases(): Array<{ name: string, type: AliasType }> {
+    const stmt = db.prepare("SELECT name, type FROM aliases");
+    const data = stmt.all() as Array<Record<string, any>>;
+    let f = new Array<{ name: string, type: AliasType }>();
+    data.forEach((row) => {
+        f.push({ name: row.name, type: row.type as AliasType })
+    });
+    return f
+}
+
 function readFeature(name: string, type: FeatureType): { found: boolean, feature: FeatureSpec } {
     const q = `SELECT id, path, ext FROM ${type} WHERE name='${name}'`;
     //console.log(q);
@@ -59,4 +69,4 @@ function readFeature(name: string, type: FeatureType): { found: boolean, feature
 }
 
 
-export { readFeatures, readFeaturePaths, readFeature, readPlugins }
+export { readFeatures, readFeaturePaths, readFeature, readPlugins, readAliases }

@@ -2,7 +2,7 @@ import { Command } from "commander";
 import { lastCmd } from "../state/state.js";
 import { modes } from "./clicmds/modes.js";
 import { processOutput, setOptions } from "./lib/utils.js";
-import { cmds, initCmds } from "./clicmds/cmds.js";
+import { cmds, initAliases, initCmds } from "./clicmds/cmds.js";
 import { Cmd } from "bin/interfaces.js";
 
 let cliCmds: Record<string, Cmd> = {};
@@ -28,7 +28,8 @@ async function runCmd(cmdName: string, args: Array<string> = []) {
 
 async function buildCmds(): Promise<Command> {
     const program = new Command();
-    for (const [name, spec] of Object.entries(cmds)) {
+    const aliases = initAliases();
+    for (const [name, spec] of Object.entries({ ...cmds, ...aliases })) {
         const cmd = program.command(name);
         const _cmd = async (args: Array<string> = [], options: any = {}): Promise<any> => {
             //console.log("CMD OPTS", options);

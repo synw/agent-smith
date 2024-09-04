@@ -43,15 +43,14 @@ const cmds = `CREATE TABLE IF NOT EXISTS cmd (
     ext TEXT NOT NULL CHECK ( ext IN ('js') )
 );`;
 
-/*const aliases = `CREATE TABLE IF NOT EXISTS aliases (
+const aliases = `CREATE TABLE IF NOT EXISTS aliases (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
-    alias TEXT NOT NULL,
     type TEXT NOT NULL CHECK ( type IN ('task', 'action', 'job') )
-);`;*/
+);`;
 
 const schemas = [
-    filepaths, featurespaths, tasks, jobs, actions, cmds, plugins
+    filepaths, featurespaths, tasks, jobs, actions, cmds, plugins, aliases
 ];
 
 export { schemas }

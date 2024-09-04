@@ -1,8 +1,8 @@
 import { Cmd, FeatureType } from "../../interfaces.js";
 import { formatMode, initFeatures, runMode } from "../../state/state.js";
 import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
-import { readFeatures } from "../../db/read.js";
-import { updateFeatures } from "../../db/write.js";
+import { readAliases, readFeatures } from "../../db/read.js";
+import { updateAliases, updateFeatures } from "../../db/write.js";
 import { updateConf } from "../../conf.js";
 import { executeActionCmd } from "../lib/execute_action.js";
 import { initAgent, marked, taskBuilder } from "../../agent.js";
@@ -60,6 +60,36 @@ let cmds: Record<string, Cmd> = {
     }
 }
 
+function initAliases(): Record<string, Cmd> {
+    const aliases = readAliases();
+    const _cmds: Record<string, Cmd> = {};
+    aliases.forEach((alias) => {
+        switch (alias.type) {
+            case "task":
+                _cmds[alias.name] = {
+                    cmd: (args: Array<string> = [], options: any) => _executeTaskCmd([alias.name, ...args], options),
+                    description: "task: " + alias.name,
+                    args: "arguments: \n-args: prompt and other arguments if any for the task"
+                }
+                break;
+            case "action":
+                _cmds[alias.name] = {
+                    cmd: (args: Array<string> = [], options: any = {}, quiet = false) => executeActionCmd([alias.name, ...args], options, quiet),
+                    description: "action: " + alias.name,
+                    args: "arguments: \n-args: other arguments if any for the action"
+                }
+                break;
+            case "job":
+                _cmds[alias.name] = {
+                    cmd: (args: Array<string> = [], options: any) => _executeJobCmd([alias.name, ...args], options),
+                    description: "job: " + alias.name,
+                    args: "arguments: \n-args: other arguments if any for the job"
+                }
+        }
+    });
+    return _cmds
+}
+
 async function initCmds(): Promise<Record<string, Cmd>> {
     //console.log("CMDS", feats.cmds)
     for (const dirpath of new Set(Object.values(readFeatures().cmd))) {
@@ -94,6 +124,7 @@ async function _updateConfCmd(args: Array<string> = [], options: any): Promise<a
     const feats = readFeaturesDirs(allPaths);
     //console.log("CMD FEATS", feats);
     updateFeatures(feats);
+    updateAliases(feats);
 }
 
 async function _readJobCmd(args: Array<string> = [], options: any): Promise<any> {
@@ -158,4 +189,4 @@ async function _listTasksCmd(args: Array<string> = [], options: any): Promise<an
     Object.keys(readFeatures().task).forEach((t) => console.log("-", t));
 }
 
-export { cmds, initCmds, pingCmd }
+export { cmds, initCmds, pingCmd, initAliases }
