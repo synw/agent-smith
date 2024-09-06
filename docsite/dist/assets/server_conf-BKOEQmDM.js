@@ -1,0 +1,1 @@
+import{d as n,o as r,c as a,a as s,e as o,v as t}from"./index-BMtjbDYc.js";const d=n({__name:"server_conf",setup(c){return(l,e)=>(r(),a("div",null,[e[0]||(e[0]=s("div",{class:"prosed"},[s("h2",null,"Inference server config")],-1)),o(t)]))}});export{d as default};
