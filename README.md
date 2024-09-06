@@ -22,6 +22,7 @@ An api to create local first human friendly agents in the browser or Nodejs
     - [Options](https://synw.github.io/agent-smith/the_brain/options)
     - [Grammars](https://synw.github.io/agent-smith/the_brain/grammars)
     - [Multiple experts](https://synw.github.io/agent-smith/the_brain/multiple_experts)
+    - [Browser](https://synw.github.io/agent-smith/the_brain/browser)
      - [Templates](https://synw.github.io/agent-smith/the_brain/templates)
         - [Basics](https://synw.github.io/agent-smith/the_brain/templates/basics)
         - [History](https://synw.github.io/agent-smith/the_brain/templates/history)
@@ -90,6 +91,8 @@ An agent is an anthropomorphic representation of a bot. It can:
 
 Actually it works with [Llama.cpp](https://github.com/ggerganov/llama.cpp/tree/master/examples/server),
 [Koboldcpp](https://github.com/LostRuins/koboldcpp) and [Ollama](https://github.com/ollama/ollama).
+
+It also works [in the browser](https://synw.github.io/agent-smith/the_brain/browser) using gpu only inference and small models
 
 - *Can I use this with OpenAI or other big apis?*
 
