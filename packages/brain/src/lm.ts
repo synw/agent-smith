@@ -5,9 +5,10 @@ import { Lm } from "@locallm/api";
 import { InferenceParams, InferenceResult } from "@locallm/types";
 import { defaultLocalBackends } from "./const.js";
 import { LmExpert, LmExpertSpec, LmThinkingOptionsSpec } from "./interfaces.js";
+import { WllamaProvider } from '@locallm/browser';
 
 const useLmExpert = (spec: LmExpertSpec): LmExpert => {
-    let _lm: Lm;
+    let _lm: Lm | WllamaProvider;
     let onToken = spec?.onToken;
     let onStartEmit = spec?.onStartEmit;
     if (spec.localLm) {
@@ -36,6 +37,14 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
                     serverUrl: defaultLocalBackends[2].serverUrl,
                     apiKey: defaultLocalBackends[2].apiKey,
                     onToken: (t: string) => { stream.set(stream.get() + t) },
+                    onStartEmit: onStartEmit,
+                });
+                break;
+            case "browser":
+                _lm = WllamaProvider.init({
+                    name: "browser",
+                    providerType: "browser",
+                    onToken: (t: string) => { stream.set(t) },
                     onStartEmit: onStartEmit,
                 });
                 break;
@@ -216,6 +225,19 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
                     await _lm.modelsInfo();
                     if (isVerbose) {
                         console.log(`Provider ${_lm.name} up`)
+                    }
+                    isUp = true;
+                } catch (e) {
+                    if (isVerbose) {
+                        console.log(`Provider ${_lm.name} down`, e)
+                    }
+                }
+                break;
+            case "browser":
+                try {
+                    const info = await _lm.info();
+                    if (isVerbose) {
+                        console.log(`Provider ${_lm.name} up`, info);
                     }
                     isUp = true;
                 } catch (e) {

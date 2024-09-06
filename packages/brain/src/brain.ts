@@ -46,6 +46,23 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
         return isOn
     }
 
+    const discoverBrowser = async (verbose = false): Promise<boolean> => {
+        const expertExists = _experts.find(x => x.name === "browser") !== undefined;
+        if (!expertExists) {
+            throw new Error("Expert browser does not exist");
+        }
+        const bro = expert("browser");
+        const isUp = await bro.probe(verbose);
+        if (isUp) {
+            if (_currentExpert.name == "dummydefault") {
+                _currentExpert = bro;
+            }
+            state.setKey("isOn", true);
+            stream = _currentExpert.stream;
+        }
+        return bro.state.get().isUp
+    }
+
     const discoverLocal = async (verbose = false): Promise<boolean> => {
         const ex = new Array<LmExpert>();
         const kobold = useLmExpert({
@@ -99,7 +116,7 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
         return state.get().isOn
     }
 
-    const expertsForModelsInfo = async () => {
+    const expertsForModelsInfo = async (): Promise<Record<string, string>> => {
         //console.log("Experts:", experts)
         for (const ex of experts) {
             if (ex.state.get().isUp) {
@@ -113,6 +130,7 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
                 }
             }
         }
+        return _expertsForModels
         //console.log("MODELS", _expertsForModels);
     }
 
@@ -175,7 +193,7 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
             throw new Error("No expert is configured")
         }
         if (!_ex.state.get().isUp) {
-            throw new Error(`Expert ${_ex.name} is down, can not abort`)
+            throw new Error(`Expert ${_ex.name} is down`)
         }
     }
 
@@ -195,6 +213,7 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
         initLocal,
         discover,
         discoverLocal,
+        discoverBrowser,
         expertsForModelsInfo,
         setDefaultExpert,
         getExpertForModel,

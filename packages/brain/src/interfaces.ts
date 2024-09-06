@@ -2,6 +2,7 @@ import { InferenceParams, InferenceResult, LmProviderType } from "@locallm/types
 import { PromptTemplate } from "modprompt";
 import { Lm } from "@locallm/api";
 import { MapStore, Store } from "nanostores";
+import { WllamaProvider } from "@locallm/browser";
 
 /**
  * Specifies the configuration for a local language model backend.
@@ -84,47 +85,26 @@ interface AgentBrainState {
 }
 
 /**
- * Represents a language model expert.
- * 
- * This interface provides the main functionality of a language model expert, which includes:
- * - Initialization of the expert.
- * - Discovery of the expert.
- * - Thinking with the expert.
- * - Aborting thinking with the expert.
- * - Resetting the expert.
- * 
+ * Represents an expert in the system with various properties and methods to interact with it.
+ * @interface LmExpert
+ * @property {Store<string>} stream - The stream of data, typically a string representation.
  * @property {string} name - The name of the expert.
- * @property {string} model - The model of the expert.
- * 
- * @method init
- * Initializes the expert.
- * @param {boolean} [isVerbose] - Whether to enable verbose mode.
- * @returns {Promise<boolean>} - Whether the initialization was successful.
- * 
- * @method discover
- * Discovers the expert.
- * @param {boolean} [isVerbose] - Whether to enable verbose mode.
- * @returns {Promise<boolean>} - Whether the discovery was successful.
- * 
- * @method think
- * Allows the expert to think with a given prompt, inference parameters, and options.
- * @param {string} prompt - The prompt to think with.
- * @param {InferenceParams} [inferenceParams] - The inference parameters.
- * @param {LmThinkingOptionsSpec} [options] - The thinking options.
- * @returns {Promise<InferenceResult>} - The result of the thinking.
- * 
- * @method abortThinking
- * Aborts thinking with the expert.
- * @returns {Promise<void>} - A promise that resolves when thinking is aborted.
- * 
- * @method reset
- * Resets the expert to its initial state.
+ * @property {string} description - A brief description or summary of the expert's role and capabilities.
+ * @property {Lm | WllamaProvider} lm - The language model provider or implementation, which can be either an Lm or a WllamaProvider instance.
+ * @property {PromptTemplate} template - The prompt template used for generating prompts to the language model.
+ * @property {MapStore<AgentBrainExpertState>} state - A store of states specific to this expert, represented as key-value pairs where each value is an AgentBrainExpertState object.
+ * @property {ProbeFunctionType} probe - A function type representing how the expert probes or gathers information from external sources.
+ * @property {ThinkFunctionType} think - A function type representing how the expert thinks and processes data, possibly generating responses based on its capabilities.
+ * @property {() => Promise<void>} abortThinking - A method to manually abort any ongoing thinking process, returning a promise that resolves when the abortion is complete.
+ * @property {(tpl: string | PromptTemplate) => void} setTemplate - Sets or updates the template for generating prompts. Accepts either a string or a PromptTemplate as an argument.
+ * @property {(func: (t: string) => void) => void} setOnToken - Registers a callback function to be executed whenever a new token is emitted during thinking or processing.
+ * @property {(func: () => void) => void} setOnStartEmit - Registers a callback function to be executed when the expert starts emitting any data, such as thoughts or results.
  */
 interface LmExpert {
     stream: Store<string>;
     name: string;
     description: string;
-    lm: Lm;
+    lm: Lm | WllamaProvider;
     template: PromptTemplate;
     state: MapStore<AgentBrainExpertState>;
     probe: ProbeFunctionType;
@@ -170,6 +150,12 @@ interface LmExpert {
  * 
  *  @method discoverLocal
  *  Discovers local experts.
+ *  @param {boolean} [isVerbose] - Whether to enable verbose mode.
+ *  @returns {Promise<boolean>} - Whether the discovery was successful.
+ * 
+ *  @method discoverBrowser
+ *  Discovers in browser expert.
+ *  @param {boolean} [isVerbose] - Whether to enable verbose mode.
  *  @returns {Promise<boolean>} - Whether the discovery was successful.
  * 
  *  @method expertsForModelsInfo
@@ -217,8 +203,9 @@ interface AgentBrain {
     init: (isVerbose?: boolean) => Promise<boolean>;
     initLocal: (isVerbose?: boolean) => Promise<boolean>;
     discover: (isVerbose?: boolean) => Promise<boolean>;
-    discoverLocal: () => Promise<boolean>;
-    expertsForModelsInfo: () => Promise<void>;
+    discoverLocal: (isVerbose?: boolean) => Promise<boolean>;
+    discoverBrowser: (isVerbose?: boolean) => Promise<boolean>;
+    expertsForModelsInfo: () => Promise<Record<string, string>>;
     setDefaultExpert: (ex: LmExpert | string) => void;
     getExpertForModel: (model: string) => string | null;
     think: ThinkFunctionType;
