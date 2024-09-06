@@ -8,14 +8,14 @@ export default {
   input: 'src/main.ts',
   output: [
     {
-      file: 'dist/api.es.js',
+      file: 'dist/main.es.js',
       format: 'esm'
     },
     {
-      file: 'dist/api.min.js',
+      file: 'dist/main.min.js',
       format: 'iife',
       name: '$agentbrain',
-      plugins: [terser()]
+      plugins: [terser({ format: { comments: false } })]
     }],
   plugins: [
     typescript(),
@@ -24,6 +24,5 @@ export default {
       main: true,
       browser: true,
     }),
-    //isProduction && terser({ format: { comments: false } }),
   ],
 };
