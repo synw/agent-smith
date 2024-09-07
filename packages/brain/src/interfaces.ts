@@ -126,6 +126,7 @@ interface LmExpert {
  * - Aborting thinking with the experts.
  * - Getting a specific expert.
  * - Resetting the experts.
+ * - Adding and removing experts.
  * 
  *  @property {Store<string>} stream - The stream of output from the brain.
  *  @property {MapStore<AgentBrainState>} state - The state of the brain.
@@ -193,6 +194,14 @@ interface LmExpert {
  * 
  *  @method resetExperts
  *  Resets the experts to their initial state.
+ * 
+ *  @method addExpert
+ *  Adds a new expert to the brain.
+ *  @param {LmExpert} ex - The expert to add.
+ * 
+ *  @method removeExpert
+ *  Removes an expert from the brain by name.
+ *  @param {string} name - The name of the expert to remove.
  */
 interface AgentBrain {
     stream: Store<string>,
@@ -213,6 +222,8 @@ interface AgentBrain {
     abortThinking: () => Promise<void>;
     expert: (name: string) => LmExpert;
     resetExperts: () => void;
+    addExpert: (ex: LmExpert) => void;
+    removeExpert: (name: string) => void;
 }
 
 /**

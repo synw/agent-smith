@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/brain",
-  "version": "0.0.20",
+  "version": "0.0.21",
   "description": "An api to create human friendly agents: the AI brain module",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {

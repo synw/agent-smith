@@ -183,6 +183,19 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
         }
     }
 
+    const addExpert = (ex: LmExpert) => {
+        _experts.push(ex);
+    }
+
+    const removeExpert = (name: string) => {
+        const index = _experts.findIndex(ex => ex.name === name);
+        if (index !== -1) {
+            _experts.splice(index, 1);
+        } else {
+            throw new Error(`Expert ${name} not found: can not remove it`)
+        }
+    }
+
     const resetExperts = () => {
         _experts = [];
         _currentExpert = _dummyExpert;
@@ -222,6 +235,8 @@ const useAgentBrain = (experts: Array<LmExpert> = []): AgentBrain => {
         abortThinking,
         expert,
         resetExperts,
+        addExpert,
+        removeExpert,
     }
 }
 
