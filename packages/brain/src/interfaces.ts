@@ -151,8 +151,9 @@ interface LmExpert {
  * 
  *  @method discoverLocal
  *  Discovers local experts.
+ *  @param {boolean} [setState] - Mutate the state: set experts
  *  @param {boolean} [isVerbose] - Whether to enable verbose mode.
- *  @returns {Promise<boolean>} - Whether the discovery was successful.
+ *  @returns {Promise<Array<LmExpert>>} - Found experts
  * 
  *  @method discoverBrowser
  *  Discovers in browser expert.
@@ -212,7 +213,7 @@ interface AgentBrain {
     init: (isVerbose?: boolean) => Promise<boolean>;
     initLocal: (isVerbose?: boolean) => Promise<boolean>;
     discover: (isVerbose?: boolean) => Promise<boolean>;
-    discoverLocal: (isVerbose?: boolean) => Promise<boolean>;
+    discoverLocal: (setState?: boolean, isVerbose?: boolean) => Promise<Array<LmExpert>>;
     discoverBrowser: (isVerbose?: boolean) => Promise<boolean>;
     expertsForModelsInfo: () => Promise<Record<string, string>>;
     setDefaultExpert: (ex: LmExpert | string) => void;
@@ -224,6 +225,7 @@ interface AgentBrain {
     resetExperts: () => void;
     addExpert: (ex: LmExpert) => void;
     removeExpert: (name: string) => void;
+    workingExperts: () => Array<LmExpert>;
 }
 
 /**

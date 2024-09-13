@@ -11,6 +11,14 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
     let _lm: Lm | WllamaProvider;
     let onToken = spec?.onToken;
     let onStartEmit = spec?.onStartEmit;
+    const description = spec.description ?? "";
+    const stream = atom("");
+    // state
+    const state = map({
+        isUp: false,
+        isStreaming: false,
+        isThinking: false,
+    });
     if (spec.localLm) {
         switch (spec.localLm) {
             case "koboldcpp":
@@ -43,7 +51,6 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
             case "browser":
                 _lm = WllamaProvider.init({
                     name: "browser",
-                    providerType: "browser",
                     onToken: (t: string) => { stream.set(t) },
                     onStartEmit: onStartEmit,
                 });
@@ -65,6 +72,10 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
     } else {
         throw new Error("Provide a backend or a localLm parameter to initialize the expert");
     }
+    if (_lm.providerType == "browser") {
+        state.setKey("isUp", true);
+    }
+    const name = spec.name ?? _lm.name;
     let template: PromptTemplate = new PromptTemplate("none");
     if (spec.template) {
         template = spec.template;
@@ -74,15 +85,6 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
     /*else {
         throw new Error("Provide either a templateName or a template parameter for the expert")
     }*/
-    const name = spec.name ?? _lm.name;
-    const description = spec.description ?? "";
-    const stream = atom("");
-    // state
-    const state = map({
-        isUp: false,
-        isStreaming: false,
-        isThinking: false,
-    });
 
     const think = async (
         prompt: string, inferenceParams: InferenceParams = {}, options: LmThinkingOptionsSpec = {},
@@ -234,17 +236,7 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
                 }
                 break;
             case "browser":
-                try {
-                    const info = await _lm.info();
-                    if (isVerbose) {
-                        console.log(`Provider ${_lm.name} up`, info);
-                    }
-                    isUp = true;
-                } catch (e) {
-                    if (isVerbose) {
-                        console.log(`Provider ${_lm.name} down`, e)
-                    }
-                }
+                isUp = true
                 break;
             default:
                 throw new Error("Unknown provider type")
