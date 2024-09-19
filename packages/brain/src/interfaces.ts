@@ -1,45 +1,24 @@
-import { InferenceParams, InferenceResult, LmProviderType } from "@locallm/types";
+import { InferenceParams, InferenceResult, LmProviderType, ModelConf, OnLoadProgress } from "@locallm/types";
 import { PromptTemplate } from "modprompt";
 import { Lm } from "@locallm/api";
 import { MapStore, Store } from "nanostores";
 import { WllamaProvider } from "@locallm/browser";
 
-/**
- * Specifies the configuration for a local language model backend.
- * 
- * @property {string} name - The name of the backend.
- * @property {LmProviderType} providerType - The type of the backend.
- * @property {string} serverUrl - The URL of the backend server.
- * @property {string} apiKey - The API key for the backend.
- * @property {boolean} enabled - Whether the backend is enabled.
- */
-interface LmBackendSpec {
-    name: string;
-    providerType: LmProviderType;
-    serverUrl: string;
-    apiKey: string;
-    enabled: boolean;
-}
-
-/**
- * Specifies the configuration for a local language model expert.
- * 
- * @property {string} name - The name of the expert.
- * @property {string} [description] - The description of the expert.
- * @property {string} [templateName] - The name of the prompt template.
- * @property {PromptTemplate} [template] - The prompt template.
- * @property {LmProviderType} [localLm] - The local language model.
- * @property {LmBackendSpec} [backend] - The backend configuration.
- * @property {(t: string) => void} [onToken] - The function to call when a token is generated.
- * @property {() => void} [onStartEmit] - The function to call just before the first token is generated.
- */
 interface LmExpertSpec {
     name: string;
+    backend: LmBackend;
+    model: ModelConf;
+    template: PromptTemplate | string;
     description?: string;
-    templateName?: string;
-    template?: PromptTemplate;
+}
+
+interface LmBackendSpec {
+    name: string;
+    providerType?: LmProviderType;
+    description?: string;
+    serverUrl?: string;
+    apiKey?: string;
     localLm?: LmProviderType;
-    backend?: LmBackendSpec;
     onToken?: (t: string) => void;
     onStartEmit?: () => void;
 }
@@ -65,14 +44,19 @@ interface LmThinkingOptionsSpec {
 /**
  * Represents the state of an expert in the agent's brain.
  * 
- * @property {boolean} isUp - Whether the expert is up and running.
+ * @property {boolean} isReady - Whether the expert is up and running.
+ * @property {boolean} isAvailable - The expert is available but the model is not loaded.
  * @property {boolean} isStreaming - Whether the expert is currently streaming.
  * @property {boolean} isThinking - Whether the expert is currently thinking.
  */
-interface AgentBrainExpertState {
-    isUp: boolean;
+interface ExpertState {
+    status: ExpertStatus;
     isStreaming: boolean;
     isThinking: boolean;
+}
+
+interface BackendState {
+    isUp: boolean;
 }
 
 /**
@@ -80,40 +64,40 @@ interface AgentBrainExpertState {
  * 
  * @property {boolean} isOn - Whether the agent's brain is currently on.
  */
-interface AgentBrainState {
+interface BrainState {
     isOn: boolean;
 }
 
-/**
- * Represents an expert in the system with various properties and methods to interact with it.
- * @interface LmExpert
- * @property {Store<string>} stream - The stream of data, typically a string representation.
- * @property {string} name - The name of the expert.
- * @property {string} description - A brief description or summary of the expert's role and capabilities.
- * @property {Lm | WllamaProvider} lm - The language model provider or implementation, which can be either an Lm or a WllamaProvider instance.
- * @property {PromptTemplate} template - The prompt template used for generating prompts to the language model.
- * @property {MapStore<AgentBrainExpertState>} state - A store of states specific to this expert, represented as key-value pairs where each value is an AgentBrainExpertState object.
- * @property {ProbeFunctionType} probe - A function type representing how the expert probes or gathers information from external sources.
- * @property {ThinkFunctionType} think - A function type representing how the expert thinks and processes data, possibly generating responses based on its capabilities.
- * @property {() => Promise<void>} abortThinking - A method to manually abort any ongoing thinking process, returning a promise that resolves when the abortion is complete.
- * @property {(tpl: string | PromptTemplate) => void} setTemplate - Sets or updates the template for generating prompts. Accepts either a string or a PromptTemplate as an argument.
- * @property {(func: (t: string) => void) => void} setOnToken - Registers a callback function to be executed whenever a new token is emitted during thinking or processing.
- * @property {(func: () => void) => void} setOnStartEmit - Registers a callback function to be executed when the expert starts emitting any data, such as thoughts or results.
- */
+
 interface LmExpert {
     stream: Store<string>;
     name: string;
     description: string;
+    readonly backend: LmBackend;
+    readonly model: ModelConf;
+    readonly template: PromptTemplate;
+    state: MapStore<ExpertState>;
     lm: Lm | WllamaProvider;
-    template: PromptTemplate;
-    state: MapStore<AgentBrainExpertState>;
-    probe: ProbeFunctionType;
     think: ThinkFunctionType;
     abortThinking: () => Promise<void>;
     setTemplate: (tpl: string | PromptTemplate) => void;
+    setModel: (m: ModelConf) => void;
+    checkStatus: () => void;
+    loadModel: (onLoadProgress?: OnLoadProgress) => Promise<void>;
+}
+
+interface LmBackend {
+    stream: Store<string>;
+    name: string;
+    description: string;
+    lm: Lm | WllamaProvider;
+    state: MapStore<BackendState>;
+    probe: ProbeFunctionType;
     setOnToken: (func: (t: string) => void) => void;
     setOnStartEmit: (func: () => void) => void;
+    resetStream: () => void;
 }
+
 
 /**
  * Represents the agent's brain.
@@ -206,18 +190,19 @@ interface LmExpert {
  */
 interface AgentBrain {
     stream: Store<string>,
-    state: MapStore<AgentBrainState>;
-    experts: Readonly<LmExpert[]>;
-    ex: Readonly<LmExpert>;
-    expertsForModels: Readonly<Record<string, string>>;
+    state: MapStore<BrainState>;
+    readonly experts: Readonly<LmExpert[]>;
+    readonly ex: Readonly<LmExpert>;
+    readonly backendsForModels: Readonly<Record<string, string>>;
+    readonly backends: Array<LmBackend>;
     init: (isVerbose?: boolean) => Promise<boolean>;
     initLocal: (isVerbose?: boolean) => Promise<boolean>;
     discover: (isVerbose?: boolean) => Promise<boolean>;
-    discoverLocal: (setState?: boolean, isVerbose?: boolean) => Promise<Array<LmExpert>>;
+    discoverLocal: (setState?: boolean, isVerbose?: boolean) => Promise<Array<LmBackend>>;
     discoverBrowser: (isVerbose?: boolean) => Promise<boolean>;
-    expertsForModelsInfo: () => Promise<Record<string, string>>;
+    backendsForModelsInfo: () => Promise<Record<string, string>>;
     setDefaultExpert: (ex: LmExpert | string) => void;
-    getExpertForModel: (model: string) => string | null;
+    getBackendForModel: (model: string) => string | null;
     think: ThinkFunctionType;
     thinkx: ThinkxFunctionType;
     abortThinking: () => Promise<void>;
@@ -225,7 +210,12 @@ interface AgentBrain {
     resetExperts: () => void;
     addExpert: (ex: LmExpert) => void;
     removeExpert: (name: string) => void;
+    getOrCreateExpertForModel: (modelName: string, templateName: string) => LmExpert | null;
+    getExpertForModel: (modelName: string) => LmExpert | null;
     workingExperts: () => Array<LmExpert>;
+    backend: (name: string) => LmBackend;
+    addBackend: (ex: LmBackend) => void;
+    removeBackend: (name: string) => void;
 }
 
 /**
@@ -266,14 +256,19 @@ type ThinkxFunctionType = (
  */
 type ProbeFunctionType = (isVerbose?: boolean) => Promise<boolean>;
 
+type ExpertStatus = "unavailable" | "available" | "ready";
+
 export {
     LmBackendSpec,
     LmExpertSpec,
     LmExpert,
+    LmBackend,
     LmThinkingOptionsSpec,
     ThinkFunctionType,
     ProbeFunctionType,
     AgentBrain,
-    AgentBrainExpertState,
-    AgentBrainState,
+    ExpertState,
+    BrainState,
+    BackendState,
+    ExpertStatus,
 }

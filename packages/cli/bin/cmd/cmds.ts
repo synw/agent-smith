@@ -3,7 +3,7 @@ import { lastCmd } from "../state/state.js";
 import { modes } from "./clicmds/modes.js";
 import { processOutput, setOptions } from "./lib/utils.js";
 import { cmds, initAliases, initCmds } from "./clicmds/cmds.js";
-import { Cmd } from "bin/interfaces.js";
+import { Cmd } from "../interfaces.js";
 
 let cliCmds: Record<string, Cmd> = {};
 

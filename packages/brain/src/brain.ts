@@ -1,16 +1,14 @@
 import { map } from 'nanostores';
 import { InferenceParams, InferenceResult } from "@locallm/types";
-import { AgentBrain, LmExpert, LmThinkingOptionsSpec } from "./interfaces.js";
-import { useLmExpert } from './lm.js';
+import { AgentBrain, LmBackend, LmExpert, LmThinkingOptionsSpec } from "./interfaces.js";
+import { useLmBackend } from './backend.js';
+import { useLmExpert } from './expert.js';
 
-const useAgentBrain = (initialExperts: Array<LmExpert> = []): AgentBrain => {
+const useAgentBrain = (initialBackends: Array<LmBackend> = [], initialExperts: Array<LmExpert> = []): AgentBrain => {
+    let _backends = initialBackends;
     let _experts = initialExperts;
-    const _expertsForModels: Record<string, string> = {};
-    let _dummyExpert = useLmExpert({
-        name: "dummydefault",
-        localLm: "koboldcpp",
-        templateName: "none",
-    });;
+    const _backendsForModels: Record<string, string> = {};
+    let _dummyExpert = { name: "dummydefault" } as LmExpert;
     let _currentExpert = _experts.length > 0 ? _experts[0] : _dummyExpert;
     let stream = _currentExpert.stream;
     // state
@@ -18,10 +16,10 @@ const useAgentBrain = (initialExperts: Array<LmExpert> = []): AgentBrain => {
         isOn: false,
     });
 
-    const initLocal = async (verbose = false): Promise<boolean> => {
-        const experts = await discoverLocal(verbose);
-        if (experts.length > 0) {
-            await expertsForModelsInfo()
+    const initLocal = async (setState = true, verbose = false): Promise<boolean> => {
+        await discoverLocal(setState, verbose);
+        if (_backends.length > 0) {
+            await backendsForModelsInfo()
         }
         return state.get().isOn
     }
@@ -29,15 +27,15 @@ const useAgentBrain = (initialExperts: Array<LmExpert> = []): AgentBrain => {
     const init = async (verbose = false): Promise<boolean> => {
         const isUp = await discover(verbose);
         if (isUp) {
-            await expertsForModelsInfo()
+            await backendsForModelsInfo()
         }
         return isUp
     }
 
     const discover = async (isVerbose = false): Promise<boolean> => {
         let isOn = false;
-        for (const e of _experts) {
-            const isUp = await e.probe(isVerbose);
+        for (const bc of _backends) {
+            const isUp = await bc.probe(isVerbose);
             if (isUp) {
                 isOn = true;
             }
@@ -47,33 +45,30 @@ const useAgentBrain = (initialExperts: Array<LmExpert> = []): AgentBrain => {
     }
 
     const discoverBrowser = async (verbose = false): Promise<boolean> => {
-        const expertExists = _experts.find(x => x.name === "browser") !== undefined;
-        if (!expertExists) {
-            throw new Error("Expert browser does not exist");
+        const backendExists = _backends.find(x => x.name === "browser") !== undefined;
+        if (!backendExists) {
+            throw new Error("Backend browser does not exist");
         }
-        const bro = expert("browser");
+        const bro = backend("browser");
         const isUp = await bro.probe(verbose);
         if (isUp) {
-            if (_currentExpert.name == "dummydefault") {
-                _currentExpert = bro;
-            }
             state.setKey("isOn", true);
             stream = _currentExpert.stream;
         }
         return bro.state.get().isUp
     }
 
-    const discoverLocal = async (setState = true, verbose = false): Promise<Array<LmExpert>> => {
-        const ex = new Array<LmExpert>();
-        const kobold = useLmExpert({
+    const discoverLocal = async (setState = true, verbose = false): Promise<Array<LmBackend>> => {
+        const foundBackends = new Array<LmBackend>();
+        const kobold = useLmBackend({
             name: "koboldcpp",
             localLm: "koboldcpp",
         });
-        const llamacpp = useLmExpert({
+        const llamacpp = useLmBackend({
             name: "llamacpp",
             localLm: "llamacpp",
         });
-        const ollama = useLmExpert({
+        const ollama = useLmBackend({
             name: "ollama",
             localLm: "ollama",
         });
@@ -84,64 +79,93 @@ const useAgentBrain = (initialExperts: Array<LmExpert> = []): AgentBrain => {
             ollama.probe(verbose),
         ]);
         if (isKobUp) {
-            const expertExists = _experts.find(x => x.name === "koboldcpp") !== undefined;
-            if (!expertExists) {
-                ex.push(kobold)
+            const backendExists = _backends.find(x => x.name === "koboldcpp") !== undefined;
+            if (!backendExists) {
+                foundBackends.push(kobold)
             }
         }
         if (isLamUp) {
-            const expertExists = _experts.find(x => x.name === "llamacpp") !== undefined;
-            if (!expertExists) {
-                ex.push(llamacpp)
+            const backendExists = _backends.find(x => x.name === "llamacpp") !== undefined;
+            if (!backendExists) {
+                foundBackends.push(llamacpp)
             }
         }
         if (isOlamUp) {
-            const expertExists = _experts.find(x => x.name === "ollama") !== undefined;
-            if (!expertExists) {
-                ex.push(ollama)
+            const backendExists = _backends.find(x => x.name === "ollama") !== undefined;
+            if (!backendExists) {
+                foundBackends.push(ollama)
             }
         }
+        //console.log("BRAIN BACKENDS", _backends);
         if (setState) {
-            if (ex.length > 0) {
+            if (foundBackends.length > 0) {
                 state.setKey("isOn", true);
-                _experts.push(...ex);
-                if (_currentExpert.name == "dummydefault") {
-                    _currentExpert = ex[0];
-                }
+                _backends.push(...foundBackends);
                 stream = _currentExpert.stream;
             } else {
                 state.setKey("isOn", false);
             }
         }
-        //console.log("DISCOV END", _experts.map(e => e.name));
-        //console.log("DISCOV CURRENT EX", _currentExpert.name)
-        return ex
+        return foundBackends
     }
 
-    const expertsForModelsInfo = async (): Promise<Record<string, string>> => {
+    const backendsForModelsInfo = async (): Promise<Record<string, string>> => {
         //console.log("Experts:", experts)
-        for (const ex of _experts) {
-            if (ex.state.get().isUp) {
-                if (ex.lm.providerType == "ollama") {
-                    await ex.lm.modelsInfo();
-                    ex.lm.models.forEach((m) => _expertsForModels[m.name] = ex.name);
-                } else if (ex.lm.providerType == "koboldcpp") {
-                    _expertsForModels[ex.lm.model.name.replace("koboldcpp/", "")] = ex.name;
+        for (const backend of _backends) {
+            if (backend.state.get().isUp) {
+                if (backend.lm.providerType == "ollama" || backend.lm.providerType == "browser") {
+                    await backend.lm.modelsInfo();
+                    backend.lm.models.forEach((m) => _backendsForModels[m.name] = backend.name);
                 } else {
-                    _expertsForModels[ex.lm.model.name] = ex.name;
+                    _backendsForModels[backend.lm.model.name] = backend.name;
                 }
             }
         }
-        return _expertsForModels
-        //console.log("MODELS", _expertsForModels);
+        return _backendsForModels
+        //console.log("MODELS", _backendsForModels);
     }
 
-    const getExpertForModel = (model: string): string | null => {
-        let ex: string | null = null;
-        if (model in _expertsForModels) {
-            ex = _expertsForModels[model];
+    const getBackendForModel = (model: string): string | null => {
+        let bc: string | null = null;
+        if (model in _backendsForModels) {
+            bc = _backendsForModels[model];
         }
-        return ex
+        return bc
+    }
+
+    const getExpertForModel = (modelName: string): LmExpert | null => {
+        let _ex: LmExpert | null = null;
+        const foundEx = _experts.find(e => e.name == modelName);
+        if (foundEx) {
+            _ex = foundEx
+        }
+        if (_ex) {
+            _ex.checkStatus()
+        }
+        return _ex
+    }
+
+    const getOrCreateExpertForModel = (modelName: string, templateName: string): LmExpert | null => {
+        let _ex: LmExpert | null = null;
+        const foundEx = _experts.find(e => e.name == modelName);
+        if (foundEx) {
+            _ex = foundEx
+        }
+        for (const bc of _backends) {
+            const m = bc.lm.models.find(x => x.name == modelName);
+            if (m) {
+                _ex = useLmExpert({
+                    name: modelName,
+                    model: m,
+                    template: templateName,
+                    backend: bc
+                })
+            }
+        }
+        if (_ex) {
+            _ex.checkStatus()
+        }
+        return _ex
     }
 
     const think = async (
@@ -178,10 +202,11 @@ const useAgentBrain = (initialExperts: Array<LmExpert> = []): AgentBrain => {
     }
 
     const workingExperts = (): Array<LmExpert> => {
-        return _experts.filter((e) => e.state.get().isUp == true && e.lm.model.name != "");
+        return _experts.filter((e) => ["available", "ready"].includes(e.state.get().status));
     }
 
     const setDefaultExpert = (ex: LmExpert | string) => {
+        //console.log("Set default expert", ex);
         if (typeof ex == "string") {
             _currentExpert = expert(ex);
         } else {
@@ -194,7 +219,11 @@ const useAgentBrain = (initialExperts: Array<LmExpert> = []): AgentBrain => {
         if (exists) {
             throw new Error(`Expert ${ex.name} already exists`)
         }
+        //console.log("ADD EXP", ex.name);
         _experts.push(ex);
+        if (_currentExpert.name == "dummydefault") {
+            setDefaultExpert(ex);
+        }
     }
 
     const removeExpert = (name: string) => {
@@ -206,6 +235,31 @@ const useAgentBrain = (initialExperts: Array<LmExpert> = []): AgentBrain => {
         }
     }
 
+    const addBackend = (bc: LmBackend) => {
+        const exists = _backends.find(x => x.name === bc.name) !== undefined;
+        if (exists) {
+            throw new Error(`Backend ${bc.name} already exists`)
+        }
+        _backends.push(bc);
+    }
+
+    const removeBackend = (name: string) => {
+        const index = _backends.findIndex(x => x.name === name);
+        if (index !== -1) {
+            _backends.splice(index, 1);
+        } else {
+            throw new Error(`Backend ${name} not found: can not remove it`)
+        }
+    }
+
+    const backend = (name: string) => {
+        const bc = _backends.find(x => x.name == name);
+        if (!bc) {
+            throw new Error(`Backend ${name} not found`)
+        }
+        return bc
+    }
+
     const resetExperts = () => {
         _experts = [];
         _currentExpert = _dummyExpert;
@@ -215,8 +269,8 @@ const useAgentBrain = (initialExperts: Array<LmExpert> = []): AgentBrain => {
         if (_ex.name == "dummydefault") {
             throw new Error("No expert is configured")
         }
-        if (!_ex.state.get().isUp) {
-            throw new Error(`Expert ${_ex.name} is down`)
+        if (!(_ex.state.get().status == "ready")) {
+            throw new Error(`Expert ${_ex.name} is down: status: ${_ex.state.get().status}`)
         }
     }
 
@@ -229,17 +283,20 @@ const useAgentBrain = (initialExperts: Array<LmExpert> = []): AgentBrain => {
         get experts() {
             return _experts
         },
-        get expertsForModels() {
-            return _expertsForModels
+        get backendsForModels() {
+            return _backendsForModels
+        },
+        get backends() {
+            return _backends
         },
         init,
         initLocal,
         discover,
         discoverLocal,
         discoverBrowser,
-        expertsForModelsInfo,
+        getBackendForModel,
+        backendsForModelsInfo,
         setDefaultExpert,
-        getExpertForModel,
         think,
         thinkx,
         abortThinking,
@@ -247,7 +304,12 @@ const useAgentBrain = (initialExperts: Array<LmExpert> = []): AgentBrain => {
         resetExperts,
         addExpert,
         removeExpert,
+        getExpertForModel,
+        getOrCreateExpertForModel,
         workingExperts,
+        backend,
+        addBackend,
+        removeBackend,
     }
 }
 

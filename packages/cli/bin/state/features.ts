@@ -11,7 +11,7 @@ function readFeaturesDirs(featuresPaths: Array<string>): Features {
         cmd: [],
     };
     featuresPaths.forEach((dir: string) => {
-        console.log("Reading feats in", dir);
+        //console.log("Reading feats in", dir);
         const _f = readFeaturesDir(dir);
         _f.task.forEach((item) => feats.task.push(item));
         _f.job.forEach((item) => feats.job.push(item));

@@ -1,5 +1,4 @@
 import { AgentTask, useAgentTask } from "@agent-smith/jobs";
-import { processOutput } from './utils.js';
 import { getFeatureSpec } from '../../state/features.js';
 import { FeatureType } from "../../interfaces.js";
 import { readYmlAction } from "../sys/read_yml_action.js";

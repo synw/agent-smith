@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
-    "module": "ES2020",
+    "target": "ES2022",
+    "module": "ES2022",
     "moduleResolution": "node",
     "strict": true,
     "sourceMap": false,
@@ -17,13 +17,10 @@
       "node"
     ],
     "lib": [
-      "ES2020"
+      "ES2022"
     ],
     "baseUrl": ".",
     "paths": {
-      "bin/*": [
-        "bin/*"
-      ],
       "*": [
         "node_modules/*"
       ]

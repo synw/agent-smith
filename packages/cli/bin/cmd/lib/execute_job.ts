@@ -18,9 +18,9 @@ async function executeJobCmd(name: string, args: Array<any> = []) {
     await job.start();
     let params = args;
     let res: Record<string, any> = {};
+    brain.backendsForModelsInfo()
     for (const name of Object.keys(job.tasks)) {
         //console.log("TASK RUN", name, params);
-        brain.expertsForModelsInfo()
         //console.log("EFM", brain.expertsForModels);
         try {
             res = await job.runTask(name, params);

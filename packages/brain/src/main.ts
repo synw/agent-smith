@@ -6,11 +6,12 @@ import {
     ThinkFunctionType,
     ProbeFunctionType,
     AgentBrain,
-    AgentBrainExpertState,
-    AgentBrainState,
+    ExpertState,
+    ExpertStatus,
+    BrainState,
 } from "./interfaces.js";
 import { useAgentBrain } from "./brain.js";
-import { useLmExpert } from "./lm.js";
+import { useLmExpert } from "./expert.js";
 
 export {
     useAgentBrain,
@@ -22,6 +23,7 @@ export {
     ThinkFunctionType,
     ProbeFunctionType,
     AgentBrain,
-    AgentBrainExpertState,
-    AgentBrainState,
+    ExpertState,
+    ExpertStatus,
+    BrainState,
 }

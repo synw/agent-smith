@@ -1,6 +1,6 @@
 import { reactive, ref } from "@vue/reactivity";
 import { PythonShell } from 'python-shell';
-import { InputMode, RunMode, FormatMode, OutputMode, Features } from "../interfaces.js";
+import { InputMode, RunMode, FormatMode, OutputMode } from "../interfaces.js";
 import { createConfDirIfNotExists, confDir } from "../conf.js";
 import { initDb } from "../db/db.js";
 import { readFeaturePaths } from "../db/read.js";
@@ -42,7 +42,7 @@ async function initFeatures() {
 
 async function initState() {
     initConf();
-    //await initFeatures()
+    await initFeatures()
     //console.log("State ready, available features:", readFeatures())
 }
 

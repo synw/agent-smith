@@ -34,7 +34,6 @@
   "include": [
     "src/**/*.ts",
     "src/**/*.d.ts",
-    "src/**/*.vue",
   ],
   "exclude": [
     "node_modules",
@@ -46,6 +45,7 @@
     "readme": "none",
     "entryPoints": [
       "src/interfaces.ts",
+      "src/task.ts",
       "src/main.ts",
     ],
     "out": "docsite/public/apidoc/auto",

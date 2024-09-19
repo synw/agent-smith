@@ -1,4 +1,4 @@
-import { ActionExtension, CmdExtension, Features, JobExtension, TaskExtension } from "bin/interfaces";
+import { ActionExtension, CmdExtension, Features, JobExtension, TaskExtension } from "../../interfaces.js";
 import { default as fs } from "fs";
 import { default as path } from "path";
 

@@ -5,7 +5,7 @@ import { dbPath } from "../conf.js";
 let db: Database;
 
 function initDb(isVerbose = false) {
-    db = new DatabaseConstructor(dbPath);
+    db = new DatabaseConstructor(dbPath, { fileMustExist: false });
     schemas.forEach((s) => {
         db.exec(s);
         if (isVerbose) {

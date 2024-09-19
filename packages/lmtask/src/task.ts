@@ -1,5 +1,5 @@
 import YAML from 'yaml';
-import { type AgentBrain } from "@agent-smith/brain";
+import { AgentBrain, LmExpert } from "@agent-smith/brain";
 import { AgentTask, AgentTaskSpec, useAgentTask } from "@agent-smith/jobs";
 import { PromptTemplate } from "modprompt";
 import { useTemplateForModel } from "@agent-smith/tfm";
@@ -9,6 +9,7 @@ const tfm = useTemplateForModel();
 
 class LmTaskBuilder {
     brain: AgentBrain;
+    expert: LmExpert | null = null;
 
     constructor(agentBrain: AgentBrain) {
         this.brain = agentBrain;
@@ -28,7 +29,7 @@ class LmTaskBuilder {
         const ts: AgentTaskSpec = {
             id: task.name,
             title: task.description,
-            run: async (params: Record<string, string>) => {
+            run: async (params: Record<string, any>) => {
                 if (!params?.prompt) {
                     throw new Error("Please provide a prompt parameter");
                 }
@@ -55,27 +56,34 @@ class LmTaskBuilder {
                     delete tvars.m;
                     //console.log("MO", modelOverride);
                 }
-                //console.log("Running task", task.name, ", params:", params);
-                //console.log("Prompt", prompt);
-                //console.log("Vars", tvars);
+                /*console.log("Running task", task.name, ", params:", params);
+                console.log("Prompt", prompt);
+                console.log("Vars", tvars);*/
                 const modelName = overrideModel ? modelOverride.model : task.model.name;
-                const expert = this.brain.getExpertForModel(modelName);
-                if (!expert) {
-                    return { error: `Expert for model ${modelName} not found` }
-                }
-                const ex = this.brain.expert(expert);
-                if (ex.lm.providerType == "ollama") {
-                    if (ex.lm.model.name != modelName) {
-                        await ex.lm.loadModel(modelName);
+                if ("expert" in params) {
+                    this.expert = params.expert as LmExpert;
+                } else {
+                    this.expert = this.brain.getExpertForModel(modelName);
+                    //console.log("EX", expert);
+                    if (!this.expert) {
+                        //return { error: `Expert for model ${modelName} not found` }
+                        throw new Error(`Expert for model ${modelName} not found`)
                     }
-                } else if (ex.lm.model.name != modelName) {
-                    throw new Error(`The ${modelName} model is not loaded on server (currently ${ex.lm.model.name})`)
+                }
+                //console.log("TASK EXPERT", this.expert.name);
+                //const ex = this.brain.expert(expert);
+                if (this.expert.lm.providerType == "ollama") {
+                    if (this.expert.lm.model.name != modelName) {
+                        await this.expert.lm.loadModel(modelName);
+                    }
+                } else if (this.expert.lm.model.name != modelName) {
+                    throw new Error(`The ${modelName} model is not loaded on server (currently ${this.expert.lm.model.name})`)
                 }
                 const templateName = overrideModel ? modelOverride.template : task.template.name;
                 const tpl = new PromptTemplate(templateName);
                 if (task.template?.stop) {
                     const defaultStop = tpl?.stop ?? [];
-                    tpl.stop = [...defaultStop, ...task.template.stop];
+                    task.inferParams.stop = [...defaultStop, ...task.template.stop];
                 }
                 if (task.template?.system) {
                     tpl.replaceSystem(task.template.system)
@@ -111,7 +119,7 @@ class LmTaskBuilder {
                 const pr = tpl.prompt(prompt);
                 //console.log("PR", pr);
                 //console.log("PARAMS", task.inferParams)
-                if (ex.lm.providerType == "ollama") {
+                if (this.expert.lm.providerType == "ollama") {
                     // tell Ollama to apply no template
                     if (!task.inferParams?.extra) {
                         task.inferParams.extra = { "raw": true }
@@ -119,17 +127,16 @@ class LmTaskBuilder {
                         task.inferParams.extra["raw"] = true
                     }
                 }
-                const res = await ex.think(pr, { ...task.inferParams, stream: true });
+                //console.log("THINK")
+                const res = await this.expert.think(pr, { ...task.inferParams, stream: true });
                 return res
             },
             abort: async (): Promise<void> => {
-                const expert = this.brain.getExpertForModel(task.model.name);
-                if (!expert) {
+                if (!this.expert) {
                     console.error(`Expert for model ${task.model.name} not found, can not abort`);
                     return
                 }
-                const ex = this.brain.expert(expert);
-                await ex.abortThinking()
+                await this.expert.abortThinking()
             }
         }
         return useAgentTask(ts)
