@@ -66,10 +66,10 @@ Check the :computer: [Starter template](https://github.com/synw/agent-smith/tree
 
 An agent is an anthropomorphic representation of a bot. It can:
 
-- **Think**: interact with some language model servers to perform inference queries
-- **Interact**: the agent can perform interactions with the user and get input and feedback
+- **Think**: use language model servers to perform inference queries
+- **Interact**: perform interactions with the user and get input and feedback
 - **Work**: manage long running jobs with multiple tasks, use custom terminal commands
-- **Remember**: use it's transient or semantic memory to store data
+- **Remember**: use transient or semantic memory to store data
 
 ## Packages
 
@@ -84,6 +84,12 @@ An agent is an anthropomorphic representation of a bot. It can:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/tfm)](https://www.npmjs.com/package/@agent-smith/tfm) | [@agent-smith/tfm](https://github.com/synw/agent-smith/tree/main/packages/tfm) | Templates for models | :white_check_mark: | :white_check_mark:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/lmtask)](https://www.npmjs.com/package/@agent-smith/lmtask) | [@agent-smith/lmtask](https://github.com/synw/agent-smith/tree/main/packages/lmtask) | Yaml model task | :white_check_mark: | :white_check_mark:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/cli)](https://www.npmjs.com/package/@agent-smith/cli) | [@agent-smith/cli](https://github.com/synw/agent-smith/tree/main/packages/cli) | Terminal client | :white_check_mark: | :x:
+
+## Philosophy
+
+- **Composable**: the packages have limited responsibilities and can work together
+- **Declarative**: focus on the business logic by expressing features simply
+- **Explicit**: keep it simple and under user control: no hidden magic
 
 ## FAQ
 
