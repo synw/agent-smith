@@ -1,7 +1,6 @@
 import { writeFileSync } from "fs";
 import select from '@inquirer/select';
-//import { execute, executeJobCmd, writeToClipboard, pingCmd } from "@agent-smith/cli";
-import { execute, executeJobCmd, writeToClipboard, pingCmd } from "../../packages/cli/main.js"
+import { execute, executeJobCmd, writeToClipboard, pingCmd } from "@agent-smith/cli";
 
 const choices = [
     {
