@@ -1,5 +1,4 @@
 import { Tmem } from "@agent-smith/tmem";
-//import { Tmem } from "../../tmem/src/tmeminterfaces"
 
 interface JobMem {
     isRunning: boolean;
@@ -10,6 +9,7 @@ interface JobMem {
 interface TaskMem {
     isCompleted: boolean;
     params: any;
+    conf: Record<string, any>;
     data: any;
 }
 
@@ -19,8 +19,8 @@ interface TmemJobs {
     init: () => Promise<void>;
     start: (name: string, tasks: Array<Record<string, any>>) => Promise<void>;
     finish: () => Promise<void>;
-    runTask: (id: string, params: any) => Promise<void>;
-    reRunTask: (id: string) => Promise<void>;
+    runTask: (id: string, params: any, conf?: Record<string, any>) => Promise<void>;
+    reRunTask: (id: string, params: any, conf?: Record<string, any>) => Promise<void>;
     finishTask: (id: string, completed: boolean, data?: any) => Promise<void>;
 }
 

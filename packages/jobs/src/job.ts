@@ -1,12 +1,11 @@
 import { map } from 'nanostores';
 import { TaskMem, TmemJobs } from "@agent-smith/tmem-jobs";
-//import { TaskMem, TmemJobs } from '../../tmem-jobs/src/tmemjobsinterfaces.js';
 import { AgentJob, AgentJobSpec, AgentJobState, AgentTask } from "./jobsinterfaces.js";
 import { useAgentTask } from './task.js';
 
-const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
+const useAgentJob = <T = string>(initParams: AgentJobSpec<T>): AgentJob<T> => {
     const _name = initParams.name;
-    let _tasks: Record<string, AgentTask> = {};
+    let _tasks: Record<string, AgentTask<T>> = {};
     initParams.tasks.forEach((ts) => {
         const _t = useAgentTask(ts);
         _tasks[_t.id] = _t
@@ -22,7 +21,7 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
         runningTask: "",
     });
 
-    const _runTask = async (t: AgentTask, params: any, autoComplete: boolean): Promise<Record<string, any>> => {
+    const _runTask = async (t: AgentTask<T>, params: any, conf: Record<string, any>, autoComplete: boolean): Promise<Record<string, any>> => {
         /*try {
             console.log("JOB RUN TASK", t.id, autoComplete, params[0].substring(0, 100));
         } catch (e) {
@@ -31,10 +30,10 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
         try {
             let res: Record<string, any> = {};
             if (autoComplete) {
-                res = await t.run(params);
+                res = await t.run(params, conf);
                 _finishTask(t, res, true);
             } else {
-                res = await t.start(params);
+                res = await t.start(params, conf);
             }
             return res;
         } catch (error) {
@@ -43,19 +42,19 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
         }
     };
 
-    const _startTask = async (name: string, params: any, isRestart: boolean) => {
+    const _startTask = async (name: string, params: any = {}, conf: Record<string, any>, isRestart: boolean) => {
         state.setKey("isRunningTask", true);
         state.setKey("runningTask", name);
         if (hasTmem) {
             if (isRestart) {
-                await tmem.reRunTask(name);
+                await tmem.reRunTask(name, params, conf);
             } else {
-                await tmem.runTask(name, params);
+                await tmem.runTask(name, params, conf);
             }
         }
     }
 
-    const _finishTask = async (task: AgentTask, res: any, completed: boolean) => {
+    const _finishTask = async (task: AgentTask<T>, res: any, completed: boolean) => {
         state.setKey("isRunningTask", false);
         state.setKey("runningTask", "");
         task.finish(completed, res);
@@ -64,39 +63,39 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
         }
     }
 
-    const continueTask = async (params: any = {}): Promise<Record<string, any>> => {
+    const continueTask = async (params: any = {}, conf: Record<string, any> = {}): Promise<Record<string, any>> => {
         //console.log("JOB TASK CONTINUE -------- TASK PARAMS", params);
         if (!state.get().isRunningTask) {
             throw new Error('No task is running, can not continue');
         }
         const t = getTaskById(state.get().runningTask);
-        return await _runTask(t, params, false)
+        return await _runTask(t, params, conf, false)
     }
 
-    const runTask = async (name: string, params: any = {}): Promise<Record<string, any>> => {
+    const runTask = async (name: string, params: any = {}, conf: Record<string, any> = {}): Promise<Record<string, any>> => {
         //console.log("JOB TASK RUN -------- TASK PARAMS", params);
         if (state.get().isRunningTask) {
             throw new Error('A task is already running');
         }
-        _startTask(name, params, false);
+        _startTask(name, params, conf, false);
         const t = getTaskById(name);
-        return await _runTask(t, params, true)
+        return await _runTask(t, params, conf, true)
     }
 
-    const startTask = async (name: string, params: any = {}) => {
+    const startTask = async (name: string, params: any = {}, conf: Record<string, any> = {}) => {
         //console.log("JOB TASK START -------- TASK PARAMS", params);
         if (state.get().isRunningTask) {
             throw new Error('A task is already running');
         }
-        await _startTask(name, params, false)
+        await _startTask(name, params, conf, false)
     }
 
-    const reStartTask = async (name: string) => {
+    const reStartTask = async (name: string, params: any = {}, conf: Record<string, any> = {}) => {
         //console.log("JOB TASK RERSTART", name);
         if (state.get().isRunningTask) {
             throw new Error('A task is already running');
         }
-        await _startTask(name, {}, true)
+        await _startTask(name, params, conf, true)
     }
 
     const finishTask = async (completed: boolean, data?: any) => {
@@ -155,7 +154,7 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
         });*/
     }
 
-    const getTaskById = (id: string): AgentTask => {
+    const getTaskById = (id: string): AgentTask<T> => {
         try {
             return _tasks[id]
         } catch (e) {
@@ -195,7 +194,7 @@ const useAgentJob = (initParams: AgentJobSpec): AgentJob => {
         title: _title,
         state,
         get tasks() { return _tasks },
-        set tasks(t: Record<string, AgentTask>) { _tasks = t },
+        set tasks(t: Record<string, AgentTask<T>>) { _tasks = t },
         tmem,
         runTask,
         continueTask,

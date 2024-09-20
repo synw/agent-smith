@@ -1,17 +1,17 @@
-import { useAgentBrain, useLmExpert } from "@agent-smith/brain";
+import { useAgentBrain } from "@agent-smith/brain";
 //import { useAgentBrain, useLmExpert } from "../../brain/src/main.js";
 import { LmTaskBuilder } from "@agent-smith/lmtask";
 //import { LmTaskBuilder } from "../../lmtask/src/task.js";
 import { MarkedExtension, marked } from 'marked';
 import { markedTerminal } from 'marked-terminal';
-import { RunMode } from "./interfaces.js";
+import { FeatureType, RunMode } from "./interfaces.js";
 
 marked.use(markedTerminal() as MarkedExtension);
 
 let brain = useAgentBrain();
 const modelsForExpert: Record<string, string> = {};
 
-const taskBuilder = new LmTaskBuilder(brain);
+const taskBuilder = new LmTaskBuilder<FeatureType>(brain);
 
 async function initExperts() {
     brain.experts.forEach((ex) => {

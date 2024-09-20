@@ -1,12 +1,12 @@
 import { map } from 'nanostores';
 import { AgentTask, AgentTaskState, type AgentTaskSpec } from "./jobsinterfaces.js";
 
-const useAgentTask = (spec: AgentTaskSpec): AgentTask => {
+const useAgentTask = <T = string>(spec: AgentTaskSpec<T>): AgentTask<T> => {
     //console.log("Init task:", JSON.stringify(spec, null, "  "));
-    //console.log("F", spec.run)
     const id = spec.id;
     const title = spec.title ?? "";
     const description = spec.description ?? "";
+    const type: T = spec.type ?? "" as T;
     const runFunc = spec.run;
     const abortFunc = spec.abort;
     //const actions = spec.actions;
@@ -16,14 +16,13 @@ const useAgentTask = (spec: AgentTaskSpec): AgentTask => {
         data: null,
     });
 
-    const _run = async (params: any, autoComplete: boolean): Promise<Record<string, any>> => {
+    const _run = async (params: any, conf: Record<string, any>, autoComplete: boolean): Promise<Record<string, any>> => {
         //console.log("TASK run task", id, autoComplete, params);
-        //console.log("RUN F", runFunc.name);
         state.setKey("isRunning", true);
         state.setKey("data", null);
         let data: Record<string, any> = {};
         if (runFunc) {
-            const d = await runFunc(params);
+            const d = await runFunc(params, conf);
             data = d;
         }
         if (autoComplete) {
@@ -32,12 +31,12 @@ const useAgentTask = (spec: AgentTaskSpec): AgentTask => {
         return data
     }
 
-    const run = async (params: any): Promise<Record<string, any>> => {
-        return _run(params, true)
+    const run = async (params: any, conf: Record<string, any> = {}): Promise<Record<string, any>> => {
+        return _run(params, conf, true)
     }
 
-    const start = async (params: any): Promise<Record<string, any>> => {
-        return _run(params, false)
+    const start = async (params: any, conf: Record<string, any> = {}): Promise<Record<string, any>> => {
+        return _run(params, conf, false)
     }
 
     const finish = (completed: boolean, data?: any): void => {
@@ -67,6 +66,7 @@ const useAgentTask = (spec: AgentTaskSpec): AgentTask => {
         id,
         title,
         description,
+        type,
         state,
         run,
         abort,

@@ -22,9 +22,7 @@ function readFeaturesDirs(featuresPaths: Array<string>): Features {
 }
 
 function getFeatureSpec(name: string, type: FeatureType): { found: boolean, path: string, ext: FeatureExtension } {
-    //console.log("GFP", name, type);
     const { found, feature } = readFeature(name, type);
-    //console.log("FEAT", feature);
     if (!found) {
         return { found: false, path: "", ext: "yml" }
     }

@@ -96,7 +96,7 @@ const useAgentBrain = (initialBackends: Array<LmBackend> = [], initialExperts: A
                 foundBackends.push(ollama)
             }
         }
-        //console.log("BRAIN BACKENDS", _backends);
+        //console.log("BRAIN BACKENDS", _backends.map(b => b.name), setState);
         if (setState) {
             if (foundBackends.length > 0) {
                 state.setKey("isOn", true);
@@ -112,9 +112,11 @@ const useAgentBrain = (initialBackends: Array<LmBackend> = [], initialExperts: A
     const backendsForModelsInfo = async (): Promise<Record<string, string>> => {
         //console.log("Experts:", experts)
         for (const backend of _backends) {
+            //console.log("BS", backend.state.get().isUp);
             if (backend.state.get().isUp) {
                 if (backend.lm.providerType == "ollama" || backend.lm.providerType == "browser") {
                     await backend.lm.modelsInfo();
+                    //console.log("BACKEND", backend.name, backend.lm.models);
                     backend.lm.models.forEach((m) => _backendsForModels[m.name] = backend.name);
                 } else {
                     _backendsForModels[backend.lm.model.name] = backend.name;

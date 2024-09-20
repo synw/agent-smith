@@ -4,17 +4,16 @@
   "description": "Git features for Agent Smith cli",
   "repository": "https://github.com/synw/agent-smith",
   "dependencies": {
-    "@agent-smith/cli": "^0.0.3",
-    "@agent-smith/jobs": "^0.0.7",
-    "@inquirer/select": "^2.4.7"
+    "@agent-smith/jobs": "^0.0.8",
+    "@inquirer/select": "^3.0.1"
   },
   "devDependencies": {
     "@commander-js/extra-typings": "^12.1.0",
-    "@locallm/types": "^0.0.17",
-    "@types/node": "^22.5.0",
+    "@locallm/types": "^0.1.5",
+    "@types/node": "^22.5.5",
     "ts-node": "^10.9.2",
     "tslib": "2.7.0",
-    "typescript": "^5.5.4"
+    "typescript": "^5.6.2"
   },
   "type": "module",
   "files": [

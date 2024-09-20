@@ -78,10 +78,36 @@ function readTasksDir(dir: string): Array<string> {
     return tasks
 }
 
+function initTaskVars(args: Array<any>): { conf: Record<string, any>, vars: Record<string, any> } {
+    const conf: Record<string, any> = {};
+    const vars: Record<string, any> = {};
+    args.forEach((a) => {
+        if (a.includes("=")) {
+            const t = a.split("=");
+            const k = t[0];
+            const v = t[1];
+            //vars[t[0]] = t[1];
+            if (k == "m") {
+                if (v.includes("/")) {
+                    const _s = v.split("/");
+                    conf.model = _s[0];
+                    conf.template = _s[1];
+                } else {
+                    conf.model = v
+                }
+            } else {
+                vars[k] = v
+            }
+        }
+    });
+    return { conf, vars }
+}
+
 export {
     readPromptFile,
     processOutput,
     setOptions,
     readTask,
     readTasksDir,
+    initTaskVars,
 }

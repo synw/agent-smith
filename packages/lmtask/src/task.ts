@@ -1,13 +1,14 @@
 import YAML from 'yaml';
 import { AgentBrain, LmExpert } from "@agent-smith/brain";
 import { AgentTask, AgentTaskSpec, useAgentTask } from "@agent-smith/jobs";
+//import { AgentTask, AgentTaskSpec, useAgentTask } from "../../jobs/src/main";
 import { PromptTemplate } from "modprompt";
 import { useTemplateForModel } from "@agent-smith/tfm";
 import { LmTask } from "./interfaces.js";
 
 const tfm = useTemplateForModel();
 
-class LmTaskBuilder {
+class LmTaskBuilder<T = string> {
     brain: AgentBrain;
     expert: LmExpert | null = null;
 
@@ -20,16 +21,17 @@ class LmTaskBuilder {
         return data
     }
 
-    fromYaml(txt: string): AgentTask {
+    fromYaml(txt: string, type?: T, autoCreateExpert = true): AgentTask<T> {
         const data = YAML.parse(txt);
-        return this.init(data);
+        return this.init(data, type, autoCreateExpert);
     }
 
-    init(task: LmTask): AgentTask {
-        const ts: AgentTaskSpec = {
+    init(task: LmTask, type?: T, autoCreateExpert = true): AgentTask<T> {
+        const ts: AgentTaskSpec<T> = {
             id: task.name,
             title: task.description,
-            run: async (params: Record<string, any>) => {
+            type: type,
+            run: async (params: Record<string, any>, conf?: Record<string, any>) => {
                 if (!params?.prompt) {
                     throw new Error("Please provide a prompt parameter");
                 }
@@ -37,38 +39,48 @@ class LmTaskBuilder {
                 const tvars = params;
                 delete tvars.prompt;
                 let overrideModel = false;
-                const modelOverride = { model: "", template: "" };
-                if (tvars?.m) {
-                    overrideModel = true;
-                    if (tvars.m.includes("/")) {
-                        const _s = tvars.m.split("/");
-                        modelOverride.model = _s[0];
-                        modelOverride.template = _s[1];
-                    } else {
-                        // try to guess the template
-                        const gt = tfm.guess(tvars.m);
-                        if (gt == "none") {
-                            throw new Error(`Unable to guess the template for ${tvars.m}: please provide a template name: m="modelname/templatename"`)
+                const modelOverride: { model: string, template: string | null } = {
+                    model: "", template: null
+                };
+                if (conf) {
+                    if (conf?.model) {
+                        overrideModel = true;
+                        modelOverride.model = conf.model;
+                        if (conf.template) {
+                            modelOverride.template = conf.template;
+                        } else {
+                            // try to guess the template
+                            const gt = tfm.guess(conf.model);
+                            if (gt == "none") {
+                                throw new Error(`Unable to guess the template for ${conf.model}: please provide a template name: m="modelname/templatename"`)
+                            }
                         }
-                        modelOverride.model = tvars.m;
-                        modelOverride.template = gt;
+                        //console.log("MO", modelOverride);
                     }
-                    delete tvars.m;
-                    //console.log("MO", modelOverride);
                 }
                 /*console.log("Running task", task.name, ", params:", params);
                 console.log("Prompt", prompt);
-                console.log("Vars", tvars);*/
+                console.log("Vars", tvars);
+                console.log("Conf", conf);*/
                 const modelName = overrideModel ? modelOverride.model : task.model.name;
-                if ("expert" in params) {
-                    this.expert = params.expert as LmExpert;
-                } else {
-                    this.expert = this.brain.getExpertForModel(modelName);
-                    //console.log("EX", expert);
-                    if (!this.expert) {
-                        //return { error: `Expert for model ${modelName} not found` }
-                        throw new Error(`Expert for model ${modelName} not found`)
+                const templateName = modelOverride?.template ? modelOverride.template : task.template.name;
+                if (conf) {
+                    if ("expert" in conf) {
+                        this.expert = conf.expert as LmExpert;
+                    } else {
+                        if (!this.expert) {
+                            if (autoCreateExpert) {
+                                // try to find an existing expert for the model or create it
+                                this.expert = this.brain.getOrCreateExpertForModel(modelName, templateName);
+                            }
+                            // try to find an existing expert for the model
+                            this.expert = this.brain.getExpertForModel(modelName);
+                        }
                     }
+                }
+                if (!this.expert) {
+                    //return { error: `Expert for model ${modelName} not found` }
+                    throw new Error(`Expert for model ${modelName} not found: no backend is available for this model`)
                 }
                 //console.log("TASK EXPERT", this.expert.name);
                 //const ex = this.brain.expert(expert);
@@ -79,7 +91,6 @@ class LmTaskBuilder {
                 } else if (this.expert.lm.model.name != modelName) {
                     throw new Error(`The ${modelName} model is not loaded on server (currently ${this.expert.lm.model.name})`)
                 }
-                const templateName = overrideModel ? modelOverride.template : task.template.name;
                 const tpl = new PromptTemplate(templateName);
                 if (task.template?.stop) {
                     const defaultStop = tpl?.stop ?? [];

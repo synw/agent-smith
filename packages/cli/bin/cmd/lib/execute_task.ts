@@ -2,10 +2,7 @@ import { brain, initAgent, taskBuilder } from "../../agent.js";
 import { getFeatureSpec } from "../../state/features.js";
 import { FeatureType } from "../../interfaces.js";
 import { runMode } from "../../state/state.js";
-import { readTask } from "./utils.js";
-//import { useLmExpert } from "../../../../brain/src/expert.js";
-//import { LmExpert } from "../../../../brain/src/interfaces.js";
-//import { useLmExpert, LmExpert } from "@agent-smith/brain";
+import { initTaskVars, readTask } from "./utils.js";
 
 async function executeTaskCmd(args: Array<string> = [], options: any = {}): Promise<any> {
     await initAgent(runMode.value);
@@ -25,13 +22,7 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
     //const ex = brain.getOrCreateExpertForModel(taskSpec.model.name, taskSpec.template.name);
     //console.log("TB", task.b)
     const pr = args.shift()!;
-    const vars: Record<string, any> = {};
-    args.forEach((a) => {
-        if (a.includes("=")) {
-            const t = a.split("=");
-            vars[t[0]] = t[1];
-        }
-    })
+    const { conf, vars } = initTaskVars(args);
     const ex = brain.getOrCreateExpertForModel(taskSpec.model.name, taskSpec.template.name);
     //console.log("EFM", ex?.name);
     if (!ex) {
@@ -41,10 +32,10 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
     ex.backend.setOnToken((t) => {
         process.stdout.write(t)
     });
-    vars["expert"] = ex;
+    conf.expert = ex;
     console.log("Ingesting prompt ...");
     //console.log("Vars", vars);
-    const data = await task.run({ prompt: pr, ...vars }) as Record<string, any>;
+    const data = await task.run({ prompt: pr, ...vars }, conf) as Record<string, any>;
     if (data?.error) {
         return { ok: false, data: {}, error: `Error executing task: ${data.error}` }
     }

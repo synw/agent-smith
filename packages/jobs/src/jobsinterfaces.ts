@@ -1,12 +1,13 @@
 import type { MapStore } from "nanostores";
 import type { TmemJobs } from "@agent-smith/tmem-jobs";
 
-interface AgentTaskSpec {
+interface AgentTaskSpec<T = string> {
     id: string;
-    run?: (params: any) => Promise<Record<string, any>>;
-    abort?: (params: any) => Promise<void>;
     title: string;
+    type?: T;
     description?: string;
+    run?: (params: any, conf?: Record<string, any>) => Promise<Record<string, any>>;
+    abort?: (params: any) => Promise<void>;
 }
 
 interface AgentTaskState {
@@ -22,39 +23,40 @@ interface AgentJobState {
     runningTask: string;
 }
 
-interface AgentTask {
+interface AgentTask<T = string> {
     id: string;
     title: string;
     description: string;
+    type: T;
     state: MapStore<AgentTaskState>;
-    run: (params: any) => Promise<Record<string, any>>;
+    run: (params: any, conf?: Record<string, any>) => Promise<Record<string, any>>;
     abort: (params?: any) => Promise<void>;
-    start: (params: any) => Promise<Record<string, any>>;
+    start: (params: any, conf?: Record<string, any>) => Promise<Record<string, any>>;
     finish: (completed: boolean, data?: any) => void;
 }
 
-interface AgentJobSpec {
+interface AgentJobSpec<T = string> {
     name: string;
     title: string;
-    tasks: Array<AgentTaskSpec>;
+    tasks: Array<AgentTaskSpec<T>>;
     tmem?: TmemJobs;
 }
 
-interface AgentJob {
+interface AgentJob<T = string> {
     name: string;
     title: string;
     state: MapStore<AgentJobState>;
-    tasks: Record<string, AgentTask>;
+    tasks: Record<string, AgentTask<T>>;
     tmem: TmemJobs;
-    runTask: (name: string, params?: any) => Promise<Record<string, any>>;
-    continueTask: (params?: any) => Promise<Record<string, any>>;
-    startTask: (name: string, params?: any) => Promise<void>;
-    reStartTask: (name: string) => Promise<void>;
+    runTask: (name: string, params?: any, conf?: Record<string, any>) => Promise<Record<string, any>>;
+    continueTask: (params?: any, conf?: Record<string, any>) => Promise<Record<string, any>>;
+    startTask: (name: string, params?: any, conf?: Record<string, any>) => Promise<void>;
+    reStartTask: (name: string, params?: any, conf?: Record<string, any>) => Promise<void>;
     finishTask: (completed: boolean, data?: any) => Promise<void>;
     abortTask: (params?: any) => Promise<void>;
     start: () => Promise<void>;
     finish: (success: boolean) => Promise<void>;
-    getTaskById: (id: string) => AgentTask;
+    getTaskById: (id: string) => AgentTask<T>;
     syncMem: () => Promise<void>;
 }
 

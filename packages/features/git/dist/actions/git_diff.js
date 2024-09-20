@@ -1,5 +1,6 @@
 import { useAgentTask } from "@agent-smith/jobs";
-import { execute } from "@agent-smith/cli";
+//import { execute } from "@agent-smith/cli";
+import { execute } from "../../packages/cli/main.js";
 
 const action = useAgentTask({
     id: "git_diff",

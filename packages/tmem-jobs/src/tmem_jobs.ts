@@ -1,5 +1,4 @@
 import { useTmem } from "@agent-smith/tmem";
-//import { useTmem } from "../../tmem/src/tmem";
 import { JobMem, TaskMem, TmemJobs } from "./tmemjobsinterfaces.js";
 
 const useTmemJobs = (isVerbose = false): TmemJobs => {
@@ -25,6 +24,7 @@ const useTmemJobs = (isVerbose = false): TmemJobs => {
         tasks.forEach(async (t) => await tMem.set(t.id, {
             isCompleted: false,
             params: {},
+            conf: {},
             data: {},
         }))
     }
@@ -33,7 +33,7 @@ const useTmemJobs = (isVerbose = false): TmemJobs => {
         await jMem.set("isRunning", false);
     }
 
-    const _runTask = async (id: string, params: any, isRestart: boolean) => {
+    const _runTask = async (id: string, params: any, isRestart: boolean, conf: Record<string, any> = {}) => {
         //console.log("TMEM run task", id, params);
         const t = await tMem.get<TaskMem>(id);
         // update the job state
@@ -42,6 +42,7 @@ const useTmemJobs = (isVerbose = false): TmemJobs => {
         if (!isRestart) {
             // keep the params for a restart
             t.params = params;
+            t.conf = conf;
         }
         t.data = {};
         //console.log("MEM RUN T", id, t.params);
@@ -50,12 +51,12 @@ const useTmemJobs = (isVerbose = false): TmemJobs => {
         //console.log("RES", JSON.stringify(res, null, "  "))
     }
 
-    const runTask = async (id: string, params: any) => {
-        return await _runTask(id, params, false)
+    const runTask = async (id: string, params: any, conf: Record<string, any> = {}) => {
+        return await _runTask(id, params, false, conf)
     }
 
-    const reRunTask = async (id: string) => {
-        return await _runTask(id, {}, true)
+    const reRunTask = async (id: string, params: any, conf: Record<string, any> = {}) => {
+        return await _runTask(id, params, true, conf)
     }
 
     const finishTask = async (id: string, completed: boolean, data?: any) => {

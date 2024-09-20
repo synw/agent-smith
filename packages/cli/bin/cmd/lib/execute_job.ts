@@ -1,58 +1,88 @@
 import YAML from 'yaml';
 import { default as fs } from "fs";
 import { AgentJob, AgentTask, useAgentJob } from "@agent-smith/jobs";
+//import { AgentJob, AgentTask, useAgentJob } from "../../../../jobs/src/main";
 import { brain, marked, taskBuilder } from '../../agent.js';
 import { getFeatureSpec } from '../../state/features.js';
 import { FeatureType } from '../../interfaces.js';
 import { formatMode } from '../../state/state.js';
-import { readTask } from './utils.js';
+import { initTaskVars, readTask } from './utils.js';
 
-async function executeJobCmd(name: string, args: Array<any> = []) {
+async function executeJobCmd(name: string, args: Array<any> = []): Promise<Record<string, any>> {
     const { job, found } = await _dispatchReadJob(name);
     //console.log("F", found);
     if (!found) {
         console.log(`Job ${name} not found`);
-        return ""
+        return { error: `Job ${name} not found` }
     }
     //console.log("JOB", job.tasks);
     await job.start();
     let params = args;
     let res: Record<string, any> = {};
-    brain.backendsForModelsInfo()
-    for (const name of Object.keys(job.tasks)) {
-        //console.log("TASK RUN", name, params);
-        //console.log("EFM", brain.expertsForModels);
-        try {
-            res = await job.runTask(name, params);
-            if ("text" in res) {
-                if (formatMode.value == "markdown") {
-                    console.log("\n\n------------------\n");
-                    console.log((marked.parse(res.text) as string).trim())
+    brain.backendsForModelsInfo();
+    for (const [name, task] of Object.entries(job.tasks)) {
+        //console.log("TASK RUN", name, job.tasks[name], params.length, task.type);
+        if (task.type == "task") {
+            const pr = args.shift()!;
+            const { conf, vars } = initTaskVars(args);
+            const { found, path } = getFeatureSpec(name, "task" as FeatureType);
+            if (!found) {
+                return { ok: false, data: {}, error: `Task ${name} not found` };
+            }
+            //console.log("TASK PATH", path, found);
+            const tres = readTask(path);
+            if (!tres.found) {
+                throw new Error(`Task ${name}, ${path} not found`)
+            }
+            const taskSpec = taskBuilder.readFromYaml(tres.ymlTask);
+            //const task = taskBuilder.fromYaml(tres.ymlTask);
+            const ex = brain.getOrCreateExpertForModel(taskSpec.model.name, taskSpec.template.name);
+            //console.log("EFM", ex?.name);
+            if (!ex) {
+                throw new Error("No expert found for model " + taskSpec.model.name)
+            }
+            ex.checkStatus();
+            ex.backend.setOnToken((t) => {
+                process.stdout.write(t)
+            });
+            conf["expert"] = ex;
+            vars["prompt"] = pr;
+            try {
+                res = await job.runTask(name, vars, conf);
+                if ("text" in res) {
+                    if (formatMode.value == "markdown") {
+                        console.log("\n\n------------------\n");
+                        console.log((marked.parse(res.text) as string).trim())
+                    }
                 }
             }
+            catch (err) {
+                return { error: `Error executing task ${name}: ${err}` }
+            }
+        } else {
+            try {
+                res = await job.runTask(name, args);
+            }
+            catch (err) {
+                return { error: `Error executing task ${name}: ${err}` }
+            }
         }
-        catch (err) {
-            console.log("ERR", err);
-            throw new Error(`Error executing task ${name}: ${err}`)
-        }
-        //console.log("RES", res);
-        params = res.data;
     }
     await job.finish(true);
     //console.log("JOB RES", res)
     return res
 }
 
-async function _dispatchReadJob(name: string): Promise<{ found: boolean, job: AgentJob }> {
+async function _dispatchReadJob(name: string): Promise<{ found: boolean, job: AgentJob<FeatureType> }> {
     const { found, path, ext } = getFeatureSpec(name, "job" as FeatureType);
     if (!found) {
-        return { found: false, job: {} as AgentJob };
+        return { found: false, job: {} as AgentJob<FeatureType> };
     }
-    let jb: AgentJob;
+    let jb: AgentJob<FeatureType>;
     switch (ext) {
         case "js":
             let { job } = await import(path);
-            jb = job as AgentJob;
+            jb = job as AgentJob<FeatureType>;
             break;
         case "yml":
             const { data } = await readJob(name)
@@ -61,37 +91,39 @@ async function _dispatchReadJob(name: string): Promise<{ found: boolean, job: Ag
             break
         default:
             throw new Error(`Job extension ${ext} not implemented`)
-            break;
     }
     return { found: true, job: jb }
 }
 
-async function _createJobFromSpec(spec: Record<string, any>): Promise<{ found: boolean, job: AgentJob }> {
-    const job = useAgentJob({
+async function _createJobFromSpec(spec: Record<string, any>): Promise<{ found: boolean, job: AgentJob<FeatureType> }> {
+    const job = useAgentJob<FeatureType>({
         name: spec.name,
         title: spec.title,
         tasks: []
     });
-    const tasks: Record<string, AgentTask> = {};
+    const tasks: Record<string, AgentTask<FeatureType>> = {};
     //console.log("Create job. Feats:", feats);
     for (const t of spec.tasks) {
         if (t.type == "action") {
             const { found, path } = getFeatureSpec(t.name, "action" as FeatureType);
             if (!found) {
-                return { found: false, job: {} as AgentJob };
+                return { found: false, job: {} as AgentJob<FeatureType> };
             }
             const { action } = await import(path);
-            tasks[t.name] = action;
+            const at = action as AgentTask<FeatureType>;
+            at.type = "action";
+            tasks[t.name] = at;
         } else {
             const { found, path } = getFeatureSpec(t.name, "task" as FeatureType);
             if (!found) {
-                return { found: false, job: {} as AgentJob };
+                return { found: false, job: {} as AgentJob<FeatureType> };
             }
             const res = readTask(path);
             if (!res.found) {
                 throw new Error(`Task ${t.name}, ${path} not found`)
             }
             const at = taskBuilder.fromYaml(res.ymlTask);
+            at.type = "task";
             tasks[t.name] = at
         }
     }

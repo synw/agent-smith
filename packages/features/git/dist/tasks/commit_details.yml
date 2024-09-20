@@ -52,5 +52,6 @@ model:
 inferParams:
     min_p: 0.05
     temperature: 0
-    extra:
-        raw: true # this if to tell Ollama to not apply any template
+variables:
+    required:
+        - msg

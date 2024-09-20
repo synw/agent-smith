@@ -51,8 +51,7 @@ function readAliases(): Array<{ name: string, type: AliasType }> {
 }
 
 function readFeature(name: string, type: FeatureType): { found: boolean, feature: FeatureSpec } {
-    const q = `SELECT id, path, ext FROM ${type} WHERE name='${name}'`;
-    //console.log(q);
+    const q = `SELECT id, name, path, ext FROM ${type} WHERE name='${name}'`;
     const stmt = db.prepare(q);
     const result = stmt.get() as Record<string, string>;
     if (result?.id) {
