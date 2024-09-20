@@ -7,11 +7,11 @@ prompt: |-
 
       {instructions}
 template: 
-    name: phi3
+    name: llama3
     system: |-
         You are impersonating characters for helping to write a book. Always act as the requested character.
 model:
-    name: phi3.5:latest
+    name: llama3.1:latest
     ctx: 2048
 inferParams:
     min_p: 0.05

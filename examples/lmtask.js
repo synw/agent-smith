@@ -2,26 +2,38 @@
 //import { useLmTask } from "@agent-smith/lmtask";
 import { default as fs } from "fs";
 import { useAgentBrain } from "@agent-smith/brain";
-import { LmTaskBuilder } from "../packages/lmtask/dist/task.js"
+import { LmTaskBuilder } from "@agent-smith/lmtask";
+//import { useAgentBrain } from "../packages/brain/dist/brain.js";
+//import { LmTaskBuilder } from "../packages/lmtask/dist/task.js"
 
-// Run an Ollama server with phi3.5:latest
+// Run an Ollama server with llama3.1:latest
 
-const taskPath = "./sample/mytask.yml"
+async function main() {
+    const taskPath = "./sample/mytask.yml"
 
-const brain = useAgentBrain();
-await brain.initLocal();
-brain.expert("ollama").setOnToken((t) => process.stdout.write(t));
+    const brain = useAgentBrain();
+    await brain.initLocal();
+    brain.backend("ollama").setOnToken((t) => process.stdout.write(t));
+    const ex = brain.getOrCreateExpertForModel("llama3.1:latest", "llama3");
+    if (!ex) {
+        console.error("No backend found for model")
+    }
+    const ymlTaskDef = fs.readFileSync(taskPath, 'utf8');
+    const taskBuilder = new LmTaskBuilder(brain);
+    // build the task
+    const task = taskBuilder.fromYaml(ymlTaskDef);
+    console.log("Running task...", task)
+    // run the task    
+    const conf = {
+        expert: ex,
+    };
+    await task.run({
+        prompt: "What are your favourite activities?",
+        name: "Mr Brown", role: "marketing director",
+        instructions: "Important: answer with a markdown bullet points list"
+    }, conf);
+}
 
-const ymlTaskDef = fs.readFileSync(taskPath, 'utf8');
-const taskBuilder = new LmTaskBuilder(brain);
-// read the task spec
-console.log(taskBuilder.readFromYaml(ymlTaskDef));
-// build the task
-const task = taskBuilder.fromYaml(ymlTaskDef);
-
-// run the task
-await task.run({
-    prompt: "What are your favourite activities?",
-    name: "Mr Brown", role: "marketing director",
-    instructions: "Important: answer with a markdown bullet points list"
-});
+(async () => {
+    await main();
+})();
