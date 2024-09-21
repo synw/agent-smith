@@ -2,7 +2,7 @@
   "name": "@agent-smith/cli",
   "description": "Agent Smith: terminal client for language model agents",
   "repository": "https://github.com/synw/agent-smith",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "scripts": {
     "buildrl": "rm -rf dist/* && rollup -c",
     "build": "rm -rf dist/* && tsc",
@@ -15,7 +15,7 @@
     "@agent-smith/lmtask": "^0.0.20",
     "@inquirer/prompts": "^6.0.1",
     "@inquirer/select": "^3.0.1",
-    "@vue/reactivity": "^3.5.6",
+    "@vue/reactivity": "^3.5.7",
     "better-sqlite3": "^11.3.0",
     "clipboardy": "^4.0.0",
     "commander": "^12.1.0",

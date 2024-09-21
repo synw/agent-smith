@@ -17,14 +17,24 @@ async function executeJobCmd(name: string, args: Array<any> = []): Promise<Recor
     }
     //console.log("JOB", job.tasks);
     await job.start();
-    let params = args;
     let res: Record<string, any> = {};
+    let params: Record<string, any> = {};
     brain.backendsForModelsInfo();
+    let i = 0;
     for (const [name, task] of Object.entries(job.tasks)) {
-        //console.log("TASK RUN", name, job.tasks[name], params.length, task.type);
+        //console.log("TASK RUN", name, job.tasks[name], params, task.type);
         if (task.type == "task") {
-            const pr = args.shift()!;
-            const { conf, vars } = initTaskVars(args);
+            //const pr = params.shift()!;
+            let conf: Record<string, any> = {};
+            let vars: Record<string, any> = {};
+            if (i == 0) {
+                const tv = initTaskVars(args);
+                conf = tv.conf;
+                vars = tv.vars;
+            } else {
+                conf = {};
+                vars = params;
+            }
             const { found, path } = getFeatureSpec(name, "task" as FeatureType);
             if (!found) {
                 return { ok: false, data: {}, error: `Task ${name} not found` };
@@ -46,8 +56,8 @@ async function executeJobCmd(name: string, args: Array<any> = []): Promise<Recor
                 process.stdout.write(t)
             });
             conf["expert"] = ex;
-            vars["prompt"] = pr;
             try {
+                //console.log("Running", name, task.type, vars);
                 res = await job.runTask(name, vars, conf);
                 if ("text" in res) {
                     if (formatMode.value == "markdown") {
@@ -55,18 +65,28 @@ async function executeJobCmd(name: string, args: Array<any> = []): Promise<Recor
                         console.log((marked.parse(res.text) as string).trim())
                     }
                 }
+                params = res
             }
             catch (err) {
-                return { error: `Error executing task ${name}: ${err}` }
+                return { error: `Error executing (${task.type}) task ${name}: ${err}` }
             }
         } else {
             try {
-                res = await job.runTask(name, args);
+                if (i == 0) {
+                    //console.log("Running", name, args);
+                    res = await job.runTask(name, args);
+                } else {
+                    //console.log("Running", name, params);
+                    res = await job.runTask(name, params);
+                }
+                //console.log("RES", res);
+                params = res.data;
             }
             catch (err) {
-                return { error: `Error executing task ${name}: ${err}` }
+                return { error: `Error executing (${task.type}) task ${name}: ${err}` }
             }
         }
+        ++i
     }
     await job.finish(true);
     //console.log("JOB RES", res)
@@ -104,6 +124,7 @@ async function _createJobFromSpec(spec: Record<string, any>): Promise<{ found: b
     const tasks: Record<string, AgentTask<FeatureType>> = {};
     //console.log("Create job. Feats:", feats);
     for (const t of spec.tasks) {
+        //console.log("TASK SPEC", t);
         if (t.type == "action") {
             const { found, path } = getFeatureSpec(t.name, "action" as FeatureType);
             if (!found) {
