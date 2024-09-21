@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/tfm",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "An api to create human friendly agents: the templates for models module",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {

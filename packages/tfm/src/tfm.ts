@@ -6,7 +6,7 @@ const useTemplateForModel = (): TemplateForModel => {
 
     const guess = (model: string): string => {
         const _model = model.toLowerCase();
-        if (_model.includes("hermes") || _model.includes("dolphin")) {
+        if (_model.includes("hermes") || _model.includes("dolphin") || _model.includes("qwen")) {
             return "chatml"
         }
         if (_model.includes("deepseek")) {
