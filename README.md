@@ -84,6 +84,7 @@ An agent is an anthropomorphic representation of a bot. It can:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/tfm)](https://www.npmjs.com/package/@agent-smith/tfm) | [@agent-smith/tfm](https://github.com/synw/agent-smith/tree/main/packages/tfm) | Templates for models | :white_check_mark: | :white_check_mark:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/lmtask)](https://www.npmjs.com/package/@agent-smith/lmtask) | [@agent-smith/lmtask](https://github.com/synw/agent-smith/tree/main/packages/lmtask) | Yaml model task | :white_check_mark: | :white_check_mark:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/cli)](https://www.npmjs.com/package/@agent-smith/cli) | [@agent-smith/cli](https://github.com/synw/agent-smith/tree/main/packages/cli) | Terminal client | :white_check_mark: | :x:
+| [![pub package](https://img.shields.io/npm/v/@agent-smith/feat-git)](https://www.npmjs.com/package/@agent-smith/feat-git) | [@agent-smith/feat-git](https://github.com/synw/agent-smith/tree/main/packages/features/git) | Git features | :white_check_mark: | :x:
 
 ## Philosophy
 
