@@ -62,7 +62,7 @@ const useLmBackend = (spec: LmBackendSpec): LmBackend => {
                 lm = WllamaProvider.init({
                     name: "browser",
                     onToken: (t: string) => {
-                        stream.set(t);
+                        stream.set(stream.get() + t);
                         if (onToken) {
                             onToken(t)
                         }
