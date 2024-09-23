@@ -2,5 +2,5 @@ title: "Generate a git commit message from a git diff"
 tasks:
   - type: "action"
     name: "git_diff"
-  - type: "lmtask"
+  - type: "task"
     name: "commit_msg"

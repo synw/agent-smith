@@ -1,6 +1,7 @@
 import { writeFileSync } from "fs";
 import select from '@inquirer/select';
-import { execute, executeJobCmd, writeToClipboard, pingCmd } from "@agent-smith/cli";
+//import { execute, executeJobCmd, writeToClipboard, pingCmd } from "@agent-smith/cli";
+import { execute, executeJobCmd, writeToClipboard, pingCmd } from "../../../../cli/dist/main.js";
 
 const choices = [
     {
@@ -49,9 +50,11 @@ async function runCmd(args = [], options) {
     console.log("Generating a commit message ...");
     const res = await executeJobCmd(job, args);
     if ("error" in res) {
+        console.log(res);
         throw new Error(`Job execution error: ${res.error}`)
     }
     //console.log("JOB RES", res);
+    console.log("\n");
     const final = res.text.replace("```", "").trim();
     /* console.log("\n--------------------------------------------------------");
     console.log(final);
