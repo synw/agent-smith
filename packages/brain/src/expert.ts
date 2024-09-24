@@ -99,7 +99,10 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
         if (options.skipTemplate === true) {
             p = prompt
         } else {
-            p = template.prompt(prompt)
+            p = template.prompt(prompt);
+            if (backend.lm.providerType == "ollama") {
+                completionParams.extra = { raw: true }
+            }
         }
         state.setKey("isThinking", true);
         let _parseJson = (options?.tsGrammar !== undefined) || (options?.grammar !== undefined);

@@ -232,6 +232,9 @@ const useAgentBrain = (initialBackends: Array<LmBackend> = [], initialExperts: A
         const index = _experts.findIndex(ex => ex.name === name);
         if (index !== -1) {
             _experts.splice(index, 1);
+            if (_currentExpert.name == name) {
+                _currentExpert = { name: "dummydefault" } as LmExpert;
+            }
         } else {
             throw new Error(`Expert ${name} not found: can not remove it`)
         }
