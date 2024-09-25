@@ -4,7 +4,8 @@
             <h1>Gbnf grammars</h1>
         </div>
         <div class="flex flex-col space-y-5 mt-5">
-            <div>An expert can use gbnf grammars to constraint the output of the language model to a given format.
+            <div>An expert can use gbnf grammars to constraint the output of the language model to a given format, if
+                the model and backend support it. Note: Ollama does not support grammars.
                 The grammars can be defined in Typescript intefaces with
                 <a href="https://github.com/IntrinsicLabsAI/gbnfgen">Gbnfgen</a> or as raw strings.
             </div>
@@ -14,14 +15,22 @@
             <div>
                 <static-code-block :hljs="hljs" :code="code1" lang="ts"></static-code-block>
             </div>
-            <div>
-                Query:<br />
-                <Textarea class="w-[50rem] mt-3" v-model="q1" :rows="1" disabled />
+            <div v-if="!hasExpert">
+                <div class="text-lg font-medium">Configure an expert for the interactive demo:</div>
+                <AgentConf class="p-3 mt-3 border rounded-md" @end="init()"></AgentConf>
             </div>
-            <div>
-                <button class="btn semilight" @click="runQ1()">Run the query</button>
-            </div>
-            <pre class="font-light" v-if="isReady"><code>{{ brainStream }}</code></pre>
+            <template v-else>
+                <template v-if="state.status == 'ready'">
+                    <Textarea class="w-[50rem] mt-3" v-model="q1" :rows="1" />
+                    <div class="flex flex-row space-x-2">
+                        <button class="btn semilight" @click="runQ1()" :disabled="state.isThinking">Run
+                            the query</button>
+                        <button v-if="state.isThinking" @click="brain.ex.abortThinking()">Abort</button>
+                    </div>
+                </template>
+                <template v-else>expert not ready: {{ state.status }}</template>
+            </template>
+            <pre class="font-light" v-if="isReady"><code>{{ stream }}</code></pre>
             <div>The button click is mapped on this code:</div>
             <div>
                 <static-code-block :hljs="hljs" :code="code2" lang="ts"></static-code-block>
@@ -43,9 +52,8 @@
                 be formated in json. Use the <kbd>parseJson</kbd> option to change this behavior.
             </div>
             <div class="pt-5">
-                <a href="javascript:openLink('/the_brain/multiple_experts')">Next: multiple experts</a>
+                <a href="javascript:openLink('/the_brain/templates/basics')">Next: templates</a>
             </div>
-            <AgentJoeV3></AgentJoeV3>
         </div>
     </div>
 </template>
@@ -55,13 +63,14 @@ import { onBeforeMount, ref } from 'vue';
 import Textarea from 'primevue/textarea';
 import { StaticCodeBlock } from "@docdundee/vue";
 import { hljs } from "@/conf";
-import { brain, agent } from "@/agent/agent";
+import { brain } from "@/agent/agent";
 import { discover } from './utils';
-import AgentJoeV3 from '@/agent/AgentV3.vue';
 import { useStore } from '@nanostores/vue';
-import { initLm } from '@/agent/state';
+import AgentConf from "@/components/agentconf/AgentConf.vue";
 
-let brainStream = useStore(brain.stream);
+let state: ReturnType<typeof useStore>;
+let stream: ReturnType<typeof useStore>;
+const hasExpert = ref(false);
 const isReady = ref(false);
 
 const q1 = ref("Write a list of the planets names of the solar system");
@@ -70,11 +79,12 @@ const grammar1 = `interface Grammar {
 }`;
 
 async function init() {
-    agent.state.setKey("component", "AgentBaseText");
-    if (!brain.state.get().isOn) {
-        await initLm()
+    hasExpert.value = brain.experts.length > 0;
+    if (hasExpert.value) {
+        brain.ex.checkStatus();
+        state = useStore(brain.ex.state);
+        stream = useStore(brain.ex.backend.stream);
     }
-    brainStream = useStore(brain.ex.stream);
     isReady.value = true
 }
 

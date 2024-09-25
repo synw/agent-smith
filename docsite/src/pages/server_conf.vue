@@ -1,12 +1,12 @@
 <template>
-    <div>
+    <div class="w-full h-full">
         <div class="prosed">
-            <h2>Inference server config</h2>
+            <h2>Agent config</h2>
         </div>
-        <model-conf></model-conf>
+        <agent-conf></agent-conf>
     </div>
 </template>
 
 <script setup lang="ts">
-import ModelConf from "@/agent/widgets/ModelConf.vue";
+import AgentConf from '@/components/agentconf/AgentConf.vue';
 </script>

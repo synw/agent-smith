@@ -9,6 +9,14 @@
     </div>
   </div>
   <the-sidebar class="fixed left-0 hidden p-3 overflow-y-auto w-80 top-16 md:block secondary main-h"></the-sidebar>
+  <Toast />
+  <ConfirmDialog>
+    <template #message="slotProps">
+      <div class="flex flex-row items-center p-4">
+        <div class="pl-2">{{ slotProps.message.message }}</div>
+      </div>
+    </template>
+  </ConfirmDialog>
 </template>
 
 <script setup lang="ts">
@@ -18,6 +26,9 @@ import TheSidebar from "./components/TheSidebar.vue";
 import { libTitle, links } from "@/conf";
 import { initState } from "./state";
 import { useRouter } from "vue-router";
+import { initNotifyService } from "./services/notify";
+import ConfirmDialog from "primevue/confirmdialog";
+import Toast from "primevue/toast";
 
 const router = useRouter();
 
@@ -34,7 +45,10 @@ function openLink(url: string) {
 // <a href="javascript:openLink('/category/name')">My link</a>
 window["openLink"] = openLink;
 
-onBeforeMount(() => initState());
+onBeforeMount(() => {
+  initNotifyService();
+  initState();
+});
 </script>
 
 <style lang="sass">

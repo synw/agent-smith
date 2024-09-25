@@ -1,6 +1,6 @@
-//import { useLmExpert, LmExpert } from "@agent-smith/brain";
-import { useLmExpert } from "../../../packages/brain/src/lm";
-import { LmExpert } from "../../../packages/brain/src/interfaces";
+import { useLmExpert, LmExpert } from "@agent-smith/brain";
+//import { useLmExpert } from "../../../packages/brain/src/lm";
+//import { LmExpert } from "../../../packages/brain/src/interfaces";
 
 async function discoverExperts(): Promise<Array<LmExpert>> {
     const ex = new Array<LmExpert>();

@@ -2,7 +2,7 @@
   <sw-header class="fixed top-0 left-0 z-40 w-screen h-16" :class="css ? css : 'primary'"
     @togglemenu="isMenuVisible = !isMenuVisible">
     <template #branding>
-      <div @click="$router.push('/')">
+      <div @click="router.push('/')">
         <div class="ml-5 text-2xl cursor-pointer flex flex-row items-center">
           <div class="mr-2">
             <img src="/img/agentsmith.png" alt="" class="h-14" />
@@ -12,7 +12,7 @@
       </div>
     </template>
     <template #mobile-branding>
-      <a class="ml-3 text-2xl" @click="$router.push('/')">
+      <a class="ml-3 text-2xl" @click="router.push('/')">
         {{ libTitle }}
       </a>
     </template>
@@ -23,10 +23,11 @@
     </template>
     <template #menu>
       <div class="flex flex-row items-center justify-end h-full">
-        <button v-for="link in links" class="border-none btn" @click="closeMenu(); $router.push(link.href)"
+        <button v-for="link in links" class="border-none btn" @click="closeMenu(); router.push(link.href)"
           v-html="link.name"></button>
-        <py-status :py="py" v-if="$route.path.startsWith('/examples/data_viz')" class=""></py-status>
-        <button class="btn" @click="$router.push('/server_conf')">
+        <py-status :py="py" v-if="router.currentRoute.value.path.startsWith('/examples/data_viz')" class=""></py-status>
+        <button class="btn"
+          @click="router.push({ path: '/server_conf', query: { from: router.currentRoute.value.path } })">
           <prompt-icon class="text-3xl"></prompt-icon>
         </button>
         <a :href="repoUrl" class="btn">
@@ -41,7 +42,7 @@
   </sw-header>
   <sw-mobile-menu :is-visible="isMenuVisible" class="absolute left-0 z-30 w-full lighter top-14">
     <div class="flex flex-col p-3 space-y-5">
-      <button v-for=" link  in  links " class="border-none btn" @click="closeMenu(); $router.push(link.href)"
+      <button v-for=" link in links " class="border-none btn" @click="closeMenu(); router.push(link.href)"
         v-html="link.name"></button>
       <div class="pr-5 text-lg" @click="closeMenu(); toggleDarkMode()">
         <i-fa-solid:moon v-if="!user.isDarkMode.value"></i-fa-solid:moon>

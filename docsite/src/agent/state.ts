@@ -1,6 +1,6 @@
 import { InferenceParams, ModelConf } from "@locallm/types"
 import { Ref, reactive, ref } from "vue";
-import { useTemplateForModel } from "./tfm";
+//import { useTemplateForModel } from "@agent-smith/tfm";
 import { brain } from "./agent";
 
 const defaultInferenceParams: InferenceParams = {
@@ -15,19 +15,19 @@ const inferenceParams = reactive(defaultInferenceParams);
 const model = reactive<ModelConf>({ name: "", ctx: 2048 });
 const template = ref("none");
 
-const tfm = useTemplateForModel();
+//const tfm = useTemplateForModel();
 
 async function initLm(isTrying: Ref<boolean> | null = null) {
     if (isTrying) {
         isTrying.value = true;
     }
-    await brain.resetExperts();
+    brain.resetExperts();
     await brain.discoverLocal();
-    console.log("Experts:", brain.experts);
+    console.log("Experts:", brain.backends);
     if (isTrying) {
         isTrying.value = false;
     }
-    if (brain.state.get().isOn) {
+    /*if (brain.state.get().isOn) {
         let templ = "none";
         try {
             templ = await tfm.get(brain.ex.lm.model.name);
@@ -44,7 +44,7 @@ async function initLm(isTrying: Ref<boolean> | null = null) {
             model.name = brain.ex.lm.model.name;
             model.ctx = brain.ex.lm.model.ctx;
         }
-    }
+    }*/
 }
 
-export { inferenceParams, template, tfm, model, initLm }
+export { inferenceParams, template, model, initLm }

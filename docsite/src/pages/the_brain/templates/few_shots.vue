@@ -13,8 +13,11 @@
             </div>
             <div>The template rendering:</div>
             <div class="txt-light">
-                <pre>{{ expert.template.render() }}</pre>
+                <pre>{{ ex.template.render() }}</pre>
             </div>
+        </div>
+        <div class="pt-5">
+            <a href="javascript:openLink('/the_brain/browser')">Next: browser</a>
         </div>
     </div>
 </template>
@@ -22,9 +25,16 @@
 <script setup lang="ts">
 import { StaticCodeBlock } from "@docdundee/vue";
 import { hljs } from "@/conf";
-import { expert } from "@/agent/agent4";
 import { TurnBlock } from "modprompt";
 import { onBeforeMount } from "vue";
+import { useLmBackend, useLmExpert } from "@agent-smith/brain";
+
+const ex = useLmExpert({
+    name: "demo",
+    backend: useLmBackend({ name: "browser", localLm: "browser" }),
+    template: "chatml",
+    model: { name: "dummy", ctx: 2048 },
+});
 
 function createPrompt() {
     const shots: Array<TurnBlock> = [
@@ -41,7 +51,7 @@ function createPrompt() {
             assistant: "neutral",
         },
     ];
-    shots.forEach((s) => expert.template.addShot(s.user, s.assistant));
+    shots.forEach((s) => ex.template.addShot(s.user, s.assistant));
 }
 
 const code1 = `import { TurnBlock } from "modprompt";
@@ -60,7 +70,8 @@ const shots: Array<TurnBlock> = [
         assistant: "neutral",
     },
 ];
-shots.forEach((s) => expert.template.addShot(s.user, s.assistant));`;
+shots.forEach((s) => ex.template.addShot(s.user, s.assistant));
+console.log(ex.template.render());`;
 
 onBeforeMount(() => createPrompt())
 </script>

@@ -41,9 +41,12 @@
             <div class="flex flex-row space-x-3">
                 <button class="btn" :class="isModelLoaded ? 'success' : 'light'" @click="infer()"
                     :disabled="(!isModelLoaded || isRunningInference)">Run inference</button>
-                <button v-if="isRunningInference" class="btn danger" @click="brain.abortThinking()">Abort</button>
+                <button v-if="isRunningInference" class="btn danger" @click="ex.abortThinking()">Abort</button>
             </div>
             <div>{{ output }}</div>
+            <div class="pt-5">
+                <a href="javascript:openLink('/the_brain/jobs')">Next: jobs</a>
+            </div>
         </div>
     </div>
 </template>
@@ -52,11 +55,11 @@
 import { hljs } from "@/conf";
 import { StaticCodeBlock } from "@docdundee/vue";
 import Textarea from 'primevue/textarea';
-import { brain } from "@/agent/browser/agent";
-import { OnLoadProgress } from "@/agent/browser/interfaces";
+import { OnLoadProgress } from "@locallm/types";
 import ProgressBar from 'primevue/progressbar';
 import { ref } from "vue";
 import { PromptTemplate } from "modprompt";
+import { useLmBackend, useLmExpert } from "@agent-smith/brain";
 
 const output = ref("");
 const loadingProgress = ref(0);
@@ -64,30 +67,18 @@ const isModelLoaded = ref(false);
 const isRunningInference = ref(false);
 const q = ref("List the orbital periods of the planets of the solar system");
 
-const code1 = `import { useLmExpert, useAgentBrain } from "@agent-smith/brain";
-
-const brain = useAgentBrain([
-    useLmExpert({
+const ex = useLmExpert({
+    name: "demo",
+    backend: useLmBackend({ name: "browser", localLm: "browser" }),
+    template: "chatml",
+    model: {
         name: "smollm-360m",
-        localLm: "browser",
-    }),
-]);
-
-export { brain }`;
-
-const code2 = `const onModelLoading = (st) => {
-    console.log(st.percent, "%")
-}
-
-async function loadModel() {
-    await brain.ex.lm.loadBrowsermodel(
-        "smollm-360m",
-        "https://huggingface.co/HuggingFaceTB/smollm-360M-instruct-v0.2-Q8_0-GGUF/resolve/main/smollm-360m-instruct-add-basics-q8_0.gguf",
-        2048,
-        onModelLoading,
-    );
-    await brain.discoverBrowser(true);
-}`;
+        ctx: 2048,
+        extra: {
+            urls: "https://huggingface.co/HuggingFaceTB/smollm-360M-instruct-v0.2-Q8_0-GGUF/resolve/main/smollm-360m-instruct-add-basics-q8_0.gguf"
+        }
+    },
+});
 
 const onModelLoading: OnLoadProgress = (st) => {
     console.log(st.percent, "%");
@@ -95,15 +86,9 @@ const onModelLoading: OnLoadProgress = (st) => {
 }
 
 async function loadModel() {
-    // @ts-ignore
-    await brain.ex.lm.loadBrowsermodel(
-        "smollm-360m",
-        "https://huggingface.co/HuggingFaceTB/smollm-360M-instruct-v0.2-Q8_0-GGUF/resolve/main/smollm-360m-instruct-add-basics-q8_0.gguf",
-        2048,
-        onModelLoading,
-    );
-    await brain.discoverBrowser(true);
-    brain.ex.setOnToken((t) => output.value = t);
+    await ex.loadModel(onModelLoading);
+    console.log("Status", ex.state.get().status);
+    ex.backend.setOnToken((t) => output.value += t);
     isModelLoaded.value = true;
 }
 
@@ -112,11 +97,34 @@ async function infer() {
     const p = new PromptTemplate("chatml")
         .replaceSystem("You are an AI assistant. Important: always use json to respond")
         .prompt(q.value)
-    const res = await brain.think(
+    const res = await ex.think(
         p,
         { temperature: 0, min_p: 0.05, max_tokens: 512 }
     );
     isRunningInference.value = false;
     console.log(res.stats)
 }
+
+const code1 = `import { useLmExpert, useLmBackend } from "@agent-smith/brain";
+
+const ex = useLmExpert({
+    name: "demo",
+    backend: useLmBackend({ name: "browser", localLm: "browser" }),
+    template: "chatml",
+    model: {
+        name: "smollm-360m",
+        ctx: 2048,
+        extra: {
+            urls: "https://huggingface.co/HuggingFaceTB/smollm-360M-instruct-v0.2-Q8_0-GGUF/resolve/main/smollm-360m-instruct-add-basics-q8_0.gguf"
+        }
+    },
+});`;
+
+const code2 = `const onModelLoading = (st) => {
+    console.log(st.percent, "%")
+}
+
+async function loadModel() {
+    await ex.loadModel(onModelLoading);
+}`;
 </script>

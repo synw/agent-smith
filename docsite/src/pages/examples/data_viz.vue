@@ -12,9 +12,9 @@
             <div class="prosed">
                 <h2>Model conf</h2>
             </div>
-            <model-conf class="mt-8"></model-conf>
+            <agent-conf class="mt-8" @end="step = 1" :disable-browser="true"></agent-conf>
             <div class="mt-5">
-                Recommended models: Deepseek 1.3b, 6.7b or 33b (note: the version 1.5 - 7b is not recommended)
+                Recommended models: Deepseek 1.3b, 6.7b or 33b
             </div>
         </div>
         <div v-else-if="step == 2">
@@ -30,7 +30,7 @@ import "vuepython/style.css";
 import BlockUI from 'primevue/blockui';
 import PickDataset from "./data_viz/components/PickDataset.vue";
 import ViewDataset from "./data_viz/components/ViewDataset.vue";
-import ModelConf from "../../agent/widgets/ModelConf.vue";
+import AgentConf from "@/components/agentconf/AgentConf.vue";
 
 const step = ref(1);
 const datasetName = ref("");

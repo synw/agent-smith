@@ -10,39 +10,47 @@
             <h2>Interactive doc config</h2>
           </div>
           <div>Agent Smith's documentation has interactive examples. To run them configure
-            a local inference server using Llama.cpp, Koboldcpp or Ollama.
+            an inference backend using a local Llama.cpp, Koboldcpp or Ollama or just the browser.
           </div>
-          <div class="mt-8">
-            <button class="btn success" @click="isConfigModel = true">Configure an inference server</button>
+          <div class="mt-5">
+            <button v-if="brain.experts.length == 0" class="btn success" @click="isConfigModel = true">Configure an
+              expert</button>
+            <div v-else class="flex flex-col space-y-3">
+              <div>
+                Using a <span class="font-semibold">{{ brain.ex.backend.name }}</span> backend with
+                model <span class="font-semibold">{{ brain.ex.backend.lm.model.name }}</span>
+              </div>
+            </div>
           </div>
           <div class="mt-5 flex flex-row space-x-2 items-center">
-            <div>Or you can do it later using this icon</div>
+            <div>The agent config can be updated later using this icon</div>
             <div class="txt-light">
               <prompt-icon class="text-3xl"></prompt-icon>
             </div>
             <div>in the topbar</div>
           </div>
-          <div class="mt-3">This demo works with the <a
-              href="https://huggingface.co/TheBloke/TinyLlama-1.1B-Chat-v1.0-GGUF">Tinyllama</a> model or another of
+          <div class="mt-3">This interactive doc works with the <a
+              href="https://huggingface.co/bartowski/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/Qwen2.5-0.5B-Instruct-Q5_K_M.gguf">Qwen
+              2.5 0.5b q5k_m</a> model or another of
             your choice</div>
         </template>
         <template v-else>
           <div class="prosed">
-            <h2>Inference server config</h2>
+            <h2>Agent config</h2>
           </div>
-          <model-conf></model-conf>
+          <agent-conf @end="isConfigModel = false"></agent-conf>
         </template>
       </div>
     </div>
     <div class="ml-8">
       <render-md :hljs="hljs" :source="side"></render-md>
       <div class="flex flex-col mt-5">
-        <div>Quick Nodejs example:</div>
+        <div>Quick example:</div>
         <static-code-block :hljs="hljs" :code="code" lang="typescript"
           class="not-prose mt-5 max-w-screen-lg"></static-code-block>
       </div>
       <div>
-        <button class="mt-5 btn" @click="$router.push('/the_body/overview')">Next: the body: overview</button>
+        <button class="mt-5 btn" @click="router.push('/the_body/overview')">Next: the body: overview</button>
       </div>
     </div>
   </div>
@@ -53,10 +61,13 @@ import { hljs } from "@/conf";
 import { RenderMd } from "@docdundee/vue";
 import { StaticCodeBlock } from "@docdundee/vue";
 import PromptIcon from "@/widgets/PromptIcon.vue";
-import ModelConf from "@/agent/widgets/ModelConf.vue";
+import AgentConf from '@/components/agentconf/AgentConf.vue';
 import { ref } from "vue";
+import { useRouter } from "vue-router";
+import { brain } from "@/agent/agent";
 
 const isConfigModel = ref(false);
+const router = useRouter();
 
 const side = `### What can Agent Smith do?
 
@@ -65,23 +76,29 @@ const side = `### What can Agent Smith do?
 - **Run jobs**: manage long running jobs with multiple tasks
 - **Remember**: use it's transient or semantic memory to store data`;
 
-const code = `const expert = useLmExpert({
-    name: "default",
+const code = `const backend = useLmBackend({
+    name: "koboldcpp",
     localLm: "koboldcpp",
-    templateName: "mistral",
     onToken: (t) => process.stdout.write(t),
 });
 
-const bob = useAgentSmith({
-    name: "Bob",
-    brain: useAgentBrain([expert]),
+const ex = useLmExpert({
+    name: "koboldcpp",
+    backend: backend,
+    template: templateName,
+    model: { name: modelName, ctx: 2048 },
 });
 
-// auto discover if expert's inference servers are up
-const isUp = await bob.brain.discover();
-if (isUp) {
-  // run an inference query
-  const _prompt = "list the planets of the solar sytem";
-  await bob.brain.think(_prompt, { temperature: 0.2 });
+const brain = useAgentBrain([backend], [ex]);
+
+await brain.init();
+brain.ex.checkStatus();
+if (brain.ex.state.get().status == "ready") { 
+  const params = { temperature: 0.2 };
+    const res = await brain.think(
+        prompt,
+        params,
+    );
+    console.log(res.stats);
 }`;
 </script>

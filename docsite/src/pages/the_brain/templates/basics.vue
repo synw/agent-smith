@@ -11,7 +11,7 @@
             </div>
             <div>Let's see what the template looks like:</div>
             <div class="txt-light" v-if="step == 1">
-                <pre>{{ brain.ex.template.render() }}</pre>
+                <pre>{{ ex.template.render() }}</pre>
             </div>
             <div>
                 <static-code-block :hljs="hljs" :code="code2" lang="html"></static-code-block>
@@ -25,7 +25,7 @@
             </div>
             <div>The template:</div>
             <div class="txt-light" v-if="step == 2">
-                <pre>{{ brain.ex.template.render() }}</pre>
+                <pre>{{ ex.template.render() }}</pre>
             </div>
             <div>
                 <static-code-block :hljs="hljs" :code="code3" lang="ts"></static-code-block>
@@ -39,7 +39,7 @@
             </div>
             <div>The template:</div>
             <div class="txt-light" v-if="step == 3">
-                <pre>{{ brain.ex.template.render() }}</pre>
+                <pre>{{ ex.template.render() }}</pre>
             </div>
             <div>
                 <static-code-block :hljs="hljs" :code="code4" lang="ts"></static-code-block>
@@ -50,7 +50,7 @@
             </div>
             <div>The template:</div>
             <div class="txt-light" v-if="step == 4">
-                <pre>{{ brain.ex.template.prompt("{a: 1,}") }}</pre>
+                <pre>{{ ex.template.prompt("{a: 1,}") }}</pre>
             </div>
             <div>
                 <static-code-block :hljs="hljs" :code="code5" lang="html"></static-code-block>
@@ -65,45 +65,48 @@
 <script setup lang="ts">
 import { StaticCodeBlock } from "@docdundee/vue";
 import { hljs } from "@/conf";
-import { brain } from "@/agent/agent3";
 import { ref } from "vue";
+import { useLmBackend, useLmExpert } from "@agent-smith/brain";
 
 const step = ref<1 | 2 | 3 | 4>(1);
-
-const code1 = `import { useAgentSmith } from "@agent-smith/body";
-import { useLmExpert, useAgentBrain } from "@agent-smith/brain";
-
-const expert = useLmExpert({
-    name: "default",
-    localLm: "koboldcpp",
-    templateName: "chatml",
+const ex = useLmExpert({
+    name: "demo",
+    backend: useLmBackend({ name: "browser", localLm: "browser" }),
+    template: "chatml",
+    model: { name: "dummy", ctx: 2048 },
 });
-const brain = useAgentBrain([expert]);
 
-export { brain }`;
+const code1 = `import { useLmBackend, useLmExpert } from "@agent-smith/brain";
+
+const ex = useLmExpert({
+    name: "demo",
+    backend: useLmBackend({ name: "browser", localLm: "browser" }),
+    template: "chatml",
+    model: { name: "dummy", ctx: 2048 },
+});`;
 
 const code2 = `<div class="text-light">
-    <pre>{{ brain.ex.template.render() }}</pre>
+    <pre>{{ ex.template.render() }}</pre>
 </div>`;
 
 const code3 = `function addSystemMsg() {
-    brain.ex.template.replaceSystem("You are a javascript AI code assistant")
+    ex.template.replaceSystem("You are a javascript AI code assistant")
 }`;
 
 const code4 = `function modifyPompt() {
-    brain.ex.template.replacePrompt("fix this invalid json:\n\n\`\`\`json\n{prompt}\n\`\`\`")
+    ex.template.replacePrompt("fix this invalid json:\n\n\`\`\`json\n{prompt}\n\`\`\`")
 }`;
 
-const code5 = `{{ brain.ex.template.prompt("{a: 1,}") }}`;
+const code5 = `{{ ex.template.prompt("{a: 1,}") }}`;
 
 function addSystemMsg() {
-    console.log("TPL", brain.ex.template.name);
-    brain.ex.template.replaceSystem("You are a javascript AI code assistant");
+    console.log("TPL", ex.template.name);
+    ex.template.replaceSystem("You are a javascript AI code assistant");
     step.value = 2;
 }
 
 function modifyPompt() {
-    brain.ex.template.replacePrompt("fix this invalid json:\n\n```json\n{prompt}\n```");
+    ex.template.replacePrompt("fix this invalid json:\n\n```json\n{prompt}\n```");
     step.value = 3;
 }
 
