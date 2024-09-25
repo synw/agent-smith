@@ -79,6 +79,9 @@ import { brain } from '@/agent/agent';
 import { ref } from 'vue';
 import LoadingSpinner from '@/widgets/LoadingSpinner.vue';
 import { LmBackend, LmExpert, useLmBackend, useLmExpert } from '@agent-smith/brain';
+/*import { useLmBackend } from "../../../../packages/brain/src/backend";
+import { useLmExpert } from "../../../../packages/brain/src/expert";
+import { LmExpert, LmBackend } from "../../../../packages/brain/src/interfaces";*/
 import CppModels from './CppModels.vue';
 import OllamaModels from './OllamaModels.vue';
 import { LmExpertConfDef } from '@/interfaces';
@@ -111,6 +114,7 @@ function initBrowserBackend(): LmBackend {
             name: "browser",
             localLm: "browser",
         });
+        //console.log("Create backend", bc);
         brain.addBackend(bc);
     };
     isPinging.value = false;

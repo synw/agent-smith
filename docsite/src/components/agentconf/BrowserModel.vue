@@ -20,6 +20,7 @@
 import { brain } from '@/agent/agent';
 import { BrowserModelConf, LmExpertConfDef } from '@/interfaces';
 import { WllamaProvider } from '@locallm/browser';
+//import { WllamaProvider } from '../../../../packages/brain/src/packages/browser/wllama';
 import { OnLoadProgress } from '@locallm/types';
 import { onBeforeMount, ref } from 'vue';
 import ProgressBar from 'primevue/progressbar';
@@ -56,7 +57,12 @@ async function downloadModel() {
     isDownloading.value = true;
     // @ts-ignore
     await bc.lm.wllama.exit();
-    bc.lm = WllamaProvider.init({ name: bc.name, onToken: bc.lm.onToken });
+    let base = "";
+    if (import.meta.env.BASE_URL.length > 2) {
+        base = import.meta.env.BASE_URL;
+    };
+    //console.log("BASE", base, "/", import.meta.env.BASE_URL);
+    bc.lm = WllamaProvider.init({ name: bc.name, onToken: bc.lm.onToken }, base + "/esm/");
     //bc.lm.wllama.cacheManager.clear();
     //console.log("Loadmodel");
     loadingProgress.value = 0;

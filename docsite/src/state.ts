@@ -5,7 +5,6 @@ import { loadHljsTheme } from "@/conf";
 import { useNav, useDocloader } from "@docdundee/nav";
 
 const user = new User();
-
 const api = useApi({
   serverUrl: import.meta.env.MODE == "production" ? import.meta.env.BASE_URL : "",
 });

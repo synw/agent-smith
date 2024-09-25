@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@agent-smith/body": "^0.0.8",
-    "@agent-smith/brain": "^0.0.29",
+    "@agent-smith/brain": "^0.0.30",
     "@agent-smith/jobs": "^0.0.11",
     "@agent-smith/tfm": "^0.1.1",
     "@agent-smith/tmem": "^0.0.4",
