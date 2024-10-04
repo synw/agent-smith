@@ -21,6 +21,7 @@ interface LmBackendSpec {
     localLm?: LmProviderType;
     onToken?: (t: string) => void;
     onStartEmit?: () => void;
+    extra?: Record<string, any>;
 }
 
 /**

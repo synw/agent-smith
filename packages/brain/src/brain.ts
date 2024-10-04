@@ -153,15 +153,26 @@ const useAgentBrain = (initialBackends: Array<LmBackend> = [], initialExperts: A
         if (foundEx) {
             _ex = foundEx
         }
-        for (const bc of _backends) {
-            const m = bc.lm.models.find(x => x.name == modelName);
-            if (m) {
+        //console.log("Havebc", Object.keys(_backendsForModels).includes(modelName));
+        if (Object.keys(_backendsForModels).includes(modelName)) {
+            const bc = backend(_backendsForModels[modelName]);
+            if (["llamapcpp", "koboldcpp"].includes(bc.lm.providerType)) {
                 _ex = useLmExpert({
                     name: modelName,
-                    model: m,
+                    model: bc.lm.model,
                     template: templateName,
                     backend: bc
-                })
+                });
+            } else {
+                const m = bc.lm.models.find(x => x.name == modelName);
+                if (m) {
+                    _ex = useLmExpert({
+                        name: modelName,
+                        model: m,
+                        template: templateName,
+                        backend: bc
+                    });
+                }
             }
         }
         if (_ex) {

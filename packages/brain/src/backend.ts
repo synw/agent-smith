@@ -3,6 +3,7 @@ import { Lm } from "@locallm/api";
 import { defaultLocalBackends } from "./const.js";
 import { LmBackend, LmBackendSpec } from "./interfaces.js";
 import { WllamaProvider } from '@locallm/browser';
+//import { WllamaProvider } from './packages/browser/wllama.js';
 
 const useLmBackend = (spec: LmBackendSpec): LmBackend => {
     let lm: Lm | WllamaProvider;
@@ -59,6 +60,10 @@ const useLmBackend = (spec: LmBackendSpec): LmBackend => {
                 });
                 break;
             case "browser":
+                let param: string | undefined;
+                if (spec?.extra?.esm) {
+                    param = spec.extra.esm;
+                }
                 lm = WllamaProvider.init({
                     name: "browser",
                     onToken: (t: string) => {
@@ -68,7 +73,7 @@ const useLmBackend = (spec: LmBackendSpec): LmBackend => {
                         }
                     },
                     onStartEmit: onStartEmit,
-                });
+                }, param);
                 break;
             default:
                 throw new Error(`Unknown provider type ${spec.localLm}`)
