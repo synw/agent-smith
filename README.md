@@ -118,15 +118,26 @@ lm commit .
 ### Nodejs
 
 ```ts
-const expert = useLmExpert({
-    name: "default",
+const backend = useLmBackend({
+    name: "koboldcpp",
     localLm: "koboldcpp",
-    templateName: "mistral",
     onToken: (t) => process.stdout.write(t),
 });
+
+const ex = useLmExpert({
+    name: "koboldcpp",
+    backend: backend,
+    template: templateName,
+    model: { name: modelName, ctx: 2048 },
+});
 const brain = useAgentBrain([expert]);
-// auto discover if expert's inference servers are up
-await brain.discover();
+
+console.log("Auto discovering brain backend ...");
+await brain.init();
+brain.ex.checkStatus();
+if (brain.ex.state.get().status != "ready") {
+        throw new Error("The expert's backend is not ready")
+    }
 // run an inference query
 const _prompt = "list the planets of the solar sytem";
 await brain.think(_prompt, { 
