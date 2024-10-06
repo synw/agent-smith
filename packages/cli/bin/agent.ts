@@ -35,8 +35,9 @@ async function initAgent(mode: RunMode, isVerbose = false): Promise<boolean> {
             }))
         });*/
         await initExperts();
-        //console.log("Backends:", brain.backends.map(x => x.name));
-        //console.log("Experts:", brain.experts.map(x => x.name));
+        /*console.log("Backends:", brain.backends.map(x => x.name));
+        console.log("Experts:", brain.experts.map(x => x.name));
+        console.log("Bfm:", brain.backendsForModels);*/
     }
     const brainUp = brain.state.get().isOn;
     if (isVerbose) {

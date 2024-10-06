@@ -142,7 +142,7 @@ async function _executeTaskCmd(args: Array<string> = [], options: any): Promise<
         console.warn("Provide a task name");
         return
     }
-    const { ok, data, error } = await executeTaskCmd(args);
+    const { ok, data, error } = await executeTaskCmd(args, options);
     if (!ok) {
         console.warn(error)
     }
