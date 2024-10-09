@@ -57,12 +57,12 @@ async function downloadModel() {
     isDownloading.value = true;
     // @ts-ignore
     await bc.lm.wllama.exit();
-    let base = "";
-    if (import.meta.env.BASE_URL.length > 2) {
+    /*let base = "";
+    if (import.meta.env.MODE == "production") {
         base = import.meta.env.BASE_URL;
-    };
+    };*/
     //console.log("BASE", base, "/", import.meta.env.BASE_URL);
-    bc.lm = WllamaProvider.init({ name: bc.name, onToken: bc.lm.onToken }, base + "/esm/");
+    bc.lm = WllamaProvider.init({ name: bc.name, onToken: bc.lm.onToken }, import.meta.env.BASE_URL + "/esm/");
     //bc.lm.wllama.cacheManager.clear();
     //console.log("Loadmodel");
     loadingProgress.value = 0;

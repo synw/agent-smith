@@ -1,0 +1,1 @@
+import{d as n,o as s,m as o,f as e,H as t,T as l,U as r,V as p}from"./index-56o_VcVb.js";const _=n({__name:"[...all]",setup(u){return(a,i)=>(s(),o(e(p),{hljs:e(t),nav:e(l),url:a.$route.path,"on-open":a.$router.push,"base-title":e(r)},null,8,["hljs","nav","url","on-open","base-title"]))}});export{_ as default};
