@@ -34,17 +34,25 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
     const taskSpec = taskBuilder.readFromYaml(res.ymlTask);
     const task = taskBuilder.fromYaml(res.ymlTask);
     const { conf, vars } = initTaskVars(args);
-    const ex = brain.getOrCreateExpertForModel(taskSpec.model.name, taskSpec.template.name);
+    let m = taskSpec.model.name;
+    let t = taskSpec.template.name;
+    if (conf?.model) {
+        m = conf.model
+    }
+    if (conf?.template) {
+        t = conf.template
+    }
+    const ex = brain.getOrCreateExpertForModel(m, t);
     //console.log("EFM", ex?.name);
     if (!ex) {
-        throw new Error("No expert found for model " + taskSpec.model.name)
+        throw new Error("No expert found for model " + m)
     }
     ex.checkStatus();
     ex.backend.setOnToken((t) => {
         process.stdout.write(t)
     });
     conf.expert = ex;
-    console.log("Ingesting prompt ...");
+    //console.log("Ingesting prompt ...");
     //console.log("Vars", vars);
     const data = await task.run({ prompt: pr, ...vars }, conf) as Record<string, any>;
     if (data?.error) {
