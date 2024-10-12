@@ -92,9 +92,9 @@ class LmTaskBuilder<T = string> {
                     throw new Error(`The ${modelName} model is not loaded on server (currently ${this.expert.lm.model.name})`)
                 }
                 const tpl = new PromptTemplate(templateName);
+                task.inferParams.stop = tpl?.stop ?? [];
                 if (task.template?.stop) {
-                    const defaultStop = tpl?.stop ?? [];
-                    task.inferParams.stop = [...defaultStop, ...task.template.stop];
+                    task.inferParams.stop.push(...task.template.stop);
                 }
                 if (task.template?.system) {
                     tpl.replaceSystem(task.template.system)
