@@ -6,7 +6,10 @@ import { LmTaskBuilder } from "@agent-smith/lmtask";
 //import { useAgentBrain } from "../packages/brain/dist/brain.js";
 //import { LmTaskBuilder } from "../packages/lmtask/dist/task.js"
 
-// Run an Ollama server with llama3.1:latest
+// Run an Ollama server
+
+const model = "llama3.1:latest";
+const template = "llama3";
 
 async function main() {
     const taskPath = "./sample/mytask.yml"
@@ -14,7 +17,7 @@ async function main() {
     const brain = useAgentBrain();
     await brain.initLocal();
     brain.backend("ollama").setOnToken((t) => process.stdout.write(t));
-    const ex = brain.getOrCreateExpertForModel("llama3.1:latest", "llama3");
+    const ex = brain.getOrCreateExpertForModel(model, template);
     if (!ex) {
         console.error("No backend found for model")
     }
@@ -22,10 +25,13 @@ async function main() {
     const taskBuilder = new LmTaskBuilder(brain);
     // build the task
     const task = taskBuilder.fromYaml(ymlTaskDef);
-    console.log("Running task...", task)
+    console.log("Running task...", task.name);
     // run the task    
     const conf = {
         expert: ex,
+        model: model,
+        template: template,
+        debug: true,
     };
     await task.run({
         prompt: "What are your favourite activities?",
