@@ -46,7 +46,7 @@ class LmTaskBuilder<T = string> {
                     if (conf?.model) {
                         overrideModel = true;
                         modelOverride.model = conf.model;
-                        if (conf.template) {
+                        if (conf?.template) {
                             modelOverride.template = conf.template;
                         } else {
                             // try to guess the template
@@ -54,14 +54,15 @@ class LmTaskBuilder<T = string> {
                             if (gt == "none") {
                                 throw new Error(`Unable to guess the template for ${conf.model}: please provide a template name: m="modelname/templatename"`)
                             }
+                            modelOverride.template = gt;
                         }
                         //console.log("MO", modelOverride);
                     }
                 }
-                /*console.log("Running task", task.name, ", params:", params);
-                console.log("Prompt", prompt);
-                console.log("Vars", tvars);
-                console.log("Conf", conf);*/
+                //console.log("Running task", task.name, ", params:", params);
+                //console.log("Prompt", prompt);
+                //console.log("Vars", tvars);
+                //console.log("Conf", conf);
                 const modelName = overrideModel ? modelOverride.model : task.model.name;
                 const templateName = modelOverride?.template ? modelOverride.template : task.template.name;
                 if (conf) {
@@ -128,7 +129,11 @@ class LmTaskBuilder<T = string> {
                 }
                 tpl.replacePrompt(task.prompt)
                 const pr = tpl.prompt(prompt);
-                //console.log("PR", pr);
+                if (conf?.debug) {
+                    console.log("-----------", modelName, "/", templateName, "-----------");
+                    console.log(pr);
+                    console.log("----------------------------------------------")
+                }
                 //console.log("PARAMS", task.inferParams)
                 if (this.expert.lm.providerType == "ollama") {
                     // tell Ollama to apply no template
