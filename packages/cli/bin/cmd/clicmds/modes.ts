@@ -1,7 +1,13 @@
 import { Cmd } from "../../interfaces.js";
-import { formatMode, inputMode, outputMode, runMode } from "../../state/state.js";
+import { formatMode, inputMode, isDebug, outputMode, runMode } from "../../state/state.js";
 
 const modes: Record<string, Cmd> = {
+    "-d": {
+        cmd: async () => {
+            isDebug.value = true;
+        },
+        description: "use debug mode",
+    },
     "-if": {
         cmd: async () => {
             inputMode.value = "promptfile";

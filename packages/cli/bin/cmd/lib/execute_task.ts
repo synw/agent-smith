@@ -1,7 +1,7 @@
 import { brain, initAgent, taskBuilder } from "../../agent.js";
 import { getFeatureSpec } from "../../state/features.js";
 import { FeatureType } from "../../interfaces.js";
-import { runMode } from "../../state/state.js";
+import { isDebug, runMode } from "../../state/state.js";
 import { initTaskVars, readTask } from "./utils.js";
 import { readClipboard } from "../sys/clipboard.js";
 
@@ -52,6 +52,9 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
         process.stdout.write(t)
     });
     conf.expert = ex;
+    if (isDebug.value) {
+        conf.debug = true;
+    }
     //console.log("Ingesting prompt ...");
     //console.log("Vars", vars);
     const data = await task.run({ prompt: pr, ...vars }, conf) as Record<string, any>;

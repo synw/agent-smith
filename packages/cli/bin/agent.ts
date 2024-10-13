@@ -1,7 +1,5 @@
 import { useAgentBrain } from "@agent-smith/brain";
-//import { useAgentBrain, useLmExpert } from "../../brain/src/main.js";
 import { LmTaskBuilder } from "@agent-smith/lmtask";
-//import { LmTaskBuilder } from "../../lmtask/src/task.js";
 import { MarkedExtension, marked } from 'marked';
 import { markedTerminal } from 'marked-terminal';
 import { FeatureType, RunMode } from "./interfaces.js";
@@ -26,14 +24,6 @@ async function initAgent(mode: RunMode, isVerbose = false): Promise<boolean> {
     if (!brain.state.get().isOn) {
         brain.resetExperts();
         await brain.initLocal();
-        /*brain.backends.forEach((b) => {
-            brain.addExpert(useLmExpert({
-                name: b.name,
-                backend: b,
-                model: { name: "", ctx: 2048 },
-                template: "none",
-            }))
-        });*/
         await initExperts();
         /*console.log("Backends:", brain.backends.map(x => x.name));
         console.log("Experts:", brain.experts.map(x => x.name));
