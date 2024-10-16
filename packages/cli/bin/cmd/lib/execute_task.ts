@@ -1,8 +1,8 @@
 import { brain, initAgent, taskBuilder } from "../../agent.js";
 import { getFeatureSpec } from "../../state/features.js";
 import { FeatureType } from "../../interfaces.js";
-import { isDebug, runMode } from "../../state/state.js";
-import { initTaskVars, readTask } from "./utils.js";
+import { inputMode, isDebug, runMode } from "../../state/state.js";
+import { initTaskVars, readPromptFile, readTask } from "./utils.js";
 import { readClipboard } from "../sys/clipboard.js";
 
 async function executeTaskCmd(args: Array<string> = [], options: any = {}): Promise<any> {
@@ -13,9 +13,11 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
     const params = args.filter((x) => x.length > 0);
     //console.log("Task run params", params);
     let pr: string;
-    if (options?.Ic == true) {
+    if (options?.Ic == true || inputMode.value == "clipboard") {
         //console.log("Input copy option");
         pr = await readClipboard()
+    } else if (options.Pf || inputMode.value == "promptfile") {
+        pr = readPromptFile()
     }
     else if (params.length > 0) {
         pr = params.shift()!;

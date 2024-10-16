@@ -37,7 +37,7 @@ let cmds: Record<string, Cmd> = {
     t: {
         cmd: _executeTaskCmd,
         description: "execute a task",
-        args: "arguments: \n-task (required): the task name\n-args: prompt and other arguments if any for the task"
+        //args: "arguments: \n-task (required): the task name\n-args: prompt and other arguments if any for the task"
     },
     j: {
         cmd: _executeJobCmd,
@@ -69,7 +69,7 @@ function initAliases(): Record<string, Cmd> {
                 _cmds[alias.name] = {
                     cmd: (args: Array<string> = [], options: any) => _executeTaskCmd([alias.name, ...args], options),
                     description: "task: " + alias.name,
-                    args: "arguments: \n-args: prompt and other arguments if any for the task"
+                    //args: "arguments: \n-args: prompt and other arguments if any for the task"
                 }
                 break;
             case "action":
