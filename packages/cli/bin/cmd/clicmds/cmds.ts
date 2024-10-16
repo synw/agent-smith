@@ -76,14 +76,14 @@ function initAliases(): Record<string, Cmd> {
                 _cmds[alias.name] = {
                     cmd: (args: Array<string> = [], options: any = {}, quiet = false) => executeActionCmd([alias.name, ...args], options, quiet),
                     description: "action: " + alias.name,
-                    args: "arguments: \n-args: other arguments if any for the action"
+                    //args: "arguments: \n-args: other arguments if any for the action"
                 }
                 break;
             case "job":
                 _cmds[alias.name] = {
                     cmd: (args: Array<string> = [], options: any) => _executeJobCmd([alias.name, ...args], options),
                     description: "job: " + alias.name,
-                    args: "arguments: \n-args: other arguments if any for the job"
+                    //args: "arguments: \n-args: other arguments if any for the job"
                 }
         }
     });
@@ -162,7 +162,7 @@ async function _executeJobCmd(args: Array<string> = [], options: any): Promise<a
         return
     }
     const name = args.shift()!;
-    const res = await executeJobCmd(name, args);
+    const res = await executeJobCmd(name, args, options);
     return res
     //console.log("ENDRES", t);
 }

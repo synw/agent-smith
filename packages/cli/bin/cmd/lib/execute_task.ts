@@ -36,6 +36,8 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
     const taskSpec = taskBuilder.readFromYaml(res.ymlTask);
     const task = taskBuilder.fromYaml(res.ymlTask);
     const { conf, vars } = initTaskVars(args);
+    //console.log("Conf", conf)
+    //console.log("Vars", vars)
     let m = taskSpec.model.name;
     let t = taskSpec.template.name;
     if (conf?.model) {

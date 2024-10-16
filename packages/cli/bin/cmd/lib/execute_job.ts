@@ -8,7 +8,7 @@ import { FeatureType } from '../../interfaces.js';
 import { formatMode } from '../../state/state.js';
 import { initTaskVars, readTask } from './utils.js';
 
-async function executeJobCmd(name: string, args: Array<any> = []): Promise<Record<string, any>> {
+async function executeJobCmd(name: string, args: Array<any> = [], options: any = {}): Promise<Record<string, any>> {
     const { job, found } = await _dispatchReadJob(name);
     //console.log("F", found);
     if (!found) {
@@ -22,19 +22,24 @@ async function executeJobCmd(name: string, args: Array<any> = []): Promise<Recor
     brain.backendsForModelsInfo();
     let i = 0;
     for (const [name, task] of Object.entries(job.tasks)) {
-        //console.log("TASK RUN", name, job.tasks[name], params, task.type);
+        //console.log("JOB TASK", name, task.type, "/", args, "/", options);
         if (task.type == "task") {
             //const pr = params.shift()!;
             let conf: Record<string, any> = {};
             let vars: Record<string, any> = {};
-            if (i == 0) {
+            const tv = initTaskVars(args);
+            //console.log("TV", tv);
+            conf = tv.conf;
+            vars = i == 0 ? tv.vars : params;
+            /*if (i == 0) {
                 const tv = initTaskVars(args);
+                console.log("TV", tv);
                 conf = tv.conf;
                 vars = tv.vars;
             } else {
                 conf = {};
                 vars = params;
-            }
+            }*/
             const { found, path } = getFeatureSpec(name, "task" as FeatureType);
             if (!found) {
                 return { ok: false, data: {}, error: `Task ${name} not found` };
@@ -46,10 +51,19 @@ async function executeJobCmd(name: string, args: Array<any> = []): Promise<Recor
             }
             const taskSpec = taskBuilder.readFromYaml(tres.ymlTask);
             //const task = taskBuilder.fromYaml(tres.ymlTask);
-            const ex = brain.getOrCreateExpertForModel(taskSpec.model.name, taskSpec.template.name);
+            let m = taskSpec.model.name;
+            let t = taskSpec.template.name;
+            if (conf?.model) {
+                m = conf.model
+            }
+            if (conf?.template) {
+                t = conf.template
+            }
+            //console.log("CONF", conf);
+            const ex = brain.getOrCreateExpertForModel(m, t);
             //console.log("EFM", ex?.name);
             if (!ex) {
-                throw new Error("No expert found for model " + taskSpec.model.name)
+                throw new Error("No expert found for model " + m)
             }
             ex.checkStatus();
             ex.backend.setOnToken((t) => {
@@ -57,7 +71,7 @@ async function executeJobCmd(name: string, args: Array<any> = []): Promise<Recor
             });
             conf["expert"] = ex;
             try {
-                //console.log("Running", name, task.type, vars);
+                //console.log("Running", name, vars, "/", conf);
                 res = await job.runTask(name, vars, conf);
                 if ("text" in res) {
                     if (formatMode.value == "markdown") {
@@ -74,12 +88,12 @@ async function executeJobCmd(name: string, args: Array<any> = []): Promise<Recor
             try {
                 if (i == 0) {
                     //console.log("Running", name, args);
-                    res = await job.runTask(name, args);
+                    res = await job.runTask(name, args, options);
                 } else {
                     //console.log("Running", name, params);
-                    res = await job.runTask(name, params);
+                    res = await job.runTask(name, params, options);
                 }
-                //console.log("RES", res);
+                //console.log("RES", res.data);
                 params = res.data;
             }
             catch (err) {

@@ -61,7 +61,7 @@ async function executeActionCmd(args: Array<string> = [], options: any = {}, qui
             throw new Error(`Action ext ${ext} not implemented`)
             break;
     }
-    const res = await act.run(args);
+    const res = await act.run(args, options);
     if (!quiet) {
         console.log(res.data);
     }
