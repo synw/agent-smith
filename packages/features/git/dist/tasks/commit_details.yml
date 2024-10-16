@@ -51,7 +51,7 @@ model:
     ctx: 8192
 inferParams:
     min_p: 0.05
-    temperature: 0
+    temperature: 0.1
 variables:
     required:
         - msg

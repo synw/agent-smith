@@ -48,7 +48,7 @@ async function runCmd(args = [], options) {
         }
     }
     console.log("Generating a commit message ...");
-    const res = await executeJobCmd(job, args);
+    const res = await executeJobCmd(job, args, options);
     if ("error" in res) {
         console.log(res);
         throw new Error(`Job execution error: ${res.error}`)
