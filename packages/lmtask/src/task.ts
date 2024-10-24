@@ -8,11 +8,11 @@ import { LmTask } from "./interfaces.js";
 
 const tfm = useTemplateForModel();
 
-class LmTaskBuilder<T = string> {
-    brain: AgentBrain;
-    expert: LmExpert | null = null;
+class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, any>> {
+    brain: AgentBrain<P>;
+    expert: LmExpert<P> | null = null;
 
-    constructor(agentBrain: AgentBrain) {
+    constructor(agentBrain: AgentBrain<P>) {
         this.brain = agentBrain;
     }
 
@@ -67,7 +67,7 @@ class LmTaskBuilder<T = string> {
                 const templateName = modelOverride?.template ? modelOverride.template : task.template.name;
                 if (conf) {
                     if ("expert" in conf) {
-                        this.expert = conf.expert as LmExpert;
+                        this.expert = conf.expert as LmExpert<P>;
                     } else {
                         if (!this.expert) {
                             if (autoCreateExpert) {
