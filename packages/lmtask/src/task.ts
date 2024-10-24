@@ -143,8 +143,15 @@ class LmTaskBuilder<T = string> {
                         task.inferParams.extra["raw"] = true
                     }
                 }
+                const ip = task.inferParams as Record<string, any>;
+                // override infer params
+                if (conf?.inferParams) {
+                    for (const [k, v] of Object.entries(conf.inferParams)) {
+                        ip[k] = v
+                    }
+                }
                 //console.log("THINK")
-                const res = await this.expert.think(pr, { ...task.inferParams, stream: true });
+                const res = await this.expert.think(pr, { ...ip, stream: true });
                 return res
             },
             abort: async (): Promise<void> => {
