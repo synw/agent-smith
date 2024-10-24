@@ -4,10 +4,11 @@ import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import { InferenceParams, InferenceResult, ModelConf, OnLoadProgress } from "@locallm/types";
 import { ExpertState, ExpertStatus, LmExpert, LmExpertSpec, LmThinkingOptionsSpec } from "./interfaces.js";
 
-const useLmExpert = (spec: LmExpertSpec): LmExpert => {
+const useLmExpert = <P extends Record<string, any> = Record<string, any>>(spec: LmExpertSpec<P>): LmExpert<P> => {
     const backend = spec.backend;
     let model = spec.model;
     const description = spec.description ?? "";
+    const props: P = spec.props ?? {} as P;
     // state
     const state = map<ExpertState>({
         status: "unavailable",
@@ -185,6 +186,7 @@ const useLmExpert = (spec: LmExpertSpec): LmExpert => {
         get template() { return template },
         state,
         lm: backend.lm,
+        props,
         think,
         abortThinking,
         setTemplate,

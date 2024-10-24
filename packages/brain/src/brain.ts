@@ -4,11 +4,13 @@ import { AgentBrain, LmBackend, LmExpert, LmThinkingOptionsSpec } from "./interf
 import { useLmBackend } from './backend.js';
 import { useLmExpert } from './expert.js';
 
-const useAgentBrain = (initialBackends: Array<LmBackend> = [], initialExperts: Array<LmExpert> = []): AgentBrain => {
+const useAgentBrain = <P extends Record<string, any> = Record<string, any>>(
+    initialBackends: Array<LmBackend> = [], initialExperts: Array<LmExpert<P>> = []
+): AgentBrain<P> => {
     let _backends = initialBackends;
     let _experts = initialExperts;
     const _backendsForModels: Record<string, string> = {};
-    let _dummyExpert = { name: "dummydefault" } as LmExpert;
+    let _dummyExpert = { name: "dummydefault" } as LmExpert<P>;
     let _currentExpert = _experts.length > 0 ? _experts[0] : _dummyExpert;
     let stream = _currentExpert.stream;
     // state
@@ -135,8 +137,8 @@ const useAgentBrain = (initialBackends: Array<LmBackend> = [], initialExperts: A
         return bc
     }
 
-    const getExpertForModel = (modelName: string): LmExpert | null => {
-        let _ex: LmExpert | null = null;
+    const getExpertForModel = (modelName: string): LmExpert<P> | null => {
+        let _ex: LmExpert<P> | null = null;
         const foundEx = _experts.find(e => e.name == modelName);
         if (foundEx) {
             _ex = foundEx
@@ -147,8 +149,8 @@ const useAgentBrain = (initialBackends: Array<LmBackend> = [], initialExperts: A
         return _ex
     }
 
-    const getOrCreateExpertForModel = (modelName: string, templateName: string): LmExpert | null => {
-        let _ex: LmExpert | null = null;
+    const getOrCreateExpertForModel = (modelName: string, templateName: string): LmExpert<P> | null => {
+        let _ex: LmExpert<P> | null = null;
         const foundEx = _experts.find(e => e.name == modelName);
         if (foundEx) {
             _ex = foundEx
@@ -157,7 +159,7 @@ const useAgentBrain = (initialBackends: Array<LmBackend> = [], initialExperts: A
         if (Object.keys(_backendsForModels).includes(modelName)) {
             const bc = backend(_backendsForModels[modelName]);
             if (["llamapcpp", "koboldcpp"].includes(bc.lm.providerType)) {
-                _ex = useLmExpert({
+                _ex = useLmExpert<P>({
                     name: modelName,
                     model: bc.lm.model,
                     template: templateName,
@@ -166,7 +168,7 @@ const useAgentBrain = (initialBackends: Array<LmBackend> = [], initialExperts: A
             } else {
                 const m = bc.lm.models.find(x => x.name == modelName);
                 if (m) {
-                    _ex = useLmExpert({
+                    _ex = useLmExpert<P>({
                         name: modelName,
                         model: m,
                         template: templateName,
@@ -214,11 +216,11 @@ const useAgentBrain = (initialBackends: Array<LmBackend> = [], initialExperts: A
         return ex
     }
 
-    const workingExperts = (): Array<LmExpert> => {
+    const workingExperts = (): Array<LmExpert<P>> => {
         return _experts.filter((e) => ["available", "ready"].includes(e.state.get().status));
     }
 
-    const setDefaultExpert = (ex: LmExpert | string) => {
+    const setDefaultExpert = (ex: LmExpert<P> | string) => {
         //console.log("Set default expert", ex);
         if (typeof ex == "string") {
             _currentExpert = expert(ex);
@@ -227,7 +229,7 @@ const useAgentBrain = (initialBackends: Array<LmBackend> = [], initialExperts: A
         }
     }
 
-    const addExpert = (ex: LmExpert) => {
+    const addExpert = (ex: LmExpert<P>) => {
         const exists = _experts.find(x => x.name === ex.name) !== undefined;
         if (exists) {
             throw new Error(`Expert ${ex.name} already exists`)
@@ -244,7 +246,7 @@ const useAgentBrain = (initialBackends: Array<LmBackend> = [], initialExperts: A
         if (index !== -1) {
             _experts.splice(index, 1);
             if (_currentExpert.name == name) {
-                _currentExpert = { name: "dummydefault" } as LmExpert;
+                _currentExpert = { name: "dummydefault" } as LmExpert<P>;
             }
         } else {
             throw new Error(`Expert ${name} not found: can not remove it`)
@@ -281,7 +283,7 @@ const useAgentBrain = (initialBackends: Array<LmBackend> = [], initialExperts: A
         _currentExpert = _dummyExpert;
     }
 
-    const _checkExpert = (_ex: LmExpert) => {
+    const _checkExpert = (_ex: LmExpert<P>) => {
         if (_ex.name == "dummydefault") {
             throw new Error("No expert is configured")
         }

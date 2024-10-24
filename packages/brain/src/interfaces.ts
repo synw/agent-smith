@@ -4,12 +4,13 @@ import { Lm } from "@locallm/api";
 import { MapStore, Store } from "nanostores";
 import { WllamaProvider } from "@locallm/browser";
 
-interface LmExpertSpec {
+interface LmExpertSpec<P extends Record<string, any> = Record<string, any>> {
     name: string;
     backend: LmBackend;
     model: ModelConf;
     template: PromptTemplate | string;
     description?: string;
+    props?: P;
 }
 
 interface LmBackendSpec {
@@ -70,7 +71,7 @@ interface BrainState {
 }
 
 
-interface LmExpert {
+interface LmExpert<P extends Record<string, any> = Record<string, any>> {
     stream: Store<string>;
     name: string;
     description: string;
@@ -79,6 +80,7 @@ interface LmExpert {
     readonly template: PromptTemplate;
     state: MapStore<ExpertState>;
     lm: Lm | WllamaProvider;
+    props: P;
     think: ThinkFunctionType;
     abortThinking: () => Promise<void>;
     setTemplate: (tpl: string | PromptTemplate) => void;
@@ -189,11 +191,11 @@ interface LmBackend {
  *  Removes an expert from the brain by name.
  *  @param {string} name - The name of the expert to remove.
  */
-interface AgentBrain {
+interface AgentBrain<P extends Record<string, any> = Record<string, any>> {
     stream: Store<string>,
     state: MapStore<BrainState>;
-    readonly experts: Readonly<LmExpert[]>;
-    readonly ex: Readonly<LmExpert>;
+    readonly experts: Readonly<LmExpert<P>[]>;
+    readonly ex: Readonly<LmExpert<P>>;
     readonly backendsForModels: Readonly<Record<string, string>>;
     readonly backends: Array<LmBackend>;
     init: (isVerbose?: boolean) => Promise<boolean>;
@@ -202,18 +204,18 @@ interface AgentBrain {
     discoverLocal: (setState?: boolean, isVerbose?: boolean) => Promise<Array<LmBackend>>;
     discoverBrowser: (isVerbose?: boolean) => Promise<boolean>;
     backendsForModelsInfo: () => Promise<Record<string, string>>;
-    setDefaultExpert: (ex: LmExpert | string) => void;
+    setDefaultExpert: (ex: LmExpert<P> | string) => void;
     getBackendForModel: (model: string) => string | null;
     think: ThinkFunctionType;
     thinkx: ThinkxFunctionType;
     abortThinking: () => Promise<void>;
-    expert: (name: string) => LmExpert;
+    expert: (name: string) => LmExpert<P>;
     resetExperts: () => void;
-    addExpert: (ex: LmExpert) => void;
+    addExpert: (ex: LmExpert<P>) => void;
     removeExpert: (name: string) => void;
-    getOrCreateExpertForModel: (modelName: string, templateName: string) => LmExpert | null;
-    getExpertForModel: (modelName: string) => LmExpert | null;
-    workingExperts: () => Array<LmExpert>;
+    getOrCreateExpertForModel: (modelName: string, templateName: string) => LmExpert<P> | null;
+    getExpertForModel: (modelName: string) => LmExpert<P> | null;
+    workingExperts: () => Array<LmExpert<P>>;
     backend: (name: string) => LmBackend;
     addBackend: (ex: LmBackend) => void;
     removeBackend: (name: string) => void;
