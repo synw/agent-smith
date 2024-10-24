@@ -17,7 +17,7 @@ function createConfDirIfNotExists(): boolean {
     return true
 }
 
-async function updateConf(confPath: string): Promise<Array<string>> {
+async function processConfPath(confPath: string): Promise<Array<string>> {
     const { found, data } = readConf(confPath);
     if (!found) {
         console.warn(`Config file ${confPath} not found`);
@@ -49,5 +49,5 @@ export {
     confDir,
     dbPath,
     createConfDirIfNotExists,
-    updateConf,
+    processConfPath,
 }

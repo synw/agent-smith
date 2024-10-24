@@ -7,8 +7,10 @@ import { readClipboard } from "../sys/clipboard.js";
 
 async function executeTaskCmd(args: Array<string> = [], options: any = {}): Promise<any> {
     await initAgent(runMode.value);
-    //console.log("Task args:", args);
-    //console.log("Task options:", options);
+    if (isDebug.value) {
+        console.log("Task args:", args);
+        console.log("Task options:", options);
+    }
     const name = args.shift()!;
     const params = args.filter((x) => x.length > 0);
     //console.log("Task run params", params);
@@ -36,8 +38,10 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
     const taskSpec = taskBuilder.readFromYaml(res.ymlTask);
     const task = taskBuilder.fromYaml(res.ymlTask);
     const { conf, vars } = initTaskVars(args);
-    //console.log("Conf", conf)
-    //console.log("Vars", vars)
+    if (isDebug.value) {
+        console.log("Task conf:", conf);
+        console.log("Task vars:", vars);
+    }
     let m = taskSpec.model.name;
     let t = taskSpec.template.name;
     if (conf?.model) {
@@ -60,7 +64,9 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
         conf.debug = true;
     }
     //console.log("Ingesting prompt ...");
-    //console.log("Vars", vars);
+    if (isDebug.value) {
+        console.log("Vars", vars);
+    }
     const data = await task.run({ prompt: pr, ...vars }, conf) as Record<string, any>;
     if (data?.error) {
         return { ok: false, data: {}, error: `Error executing task: ${data.error}` }

@@ -35,6 +35,20 @@ function insertPluginIfNotExists(n: string, p: string): boolean {
     return false
 }
 
+function cleanupFeaturePaths(paths: Array<string>): Array<string> {
+    const stmt = db.prepare("SELECT path FROM featurespath");
+    const rows = stmt.all() as Array<Record<string, any>>;
+    const deleted = new Array<string>();
+    for (const entry of rows) {
+        if (!paths.includes(entry.path)) {
+            const deleteStmt = db.prepare("DELETE FROM featurespath WHERE path = ?");
+            deleteStmt.run(entry.path);
+            deleted.push(entry.path)
+        }
+    }
+    return deleted
+}
+
 function _updateAlias(existingAliases: Array<string>, name: string, type: AliasType) {
     if (!existingAliases.includes(name)) {
         const insertStmt = db.prepare("INSERT INTO aliases (name, type) VALUES (?, ?)");
@@ -62,23 +76,29 @@ function updateAliases(feats: Features) {
 }
 
 function upsertAndCleanFeatures(feats: Array<FeatureSpec>, type: FeatureType) {
+    //console.log("Upsert", type);
     const stmt = db.prepare(`SELECT name FROM ${type}`);
     const rows = stmt.all() as Array<Record<string, any>>;
     const names = rows.map(row => row.name);
-    feats.forEach((feat) => {
-        if (!names.includes(feat.name)) {
-            const insertStmt = db.prepare(`INSERT INTO ${type} (name, path, ext) VALUES (?, ?, ?)`);
-            insertStmt.run(feat.name, feat.path, feat.ext);
-        }
-    });
     // cleanup removed features
     const availableFeatsNames = feats.map((f) => f.name);
-    //console.log("AF", availableFeatsNames, names);
+    //console.log("NAMES", names);
+    //console.log("AVAILABLE", availableFeatsNames);
     names.forEach((name) => {
         //console.log(name, !availableFeatsNames.includes(name));
         if (!availableFeatsNames.includes(name)) {
+            //console.log("DELETE", name);
             const deleteStmt = db.prepare(`DELETE FROM ${type} WHERE name = ?`);
             deleteStmt.run(name);
+            console.log("-", "[" + type + "]", name);
+        }
+    });
+    feats.forEach((feat) => {
+        if (!names.includes(feat.name)) {
+            //console.log("ADD", feat.name);
+            const insertStmt = db.prepare(`INSERT INTO ${type} (name, path, ext) VALUES (?, ?, ?)`);
+            insertStmt.run(feat.name, feat.path, feat.ext);
+            console.log("+", "[" + type + "]", feat.name, feat.path);
         }
     });
 }
@@ -96,4 +116,5 @@ export {
     insertPluginIfNotExists,
     updateFeatures,
     updateAliases,
+    cleanupFeaturePaths,
 }

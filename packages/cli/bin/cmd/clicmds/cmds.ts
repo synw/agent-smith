@@ -1,9 +1,9 @@
 import { Cmd, FeatureType } from "../../interfaces.js";
-import { formatMode, initFeatures, runMode } from "../../state/state.js";
+import { formatMode, runMode } from "../../state/state.js";
 import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
 import { readAliases, readFeatures } from "../../db/read.js";
-import { updateAliases, updateFeatures } from "../../db/write.js";
-import { updateConf } from "../../conf.js";
+import { cleanupFeaturePaths, updateAliases, updateFeatures } from "../../db/write.js";
+import { processConfPath } from "../../conf.js";
 import { executeActionCmd } from "../lib/execute_action.js";
 import { initAgent, marked, taskBuilder } from "../../agent.js";
 import { executeJobCmd, readJob } from "../lib/execute_job.js";
@@ -54,10 +54,6 @@ let cmds: Record<string, Cmd> = {
         description: "process config file",
         args: "arguments: \n-path (required): the path to the config.yml file"
     },
-    update: {
-        cmd: _updateFeaturesCmd,
-        description: "reparse the features dirs and update the list",
-    }
 }
 
 function initAliases(): Record<string, Cmd> {
@@ -110,21 +106,20 @@ async function pingCmd(args: Array<string> = [], options: any): Promise<boolean>
     return isUp
 }
 
-async function _updateFeaturesCmd(args: Array<string> = [], options: any): Promise<any> {
-    await initFeatures();
-    console.log("Features updated")
-}
-
 async function _updateConfCmd(args: Array<string> = [], options: any): Promise<any> {
     if (args.length == 0) {
         console.warn("Provide a config.yml file path");
         return
     }
-    const allPaths = await updateConf(args[0]);
+    const allPaths = await processConfPath(args[0]);
     const feats = readFeaturesDirs(allPaths);
     //console.log("CMD FEATS", feats);
     updateFeatures(feats);
     updateAliases(feats);
+    const deleted = cleanupFeaturePaths(allPaths);
+    for (const el of deleted) {
+        console.log("- [feature path]", el)
+    }
 }
 
 async function _readJobCmd(args: Array<string> = [], options: any): Promise<any> {

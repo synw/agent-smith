@@ -95,6 +95,13 @@ function initTaskVars(args: Array<any>): { conf: Record<string, any>, vars: Reco
                 } else {
                     conf.model = v
                 }
+            } else if (k == "ip") {
+                const ip: Record<string, any> = {};
+                v.split(",").forEach((p: string) => {
+                    const s = p.split(":");
+                    ip[s[0]] = parseFloat(s[1])
+                });
+                conf.inferParams = ip
             } else {
                 vars[k] = v
             }
