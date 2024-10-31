@@ -128,6 +128,7 @@ interface LmBackend {
  * 
  *  @method initLocal
  *  Initializes the local experts.
+ *  @param {boolean} [setState] - Mutate the state: set experts
  *  @param {boolean} [isVerbose] - Whether to enable verbose mode.
  *  @returns {Promise<boolean>} - Whether the initialization was successful.
  * 
@@ -199,7 +200,7 @@ interface AgentBrain<P extends Record<string, any> = Record<string, any>> {
     readonly backendsForModels: Readonly<Record<string, string>>;
     readonly backends: Array<LmBackend>;
     init: (isVerbose?: boolean) => Promise<boolean>;
-    initLocal: (isVerbose?: boolean) => Promise<boolean>;
+    initLocal: (setState?: boolean, isVerbose?: boolean) => Promise<boolean>;
     discover: (isVerbose?: boolean) => Promise<boolean>;
     discoverLocal: (setState?: boolean, isVerbose?: boolean) => Promise<Array<LmBackend>>;
     discoverBrowser: (isVerbose?: boolean) => Promise<boolean>;
