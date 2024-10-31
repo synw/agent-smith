@@ -5,6 +5,7 @@ import { readYmlAction } from "../sys/read_yml_action.js";
 import { execute } from "../sys/execute.js";
 import { runPyScript } from "../sys/run_python.js";
 import { pyShell } from "../../state/state.js";
+import { processOutput } from "./utils.js";
 
 function _systemAction(path: string): AgentTask {
     const action = useAgentTask({
@@ -59,13 +60,12 @@ async function executeActionCmd(args: Array<string> = [], options: any = {}, qui
             break
         default:
             throw new Error(`Action ext ${ext} not implemented`)
-            break;
     }
     const res = await act.run(args, options);
     if (!quiet) {
         console.log(res.data);
     }
-    //await processOutput(res.data);
+    await processOutput(res);
     return { ok: true, data: res.data, error: "" }
 }
 

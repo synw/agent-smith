@@ -30,6 +30,7 @@ function readPromptFile(): string {
 }
 
 async function processOutput(res: any) {
+    if (!(outputMode.value == "clipboard")) { return }
     let data = "";
     //console.log("Process OUTPUT", typeof res, res);
     if (typeof res == "object") {

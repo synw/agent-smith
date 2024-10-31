@@ -176,8 +176,8 @@ async function _readTaskCmd(args: Array<string> = [], options: any): Promise<any
     if (!res.found) {
         throw new Error(`Task ${args[0]}, ${path} not found`)
     }
-    const ts = taskBuilder.readFromYaml(path);
-    console.log(ts);
+    const ts = taskBuilder.readFromYaml(res.ymlTask);
+    console.log(JSON.stringify(ts, null, "  "));
 }
 
 async function _listTasksCmd(args: Array<string> = [], options: any): Promise<any> {

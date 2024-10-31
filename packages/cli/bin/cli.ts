@@ -4,6 +4,19 @@ import { lastCmd, inputMode } from './state/state.js';
 import { readPromptFile } from './cmd/lib/utils.js';
 import { readClipboard } from './cmd/sys/clipboard.js';
 
+/**
+ * Parses a string of parameters, which may include quoted strings and standalone words.
+ * The function uses a regular expression to identify and extract these parameters.
+ * 
+ * @param params - The string of parameters to be parsed.
+ * @returns An array of parsed parameters.
+ * 
+ * @example
+ * ```typescript
+ * console.log(parseParams('"hello world" 123 -param')); // Output: ['hello world', '123', '-param']
+ * console.log(parseParams('hello "world" 123')); // Output: ['hello', 'world', '123']
+ * ```
+ */
 function parseParams(params: string): Array<string> {
     const regex = /"([^"]*)"|(\S+)/g;
     let match;
