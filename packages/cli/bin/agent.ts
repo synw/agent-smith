@@ -2,7 +2,7 @@ import { useAgentBrain } from "@agent-smith/brain";
 import { LmTaskBuilder } from "@agent-smith/lmtask";
 import { MarkedExtension, marked } from 'marked';
 import { markedTerminal } from "marked-terminal";
-import { FeatureType, RunMode } from "./interfaces.js";
+import { FeatureType } from "./interfaces.js";
 
 marked.use(markedTerminal() as MarkedExtension);
 
@@ -12,7 +12,6 @@ const taskBuilder = new LmTaskBuilder<FeatureType>(brain);
 
 async function initExperts() {
     brain.experts.forEach((ex) => {
-        //ex.backend.setOnStartEmit(() => console.log(""))
         ex.backend.setOnToken((t) => {
             process.stdout.write(t)
         });
@@ -25,9 +24,9 @@ async function initAgent(isVerbose = false): Promise<boolean> {
         //console.log("Init", isVerbose);
         await brain.initLocal(true, isVerbose);
         await initExperts();
-        /*console.log("Backends:", brain.backends.map(x => x.name));
-        console.log("Experts:", brain.experts.map(x => x.name));
-        console.log("Bfm:", brain.backendsForModels);*/
+        //console.log("Backends:", brain.backends.map(x => x.name));
+        //console.log("Experts:", brain.experts.map(x => x.name));
+        //console.log("Bfm:", brain.backendsForModels);
     }
     const brainUp = brain.state.get().isOn;
     if (isVerbose) {

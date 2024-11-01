@@ -56,7 +56,9 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
         throw new Error("No expert found for model " + m)
     }
     ex.checkStatus();
+    //ex.backend.setOnStartEmit(() => console.log("[START]"));
     ex.backend.setOnToken((t) => {
+        //console.log("|")        
         process.stdout.write(t)
     });
     conf.expert = ex;

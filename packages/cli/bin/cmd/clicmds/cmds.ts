@@ -139,7 +139,7 @@ async function _executeTaskCmd(args: Array<string> = [], options: any): Promise<
         console.warn(error)
     }
     if (formatMode.value == "markdown") {
-        console.log("\n\n------------------\n");
+        console.log("\n------------------\n");
         console.log((marked.parse(data) as string).trim())
     } else {
         console.log()
