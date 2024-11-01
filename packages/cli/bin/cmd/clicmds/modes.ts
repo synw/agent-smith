@@ -1,12 +1,20 @@
 import { Cmd } from "../../interfaces.js";
-import { formatMode, inputMode, isDebug, outputMode, runMode } from "../../state/state.js";
+import { formatMode, inputMode, isChatMode, isDebug, outputMode, runMode } from "../../state/state.js";
 
 const modes: Record<string, Cmd> = {
     "-d": {
         cmd: async () => {
             isDebug.value = true;
+            if (runMode.value == "cli") { console.log("Debug mode is on") }
         },
         description: "use debug mode",
+    },
+    "-c": {
+        cmd: async () => {
+            isChatMode.value = true;
+            if (runMode.value == "cli") { console.log("Chat mode is on") }
+        },
+        description: "use chat mode for tasks",
     },
     "-if": {
         cmd: async () => {

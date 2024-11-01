@@ -1,11 +1,11 @@
 import { Cmd, FeatureType } from "../../interfaces.js";
-import { formatMode, runMode } from "../../state/state.js";
+import { formatMode, isChatMode, runMode } from "../../state/state.js";
 import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
 import { readAliases, readFeatures } from "../../db/read.js";
 import { cleanupFeaturePaths, updateAliases, updateFeatures } from "../../db/write.js";
 import { processConfPath } from "../../conf.js";
 import { executeActionCmd } from "../lib/execute_action.js";
-import { initAgent, marked, taskBuilder } from "../../agent.js";
+import { brain, initAgent, marked, taskBuilder } from "../../agent.js";
 import { executeJobCmd, readJob } from "../lib/execute_job.js";
 import { executeTaskCmd } from "../lib/execute_task.js";
 import { readCmds } from "../sys/read_cmds.js";
@@ -98,11 +98,8 @@ async function initCmds(): Promise<Record<string, Cmd>> {
 }
 
 async function pingCmd(args: Array<string> = [], options: any): Promise<boolean> {
-    let _isVerbose = false;
-    if (args.length > 0) {
-        _isVerbose = args[0] == "verbose"
-    }
-    const isUp = await initAgent(runMode.value, _isVerbose);
+    const isUp = await initAgent(true);
+    //console.log(brain.backends);
     return isUp
 }
 
@@ -137,7 +134,7 @@ async function _executeTaskCmd(args: Array<string> = [], options: any): Promise<
         console.warn("Provide a task name");
         return
     }
-    const { ok, data, error } = await executeTaskCmd(args, options);
+    const { ok, data, conf, error } = await executeTaskCmd(args, options);
     if (!ok) {
         console.warn(error)
     }
@@ -147,8 +144,11 @@ async function _executeTaskCmd(args: Array<string> = [], options: any): Promise<
     } else {
         console.log()
     }
+    if (isChatMode.value) {
+
+    }
+    //console.log("ENDRES", data);
     return data
-    //console.log("ENDRES", t);
 }
 
 async function _executeJobCmd(args: Array<string> = [], options: any): Promise<any> {

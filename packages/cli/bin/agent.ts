@@ -1,29 +1,29 @@
 import { useAgentBrain } from "@agent-smith/brain";
 import { LmTaskBuilder } from "@agent-smith/lmtask";
 import { MarkedExtension, marked } from 'marked';
-import { markedTerminal } from 'marked-terminal';
+import { markedTerminal } from "marked-terminal";
 import { FeatureType, RunMode } from "./interfaces.js";
 
 marked.use(markedTerminal() as MarkedExtension);
 
 let brain = useAgentBrain();
-const modelsForExpert: Record<string, string> = {};
 
 const taskBuilder = new LmTaskBuilder<FeatureType>(brain);
 
 async function initExperts() {
     brain.experts.forEach((ex) => {
-        ex.backend.setOnStartEmit(() => console.log(""))
+        //ex.backend.setOnStartEmit(() => console.log(""))
         ex.backend.setOnToken((t) => {
             process.stdout.write(t)
         });
     });
 }
 
-async function initAgent(mode: RunMode, isVerbose = false): Promise<boolean> {
+async function initAgent(isVerbose = false): Promise<boolean> {
     if (!brain.state.get().isOn) {
         brain.resetExperts();
-        await brain.initLocal();
+        //console.log("Init", isVerbose);
+        await brain.initLocal(true, isVerbose);
         await initExperts();
         /*console.log("Backends:", brain.backends.map(x => x.name));
         console.log("Experts:", brain.experts.map(x => x.name));
@@ -32,15 +32,20 @@ async function initAgent(mode: RunMode, isVerbose = false): Promise<boolean> {
     const brainUp = brain.state.get().isOn;
     if (isVerbose) {
         if (!brainUp) {
-            console.log("❌ No experts found for inference");
+            console.log("❌ No backends found for inference");
         }
         else {
-            brain.experts.forEach((ex) => {
-                console.log(`✅ Expert ${ex.name} is up`)
+            brain.backends.forEach((b) => {
+                console.log(`✅ Backend ${b.name} is up`);
+                if (b.lm.providerType == "ollama") {
+                    console.log("   Models:", b.lm.models.map(x => x.name))
+                } else {
+                    console.log("   Model:", b.lm.model.name)
+                }
             })
         }
     }
     return brainUp
 }
 
-export { brain, initAgent, marked, modelsForExpert, taskBuilder };
+export { brain, initAgent, marked, taskBuilder };

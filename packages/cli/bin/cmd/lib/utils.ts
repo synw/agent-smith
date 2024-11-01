@@ -6,9 +6,13 @@ import { readClipboard, writeToClipboard } from "../sys/clipboard.js";
 import { modes } from "../clicmds/modes.js";
 
 async function setOptions(
-    options: Record<string, any>, args: Array<string> = []
+    args: Array<string> = [], options: Record<string, any>,
 ): Promise<Array<string>> {
-    if (runMode.value == "cli") { return args };
+    //console.log("Args:", args);
+    //console.log("Opts", options);
+    /*if (runMode.value == "cli") {
+        return args
+    };*/
     //console.log("OPTIONS", options);
     for (const k of Object.keys(options)) {
         const opt = modes["-" + k.toLowerCase()];

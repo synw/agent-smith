@@ -14,6 +14,7 @@ const inputMode = ref<InputMode>("manual");
 const outputMode = ref<OutputMode>("txt");
 const runMode = ref<RunMode>("cmd");
 const formatMode = ref<FormatMode>("text");
+const isChatMode = ref(false);
 const isDebug = ref(false);
 const promptfile = ref("");
 
@@ -50,6 +51,7 @@ async function initState() {
 export {
     inputMode,
     outputMode,
+    isChatMode,
     runMode,
     formatMode,
     lastCmd,

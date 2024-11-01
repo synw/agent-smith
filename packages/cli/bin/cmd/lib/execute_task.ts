@@ -1,12 +1,12 @@
 import { brain, initAgent, taskBuilder } from "../../agent.js";
 import { getFeatureSpec } from "../../state/features.js";
 import { FeatureType } from "../../interfaces.js";
-import { inputMode, isDebug, runMode } from "../../state/state.js";
+import { inputMode, isChatMode, isDebug } from "../../state/state.js";
 import { initTaskVars, readPromptFile, readTask } from "./utils.js";
 import { readClipboard } from "../sys/clipboard.js";
 
 async function executeTaskCmd(args: Array<string> = [], options: any = {}): Promise<any> {
-    await initAgent(runMode.value);
+    await initAgent();
     if (isDebug.value) {
         console.log("Task args:", args);
         console.log("Task options:", options);
@@ -28,7 +28,7 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
     }
     const { found, path } = getFeatureSpec(name, "task" as FeatureType);
     if (!found) {
-        return { ok: false, data: {}, error: `Task ${name} not found` };
+        return { ok: false, data: "", conf: {}, error: `Task ${name} not found` };
     }
     //console.log("EFM", brain.expertsForModels);    
     const res = readTask(path);
@@ -69,9 +69,17 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
     }
     const data = await task.run({ prompt: pr, ...vars }, conf) as Record<string, any>;
     if (data?.error) {
-        return { ok: false, data: {}, error: `Error executing task: ${data.error}` }
+        return { ok: false, data: "", conf: conf, error: `Error executing task: ${data.error}` }
     }
-    return { ok: true, data: data.text, error: "" }
+    conf.prompt = pr;
+    // chat mode
+    if (isChatMode.value) {
+        if (brain.ex.name != ex.name) {
+            brain.setDefaultExpert(ex);
+        }
+        brain.ex.template.pushToHistory({ user: pr, assistant: data.text });
+    }
+    return { ok: true, data: data.text, conf: conf, error: "" }
 }
 
 export { executeTaskCmd }

@@ -1,14 +1,36 @@
+import { input } from "@inquirer/prompts";
 import { Command } from "commander";
-import { lastCmd } from "../state/state.js";
+import { brain } from "../agent.js";
+import { Cmd } from "../interfaces.js";
+import { isChatMode, lastCmd, runMode } from "../state/state.js";
+import { cmds, initAliases, initCmds } from "./clicmds/cmds.js";
 import { modes } from "./clicmds/modes.js";
 import { processOutput, setOptions } from "./lib/utils.js";
-import { cmds, initAliases, initCmds } from "./clicmds/cmds.js";
-import { Cmd } from "../interfaces.js";
+import { query } from "../cli.js";
 
 let cliCmds: Record<string, Cmd> = {};
 
+async function chat() {
+    const data = { message: '>', default: "" };
+    const prompt = await input(data);
+    if (prompt == "/q") {
+        isChatMode.value = false;
+        if (runMode.value == "cmd") {
+            process.exit(0)
+        } else {
+            await query()
+        }
+    }
+    //console.log("EX", brain.ex);
+    await brain.ex.think(prompt);
+    console.log();
+    await chat();
+}
+
 async function initCliCmds() {
-    cliCmds = await initCmds()
+    const _cmds = await initCmds();
+    const _alias = initAliases();
+    cliCmds = { ..._cmds, ..._alias }
 }
 
 async function runCmd(cmdName: string, args: Array<string> = []) {
@@ -20,20 +42,18 @@ async function runCmd(cmdName: string, args: Array<string> = []) {
     //console.log("Running cmd", cmds[cmdName]);
     await cmd(args, {});
     lastCmd.name = cmdName;
-    /*if (inputMode.value != "manual") {
-        args.pop()
-    }*/
     lastCmd.args = args;
 }
 
 async function buildCmds(): Promise<Command> {
     const program = new Command();
     const aliases = initAliases();
-    for (const [name, spec] of Object.entries({ ...cmds, ...aliases })) {
+    const excmds = await initCmds();
+    for (const [name, spec] of Object.entries({ ...cmds, ...excmds, ...aliases })) {
         const cmd = program.command(name);
         const _cmd = async (args: Array<string> = [], options: any = {}): Promise<any> => {
             //console.log("CMD OPTS", options);
-            const _args = await setOptions(options, args);
+            const _args = await setOptions(args, options);
             const res = await spec.cmd(_args, options);
             //console.log("RES", res);
             await processOutput(res);
@@ -63,6 +83,10 @@ async function buildCmds(): Promise<Command> {
 async function parseCmd() {
     const program = await buildCmds();
     await program.parseAsync();
+    if (isChatMode.value) {
+        await chat()
+    }
 }
 
-export { runCmd, buildCmds, parseCmd, initCliCmds }
+export { buildCmds, initCliCmds, parseCmd, runCmd, chat };
+;

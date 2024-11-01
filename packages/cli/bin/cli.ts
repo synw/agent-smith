@@ -1,8 +1,9 @@
 import { input } from '@inquirer/prompts';
-import { runCmd } from './cmd/cmds.js';
-import { lastCmd, inputMode } from './state/state.js';
-import { readPromptFile } from './cmd/lib/utils.js';
+import { chat, runCmd } from './cmd/cmds.js';
+import { lastCmd, inputMode, isChatMode } from './state/state.js';
+import { readPromptFile, setOptions } from './cmd/lib/utils.js';
 import { readClipboard } from './cmd/sys/clipboard.js';
+import { modes } from './cmd/clicmds/modes.js';
 
 /**
  * Parses a string of parameters, which may include quoted strings and standalone words.
@@ -32,28 +33,41 @@ function parseParams(params: string): Array<string> {
 }
 
 async function dispatch(input: string) {
-    let buf = new Array<string>();
-    buf = parseParams(input);
-    const cmd = buf.shift()!;
-    if (inputMode.value == "promptfile") {
-        const p = readPromptFile();
-        buf.push(p)
-    } else if (inputMode.value == "clipboard") {
-        const p = await readClipboard();
-        buf.push(p)
+    //console.log("Dispatch", input);
+    // modes
+    if (input.startsWith("-")) {
+        try {
+            const _cmd = modes[input].cmd;
+            await _cmd([], {});
+            return
+        } catch (e) {
+            throw new Error(`Option error ${e}`)
+        }
     }
-    await runCmd(cmd, buf)
+    // args
+    const buf = new Array<string>();
+    let params = parseParams(input);
+    const cmd = params.shift()!;
+    const opts: Record<string, any> = {};
+    params.forEach((p) => {
+        if (p.startsWith("-")) {
+            opts[p.substring(1)] = true;
+        } else {
+            buf.push(p)
+        }
+    });
+    const args = await setOptions(buf, opts);
+    await runCmd(cmd, args)
 }
 
-async function query(_default?: string) {
-    const data = { message: '>', default: "" };
-    if (_default) {
-        data.default = _default
+async function query(sign = "$") {
+    const data = { message: sign, default: "" };
+    const q = await input(data);
+    await dispatch(q);
+    if (isChatMode.value) {
+        await chat()
     }
-    const answer = await input(data);
-    await dispatch(answer);
-    const lc = lastCmd.name + " " + lastCmd.args.join(" ");
-    await query(lc)
+    await query(sign)
 }
 
 export { query }
