@@ -54,7 +54,6 @@ async function runCmd(args = [], options) {
         throw new Error(`Job execution error: ${res.error}`)
     }
     //console.log("JOB RES", res);
-    console.log("\n");
     const final = res.text.replace("```", "").trim();
     /* console.log("\n--------------------------------------------------------");
     console.log(final);

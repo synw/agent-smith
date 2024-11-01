@@ -39,6 +39,7 @@ template:
             Here is the commit message:
             
             ```text
+            
 model: 
     name: "llama3.1:latest"
     ctx: 8192
