@@ -1,1 +1,0 @@
-import{d as a,o as t,c as o,a as e,t as n}from"./index-56o_VcVb.js";const p=a({__name:"ErrorTab",props:{data:{type:Object,required:!0}},setup(r){return(c,s)=>(t(),o("div",null,[e("code",null,[e("pre",null,n(r.data.error),1)])]))}});export{p as _};
