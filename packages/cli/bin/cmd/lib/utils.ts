@@ -29,8 +29,11 @@ async function setOptions(
 }
 
 function readPromptFile(): string {
-    const res = fs.readFileSync(promptfile.value, 'utf8');
-    return res
+    try {
+        return fs.readFileSync(promptfile.value, 'utf8');
+    } catch (e) {
+        return ""
+    }
 }
 
 async function processOutput(res: any) {
@@ -115,6 +118,17 @@ function initTaskVars(args: Array<any>): { conf: Record<string, any>, vars: Reco
     return { conf, vars }
 }
 
+async function parseInputOptions(options: any): Promise<string | null> {
+    let out: string | null = null;
+    if (options?.Ic == true || inputMode.value == "clipboard") {
+        //console.log("Input copy option");
+        out = await readClipboard()
+    } else if (options.Pf || inputMode.value == "promptfile") {
+        out = readPromptFile()
+    }
+    return out
+}
+
 export {
     readPromptFile,
     processOutput,
@@ -122,4 +136,5 @@ export {
     readTask,
     readTasksDir,
     initTaskVars,
+    parseInputOptions,
 }

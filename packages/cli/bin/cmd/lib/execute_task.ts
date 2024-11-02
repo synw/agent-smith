@@ -2,7 +2,7 @@ import { brain, initAgent, taskBuilder } from "../../agent.js";
 import { getFeatureSpec } from "../../state/features.js";
 import { FeatureType } from "../../interfaces.js";
 import { inputMode, isChatMode, isDebug } from "../../state/state.js";
-import { initTaskVars, readPromptFile, readTask } from "./utils.js";
+import { initTaskVars, parseInputOptions, readPromptFile, readTask } from "./utils.js";
 import { readClipboard } from "../sys/clipboard.js";
 
 async function executeTaskCmd(args: Array<string> = [], options: any = {}): Promise<any> {
@@ -14,16 +14,14 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
     const name = args.shift()!;
     const params = args.filter((x) => x.length > 0);
     //console.log("Task run params", params);
-    let pr: string;
-    if (options?.Ic == true || inputMode.value == "clipboard") {
-        //console.log("Input copy option");
-        pr = await readClipboard()
-    } else if (options.Pf || inputMode.value == "promptfile") {
-        pr = readPromptFile()
+    let pr = await parseInputOptions(options);
+    if (!pr) {
+        const p = params.shift();
+        if (p) {
+            pr = p
+        }
     }
-    else if (params.length > 0) {
-        pr = params.shift()!;
-    } else {
+    if (!pr) {
         throw new Error("Please provide a prompt")
     }
     const { found, path } = getFeatureSpec(name, "task" as FeatureType);
@@ -57,8 +55,14 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
     }
     ex.checkStatus();
     //ex.backend.setOnStartEmit(() => console.log("[START]"));
+    let i = 0;
     ex.backend.setOnToken((t) => {
-        //console.log("|")        
+        if (i == 0) {
+            if (t == "\n\n") {
+                return
+            }
+        }
+        ++i;
         process.stdout.write(t)
     });
     conf.expert = ex;

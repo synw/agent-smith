@@ -5,7 +5,7 @@ import { readYmlAction } from "../sys/read_yml_action.js";
 import { execute } from "../sys/execute.js";
 import { runPyScript } from "../sys/run_python.js";
 import { pyShell } from "../../state/state.js";
-import { processOutput } from "./utils.js";
+import { parseInputOptions, processOutput } from "./utils.js";
 
 function _systemAction(path: string): AgentTask {
     const action = useAgentTask({
@@ -44,7 +44,7 @@ async function executeActionCmd(args: Array<string> = [], options: any = {}, qui
     const name = args.shift()!;
     const { found, path, ext } = getFeatureSpec(name, "action" as FeatureType);
     if (!found) {
-        return { ok: false, data: {}, error: "FeatureType not found" };
+        return { ok: false, data: {}, error: "Action not found" };
     }
     let act: AgentTask;
     switch (ext) {
@@ -61,7 +61,13 @@ async function executeActionCmd(args: Array<string> = [], options: any = {}, qui
         default:
             throw new Error(`Action ext ${ext} not implemented`)
     }
-    const res = await act.run(args, options);
+    // options
+    const input = await parseInputOptions(options);
+    if (input) {
+        args.push(input)
+    }
+    // run
+    const res = await act.run(args, {});
     if (!quiet) {
         console.log(res.data);
     }

@@ -18,9 +18,9 @@ interface Features {
 }
 
 interface ConfigFile {
-    promptfile: string;
-    features: Array<string>;
-    plugins: Array<string>;
+    promptfile?: string;
+    features?: Array<string>;
+    plugins?: Array<string>;
 }
 
 type CmdExecutor = (args: Array<string>, options: any) => Promise<any>;

@@ -17,7 +17,7 @@ function createConfDirIfNotExists(): boolean {
     return true
 }
 
-async function processConfPath(confPath: string): Promise<Array<string>> {
+async function processConfPath(confPath: string): Promise<{ paths: Array<string>, pf: string }> {
     const { found, data } = readConf(confPath);
     if (!found) {
         console.warn(`Config file ${confPath} not found`);
@@ -25,7 +25,7 @@ async function processConfPath(confPath: string): Promise<Array<string>> {
     //console.log(data)
     const allPaths = new Array<string>();
     // features and plugins from conf
-    if ("features" in data) {
+    if (data?.features) {
         allPaths.push(...data.features);
         const fts = new Array<string>();
         data.features.forEach((f) => {
@@ -35,14 +35,18 @@ async function processConfPath(confPath: string): Promise<Array<string>> {
             }
         });
     }
-    if ("plugins" in data) {
+    if (data?.plugins) {
         const plugins = await buildPluginsPaths(data.plugins);
         plugins.forEach((_pl) => {
             allPaths.push(_pl.path);
             insertPluginIfNotExists(_pl.name, _pl.path);
         });
     }
-    return allPaths
+    let pf = "";
+    if (data.promptfile) {
+        pf = data.promptfile
+    }
+    return { paths: allPaths, pf: pf }
 }
 
 export {

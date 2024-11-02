@@ -21,7 +21,7 @@ function readPlugins(): Array<Record<string, string>> {
     return f
 }
 
-function readFeaturesType(type: FeatureType): Record<string, string> {
+function _readFeaturesType(type: FeatureType): Record<string, string> {
     const stmt = db.prepare(`SELECT name, path FROM ${type}`);
     const data = stmt.all() as Array<Record<string, any>>;
     let f: Record<string, string> = {};
@@ -33,10 +33,10 @@ function readFeaturesType(type: FeatureType): Record<string, string> {
 
 function readFeatures(): Record<FeatureType, Record<string, string>> {
     const feats: Record<FeatureType, Record<string, string>> = { task: {}, job: {}, action: {}, cmd: {} };
-    feats.task = readFeaturesType("task");
-    feats.job = readFeaturesType("job");
-    feats.action = readFeaturesType("action");
-    feats.cmd = readFeaturesType("cmd");
+    feats.task = _readFeaturesType("task");
+    feats.job = _readFeaturesType("job");
+    feats.action = _readFeaturesType("action");
+    feats.cmd = _readFeaturesType("cmd");
     return feats
 }
 
@@ -67,5 +67,14 @@ function readFeature(name: string, type: FeatureType): { found: boolean, feature
     return { found: false, feature: {} as FeatureSpec }
 }
 
+function readPromptFile(): string {
+    const stmt1 = db.prepare("SELECT * FROM filepath WHERE name = ?");
+    const result = stmt1.get("promptfile") as Record<string, any>;
+    let res = "";
+    if (result?.id) {
+        res = result.path
+    }
+    return res
+}
 
-export { readFeatures, readFeaturePaths, readFeature, readPlugins, readAliases }
+export { readFeatures, readFeaturePaths, readFeature, readPlugins, readAliases, readPromptFile }

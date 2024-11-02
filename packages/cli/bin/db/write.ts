@@ -1,16 +1,11 @@
 import { AliasType, FeatureSpec, FeatureType, Features } from "../interfaces.js";
 import { db } from "./db.js";
 
-const defaultFilepaths = {
-    prompt: "",
-    override: "",
-}
-
-function insertDefaultFilepaths() {
-    for (const [k, v] of Object.entries(defaultFilepaths)) {
-        const stmt = db.prepare("INSERT INTO filepath (name, path) VALUES (?, ?)");
-        stmt.run(k, v);
-    }
+function updatePromptfilePath(pf: string) {
+    const deleteStmt = db.prepare("DELETE FROM featurespath WHERE path = ?");
+    deleteStmt.run("promptfile");
+    const stmt = db.prepare("INSERT INTO filepath (name, path) VALUES (?, ?)");
+    stmt.run("promptfile", pf);
 }
 
 function insertFeaturesPathIfNotExists(path: string): boolean {
@@ -111,7 +106,7 @@ function updateFeatures(feats: Features) {
 }
 
 export {
-    insertDefaultFilepaths,
+    updatePromptfilePath,
     insertFeaturesPathIfNotExists,
     insertPluginIfNotExists,
     updateFeatures,

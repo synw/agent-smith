@@ -1,8 +1,8 @@
 import { Cmd, FeatureType } from "../../interfaces.js";
-import { formatMode, isChatMode, runMode } from "../../state/state.js";
+import { formatMode, isChatMode, promptfile, runMode } from "../../state/state.js";
 import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
 import { readAliases, readFeatures } from "../../db/read.js";
-import { cleanupFeaturePaths, updateAliases, updateFeatures } from "../../db/write.js";
+import { cleanupFeaturePaths, updateAliases, updateFeatures, updatePromptfilePath } from "../../db/write.js";
 import { processConfPath } from "../../conf.js";
 import { executeActionCmd } from "../lib/execute_action.js";
 import { brain, initAgent, marked, taskBuilder } from "../../agent.js";
@@ -108,12 +108,16 @@ async function _updateConfCmd(args: Array<string> = [], options: any): Promise<a
         console.warn("Provide a config.yml file path");
         return
     }
-    const allPaths = await processConfPath(args[0]);
-    const feats = readFeaturesDirs(allPaths);
+    const { paths, pf } = await processConfPath(args[0]);
+    if (pf.length > 0) {
+        updatePromptfilePath(pf);
+        promptfile.value = pf;
+    }
+    const feats = readFeaturesDirs(paths);
     //console.log("CMD FEATS", feats);
     updateFeatures(feats);
     updateAliases(feats);
-    const deleted = cleanupFeaturePaths(allPaths);
+    const deleted = cleanupFeaturePaths(paths);
     for (const el of deleted) {
         console.log("- [feature path]", el)
     }
