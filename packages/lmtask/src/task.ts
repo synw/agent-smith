@@ -151,7 +151,7 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                     }
                 }
                 //console.log("THINK")
-                const res = await this.expert.think(pr, { ...ip, stream: true });
+                const res = await this.expert.think(pr, { ...ip, stream: true }, { skipTemplate: true });
                 return res
             },
             abort: async (): Promise<void> => {
