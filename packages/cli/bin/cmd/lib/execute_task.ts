@@ -1,9 +1,8 @@
 import { brain, initAgent, taskBuilder } from "../../agent.js";
 import { getFeatureSpec } from "../../state/features.js";
 import { FeatureType } from "../../interfaces.js";
-import { inputMode, isChatMode, isDebug } from "../../state/state.js";
-import { initTaskVars, parseInputOptions, readPromptFile, readTask } from "./utils.js";
-import { readClipboard } from "../sys/clipboard.js";
+import { isChatMode, isDebug } from "../../state/state.js";
+import { initTaskVars, parseInputOptions, readTask } from "./utils.js";
 
 async function executeTaskCmd(args: Array<string> = [], options: any = {}): Promise<any> {
     await initAgent();

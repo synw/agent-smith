@@ -1,12 +1,14 @@
 import { input } from "@inquirer/prompts";
+import { toRaw } from "@vue/reactivity";
 import { Command } from "commander";
 import { brain } from "../agent.js";
+import { query } from "../cli.js";
 import { Cmd } from "../interfaces.js";
+import { chatInferenceParams } from "../state/chat.js";
 import { isChatMode, lastCmd, runMode } from "../state/state.js";
 import { cmds, initAliases, initCmds } from "./clicmds/cmds.js";
 import { modes } from "./clicmds/modes.js";
 import { processOutput, setOptions } from "./lib/utils.js";
-import { query } from "../cli.js";
 
 let cliCmds: Record<string, Cmd> = {};
 
@@ -22,7 +24,7 @@ async function chat() {
         }
     }
     //console.log("EX", brain.ex);
-    await brain.ex.think(prompt);
+    await brain.ex.think(prompt, toRaw(chatInferenceParams));
     console.log();
     await chat();
 }
@@ -88,5 +90,4 @@ async function parseCmd() {
     }
 }
 
-export { buildCmds, initCliCmds, parseCmd, runCmd, chat };
-;
+export { buildCmds, chat, initCliCmds, parseCmd, runCmd };
