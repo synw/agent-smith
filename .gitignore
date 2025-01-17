@@ -13,3 +13,4 @@ yarn-error.log
 package-lock.json
 examples/data
 coverage
+server.config.yml
