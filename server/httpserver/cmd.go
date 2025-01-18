@@ -3,65 +3,30 @@ package httpserver
 import (
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"sync"
 
-	"github.com/synw/agent-smith/server/files"
+	"github.com/labstack/echo/v4"
 	"github.com/synw/agent-smith/server/lm"
 	"github.com/synw/agent-smith/server/state"
 	"github.com/synw/agent-smith/server/types"
-
-	"github.com/labstack/echo/v4"
 )
 
-func ExecuteTaskHandler(c echo.Context) error {
+func ExecuteCmdHandler(c echo.Context) error {
 	m := echo.Map{}
 	if err := c.Bind(&m); err != nil {
 		return err
 	}
-	//fmt.Println("PAYLOAD", m)
-	v, ok := m["task"]
-	taskName := ""
-	if ok {
-		taskName = v.(string)
-	} else {
-		msg := "Provide a 'task' string parameter"
-		return echo.NewHTTPError(http.StatusBadRequest, msg)
-	}
-	v, ok = m["prompt"]
-	prompt := ""
-	if ok {
-		prompt = v.(string)
-	} else {
-		msg := "Provide a 'prompt' string parameter"
-		return echo.NewHTTPError(http.StatusBadRequest, msg)
-	}
-	v, ok = m["vars"]
-	vars := make(map[string]interface{})
-	if ok {
-		vars = v.(map[string]interface{})
-	}
-	found, _, tp := state.GetTask(taskName)
-	if !found {
-		msg := "Task " + taskName + " not found"
-		if state.IsDebug {
-			fmt.Println(msg)
-		}
-		return echo.NewHTTPError(http.StatusBadRequest, msg)
-	}
-	ms, ok := state.ModelsConf[taskName]
+	cmd, ok := m["cmd"]
 	if !ok {
-		ms = "default"
+		msg := "Provide a 'cmd' string parameter"
+		return echo.NewHTTPError(http.StatusBadRequest, msg)
 	}
-	ok, task, err := files.ReadTask(tp, ms)
-	if err != nil {
-		log.Println(err)
-		return c.NoContent(http.StatusInternalServerError)
-	}
+	params, ok := m["params"]
 	if !ok {
-		return c.NoContent(http.StatusBadRequest)
+		params = []string{}
 	}
+
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	c.Response().WriteHeader(http.StatusOK)
 	ch := make(chan types.StreamedMessage)
@@ -71,7 +36,9 @@ func ExecuteTaskHandler(c echo.Context) error {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		lm.InferTask(prompt, vars, task, c, ch, errCh)
+		rawParams := params.([]interface{})
+		params := lm.InterfaceToStringArray(rawParams)
+		lm.RunCmd(cmd.(string), params, c, ch, errCh)
 	}()
 
 	select {

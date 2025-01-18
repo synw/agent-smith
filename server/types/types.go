@@ -3,7 +3,7 @@ package types
 type Conf struct {
 	Origins   []string
 	ApiKey    string
-	CmdApiKey *string
+	CmdApiKey string
 	Features  []string
 	Models    map[string]string
 }

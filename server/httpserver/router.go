@@ -8,12 +8,12 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
-func RunServer(origins []string, apiKey string) {
+func RunServer(origins []string, apiKey string, cmdApîKey string) {
 	e := echo.New()
 
 	// logger
 	e.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
-		Format: "${method} ${status} ${uri}  ${latency_human} ${remote_ip} ${error}\n",
+		Format: "${method} ${status} ${uri} ${latency_human} ${remote_ip} ${error}\n",
 	}))
 	if l, ok := e.Logger.(*log.Logger); ok {
 		l.SetHeader("[${time_rfc3339}] ${level}")
@@ -29,7 +29,7 @@ func RunServer(origins []string, apiKey string) {
 
 	tasks := e.Group("/task")
 	tasks.Use(middleware.KeyAuth(func(key string, c echo.Context) (bool, error) {
-		if key == apiKey {
+		if (key == apiKey) || (key == cmdApîKey) {
 			//c.Set("apiKey", key)
 			return true, nil
 		}
@@ -37,6 +37,17 @@ func RunServer(origins []string, apiKey string) {
 	}))
 	//tasks.GET("/abort", AbortHandler)
 	tasks.POST("/execute", ExecuteTaskHandler)
+
+	/*cmds := e.Group("/cmd")
+	cmds.Use(middleware.KeyAuth(func(key string, c echo.Context) (bool, error) {
+		if key == cmdApîKey {
+			//c.Set("apiKey", key)
+			return true, nil
+		}
+		return false, nil
+	}))
+	//tasks.GET("/abort", AbortHandler)
+	cmds.POST("/execute", ExecuteCmdHandler)*/
 
 	e.Start(":5143")
 }

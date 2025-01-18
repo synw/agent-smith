@@ -29,6 +29,7 @@ func main() {
 	}
 	state.IsVerbose = !*quiet
 	config := conf.InitConf()
+	//fmt.Println("Conf", config)
 	err := state.Init(config.Features, config.Models)
 	if err != nil {
 		log.Fatal("Error initializing state", err)
@@ -36,5 +37,5 @@ func main() {
 	if state.IsVerbose {
 		fmt.Println("Starting the http server with allowed origins", config.Origins)
 	}
-	httpserver.RunServer(config.Origins, config.ApiKey)
+	httpserver.RunServer(config.Origins, config.ApiKey, config.CmdApiKey)
 }
