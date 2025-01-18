@@ -20,7 +20,7 @@ func ExecuteTaskHandler(c echo.Context) error {
 	if err := c.Bind(&m); err != nil {
 		return err
 	}
-	fmt.Println("PAYLOAD", m)
+	//fmt.Println("PAYLOAD", m)
 	v, ok := m["task"]
 	taskName := ""
 	if ok {
@@ -36,7 +36,14 @@ func ExecuteTaskHandler(c echo.Context) error {
 	if ok {
 		vars = v.(map[string]interface{})
 	}
-	ok, task, err := files.ReadTask(taskName)
+	found, _, tp := state.GetTask(taskName)
+	if !found {
+		if state.IsDebug {
+			fmt.Println("Task", taskName, "not found")
+		}
+		return c.NoContent(http.StatusBadRequest)
+	}
+	ok, task, err := files.ReadTask(tp, state.ModelSize)
 	if err != nil {
 		log.Println(err)
 		return c.NoContent(http.StatusInternalServerError)
@@ -78,6 +85,10 @@ func ExecuteTaskHandler(c echo.Context) error {
 			if err != nil {
 				if state.IsDebug {
 					fmt.Println("Streaming error", err)
+					errCh <- types.StreamedMessage{
+						Content: "Streaming error",
+						MsgType: types.ErrorMsgType,
+					}
 				}
 				wg.Wait()
 				close(ch)

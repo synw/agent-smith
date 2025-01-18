@@ -48,18 +48,21 @@ func InferTask(
 	if state.IsDebug {
 		fmt.Println("Inference params:")
 		fmt.Printf("%+v\n\n", task.InferParams)
-
 	}
+	fmt.Println("Stop", stop)
 	for _, s := range stop {
-		task.InferParams.Stop = append(task.InferParams.Stop, s)
+		st, ok := task.InferParams["stop"]
+		if st == nil || !ok {
+			task.InferParams["stop"] = []string{}
+		}
+		task.InferParams["stop"] = append(task.InferParams["stop"].([]string), s)
 	}
-	ip, err := StructToMap(task.InferParams)
+	ip, err := convertInferParams(task.InferParams)
 	if err != nil {
 		errCh <- types.StreamedMessage{
 			Content: err.Error(),
 			MsgType: types.ErrorMsgType,
 		}
 	}
-
 	ollamaInfer(finalPrompt, task.Model, ip, c, ch, errCh)
 }

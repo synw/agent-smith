@@ -32,6 +32,7 @@ func formatPrompt(task types.LmTask, userPrompt string, vars map[string]interfac
 			}
 		}
 	}
+	task.Prompt = strings.Replace(task.Prompt, "{prompt}", userPrompt, 1)
 	promptTemplate := &modprompt.PromptTemplate{
 		ID:         tpl.ID,
 		Name:       tpl.Name,
@@ -49,11 +50,11 @@ func formatPrompt(task types.LmTask, userPrompt string, vars map[string]interfac
 	}
 	for k, v := range task.Template {
 		if k == "system" {
-			promptTemplate.AfterSystem(v)
+			promptTemplate.ReplaceSystem(v)
 		}
 		if k == "assistant" {
 			promptTemplate.AfterAssistant(v)
 		}
 	}
-	return promptTemplate.Prompt(userPrompt), promptTemplate.Stop, nil
+	return promptTemplate.Prompt(task.Prompt), promptTemplate.Stop, nil
 }

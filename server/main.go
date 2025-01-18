@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"log"
 
 	"github.com/synw/agent-smith/server/conf"
 	"github.com/synw/agent-smith/server/httpserver"
@@ -28,6 +29,10 @@ func main() {
 	}
 	state.IsVerbose = !*quiet
 	config := conf.InitConf()
+	err := state.Init(config.Features)
+	if err != nil {
+		log.Fatal("Error initializing state", err)
+	}
 	if state.IsVerbose {
 		fmt.Println("Starting the http server with allowed origins", config.Origins)
 	}

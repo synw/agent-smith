@@ -68,6 +68,8 @@ func ollamaInfer(
 			}
 		}
 		token := resp.Response
+		//_, isStopToken := inferParams["stop"].([]string)
+		//if !isStopToken {
 		buf = append(buf, token)
 		if state.IsVerbose {
 			fmt.Print(token)
@@ -81,6 +83,7 @@ func ollamaInfer(
 			StreamMsg(tmsg, c, enc)
 		}
 		ntokens++
+		//}
 		return nil
 	}
 
@@ -138,4 +141,18 @@ func ollamaInfer(
 		ch <- endmsg
 	}
 	return nil
+}
+
+func convertInferParams(inferParams map[string]interface{}) (map[string]interface{}, error) {
+	ip := make(map[string]interface{})
+	for k, v := range inferParams {
+		if k == "max_tokens" {
+			ip["num_predict"] = v
+		} else if k == "tfs" {
+			ip["tfs_z"] = v
+		} else {
+			ip[k] = v
+		}
+	}
+	return ip, nil
 }
