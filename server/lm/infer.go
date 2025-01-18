@@ -37,19 +37,21 @@ func InferTask(
 			MsgType: types.ErrorMsgType,
 		}
 	}
-	if state.IsVerbose {
+	if state.IsDebug {
 		//fmt.Println("Inference params:")
 		//fmt.Println(params)
 		fmt.Println("---------- prompt ----------")
 		fmt.Println(finalPrompt)
 		fmt.Println("----------------------------")
-		fmt.Println("Thinking ..")
+	}
+	if state.IsVerbose {
+		fmt.Println("Ingesting prompt ..")
 	}
 	if state.IsDebug {
 		fmt.Println("Inference params:")
-		fmt.Printf("%+v\n\n", task.InferParams)
+		fmt.Printf("%+v\n", task.InferParams)
 	}
-	fmt.Println("Stop", stop)
+	//fmt.Println("Stop", stop)
 	for _, s := range stop {
 		st, ok := task.InferParams["stop"]
 		if st == nil || !ok {

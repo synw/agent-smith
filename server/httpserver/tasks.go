@@ -43,7 +43,11 @@ func ExecuteTaskHandler(c echo.Context) error {
 		}
 		return c.NoContent(http.StatusBadRequest)
 	}
-	ok, task, err := files.ReadTask(tp, state.ModelSize)
+	ms, ok := state.ModelsConf[taskName]
+	if !ok {
+		ms = "default"
+	}
+	ok, task, err := files.ReadTask(tp, ms)
 	if err != nil {
 		log.Println(err)
 		return c.NoContent(http.StatusInternalServerError)
@@ -66,7 +70,7 @@ func ExecuteTaskHandler(c echo.Context) error {
 	select {
 	case res, ok := <-ch:
 		if ok {
-			if state.IsVerbose {
+			if state.IsDebug {
 				fmt.Println("-------- result ----------")
 				for key, value := range res.Data {
 					fmt.Printf("%s: %v\n", key, value)

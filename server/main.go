@@ -29,7 +29,7 @@ func main() {
 	}
 	state.IsVerbose = !*quiet
 	config := conf.InitConf()
-	err := state.Init(config.Features)
+	err := state.Init(config.Features, config.Models)
 	if err != nil {
 		log.Fatal("Error initializing state", err)
 	}

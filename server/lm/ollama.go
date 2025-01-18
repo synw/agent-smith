@@ -49,7 +49,7 @@ func ollamaInfer(
 			thinkingElapsed = time.Since(startThinking)
 			if state.IsVerbose {
 				fmt.Println("Thinking time:", thinkingElapsed)
-				fmt.Println("Emitting ..")
+				fmt.Println("Emitting ..\n")
 			}
 			smsg := types.StreamedMessage{
 				Num:     ntokens,
@@ -99,7 +99,7 @@ func ollamaInfer(
 		// the inference was not aborted
 		emittingElapsed := time.Since(startEmitting)
 		if state.IsVerbose {
-			fmt.Println("Emitting time:", emittingElapsed)
+			fmt.Println("\n\nEmitting time:", emittingElapsed)
 		}
 		tpsRaw := float64(ntokens) / emittingElapsed.Seconds()
 		s := fmt.Sprintf("%.2f", tpsRaw)

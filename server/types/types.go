@@ -5,6 +5,7 @@ type Conf struct {
 	ApiKey    string
 	CmdApiKey *string
 	Features  []string
+	Models    map[string]string
 }
 
 // ModelConf represents the configuration for a language model.

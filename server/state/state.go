@@ -15,11 +15,12 @@ var ContinueInferingController = true
 var IsInfering = false
 
 // models
-var ModelSize = "xsmall"
+var ModelsConf = make((map[string]string))
 
 var Tasks = map[string]string{}
 
-func Init(features []string) error {
+func Init(features []string, models map[string]string) error {
+	ModelsConf = models
 	ts, err := files.InitTasks(features)
 	if err != nil {
 		return err

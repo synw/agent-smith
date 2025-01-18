@@ -17,6 +17,7 @@ func InitConf() types.Conf {
 	viper.AddConfigPath(".")
 	viper.SetDefault("origins", []string{"localhost"})
 	viper.SetDefault("cmd_api_key", nil)
+	viper.SetDefault("models", map[string]string{})
 	viper.SetDefault("features", []string{})
 	err := viper.ReadInConfig() // Find and read the config file
 	if err != nil {             // Handle errors reading the config file
@@ -25,12 +26,14 @@ func InitConf() types.Conf {
 	or := viper.GetStringSlice("origins")
 	ak := viper.GetString("api_key")
 	cmdak := viper.GetString("cmd_api_key")
+	models := viper.GetStringMapString("models")
 	ft := viper.GetStringSlice("features")
 	return types.Conf{
 		Origins:   or,
 		ApiKey:    ak,
 		CmdApiKey: &cmdak,
 		Features:  ft,
+		Models:    models,
 	}
 }
 
