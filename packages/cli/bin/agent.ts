@@ -1,5 +1,6 @@
 import { useAgentBrain } from "@agent-smith/brain";
-import { LmTaskBuilder } from "@agent-smith/lmtask";
+//import { LmTaskBuilder } from "@agent-smith/lmtask";
+import { LmTaskBuilder } from "../../lmtask/dist/task.js";
 import { MarkedExtension, marked } from 'marked';
 import { markedTerminal } from "marked-terminal";
 import { FeatureType } from "./interfaces.js";

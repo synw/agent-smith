@@ -52,7 +52,7 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
             const taskSpec = taskBuilder.readFromYaml(tres.ymlTask);
             //const task = taskBuilder.fromYaml(tres.ymlTask);
             let m = taskSpec.model.name;
-            let t = taskSpec.template.name;
+            let t = taskSpec.model.template;
             if (conf?.model) {
                 m = conf.model
             }

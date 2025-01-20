@@ -3,6 +3,9 @@ import { getFeatureSpec } from "../../state/features.js";
 import { FeatureType } from "../../interfaces.js";
 import { isChatMode, isDebug } from "../../state/state.js";
 import { initTaskVars, parseInputOptions, readTask } from "./utils.js";
+import { useTemplateForModel } from "@agent-smith/tfm";
+
+const tfm = useTemplateForModel();
 
 async function executeTaskCmd(args: Array<string> = [], options: any = {}): Promise<any> {
     await initAgent();
@@ -40,12 +43,39 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
         console.log("Task vars:", vars);
     }
     let m = taskSpec.model.name;
-    let t = taskSpec.template.name;
+    let t: string = taskSpec.model.template;
+    let c = taskSpec.model.ctx;
     if (conf?.model) {
         m = conf.model
+        if (conf?.template) {
+            t = conf.template
+        } else {
+            const gt = tfm.guess(m);
+            if (gt == "none") {
+                throw new Error(`Unable to guess the template for ${conf.model}: please provide a template name: m="modelname/templatename"`)
+            }
+            t = gt
+        }
+    } else {
+        if (conf?.size) {
+            if (!taskSpec?.models) {
+                throw new Error(`Model ${conf.size} not found in task`)
+            }
+            if (!Object.keys(taskSpec.models).includes(conf.size)) {
+                throw new Error(`Model ${conf.size} not found in task`)
+            }
+            m = taskSpec.models[conf.size].name;
+            t = taskSpec.models[conf.size].template;
+            c = taskSpec.models[conf.size].ctx;
+        }
     }
-    if (conf?.template) {
-        t = conf.template
+    conf.model = {
+        name: m,
+        template: t,
+        ctx: c,
+    };
+    if (isDebug.value) {
+        console.log("Model:", conf.model);
     }
     const ex = brain.getOrCreateExpertForModel(m, t);
     //console.log("EFM", ex?.name);
@@ -67,10 +97,6 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
     conf.expert = ex;
     if (isDebug.value) {
         conf.debug = true;
-    }
-    //console.log("Ingesting prompt ...");
-    if (isDebug.value) {
-        console.log("Vars", vars);
     }
     const data = await task.run({ prompt: pr, ...vars }, conf) as Record<string, any>;
     if (data?.error) {

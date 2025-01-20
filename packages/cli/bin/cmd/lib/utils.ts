@@ -110,6 +110,8 @@ function initTaskVars(args: Array<any>): { conf: Record<string, any>, vars: Reco
                     ip[s[0]] = parseFloat(s[1])
                 });
                 conf.inferParams = ip
+            } else if (k == "s") {
+                conf.size = v
             } else {
                 vars[k] = v
             }
