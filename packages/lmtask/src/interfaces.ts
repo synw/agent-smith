@@ -1,17 +1,21 @@
-import { InferenceParams, ModelConf } from "@locallm/types";
+import { InferenceParams } from "@locallm/types";
 import { TurnBlock } from "modprompt";
+
+interface ModelSpec {
+  name: string
+  ctx: number;
+  template: string;
+}
 
 /**
  * Represents a template specification for a language model task.
  *
  * @interface TemplateSpec
- * @param {string} name - The name of the template.
  * @param {string} [system] - The system message for the template.
- * @param {Array<string>} [stop] - The stop sequences for the template.
- * @param {string} [assistant] - The assistant message for the template.
+ * @param {Array<string>} [stop] - Extra stop sequences for the template.
+ * @param {string} [assistant] - The assistant start message for the template.
  */
 interface TemplateSpec {
-  name: string;
   system?: string;
   stop?: Array<string>;
   assistant?: string;
@@ -34,12 +38,20 @@ interface LmTask {
   name: string;
   description: string;
   prompt: string;
-  template: TemplateSpec;
-  inferParams: InferenceParams;
-  model: ModelConf;
-  shots: Array<TurnBlock>;
+  model: ModelSpec;
+  template?: TemplateSpec;
+  inferParams?: InferenceParams;
+  models?: Record<string, ModelSpec>,
+  shots?: Array<TurnBlock>;
   variables?: { required?: Array<string>, optional?: Array<string> };
 }
 
-export { LmTask, TemplateSpec };
+//type ModelSize = "xsmall" | "small" | "medium" | "large" | "xlarge" | "xxlarge";
+
+export {
+  ModelSpec,
+  //ModelSize,
+  LmTask,
+  TemplateSpec,
+};
 
