@@ -49,5 +49,5 @@ func RunServer(origins []string, apiKey string, cmdApîKey string) {
 	//tasks.GET("/abort", AbortHandler)
 	cmds.POST("/execute", ExecuteCmdHandler)*/
 
-	e.Start(":5143")
+	e.Start(":5042")
 }

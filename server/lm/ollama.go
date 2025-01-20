@@ -64,15 +64,16 @@ func ollamaInfer(
 				StreamMsg(smsg, c, enc)
 				// sleep to let the time to stream this message, as a second
 				// message with the token has to be streamed in this loop as well
-				time.Sleep(2 * time.Millisecond)
+				time.Sleep(1 * time.Millisecond)
 			}
 		}
 		token := resp.Response
 		//_, isStopToken := inferParams["stop"].([]string)
 		//if !isStopToken {
 		buf = append(buf, token)
+		//}
 		if state.IsVerbose {
-			fmt.Print(token)
+			go fmt.Print(token)
 		}
 		tmsg := types.StreamedMessage{
 			Content: token,
@@ -80,7 +81,7 @@ func ollamaInfer(
 			MsgType: types.TokenMsgType,
 		}
 		if state.ContinueInferingController {
-			StreamMsg(tmsg, c, enc)
+			go StreamMsg(tmsg, c, enc)
 		}
 		ntokens++
 		//}
