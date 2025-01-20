@@ -58,6 +58,11 @@ An api to create local first human friendly agents in the browser or Nodejs
     - [Commands](https://synw.github.io/agent-smith/terminal_client/commands)
     - [Options](https://synw.github.io/agent-smith/terminal_client/options)
     - [Plugins](https://synw.github.io/agent-smith/terminal_client/plugins)
+ - [Server](https://synw.github.io/agent-smith/server)
+    - [Get started](https://synw.github.io/agent-smith/server/get_started)
+    - [Configuration](https://synw.github.io/agent-smith/server/configuration)
+    - [Tasks](https://synw.github.io/agent-smith/server/tasks)
+    - [Api](https://synw.github.io/agent-smith/server/api)
  - [Examples](https://synw.github.io/agent-smith/examples)
     - [Data viz](https://synw.github.io/agent-smith/examples/data_viz)
 
@@ -149,10 +154,35 @@ await brain.think(_prompt, {
 });
 ```
 
+### Server api
+
+To execute a task using the server http api:
+
+```js
+import { useServer } from "@agent-smith/apicli";
+
+const api = useServer({
+    apiKey: "server_api_key",
+    onToken: (t) => {
+        // handle the streamed tokens here
+        process.stdout.write(t)
+    }
+});
+await api.executeTask(
+    "translate", 
+    "Which is the largest planet of the solar system?", 
+    { lang: "german" }
+)
+```
+
 ## Libraries
 
-Powered by:
+The cli is powered by:
 
 - [Nanostores](https://github.com/nanostores/nanostores) for the state management and reactive variables
 - [Locallm](https://github.com/synw/locallm) for the inference api servers management
 - [Modprompt](https://github.com/synw/modprompt) for the prompt templates management
+
+The server is powered by:
+
+- [Echo](https://github.com/labstack/echo)
