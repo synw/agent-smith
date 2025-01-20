@@ -11,7 +11,6 @@ prompt: |-
       Think carefully before you write your commit message.
 
 template: 
-    name: llama3
     system: |- 
         You are an AI programmer assistant. Your task is to write a commit message from a git diff.
 
@@ -43,6 +42,7 @@ template:
 model: 
     name: "llama3.1:latest"
     ctx: 8192
+    template: llama3
 inferParams:
     min_p: 0.05
     temperature: 0.1
