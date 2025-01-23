@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/synw/agent-smith/server/state"
 	"github.com/synw/agent-smith/server/types"
 
 	"gopkg.in/yaml.v3"
@@ -32,25 +33,25 @@ func InitTasks(features []string) (map[string]string, error) {
 	return ymlFiles, nil
 }
 
-func ReadTask(path string, modelSize string) (bool, types.LmTask, error) {
+func ReadTask(path string, modelSize string) (bool, types.LmTask, bool, error) {
 	_, err := os.Stat(path)
 	t := types.LmTask{}
 	if os.IsNotExist(err) {
-		return false, t, nil
+		return false, t, false, nil
 	}
 	file, err := os.Open(path)
 	if err != nil {
-		return true, t, err
+		return true, t, false, err
 	}
 	defer file.Close()
 
 	data, err := io.ReadAll(file)
 	if err != nil {
-		return true, t, err
+		return true, t, false, err
 	}
 	err = yaml.Unmarshal([]byte(data), &t)
 	if err != nil {
-		return true, t, err
+		return true, t, false, err
 	}
 	/*fmt.Println("M2", m2)
 	prompt, ok := m2["prompt"].(string)
@@ -59,14 +60,14 @@ func ReadTask(path string, modelSize string) (bool, types.LmTask, error) {
 	}
 	t.Prompt = prompt*/
 	//fmt.Println("Prompt", t.Prompt)
-	t, err = convertTask(t, modelSize)
+	t, useApi, err := convertTask(t, modelSize)
 	if err != nil {
-		return true, t, err
+		return true, t, false, err
 	}
 	//fmt.Printf("Task: %+v\n", t)
 	//ndata, _ := json.MarshalIndent(t, "", "  ")
 	//fmt.Println(string(ndata))
-	return true, t, nil
+	return true, t, useApi, nil
 }
 
 func keyExists(m map[string]interface{}, key string) bool {
@@ -74,9 +75,15 @@ func keyExists(m map[string]interface{}, key string) bool {
 	return ok
 }
 
-func convertTask(task types.LmTask, modelSize string) (types.LmTask, error) {
+func convertTask(task types.LmTask, modelSize string) (types.LmTask, bool, error) {
 	//foundModel := false
+	useApi := false
 	if modelSize != "default" {
+		if modelSize == "api" {
+			if state.HasOaiApi {
+				useApi = true
+			}
+		}
 		if task.Models != nil {
 			for size, mod := range task.Models {
 				if size == modelSize {
@@ -129,5 +136,5 @@ func convertTask(task types.LmTask, modelSize string) (types.LmTask, error) {
 
 	}
 	task.InferParams = ip*/
-	return task, nil
+	return task, useApi, nil
 }

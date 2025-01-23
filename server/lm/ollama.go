@@ -49,7 +49,8 @@ func ollamaInfer(
 			thinkingElapsed = time.Since(startThinking)
 			if state.IsVerbose {
 				fmt.Println("Thinking time:", thinkingElapsed)
-				fmt.Println("Emitting ..\n")
+				fmt.Println("Emitting ..")
+				fmt.Println()
 			}
 			smsg := types.StreamedMessage{
 				Num:     ntokens,
@@ -144,7 +145,7 @@ func ollamaInfer(
 	return nil
 }
 
-func convertInferParams(inferParams map[string]interface{}) (map[string]interface{}, error) {
+func ollamaConvertInferParams(inferParams map[string]interface{}) (map[string]interface{}, error) {
 	ip := make(map[string]interface{})
 	for k, v := range inferParams {
 		if k == "max_tokens" {

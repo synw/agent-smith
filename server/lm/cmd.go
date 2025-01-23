@@ -2,10 +2,12 @@ package lm
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os/exec"
 
 	"github.com/labstack/echo/v4"
+	"github.com/synw/agent-smith/server/state"
 	"github.com/synw/agent-smith/server/types"
 )
 
@@ -18,51 +20,56 @@ func RunCmd(
 ) {
 	// Create the command with the arguments
 	params = append([]string{cmdName}, params...)
-	fmt.Println("Params:")
-	for _, p := range params {
-		fmt.Println("-", p)
+	if state.IsDebug {
+		fmt.Println("Cmd params:")
+		for _, p := range params {
+			fmt.Println("-", p)
+		}
 	}
-	fmt.Println("Cmd", "lm", params)
 	cmd := exec.Command("lm", params...)
+	//cmd.Env = append(os.Environ(), "LANG=en_US.UTF-8")
 
 	// Create a pipe to capture the command's output
 	stdout, err := cmd.StdoutPipe()
 	if err != nil {
-		msg := fmt.Errorf("Error creating stdout pipe:", err)
+		msg := fmt.Errorf("Error creating stdout pipe: %v", err)
 		errCh <- createErrorMsg(msg.Error())
 		return
 	}
 
 	// Start the command
 	if err := cmd.Start(); err != nil {
-		msg := fmt.Errorf("Error starting command:", err)
+		msg := fmt.Errorf("Error starting command: %v", err)
 		errCh <- createErrorMsg(msg.Error())
 		return
 	}
 
-	// Create a scanner to read the output word by word
-	scanner := bufio.NewScanner(stdout)
-	scanner.Split(bufio.ScanWords) // Set the split function to scan words
+	decoder := bufio.NewReader(stdout)
+	scanner := bufio.NewScanner(decoder)
+	scanner.Split(bufio.ScanRunes)
 
-	// Read and print the output word by word
+	enc := json.NewEncoder(c.Response())
+	enc.SetEscapeHTML(false)
 	i := 0
 	for scanner.Scan() {
 		i++
 		token := scanner.Text()
-		fmt.Println("T", token)
-		ch <- createMsg(token, i)
+		if state.IsVerbose {
+			fmt.Print(token)
+		}
+		StreamMsg(createMsg(token, i), c, enc)
 	}
 
 	// Check for errors during scanning
 	if err := scanner.Err(); err != nil {
-		msg := fmt.Errorf("Error reading output:", err)
+		msg := fmt.Errorf("Error reading output: %v", err)
 		fmt.Println(msg)
 		errCh <- createErrorMsg(msg.Error())
 	}
 
 	// Wait for the command to finish
 	if err := cmd.Wait(); err != nil {
-		msg := fmt.Errorf("Command finished with error:", err)
+		msg := fmt.Errorf("Command finished with error: %v", err)
 		errCh <- createErrorMsg(msg.Error())
 	}
 }

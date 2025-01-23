@@ -54,7 +54,8 @@ func ExecuteTaskHandler(c echo.Context) error {
 	if !ok {
 		ms = "default"
 	}
-	ok, task, err := files.ReadTask(tp, ms)
+	fmt.Println("Tms", ms)
+	ok, task, useApi, err := files.ReadTask(tp, ms)
 	if err != nil {
 		log.Println(err)
 		return c.NoContent(http.StatusInternalServerError)
@@ -71,7 +72,7 @@ func ExecuteTaskHandler(c echo.Context) error {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		lm.InferTask(prompt, vars, task, c, ch, errCh)
+		lm.InferTask(prompt, vars, task, useApi, c, ch, errCh)
 	}()
 
 	select {

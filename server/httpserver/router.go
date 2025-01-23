@@ -38,7 +38,7 @@ func RunServer(origins []string, apiKey string, cmdApîKey string) {
 	//tasks.GET("/abort", AbortHandler)
 	tasks.POST("/execute", ExecuteTaskHandler)
 
-	/*cmds := e.Group("/cmd")
+	cmds := e.Group("/cmd")
 	cmds.Use(middleware.KeyAuth(func(key string, c echo.Context) (bool, error) {
 		if key == cmdApîKey {
 			//c.Set("apiKey", key)
@@ -47,7 +47,7 @@ func RunServer(origins []string, apiKey string, cmdApîKey string) {
 		return false, nil
 	}))
 	//tasks.GET("/abort", AbortHandler)
-	cmds.POST("/execute", ExecuteCmdHandler)*/
+	cmds.POST("/execute", ExecuteCmdHandler)
 
 	e.Start(":5042")
 }

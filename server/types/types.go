@@ -1,11 +1,12 @@
 package types
 
 type Conf struct {
-	Origins   []string
-	ApiKey    string
-	CmdApiKey string
-	Features  []string
-	Models    map[string]string
+	Origins      []string
+	ApiKey       string
+	CmdApiKey    string
+	Features     []string
+	Models       map[string]string
+	OaiApiParams map[string]string
 }
 
 // ModelConf represents the configuration for a language model.

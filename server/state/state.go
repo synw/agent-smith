@@ -2,8 +2,7 @@ package state
 
 import (
 	"fmt"
-
-	"github.com/synw/agent-smith/server/files"
+	"slices"
 )
 
 // app state
@@ -17,18 +16,32 @@ var IsInfering = false
 // models
 var ModelsConf = make((map[string]string))
 
+// tasks
 var Tasks = map[string]string{}
 
-func Init(features []string, models map[string]string) error {
+// oai api
+var HasOaiApi = false
+
+func Init(features []string, models map[string]string, hasOai bool, tasks map[string]string) error {
 	ModelsConf = models
-	ts, err := files.InitTasks(features)
-	if err != nil {
-		return err
-	}
-	Tasks = ts
 	if IsDebug {
-		fmt.Println("Tasks:", Tasks)
+		fmt.Println("Models conf:", ModelsConf)
 	}
+	Tasks = tasks
+	if IsDebug {
+		fmt.Print("Found ", len(Tasks), " tasks:")
+		var keys []string
+		for k := range Tasks {
+			keys = append(keys, k)
+		}
+		// Sort the keys
+		slices.Sort(keys)
+		for _, tn := range keys {
+			fmt.Print(" ", tn)
+		}
+		fmt.Println()
+	}
+	HasOaiApi = hasOai
 	return nil
 }
 

@@ -8,15 +8,7 @@ import (
 	modprompt "github.com/synw/gomodprompt"
 )
 
-func formatPrompt(task types.LmTask, userPrompt string, vars map[string]interface{}) (string, []string, error) {
-	// Initialize a template by name
-	tpl, err := modprompt.InitTemplate(task.Model.Template)
-	if err != nil {
-		//fmt.Println("Error initializing template:", err)
-		return "", []string{}, fmt.Errorf("Error initializing template:", err)
-	}
-	// variables
-	//fmt.Println("VARS", vars)
+func processVars(task types.LmTask, vars map[string]interface{}) types.LmTask {
 	if task.Variables.Required != nil {
 		for _, v := range task.Variables.Required {
 			task.Prompt = strings.Replace(task.Prompt, "{"+v+"}", vars[v].(string), 1)
@@ -32,7 +24,26 @@ func formatPrompt(task types.LmTask, userPrompt string, vars map[string]interfac
 			}
 		}
 	}
+	return task
+}
+
+func oaiFormatPrompt(task types.LmTask, userPrompt string, vars map[string]interface{}) (string, []string, error) {
 	task.Prompt = strings.Replace(task.Prompt, "{prompt}", userPrompt, 1)
+	processVars(task, vars)
+	return task.Prompt, []string{}, nil
+}
+
+func ollamaFormatPrompt(task types.LmTask, userPrompt string, vars map[string]interface{}) (string, []string, error) {
+	// Initialize a template by name
+	tpl, err := modprompt.InitTemplate(task.Model.Template)
+	if err != nil {
+		//fmt.Println("Error initializing template:", err)
+		return "", []string{}, fmt.Errorf("Error initializing template: %v", err)
+	}
+	// variables
+	//fmt.Println("VARS", vars)
+	task.Prompt = strings.Replace(task.Prompt, "{prompt}", userPrompt, 1)
+	processVars(task, vars)
 	promptTemplate := &modprompt.PromptTemplate{
 		ID:         tpl.ID,
 		Name:       tpl.Name,

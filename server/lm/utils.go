@@ -1,11 +1,24 @@
 package lm
 
 import (
+	"encoding/json"
 	"fmt"
 	"reflect"
 
+	"github.com/labstack/echo/v4"
 	"github.com/synw/agent-smith/server/types"
 )
+
+func StreamMsg(msg types.StreamedMessage, c echo.Context, enc *json.Encoder) error {
+	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	c.Response().Write([]byte("data: "))
+	if err := enc.Encode(msg); err != nil {
+		return err
+	}
+	c.Response().Write([]byte("\n"))
+	c.Response().Flush()
+	return nil
+}
 
 func StructToMap(s interface{}) (map[string]interface{}, error) {
 	v := reflect.ValueOf(s)

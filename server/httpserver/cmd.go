@@ -44,6 +44,7 @@ func ExecuteCmdHandler(c echo.Context) error {
 	select {
 	case res, ok := <-ch:
 		if ok {
+			fmt.Println("ch", res)
 			if state.IsDebug {
 				fmt.Println("-------- result ----------")
 				for key, value := range res.Data {

@@ -6,7 +6,9 @@ import (
 	"log"
 
 	"github.com/synw/agent-smith/server/conf"
+	"github.com/synw/agent-smith/server/files"
 	"github.com/synw/agent-smith/server/httpserver"
+	"github.com/synw/agent-smith/server/lm"
 	"github.com/synw/agent-smith/server/state"
 )
 
@@ -30,7 +32,12 @@ func main() {
 	state.IsVerbose = !*quiet
 	config := conf.InitConf()
 	//fmt.Println("Conf", config)
-	err := state.Init(config.Features, config.Models)
+	hasOaiApi := lm.InitOaiCli(config.OaiApiParams)
+	tasks, err := files.InitTasks(config.Features)
+	if err != nil {
+		panic(err)
+	}
+	err = state.Init(config.Features, config.Models, hasOaiApi, tasks)
 	if err != nil {
 		log.Fatal("Error initializing state", err)
 	}
