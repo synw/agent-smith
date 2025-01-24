@@ -1,0 +1,31 @@
+name: Build Go binaries
+
+on:
+  release:
+    types: [created]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Go
+      uses: actions/setup-go@v2
+      with:
+        go-version: '1.17'
+
+    - name: Build Go binary
+      run: |
+        cd server
+        go build -o agentsmith
+
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: server/agentsmith
+        asset_name: agentsmith
+        asset_content_type: application/octet-stream
