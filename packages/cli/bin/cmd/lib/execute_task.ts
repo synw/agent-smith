@@ -37,7 +37,7 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
     }
     const taskSpec = taskBuilder.readFromYaml(res.ymlTask);
     const task = taskBuilder.fromYaml(res.ymlTask);
-    const { conf, vars } = initTaskVars(args);
+    const { conf, vars } = initTaskVars(args, taskSpec?.inferParams ? taskSpec.inferParams as Record<string, any> : {});
     if (isDebug.value) {
         console.log("Task conf:", conf);
         console.log("Task vars:", vars);
@@ -52,7 +52,7 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
         } else {
             const gt = tfm.guess(m);
             if (gt == "none") {
-                throw new Error(`Unable to guess the template for ${conf.model}: please provide a template name: m="modelname/templatename"`)
+                throw new Error(`Unable to guess the template for ${conf.model}: please provide a template name"`)
             }
             t = gt
         }

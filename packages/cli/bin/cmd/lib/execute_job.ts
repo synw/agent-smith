@@ -25,12 +25,7 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
         //console.log("JOB TASK", name, task.type, "/", args, "/", options);
         if (task.type == "task") {
             //const pr = params.shift()!;
-            let conf: Record<string, any> = {};
-            let vars: Record<string, any> = {};
-            const tv = initTaskVars(args);
-            //console.log("TV", tv);
-            conf = tv.conf;
-            vars = i == 0 ? tv.vars : params;
+
             /*if (i == 0) {
                 const tv = initTaskVars(args);
                 console.log("TV", tv);
@@ -50,9 +45,17 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
                 throw new Error(`Task ${name}, ${path} not found`)
             }
             const taskSpec = taskBuilder.readFromYaml(tres.ymlTask);
-            //const task = taskBuilder.fromYaml(tres.ymlTask);
+            //console.log("Task spec", taskSpec);
             let m = taskSpec.model.name;
             let t = taskSpec.model.template;
+            let conf: Record<string, any> = {};
+            let vars: Record<string, any> = {};
+            const tv = initTaskVars(args, taskSpec?.inferParams ? taskSpec.inferParams as Record<string, any> : {});
+            console.log("TIP", taskSpec.inferParams);
+            console.log("IP", tv.conf.inferParams);
+            //console.log("TV", tv);
+            conf = tv.conf;
+            vars = i == 0 ? tv.vars : params;
             if (conf?.model) {
                 m = conf.model
             }

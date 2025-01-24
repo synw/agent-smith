@@ -4,6 +4,7 @@ import { outputMode, promptfile } from "../../state/state.js";
 import { inputMode, runMode } from "../../state/state.js";
 import { readClipboard, writeToClipboard } from "../sys/clipboard.js";
 import { modes } from "../clicmds/modes.js";
+import { InferenceParams } from "@locallm/types/dist/interfaces.js";
 
 async function setOptions(
     args: Array<string> = [], options: Record<string, any>,
@@ -86,8 +87,8 @@ function readTasksDir(dir: string): Array<string> {
     return tasks
 }
 
-function initTaskVars(args: Array<any>): { conf: Record<string, any>, vars: Record<string, any> } {
-    const conf: Record<string, any> = {};
+function initTaskVars(args: Array<any>, inferParams: Record<string, any>): { conf: Record<string, any>, vars: Record<string, any> } {
+    const conf: Record<string, any> = { inferParams: inferParams };
     const vars: Record<string, any> = {};
     args.forEach((a) => {
         if (a.includes("=")) {
@@ -104,12 +105,10 @@ function initTaskVars(args: Array<any>): { conf: Record<string, any>, vars: Reco
                     conf.model = v
                 }
             } else if (k == "ip") {
-                const ip: Record<string, any> = {};
                 v.split(",").forEach((p: string) => {
                     const s = p.split(":");
-                    ip[s[0]] = parseFloat(s[1])
+                    conf["inferParams"][s[0]] = parseFloat(s[1])
                 });
-                conf.inferParams = ip
             } else if (k == "s") {
                 conf.size = v
             } else {
