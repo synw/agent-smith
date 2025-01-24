@@ -29,7 +29,7 @@ func processVars(task types.LmTask, vars map[string]interface{}) types.LmTask {
 
 func oaiFormatPrompt(task types.LmTask, userPrompt string, vars map[string]interface{}) (string, []string, error) {
 	task.Prompt = strings.Replace(task.Prompt, "{prompt}", userPrompt, 1)
-	processVars(task, vars)
+	task = processVars(task, vars)
 	return task.Prompt, []string{}, nil
 }
 

@@ -54,7 +54,7 @@ func ExecuteTaskHandler(c echo.Context) error {
 	if !ok {
 		ms = "default"
 	}
-	fmt.Println("Tms", ms)
+	//fmt.Println("Tms", ms)
 	ok, task, useApi, err := files.ReadTask(tp, ms)
 	if err != nil {
 		log.Println(err)

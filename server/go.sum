@@ -67,8 +67,6 @@ github.com/subosito/gotenv v1.6.0 h1:9NlTDc1FTs4qu0DDq7AEtTPNw6SVm7uBMsUCUjABIf8
 github.com/subosito/gotenv v1.6.0/go.mod h1:Dk4QP5c2W3ibzajGcXpNraDfq2IrhjMIvMSWPKKo0FU=
 github.com/synw/gomodprompt v0.0.0-20250117121338-89ab627282a2 h1:GqWKFl4qjGQUJeIOae0SlGE7E5jxewSWYn/+R/M/HEA=
 github.com/synw/gomodprompt v0.0.0-20250117121338-89ab627282a2/go.mod h1:hZKSb6Q+rebeRI8yFiZPMbgR/mnKLAQ5iDfUuhVw14c=
-github.com/synw/modprompt v0.0.0-20250117093816-d74bd6d144a0 h1:xVZ8KzNSWxP/ucpuRkamgY3e1Samr92yqCaOansbYdw=
-github.com/synw/modprompt v0.0.0-20250117093816-d74bd6d144a0/go.mod h1:K0QVRn4kXeEbQXTtc1I597tuN1T7vI+ZypO7VaZlBFU=
 github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6KllzawFIhcdPw=
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/valyala/fasttemplate v1.2.2 h1:lxLXG0uE3Qnshl9QyaK6XJxMXlQZELvChBOCmQD0Loo=

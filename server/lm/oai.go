@@ -55,11 +55,11 @@ func OaiInfer(
 	}
 	p, ok := inferParams["temperature"]
 	if ok {
-		req.Temperature = p.(float32)
+		req.Temperature = float32(p.(float64))
 	}
 	p2, ok := inferParams["top_p"]
 	if ok {
-		req.TopP = p2.(float32)
+		req.TopP = float32(p2.(float64))
 	}
 	p3, ok := inferParams["stop"]
 	if ok {
@@ -67,11 +67,11 @@ func OaiInfer(
 	}
 	p4, ok := inferParams["presence_penalty"]
 	if ok {
-		req.PresencePenalty = p4.(float32)
+		req.PresencePenalty = float32(p4.(float64))
 	}
 	p5, ok := inferParams["frequency_penalty"]
 	if ok {
-		req.FrequencyPenalty = p5.(float32)
+		req.FrequencyPenalty = float32(p5.(float64))
 	}
 	if len(system) > 0 {
 		req.Messages = append(req.Messages,
@@ -112,7 +112,7 @@ func OaiInfer(
 	for {
 		response, err := stream.Recv()
 		if errors.Is(err, io.EOF) {
-			fmt.Println("\nStream finished")
+			//fmt.Println("\nStream finished")
 			emittingElapsed := time.Since(startEmitting)
 			if state.IsVerbose {
 				fmt.Println("\n\nEmitting time:", emittingElapsed)
@@ -187,20 +187,19 @@ func OaiInfer(
 				// message with the token has to be streamed in this loop as well
 				time.Sleep(1 * time.Millisecond)
 			}
-		} else {
-			if state.ContinueInferingController {
-				token := response.Choices[0].Delta.Content
-				if state.IsVerbose {
-					go fmt.Print(token)
-				}
-				tmsg := types.StreamedMessage{
-					Content: token,
-					Num:     ntokens,
-					MsgType: types.TokenMsgType,
-				}
-				go StreamMsg(tmsg, c, enc)
-				buf = append(buf, token)
+		}
+		if state.ContinueInferingController {
+			token := response.Choices[0].Delta.Content
+			if state.IsVerbose {
+				go fmt.Print(token)
 			}
+			tmsg := types.StreamedMessage{
+				Content: token,
+				Num:     ntokens,
+				MsgType: types.TokenMsgType,
+			}
+			StreamMsg(tmsg, c, enc)
+			buf = append(buf, token)
 		}
 		ntokens++
 	}

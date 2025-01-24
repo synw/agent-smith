@@ -95,46 +95,5 @@ func convertTask(task types.LmTask, modelSize string) (types.LmTask, bool, error
 			}
 		}
 	}
-	/*if !foundModel {
-		return task, fmt.Errorf("No model found in task " + task.Name)
-	}*/
-	/*ip := state.DefaultInferenceParams
-	for k, v := range m.InferParams {
-		//fmt.Println("P", k, v)
-		switch k {
-		case "max_tokens":
-			ip.MaxTokens = v.(int)
-		case "top_k":
-			ip.TopK = v.(int)
-		case "top_p":
-			ip.TopP = v.(float64)
-		case "min_p":
-			ip.MinP = v.(float64)
-		case "temperature":
-			ip.Temperature = v.(float64)
-		case "repeat_penalty":
-			ip.RepeatPenalty = v.(float64)
-		case "tfs_z":
-			ip.TFS = v.(float64)
-		case "grammar":
-			ip.Grammar = v.(string)
-		case "stop":
-			s := v.([]interface{})
-			t := []string{}
-			for _, v = range s {
-				t = append(t, v.(string))
-			}
-			ip.Stop = t
-		case "images":
-			s := v.([]interface{})
-			t := []string{}
-			for _, v = range s {
-				t = append(t, v.(string))
-			}
-			ip.Images = t
-		}
-
-	}
-	task.InferParams = ip*/
 	return task, useApi, nil
 }
