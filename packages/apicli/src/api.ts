@@ -32,13 +32,13 @@ const useServer = (params: ServerParams) => {
         }
     }
 
-    const executeTask = async (taskPath: string, prompt: string, variables: Record<string, any> = {}) => {
+    const executeCmd = async (cmdName: string, _params: Array<string> = []) => {
         const parser = createParser({ onEvent: _onParse });
-        const payload = { task: taskPath, prompt: prompt, vars: variables };
+        const payload = { cmd: cmdName, params: _params };
         if (isVerbose) {
             console.log("Ingesting prompt ...")
         }
-        const response = await fetch(url + "/task/execute", {
+        const response = await fetch(url + "/cmd/execute", {
             method: 'POST',
             body: JSON.stringify(payload),
             headers: {
@@ -62,8 +62,39 @@ const useServer = (params: ServerParams) => {
         }
     };
 
+    const executeTask = async (taskPath: string, prompt: string, variables: Record<string, any> = {}) => {
+        const parser = createParser({ onEvent: _onParse });
+        const payload = { task: taskPath, prompt: prompt, vars: variables };
+        if (isVerbose) {
+            console.log("Ingesting prompt ...")
+        }
+        const response = await fetch(url + "/task/execute", {
+            method: 'POST',
+            body: JSON.stringify(payload),
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'text/event-stream',
+                'Authorization': `Bearer ${params.apiKey}`,
+            },
+        });
+        if (!response?.body) {
+            throw new Error("No response")
+        }
+        const reader = response.body.getReader();
+        const decoder = new TextDecoder('utf-8');
+        while (true) {
+            const result = await reader.read();
+            if (result.done) {
+                break;
+            }
+            const chunk = decoder.decode(result.value);
+            parser.feed(chunk)
+        }
+    };
+
     return {
         executeTask,
+        executeCmd,
     }
 }
 
