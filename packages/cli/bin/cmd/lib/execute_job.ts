@@ -5,7 +5,7 @@ import { AgentJob, AgentTask, useAgentJob } from "@agent-smith/jobs";
 import { brain, marked, taskBuilder } from '../../agent.js';
 import { getFeatureSpec } from '../../state/features.js';
 import { FeatureType } from '../../interfaces.js';
-import { formatMode } from '../../state/state.js';
+import { formatMode, isDebug } from '../../state/state.js';
 import { initTaskVars, readTask } from './utils.js';
 
 async function executeJobCmd(name: string, args: Array<any> = [], options: any = {}): Promise<Record<string, any>> {
@@ -51,11 +51,13 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
             let conf: Record<string, any> = {};
             let vars: Record<string, any> = {};
             const tv = initTaskVars(args, taskSpec?.inferParams ? taskSpec.inferParams as Record<string, any> : {});
-            console.log("TIP", taskSpec.inferParams);
-            console.log("IP", tv.conf.inferParams);
             //console.log("TV", tv);
             conf = tv.conf;
             vars = i == 0 ? tv.vars : params;
+            if (isDebug.value) {
+                console.log("Task conf:", conf);
+                console.log("Task vars:", vars);
+            }
             if (conf?.model) {
                 m = conf.model
             }
