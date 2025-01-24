@@ -11,17 +11,21 @@ const useServer = (params: ServerParams) => {
             case "system":
                 if (msg.content == "start_emitting") {
                     if (isVerbose) {
-                        console.log("Thinking time:", msg.data.thinking_time_format)
+                        if (msg?.data?.thinking_time_format) {
+                            console.log("Thinking time:", msg.data.thinking_time_format)
+                        }
                     }
                 } else if (msg.content == "result") {
                     if (isVerbose) {
-                        const tps = msg.data.stats.tokensPerSecond;
-                        const tt = msg.data.stats.totalTokens;
-                        const ti = msg.data.stats.totalTimeFormat;
-                        console.log("\nTotal tokens:", tt);
-                        console.log("Total time:", ti);
-                        console.log("Tokens per second:", tps);
-                        //console.log(msg.data)
+                        if (msg.data?.stats) {
+                            const tps = msg.data.stats.tokensPerSecond;
+                            const tt = msg.data.stats.totalTokens;
+                            const ti = msg.data.stats.totalTimeFormat;
+                            console.log("\nTotal tokens:", tt);
+                            console.log("Total time:", ti);
+                            console.log("Tokens per second:", tps);
+                            //console.log(msg.data)
+                        }
                     }
                 }
                 break;
@@ -36,7 +40,7 @@ const useServer = (params: ServerParams) => {
         const parser = createParser({ onEvent: _onParse });
         const payload = { cmd: cmdName, params: _params };
         if (isVerbose) {
-            console.log("Ingesting prompt ...")
+            console.log("Executing command ...")
         }
         const response = await fetch(url + "/cmd/execute", {
             method: 'POST',
