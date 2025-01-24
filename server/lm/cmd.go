@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os/exec"
+	"strings"
 
 	"github.com/labstack/echo/v4"
 	"github.com/synw/agent-smith/server/state"
@@ -51,11 +52,13 @@ func RunCmd(
 	enc := json.NewEncoder(c.Response())
 	enc.SetEscapeHTML(false)
 	i := 0
+	buf := []string{}
 	for scanner.Scan() {
 		i++
 		token := scanner.Text()
+		buf = append(buf, token)
 		if state.IsVerbose {
-			fmt.Print(token)
+			go fmt.Print(token)
 		}
 		StreamMsg(createMsg(token, i), c, enc)
 	}
@@ -71,5 +74,17 @@ func RunCmd(
 	if err := cmd.Wait(); err != nil {
 		msg := fmt.Errorf("Command finished with error: %v", err)
 		errCh <- createErrorMsg(msg.Error())
+	} else {
+		//fmt.Println("Command finished")
+		res := make(map[string]interface{})
+		res["text"] = strings.Join(buf, "")
+		endmsg := types.StreamedMessage{
+			Num:     0,
+			Content: "result",
+			MsgType: types.SystemMsgType,
+			Data:    res,
+		}
+		StreamMsg(endmsg, c, enc)
+		ch <- endmsg
 	}
 }

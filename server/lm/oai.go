@@ -111,8 +111,10 @@ func OaiInfer(
 	ntokens := 0
 	for {
 		response, err := stream.Recv()
+		fmt.Println("SERR", err)
+		fmt.Println("RESP", response)
 		if errors.Is(err, io.EOF) {
-			//fmt.Println("\nStream finished")
+			fmt.Println("\nStream EOF")
 			emittingElapsed := time.Since(startEmitting)
 			if state.IsVerbose {
 				fmt.Println("\n\nEmitting time:", emittingElapsed)
@@ -155,7 +157,7 @@ func OaiInfer(
 			}
 			StreamMsg(endmsg, c, enc)
 			ch <- endmsg
-			return nil
+			break
 		}
 		if err != nil {
 			fmt.Printf("\nStream error: %v\n", err)
@@ -203,4 +205,5 @@ func OaiInfer(
 		}
 		ntokens++
 	}
+	return nil
 }
