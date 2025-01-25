@@ -2,10 +2,8 @@ import { brain, initAgent, taskBuilder } from "../../agent.js";
 import { getFeatureSpec } from "../../state/features.js";
 import { FeatureType } from "../../interfaces.js";
 import { isChatMode, isDebug } from "../../state/state.js";
-import { initTaskVars, parseInputOptions, readTask } from "./utils.js";
-import { useTemplateForModel } from "@agent-smith/tfm";
+import { initTaskConf, initTaskVars, parseInputOptions, readTask } from "./utils.js";
 
-const tfm = useTemplateForModel();
 
 async function executeTaskCmd(args: Array<string> = [], options: any = {}): Promise<any> {
     await initAgent();
@@ -37,50 +35,16 @@ async function executeTaskCmd(args: Array<string> = [], options: any = {}): Prom
     }
     const taskSpec = taskBuilder.readFromYaml(res.ymlTask);
     const task = taskBuilder.fromYaml(res.ymlTask);
-    const { conf, vars } = initTaskVars(args, taskSpec?.inferParams ? taskSpec.inferParams as Record<string, any> : {});
+    let { conf, vars } = initTaskVars(args, taskSpec?.inferParams ? taskSpec.inferParams as Record<string, any> : {});
+    conf = initTaskConf(conf, taskSpec);
     if (isDebug.value) {
         console.log("Task conf:", conf);
         console.log("Task vars:", vars);
     }
-    let m = taskSpec.model.name;
-    let t: string = taskSpec.model.template;
-    let c = taskSpec.model.ctx;
-    if (conf?.model) {
-        m = conf.model
-        if (conf?.template) {
-            t = conf.template
-        } else {
-            const gt = tfm.guess(m);
-            if (gt == "none") {
-                throw new Error(`Unable to guess the template for ${conf.model}: please provide a template name"`)
-            }
-            t = gt
-        }
-    } else {
-        if (conf?.size) {
-            if (!taskSpec?.models) {
-                throw new Error(`Model ${conf.size} not found in task`)
-            }
-            if (!Object.keys(taskSpec.models).includes(conf.size)) {
-                throw new Error(`Model ${conf.size} not found in task`)
-            }
-            m = taskSpec.models[conf.size].name;
-            t = taskSpec.models[conf.size].template;
-            c = taskSpec.models[conf.size].ctx;
-        }
-    }
-    conf.model = {
-        name: m,
-        template: t,
-        ctx: c,
-    };
-    if (isDebug.value) {
-        console.log("Model:", conf.model);
-    }
-    const ex = brain.getOrCreateExpertForModel(m, t);
+    const ex = brain.getOrCreateExpertForModel(conf.model.name, conf.model.template);
     //console.log("EFM", ex?.name);
     if (!ex) {
-        throw new Error("No expert found for model " + m)
+        throw new Error("No expert found for model " + conf.model.name)
     }
     ex.checkStatus();
     //ex.backend.setOnStartEmit(() => console.log("[START]"));

@@ -16,42 +16,42 @@ const modes: Record<string, Cmd> = {
         },
         description: "use chat mode for tasks",
     },
-    "-if": {
+    "--if": {
         cmd: async () => {
             inputMode.value = "promptfile";
             if (runMode.value == "cli") { console.log("Prompt file input mode is on") }
         },
         description: "use promptfile input mode",
     },
-    "-ic": {
+    "--ic": {
         cmd: async () => {
             inputMode.value = "clipboard";
             if (runMode.value == "cli") { console.log("Clipboard input mode is on") }
         },
         description: "use clipboard input mode"
     },
-    "-im": {
+    "--im": {
         cmd: async () => {
             inputMode.value = "manual";
             if (runMode.value == "cli") { console.log("Manual inputMode") }
         },
         description: "use manual input mode (default)"
     },
-    "-oc": {
+    "--oc": {
         cmd: async () => {
             outputMode.value = "clipboard";
             if (runMode.value == "cli") { console.log("Clipboard output mode is on") }
         },
         description: "use clipboard output mode"
     },
-    "-omd": {
+    "--omd": {
         cmd: async () => {
             formatMode.value = "markdown";
             if (runMode.value == "cli") { console.log("Markdown output mode") }
         },
         description: "use markdown output"
     },
-    "-otxt": {
+    "--otxt": {
         cmd: async () => {
             formatMode.value = "text";
             if (runMode.value == "cli") { console.log("Text output mode (default)") }

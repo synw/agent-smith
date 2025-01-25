@@ -1,11 +1,14 @@
 import { default as fs } from "fs";
 import { default as path } from "path";
 import { outputMode, promptfile } from "../../state/state.js";
-import { inputMode, runMode } from "../../state/state.js";
+import { inputMode } from "../../state/state.js";
 import { readClipboard, writeToClipboard } from "../sys/clipboard.js";
 import { modes } from "../clicmds/modes.js";
-import { InferenceParams } from "@locallm/types/dist/interfaces.js";
+import { LmTask } from "@agent-smith/lmtask/dist/interfaces.js";
+import { useTemplateForModel } from "@agent-smith/tfm";
+import { Cmd } from "../../interfaces.js";
 
+const tfm = useTemplateForModel();
 async function setOptions(
     args: Array<string> = [], options: Record<string, any>,
 ): Promise<Array<string>> {
@@ -16,7 +19,13 @@ async function setOptions(
     };*/
     //console.log("OPTIONS", options);
     for (const k of Object.keys(options)) {
-        const opt = modes["-" + k.toLowerCase()];
+        let opt: Cmd;
+        if (k.length == 1) {
+            opt = modes["-" + k.toLowerCase()];
+        } else {
+            opt = modes["--" + k.toLowerCase()];
+        }
+        //console.log("OPT", opt)
         await opt.cmd([], undefined)
     }
     if (inputMode.value == "promptfile") {
@@ -87,9 +96,50 @@ function readTasksDir(dir: string): Array<string> {
     return tasks
 }
 
+function initTaskConf(conf: Record<string, any>, taskSpec: LmTask): Record<string, any> {
+    const _conf = conf;
+    let m = taskSpec.model.name;
+    let t: string = taskSpec.model.template;
+    let c = taskSpec.model.ctx;
+    if (conf?.model) {
+        m = conf.model;
+        if (conf?.template) {
+            t = conf.template
+        } else {
+            const gt = tfm.guess(m);
+            if (gt == "none") {
+                throw new Error(`Unable to guess the template for ${m}: please provide a template name"`)
+            }
+            t = gt
+        }
+    } else {
+        if (conf?.size) {
+            if (!taskSpec?.models) {
+                throw new Error(`Model ${conf.size} not found in task`)
+            }
+            if (!Object.keys(taskSpec.models).includes(conf.size)) {
+                throw new Error(`Model ${conf.size} not found in task`)
+            }
+            m = taskSpec.models[conf.size].name;
+            t = taskSpec.models[conf.size].template;
+            c = taskSpec.models[conf.size].ctx;
+        }
+    }
+    _conf.model = {
+        name: m,
+        template: t,
+        ctx: c,
+    };
+    if (_conf?.template) {
+        delete conf.template
+    }
+    return _conf
+}
+
 function initTaskVars(args: Array<any>, inferParams: Record<string, any>): { conf: Record<string, any>, vars: Record<string, any> } {
     const conf: Record<string, any> = { inferParams: inferParams };
     const vars: Record<string, any> = {};
+    //console.log("ARGS", args);
     args.forEach((a) => {
         if (a.includes("=")) {
             const t = a.split("=");
@@ -137,5 +187,6 @@ export {
     readTask,
     readTasksDir,
     initTaskVars,
+    initTaskConf,
     parseInputOptions,
 }

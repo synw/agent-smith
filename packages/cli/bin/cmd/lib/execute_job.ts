@@ -6,7 +6,7 @@ import { brain, marked, taskBuilder } from '../../agent.js';
 import { getFeatureSpec } from '../../state/features.js';
 import { FeatureType } from '../../interfaces.js';
 import { formatMode, isDebug } from '../../state/state.js';
-import { initTaskVars, readTask } from './utils.js';
+import { initTaskConf, initTaskVars, readTask } from './utils.js';
 
 async function executeJobCmd(name: string, args: Array<any> = [], options: any = {}): Promise<Record<string, any>> {
     const { job, found } = await _dispatchReadJob(name);
@@ -24,8 +24,7 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
     for (const [name, task] of Object.entries(job.tasks)) {
         //console.log("JOB TASK", name, task.type, "/", args, "/", options);
         if (task.type == "task") {
-            //const pr = params.shift()!;
-
+            //console.log("TPR", params);
             /*if (i == 0) {
                 const tv = initTaskVars(args);
                 console.log("TV", tv);
@@ -46,29 +45,19 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
             }
             const taskSpec = taskBuilder.readFromYaml(tres.ymlTask);
             //console.log("Task spec", taskSpec);
-            let m = taskSpec.model.name;
-            let t = taskSpec.model.template;
-            let conf: Record<string, any> = {};
-            let vars: Record<string, any> = {};
-            const tv = initTaskVars(args, taskSpec?.inferParams ? taskSpec.inferParams as Record<string, any> : {});
-            //console.log("TV", tv);
-            conf = tv.conf;
-            vars = i == 0 ? tv.vars : params;
+            let { conf, vars } = initTaskVars(args, taskSpec?.inferParams ? taskSpec.inferParams as Record<string, any> : {});
+            //conf = tv.conf;
+            //vars = i == 0 ? tv.vars : params;
+            conf = initTaskConf(conf, taskSpec);
             if (isDebug.value) {
                 console.log("Task conf:", conf);
                 console.log("Task vars:", vars);
             }
-            if (conf?.model) {
-                m = conf.model
-            }
-            if (conf?.template) {
-                t = conf.template
-            }
             //console.log("CONF", conf);
-            const ex = brain.getOrCreateExpertForModel(m, t);
+            const ex = brain.getOrCreateExpertForModel(conf.model.name, conf.model.template);
             //console.log("EFM", ex?.name);
             if (!ex) {
-                throw new Error("No expert found for model " + m)
+                throw new Error("No expert found for model " + conf.model.name)
             }
             ex.checkStatus();
             ex.backend.setOnToken((t) => {
@@ -76,8 +65,10 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
             });
             conf["expert"] = ex;
             try {
-                //console.log("Running", name, vars, "/", conf);
-                res = await job.runTask(name, vars, conf);
+                if (isDebug) {
+                    console.log("Running", name);
+                }
+                res = await job.runTask(name, { ...params, ...vars }, conf);
                 if ("text" in res) {
                     if (formatMode.value == "markdown") {
                         console.log("\n\n------------------\n");
@@ -98,7 +89,6 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
                     //console.log("Running", name, params);
                     res = await job.runTask(name, params, options);
                 }
-                //console.log("RES", res.data);
                 params = res.data;
             }
             catch (err) {
