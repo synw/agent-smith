@@ -20,7 +20,7 @@ func ExecuteTaskHandler(c echo.Context) error {
 	if err := c.Bind(&m); err != nil {
 		return err
 	}
-	//fmt.Println("PAYLOAD", m)
+
 	v, ok := m["task"]
 	taskName := ""
 	if ok {
@@ -54,7 +54,6 @@ func ExecuteTaskHandler(c echo.Context) error {
 	if !ok {
 		ms = "default"
 	}
-	//fmt.Println("Tms", ms)
 	ok, task, useApi, err := files.ReadTask(tp, ms)
 	if err != nil {
 		log.Println(err)
@@ -72,7 +71,7 @@ func ExecuteTaskHandler(c echo.Context) error {
 	wg.Add(1)
 	go func() {
 		defer wg.Done()
-		lm.InferTask(prompt, vars, task, useApi, c, ch, errCh)
+		lm.InferTask(prompt, vars, task, useApi, c, ch, errCh, c.Request().Context())
 	}()
 
 	select {

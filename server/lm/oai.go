@@ -37,7 +37,6 @@ func InitOaiCli(aoiApiParams map[string]string) bool {
 	oaiCli = openai.NewClientWithConfig(config)
 	return hasOai
 }
-
 func OaiInfer(
 	prompt string,
 	model types.ModelConf,
@@ -46,7 +45,9 @@ func OaiInfer(
 	system string,
 	c echo.Context,
 	ch chan<- types.StreamedMessage,
-	errCh chan<- types.StreamedMessage) error {
+	errCh chan<- types.StreamedMessage,
+	ctx context.Context,
+) error {
 	req := openai.ChatCompletionRequest{
 		Model:               model.Name,
 		MaxCompletionTokens: inferParams["max_tokens"].(int),
@@ -96,7 +97,6 @@ func OaiInfer(
 		Role:    openai.ChatMessageRoleUser,
 		Content: prompt,
 	})
-	ctx := context.Background()
 	stream, err := oaiCli.CreateChatCompletionStream(ctx, req)
 	if err != nil {
 		fmt.Printf("ChatCompletionStream error: %v\n", err)
@@ -111,8 +111,6 @@ func OaiInfer(
 	ntokens := 0
 	for {
 		response, err := stream.Recv()
-		fmt.Println("SERR", err)
-		fmt.Println("RESP", response)
 		if errors.Is(err, io.EOF) {
 			fmt.Println("\nStream EOF")
 			emittingElapsed := time.Since(startEmitting)
@@ -145,7 +143,6 @@ func OaiInfer(
 				Text:  strings.Join(buf, ""),
 				Stats: stats,
 			}
-			// result
 			b, _ := json.Marshal(&result)
 			var _res map[string]interface{}
 			_ = json.Unmarshal(b, &_res)
@@ -185,8 +182,6 @@ func OaiInfer(
 			}
 			if state.ContinueInferingController {
 				StreamMsg(smsg, c, enc)
-				// sleep to let the time to stream this message, as a second
-				// message with the token has to be streamed in this loop as well
 				time.Sleep(1 * time.Millisecond)
 			}
 		}

@@ -1,6 +1,7 @@
 package lm
 
 import (
+	"context"
 	"fmt"
 
 	"github.com/synw/agent-smith/server/state"
@@ -17,6 +18,7 @@ func InferTask(
 	c echo.Context,
 	ch chan<- types.StreamedMessage,
 	errCh chan<- types.StreamedMessage,
+	ctx context.Context,
 ) {
 	state.IsInfering = true
 	state.ContinueInferingController = true
@@ -35,8 +37,6 @@ func InferTask(
 		finalPrompt, stop, err = oaiFormatPrompt(task, prompt, vars)
 	}
 	if state.IsDebug {
-		//fmt.Println("Inference params:")
-		//fmt.Println(params)
 		fmt.Println("---------- prompt ----------")
 		fmt.Println(finalPrompt)
 		fmt.Println("----------------------------")
@@ -44,7 +44,6 @@ func InferTask(
 	if state.IsVerbose {
 		fmt.Println("Ingesting prompt ..")
 	}
-	//fmt.Println("Stop", stop)
 	for _, s := range stop {
 		st, ok := task.InferParams["stop"]
 		if st == nil || !ok {
@@ -67,7 +66,7 @@ func InferTask(
 				MsgType: types.ErrorMsgType,
 			}
 		}
-		ollamaInfer(finalPrompt, task.Model, ip, c, ch, errCh)
+		ollamaInfer(finalPrompt, task.Model, ip, c, ch, errCh, ctx)
 	} else {
 		if state.IsDebug {
 			fmt.Println("Using api")
@@ -77,7 +76,6 @@ func InferTask(
 		if ok {
 			system = sys
 		}
-		OaiInfer(finalPrompt, task.Model, task.InferParams, task.Shots, system, c, ch, errCh)
+		OaiInfer(finalPrompt, task.Model, task.InferParams, task.Shots, system, c, ch, errCh, ctx)
 	}
-
 }

@@ -22,13 +22,14 @@ func ollamaInfer(
 	inferParams map[string]interface{},
 	c echo.Context,
 	ch chan<- types.StreamedMessage,
-	errCh chan<- types.StreamedMessage) error {
+	errCh chan<- types.StreamedMessage,
+	ctx context.Context,
+) error {
 	client, err := api.ClientFromEnvironment()
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	// By default, GenerateRequest is streaming.
 	req := &api.GenerateRequest{
 		Model:   model.Name,
 		Prompt:  prompt,
@@ -36,7 +37,6 @@ func ollamaInfer(
 		Raw:     true,
 	}
 
-	ctx := context.Background()
 	startThinking := time.Now()
 	startEmitting := time.Now()
 	var thinkingElapsed time.Duration
@@ -63,16 +63,11 @@ func ollamaInfer(
 			}
 			if state.ContinueInferingController {
 				StreamMsg(smsg, c, enc)
-				// sleep to let the time to stream this message, as a second
-				// message with the token has to be streamed in this loop as well
 				time.Sleep(1 * time.Millisecond)
 			}
 		}
 		token := resp.Response
-		//_, isStopToken := inferParams["stop"].([]string)
-		//if !isStopToken {
 		buf = append(buf, token)
-		//}
 		if state.IsVerbose {
 			go fmt.Print(token)
 		}
@@ -85,7 +80,6 @@ func ollamaInfer(
 			go StreamMsg(tmsg, c, enc)
 		}
 		ntokens++
-		//}
 		return nil
 	}
 
@@ -98,7 +92,6 @@ func ollamaInfer(
 		}
 	}
 	if state.ContinueInferingController {
-		// the inference was not aborted
 		emittingElapsed := time.Since(startEmitting)
 		if state.IsVerbose {
 			fmt.Println("\n\nEmitting time:", emittingElapsed)
@@ -129,7 +122,6 @@ func ollamaInfer(
 			Text:  strings.Join(buf, ""),
 			Stats: stats,
 		}
-		// result
 		b, _ := json.Marshal(&result)
 		var _res map[string]interface{}
 		_ = json.Unmarshal(b, &_res)
