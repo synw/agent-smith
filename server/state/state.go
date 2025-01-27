@@ -10,7 +10,6 @@ var IsVerbose = true
 var IsDebug = false
 
 // inference state
-var ContinueInferingController = true
 var IsInfering = false
 
 // models

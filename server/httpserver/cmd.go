@@ -38,7 +38,7 @@ func ExecuteCmdHandler(c echo.Context) error {
 		defer wg.Done()
 		rawParams := params.([]interface{})
 		params := lm.InterfaceToStringArray(rawParams)
-		lm.RunCmd(cmd.(string), params, c, ch, errCh)
+		lm.RunCmd(cmd.(string), params, c, ch, errCh, c.Request().Context())
 	}()
 
 	select {
@@ -86,7 +86,6 @@ func ExecuteCmdHandler(c echo.Context) error {
 		return nil
 	case <-c.Request().Context().Done():
 		fmt.Println("\nRequest canceled")
-		state.ContinueInferingController = false
 		wg.Wait()
 		close(ch)
 		close(errCh)

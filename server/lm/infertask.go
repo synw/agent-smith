@@ -21,7 +21,6 @@ func InferTask(
 	ctx context.Context,
 ) {
 	state.IsInfering = true
-	state.ContinueInferingController = true
 	var finalPrompt string
 	var stop []string
 	var err error

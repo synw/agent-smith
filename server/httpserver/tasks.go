@@ -118,7 +118,6 @@ func ExecuteTaskHandler(c echo.Context) error {
 		return nil
 	case <-c.Request().Context().Done():
 		fmt.Println("\nRequest canceled")
-		state.ContinueInferingController = false
 		wg.Wait()
 		close(ch)
 		close(errCh)

@@ -61,10 +61,8 @@ func ollamaInfer(
 					"thinking_time_format": thinkingElapsed.String(),
 				},
 			}
-			if state.ContinueInferingController {
-				StreamMsg(smsg, c, enc)
-				time.Sleep(1 * time.Millisecond)
-			}
+			StreamMsg(smsg, c, enc)
+			time.Sleep(1 * time.Millisecond)
 		}
 		token := resp.Response
 		buf = append(buf, token)
@@ -76,9 +74,7 @@ func ollamaInfer(
 			Num:     ntokens,
 			MsgType: types.TokenMsgType,
 		}
-		if state.ContinueInferingController {
-			go StreamMsg(tmsg, c, enc)
-		}
+		go StreamMsg(tmsg, c, enc)
 		ntokens++
 		return nil
 	}
@@ -91,49 +87,48 @@ func ollamaInfer(
 			MsgType: types.ErrorMsgType,
 		}
 	}
-	if state.ContinueInferingController {
-		emittingElapsed := time.Since(startEmitting)
-		if state.IsVerbose {
-			fmt.Println("\n\nEmitting time:", emittingElapsed)
-		}
-		tpsRaw := float64(ntokens) / emittingElapsed.Seconds()
-		s := fmt.Sprintf("%.2f", tpsRaw)
-		tps := 0.0
-		if res, err := strconv.ParseFloat(s, 64); err == nil {
-			tps = res
-		}
-		totalTime := thinkingElapsed + emittingElapsed
-		if state.IsVerbose {
-			fmt.Println("Total time:", totalTime)
-			fmt.Println("Tokens per seconds", tps)
-			fmt.Println("Tokens emitted", ntokens)
-		}
-		stats := types.InferenceStats{
-			ThinkingTime:       thinkingElapsed.Seconds(),
-			ThinkingTimeFormat: thinkingElapsed.String(),
-			EmitTime:           emittingElapsed.Seconds(),
-			EmitTimeFormat:     emittingElapsed.String(),
-			TotalTime:          totalTime.Seconds(),
-			TotalTimeFormat:    totalTime.String(),
-			TokensPerSecond:    tps,
-			TotalTokens:        ntokens,
-		}
-		result := types.InferenceResult{
-			Text:  strings.Join(buf, ""),
-			Stats: stats,
-		}
-		b, _ := json.Marshal(&result)
-		var _res map[string]interface{}
-		_ = json.Unmarshal(b, &_res)
-		endmsg := types.StreamedMessage{
-			Num:     ntokens + 1,
-			Content: "result",
-			MsgType: types.SystemMsgType,
-			Data:    _res,
-		}
-		StreamMsg(endmsg, c, enc)
-		ch <- endmsg
+	emittingElapsed := time.Since(startEmitting)
+	if state.IsVerbose {
+		fmt.Println("\n\nEmitting time:", emittingElapsed)
 	}
+	tpsRaw := float64(ntokens) / emittingElapsed.Seconds()
+	s := fmt.Sprintf("%.2f", tpsRaw)
+	tps := 0.0
+	if res, err := strconv.ParseFloat(s, 64); err == nil {
+		tps = res
+	}
+	totalTime := thinkingElapsed + emittingElapsed
+	if state.IsVerbose {
+		fmt.Println("Total time:", totalTime)
+		fmt.Println("Tokens per seconds", tps)
+		fmt.Println("Tokens emitted", ntokens)
+	}
+	stats := types.InferenceStats{
+		ThinkingTime:       thinkingElapsed.Seconds(),
+		ThinkingTimeFormat: thinkingElapsed.String(),
+		EmitTime:           emittingElapsed.Seconds(),
+		EmitTimeFormat:     emittingElapsed.String(),
+		TotalTime:          totalTime.Seconds(),
+		TotalTimeFormat:    totalTime.String(),
+		TokensPerSecond:    tps,
+		TotalTokens:        ntokens,
+	}
+	result := types.InferenceResult{
+		Text:  strings.Join(buf, ""),
+		Stats: stats,
+	}
+	b, _ := json.Marshal(&result)
+	var _res map[string]interface{}
+	_ = json.Unmarshal(b, &_res)
+	endmsg := types.StreamedMessage{
+		Num:     ntokens + 1,
+		Content: "result",
+		MsgType: types.SystemMsgType,
+		Data:    _res,
+	}
+	StreamMsg(endmsg, c, enc)
+	ch <- endmsg
+
 	return nil
 }
 

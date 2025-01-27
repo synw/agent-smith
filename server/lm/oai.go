@@ -180,24 +180,20 @@ func OaiInfer(
 					"thinking_time_format": thinkingElapsed.String(),
 				},
 			}
-			if state.ContinueInferingController {
-				StreamMsg(smsg, c, enc)
-				time.Sleep(1 * time.Millisecond)
-			}
+			StreamMsg(smsg, c, enc)
+			time.Sleep(1 * time.Millisecond)
 		}
-		if state.ContinueInferingController {
-			token := response.Choices[0].Delta.Content
-			if state.IsVerbose {
-				go fmt.Print(token)
-			}
-			tmsg := types.StreamedMessage{
-				Content: token,
-				Num:     ntokens,
-				MsgType: types.TokenMsgType,
-			}
-			StreamMsg(tmsg, c, enc)
-			buf = append(buf, token)
+		token := response.Choices[0].Delta.Content
+		if state.IsVerbose {
+			go fmt.Print(token)
 		}
+		tmsg := types.StreamedMessage{
+			Content: token,
+			Num:     ntokens,
+			MsgType: types.TokenMsgType,
+		}
+		StreamMsg(tmsg, c, enc)
+		buf = append(buf, token)
 		ntokens++
 	}
 	return nil

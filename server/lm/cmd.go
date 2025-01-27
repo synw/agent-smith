@@ -2,6 +2,7 @@ package lm
 
 import (
 	"bufio"
+	"context"
 	"encoding/json"
 	"fmt"
 	"os/exec"
@@ -18,6 +19,7 @@ func RunCmd(
 	c echo.Context,
 	ch chan<- types.StreamedMessage,
 	errCh chan<- types.StreamedMessage,
+	ctx context.Context,
 ) {
 	// Create the command with the arguments
 	params = append([]string{cmdName}, params...)
@@ -27,7 +29,7 @@ func RunCmd(
 			fmt.Println("-", p)
 		}
 	}
-	cmd := exec.Command("lm", params...)
+	cmd := exec.CommandContext(ctx, "lm", params...)
 	//cmd.Env = append(os.Environ(), "LANG=en_US.UTF-8")
 
 	// Create a pipe to capture the command's output
@@ -72,6 +74,10 @@ func RunCmd(
 
 	// Wait for the command to finish
 	if err := cmd.Wait(); err != nil {
+		if ctx.Err() == context.Canceled {
+			fmt.Println("Command canceled by context")
+			return
+		}
 		msg := fmt.Errorf("Command finished with error: %v", err)
 		errCh <- createErrorMsg(msg.Error())
 	} else {
