@@ -53,7 +53,13 @@ async function main() {
         apiKey: "30f224ea6b45af61356b8eb0bd84d2011f6f85dec6d49716c686cff66510efba",
         onToken: (t) => process.stdout.write(t),
     });
-    await api.executeTask("translate", "Which is the largest planet of the solar system?", { lang: "spanish" })
+    const abortController = new AbortController();
+    await api.executeTask(
+        "translate",
+        "Which is the largest planet of the solar system?",
+        { lang: "spanish" },
+        abortController.signal
+    )
 }
 
 (async () => { await main() })()

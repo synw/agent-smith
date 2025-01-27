@@ -36,7 +36,7 @@ const useServer = (params: ServerParams) => {
         }
     }
 
-    const executeCmd = async (cmdName: string, _params: Array<string> = []) => {
+    const executeCmd = async (cmdName: string, _params: Array<string> = [], abortSignal?: AbortSignal) => {
         const parser = createParser({ onEvent: _onParse });
         const payload = { cmd: cmdName, params: _params };
         if (isVerbose) {
@@ -50,6 +50,7 @@ const useServer = (params: ServerParams) => {
                 'Accept': 'text/event-stream',
                 'Authorization': `Bearer ${params.apiKey}`,
             },
+            signal: abortSignal, // Pass the abort signal
         });
         if (!response?.body) {
             throw new Error("No response")
@@ -66,7 +67,7 @@ const useServer = (params: ServerParams) => {
         }
     };
 
-    const executeTask = async (taskPath: string, prompt: string, variables: Record<string, any> = {}) => {
+    const executeTask = async (taskPath: string, prompt: string, variables: Record<string, any> = {}, abortSignal?: AbortSignal) => {
         const parser = createParser({ onEvent: _onParse });
         const payload = { task: taskPath, prompt: prompt, vars: variables };
         if (isVerbose) {
@@ -80,6 +81,7 @@ const useServer = (params: ServerParams) => {
                 'Accept': 'text/event-stream',
                 'Authorization': `Bearer ${params.apiKey}`,
             },
+            signal: abortSignal, // Pass the abort signal
         });
         if (!response?.body) {
             throw new Error("No response")

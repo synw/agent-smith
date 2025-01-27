@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/apicli",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "An api client for the Agent Smith server",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {
