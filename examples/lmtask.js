@@ -25,7 +25,7 @@ async function main() {
     const taskBuilder = new LmTaskBuilder(brain);
     // build the task
     const task = taskBuilder.fromYaml(ymlTaskDef);
-    console.log("Running task...", task.name);
+    console.log("Running task...", ymlTaskDef);
     // run the task    
     const conf = {
         expert: ex,
