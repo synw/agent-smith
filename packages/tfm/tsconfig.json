@@ -14,7 +14,8 @@
     "removeComments": false,
     "strictFunctionTypes": true,
     "types": [
-      "node"
+      "node",
+      "jest"
     ],
     "lib": [
       "ES2020",

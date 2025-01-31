@@ -37,12 +37,12 @@ async function runCmd(args = [], options) {
         throw new Error("No inference server found, canceling")
     }
     let job = "git_commit";
-    let hasMsg = false;
     let gitArgs = [];
     for (const arg of args) {
         if (arg.startsWith("msg=")) {
             job = "git_commit_details";
-            hasMsg = true;
+        } else if (arg.includes("=")) {
+            continue
         } else {
             gitArgs.push(arg)
         }

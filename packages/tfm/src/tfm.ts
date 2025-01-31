@@ -1,5 +1,5 @@
 import { templates } from "modprompt";
-import { TemplateForModel } from "./tfminterfaces";
+import { TemplateForModel } from "./tfminterfaces.js";
 
 const useTemplateForModel = (): TemplateForModel => {
     const list = () => Object.keys(templates);

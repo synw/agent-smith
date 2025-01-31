@@ -77,7 +77,7 @@ const useAgentJob = <T = string>(initParams: AgentJobSpec<T>): AgentJob<T> => {
         if (state.get().isRunningTask) {
             throw new Error('A task is already running');
         }
-        _startTask(name, params, conf, false);
+        await _startTask(name, params, conf, false);
         const t = getTaskById(name);
         return await _runTask(t, params, conf, true)
     }

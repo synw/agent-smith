@@ -24,16 +24,6 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
     for (const [name, task] of Object.entries(job.tasks)) {
         //console.log("JOB TASK", name, task.type, "/", args, "/", options);
         if (task.type == "task") {
-            //console.log("TPR", params);
-            /*if (i == 0) {
-                const tv = initTaskVars(args);
-                console.log("TV", tv);
-                conf = tv.conf;
-                vars = tv.vars;
-            } else {
-                conf = {};
-                vars = params;
-            }*/
             const { found, path } = getFeatureSpec(name, "task" as FeatureType);
             if (!found) {
                 return { ok: false, data: {}, error: `Task ${name} not found` };
