@@ -106,18 +106,23 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                     throw new Error(`The ${task.model.name} model is not loaded on server (currently ${this.expert.lm.model.name})`)
                 }
                 const tpl = new PromptTemplate(task.model.template);
+                const ip = task?.inferParams ? task.inferParams as Record<string, any> : {};
                 if (task?.inferParams) {
                     task.inferParams.stop = tpl?.stop ?? [];
-                    if (task.template?.stop) {
-                        task.inferParams.stop.push(...task.template.stop);
-                    }
+
                 }
                 if (task?.template) {
                     if (task.template?.system) {
                         tpl.replaceSystem(task.template.system)
                     }
                     if (task.template?.assistant) {
-                        tpl.afterAssistant(task.template.assistant)
+                        tpl.afterAssistant(" " + task.template.assistant)
+                    }
+                    if (task.template?.stop) {
+                        if (!ip?.stop) {
+                            ip.stop = []
+                        }
+                        ip.stop.push(...task.template.stop);
                     }
                 }
                 if (task?.shots) {
@@ -154,8 +159,10 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                     console.log(pr);
                     console.log("----------------------------------------------")
                 }
-                const ip = task?.inferParams ? {} : task.inferParams as Record<string, any>;
-                //console.log("PARAMS", task.inferParams)
+                if (conf?.debug) {
+                    console.log("Infer params:", task.inferParams);
+                    console.log("----------------------------------------------")
+                }
                 if (this.expert.lm.providerType == "ollama") {
                     // tell Ollama to apply no template
                     if (!task?.inferParams?.extra) {
