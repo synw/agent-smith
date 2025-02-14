@@ -1,0 +1,28 @@
+{
+  "name": "@agent-smith/feat-git",
+  "version": "0.0.9",
+  "description": "Git features for Agent Smith cli",
+  "repository": "https://github.com/synw/agent-smith",
+  "dependencies": {
+    "@agent-smith/cli": "^0.0.29",
+    "@agent-smith/jobs": "^0.0.11",
+    "@inquirer/select": "^4.0.8"
+  },
+  "devDependencies": {
+    "@commander-js/extra-typings": "^13.1.0",
+    "@locallm/types": "^0.1.5",
+    "@types/node": "^22.13.1",
+    "ts-node": "^10.9.2",
+    "tslib": "2.8.1",
+    "typescript": "^5.7.3"
+  },
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "license": "MIT"
+}

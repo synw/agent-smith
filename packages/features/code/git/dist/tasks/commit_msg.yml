@@ -40,9 +40,18 @@ template:
             ```text
             
 model: 
-    name: "llama3.1:latest"
-    ctx: 8192
-    template: llama3
+    name: "mistral-small:latest"
+    ctx: 32768
+    template: mistral-system
+models:
+    small:
+        name: "llama3.1:latest"
+        ctx: 32768
+        template: llama3
+    medium:
+        name: Mistral-Small-24B-Instruct-2501-Q5_K_L
+        ctx: 32768
+        template: mistral-system
 inferParams:
     min_p: 0.05
     temperature: 0.1
