@@ -3,7 +3,7 @@ import { argv } from 'process';
 import { query } from "./cli.js";
 import { initState, runMode } from './state/state.js';
 import { initAgent } from './agent.js';
-import { buildCmds, initCliCmds, parseCmd } from './cmd/cmds.js';
+import { initCliCmds, parseCmd } from './cmd/cmds.js';
 
 async function main() {
     if (argv.length == 2) {
