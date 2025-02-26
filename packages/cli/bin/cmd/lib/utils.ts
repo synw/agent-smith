@@ -53,7 +53,7 @@ async function processOutput(res: any) {
     if (typeof res == "object") {
         let hasOutput = false;
         if (res?.data) {
-            data = res.data;
+            data = res.data; 0
             hasOutput = true;
         }
         if (res?.text) {
@@ -70,6 +70,9 @@ async function processOutput(res: any) {
     //console.log("OUTPUT", typeof res, res);
     if (outputMode.value == "clipboard") {
         //console.log("Writing to kb", res)
+        if (typeof data == "object") {
+            data = JSON.stringify(data)
+        }
         await writeToClipboard(data);
     }
 }
@@ -136,6 +139,20 @@ function initTaskConf(conf: Record<string, any>, taskSpec: LmTask): Record<strin
     return _conf
 }
 
+function initTaskParams(params: Record<string, any>, inferParams: Record<string, any>): { conf: Record<string, any>, vars: Record<string, any> } {
+    //console.log("TASK PARAMS", params);
+    const conf: Record<string, any> = { inferParams: inferParams };
+    if (!params?.prompt) {
+        throw new Error(`Error initializing task variable: provide a prompt`)
+    }
+    if (params?.images) {
+        conf.inferParams.images = params.images;
+        delete params.images;
+    }
+    const res = { conf: conf, vars: params };
+    return res
+}
+
 function initTaskVars(args: Array<any>, inferParams: Record<string, any>): { conf: Record<string, any>, vars: Record<string, any> } {
     const conf: Record<string, any> = { inferParams: inferParams };
     const vars: Record<string, any> = {};
@@ -145,24 +162,28 @@ function initTaskVars(args: Array<any>, inferParams: Record<string, any>): { con
             const t = a.split("=");
             const k = t[0];
             const v = t[1];
-            //vars[t[0]] = t[1];
-            if (k == "m") {
-                if (v.includes("/")) {
-                    const _s = v.split("/");
-                    conf.model = _s[0];
-                    conf.template = _s[1];
-                } else {
-                    conf.model = v
-                }
-            } else if (k == "ip") {
-                v.split(",").forEach((p: string) => {
-                    const s = p.split(":");
-                    conf["inferParams"][s[0]] = parseFloat(s[1])
-                });
-            } else if (k == "s") {
-                conf.size = v
-            } else {
-                vars[k] = v
+            switch (k) {
+                case "m":
+                    if (v.includes("/")) {
+                        const _s = v.split("/");
+                        conf.model = _s[0];
+                        conf.template = _s[1];
+                    } else {
+                        conf.model = v;
+                    }
+                    break;
+                case "ip":
+                    v.split(",").forEach((p: string) => {
+                        const s = p.split(":");
+                        conf["inferParams"][s[0]] = parseFloat(s[1]);
+                    });
+                    break;
+                case "s":
+                    conf.size = v;
+                    break;
+                default:
+                    vars[k] = v;
+                    break;
             }
         }
     });
@@ -188,5 +209,6 @@ export {
     readTasksDir,
     initTaskVars,
     initTaskConf,
+    initTaskParams,
     parseInputOptions,
 }

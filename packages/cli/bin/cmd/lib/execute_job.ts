@@ -1,15 +1,19 @@
 import YAML from 'yaml';
 import { default as fs } from "fs";
 import { AgentJob, AgentTask, useAgentJob } from "@agent-smith/jobs";
-//import { AgentJob, AgentTask, useAgentJob } from "../../../../jobs/src/main";
+//import { AgentJob, AgentTask, useAgentJob } from "../../../../jobs/dist/main.js";
 import { brain, marked, taskBuilder } from '../../agent.js';
 import { getFeatureSpec } from '../../state/features.js';
 import { FeatureType } from '../../interfaces.js';
-import { formatMode, isDebug } from '../../state/state.js';
-import { initTaskConf, initTaskVars, readTask } from './utils.js';
+import { formatMode, isDebug, isVerbose } from '../../state/state.js';
+import { initTaskConf, initTaskParams, initTaskVars, readTask } from './utils.js';
+import { pythonAction, systemAction } from './execute_action.js';
 
 async function executeJobCmd(name: string, args: Array<any> = [], options: any = {}): Promise<Record<string, any>> {
     const { job, found } = await _dispatchReadJob(name);
+    if (isDebug.value || isVerbose.value) {
+        console.log("Running job", name, Object.keys(job.tasks).length, "tasks");
+    }
     //console.log("F", found);
     if (!found) {
         console.log(`Job ${name} not found`);
@@ -21,6 +25,7 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
     let params: Record<string, any> = {};
     brain.backendsForModelsInfo();
     let i = 0;
+    const finalTaskIndex = Object.keys(job.tasks).length - 1;
     for (const [name, task] of Object.entries(job.tasks)) {
         //console.log("JOB TASK", name, task.type, "/", args, "/", options);
         if (task.type == "task") {
@@ -35,13 +40,26 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
             }
             const taskSpec = taskBuilder.readFromYaml(tres.ymlTask);
             //console.log("Task spec", taskSpec);
-            let { conf, vars } = initTaskVars(args, taskSpec?.inferParams ? taskSpec.inferParams as Record<string, any> : {});
+            let conf: Record<string, any> = {};
+            let vars: Record<string, any> = {};
+            if (i == 0) {
+                const vs = initTaskVars(args, taskSpec?.inferParams ? taskSpec.inferParams as Record<string, any> : {});
+                conf = vs.conf;
+                vars = vs.vars;
+            } else {
+                const vs = initTaskParams(params, taskSpec?.inferParams ? taskSpec.inferParams as Record<string, any> : {});
+                conf = vs.conf;
+                vars = vs.vars;
+            }
             //conf = tv.conf;
             //vars = i == 0 ? tv.vars : params;
             conf = initTaskConf(conf, taskSpec);
             if (isDebug.value) {
                 console.log("Task conf:", conf);
                 console.log("Task vars:", vars);
+            }
+            if (isVerbose.value || isDebug.value) {
+                conf.verbose = true;
             }
             //console.log("CONF", conf);
             const ex = brain.getOrCreateExpertForModel(conf.model.name, conf.model.template);
@@ -55,10 +73,20 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
             });
             conf["expert"] = ex;
             try {
-                if (isDebug) {
-                    console.log("Running", name);
+                if (isDebug.value || isVerbose.value) {
+                    console.log(i + 1, "Running task", name);
+                    console.log("IP", conf.inferParams.images.length);
                 }
-                res = await job.runTask(name, { ...params, ...vars }, conf);
+                try {
+                    //console.log("PPP", { ...params, ...vars });
+                    res = await job.runTask(name, { ...params, ...vars }, conf);
+                } catch (e) {
+                    throw new Error(`Error running job task ${e}`)
+                }
+                //console.log("RES", res);
+                if (res?.error) {
+                    return { ok: false, data: "", conf: conf, error: `Error executing job task ${name}: ${res.error}` }
+                }
                 if ("text" in res) {
                     if (formatMode.value == "markdown") {
                         console.log("\n\n------------------\n");
@@ -68,18 +96,34 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
                 params = res
             }
             catch (err) {
-                return { error: `Error executing (${task.type}) task ${name}: ${err}` }
+                return { error: `Error executing job task ${name}: ${err}` }
             }
         } else {
             try {
-                if (i == 0) {
-                    //console.log("Running", name, args);
-                    res = await job.runTask(name, args, options);
+                if (isDebug.value) {
+                    console.log(i + 1, "Running action", name, args);
+                } else if (isVerbose.value) {
+                    console.log(i + 1, "Running action", name);
+                }
+                const _p = i == 0 ? args : params;
+                try {
+                    res = await job.runTask(name, _p, options);
+                } catch (e) {
+                    throw new Error(`Error executing job action ${e}`)
+                }
+                //console.log("RES", res);
+                if (res?.error) {
+                    return { ok: false, data: "", conf: {}, error: `Error executing action ${name}: ${res.error}` }
+                }
+                //console.log(i, "/", finalTaskIndex, i == finalTaskIndex)
+                if (i == finalTaskIndex) {
+                    // it is the last action, output the final result
+                    console.log(res.data);
                 } else {
-                    //console.log("Running", name, params);
-                    res = await job.runTask(name, params, options);
+                    params = res.data;
                 }
                 params = res.data;
+                //console.log("Params", params)
             }
             catch (err) {
                 return { error: `Error executing (${task.type}) task ${name}: ${err}` }
@@ -88,7 +132,6 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
         ++i
     }
     await job.finish(true);
-    //console.log("JOB RES", res)
     return res
 }
 
@@ -125,14 +168,24 @@ async function _createJobFromSpec(spec: Record<string, any>): Promise<{ found: b
     for (const t of spec.tasks) {
         //console.log("TASK SPEC", t);
         if (t.type == "action") {
-            const { found, path } = getFeatureSpec(t.name, "action" as FeatureType);
+            const { found, path, ext } = getFeatureSpec(t.name, "action" as FeatureType);
             if (!found) {
                 return { found: false, job: {} as AgentJob<FeatureType> };
             }
-            const { action } = await import(path);
-            const at = action as AgentTask<FeatureType>;
-            at.type = "action";
-            tasks[t.name] = at;
+            if (ext == "js") {
+                const { action } = await import(path);
+                const at = action as AgentTask<FeatureType>;
+                at.type = "action";
+                tasks[t.name] = at;
+            } else if (ext == "yml") {
+                const _t = systemAction(path);
+                _t.type = "action";
+                tasks[t.name] = _t;
+            } else if (ext == "py") {
+                const _t = pythonAction(path);
+                _t.type = "action";
+                tasks[t.name] = _t;
+            }
         } else {
             const { found, path } = getFeatureSpec(t.name, "task" as FeatureType);
             if (!found) {

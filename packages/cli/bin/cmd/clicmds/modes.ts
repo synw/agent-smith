@@ -1,5 +1,5 @@
 import { Cmd } from "../../interfaces.js";
-import { formatMode, inputMode, isChatMode, isDebug, outputMode, runMode } from "../../state/state.js";
+import { formatMode, inputMode, isChatMode, isDebug, isVerbose, outputMode, runMode } from "../../state/state.js";
 
 const modes: Record<string, Cmd> = {
     "-d": {
@@ -8,6 +8,13 @@ const modes: Record<string, Cmd> = {
             if (runMode.value == "cli") { console.log("Debug mode is on") }
         },
         description: "use debug mode",
+    },
+    "-v": {
+        cmd: async () => {
+            isVerbose.value = true;
+            if (runMode.value == "cli") { console.log("Verbose mode is on") }
+        },
+        description: "use verbose mode",
     },
     "-c": {
         cmd: async () => {

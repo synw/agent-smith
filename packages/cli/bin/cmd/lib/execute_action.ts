@@ -7,23 +7,26 @@ import { runPyScript } from "../sys/run_python.js";
 import { pyShell } from "../../state/state.js";
 import { parseInputOptions, processOutput } from "./utils.js";
 
-function _systemAction(path: string): AgentTask {
-    const action = useAgentTask({
+function systemAction(path: string): AgentTask<FeatureType> {
+    const action = useAgentTask<FeatureType>({
         id: "system_action",
         title: "",
         run: async (args) => {
             const actionSpec = readYmlAction(path);
             //console.log("Yml action", JSON.stringify(actionSpec, null, "  "));
             //console.log("Args", args)
+            if (!actionSpec.data?.args) {
+                actionSpec.data.args = []
+            }
             const out = await execute(actionSpec.data.cmd, [...actionSpec.data.args, ...args]);
-            return { data: out, error: "", ok: true }
+            return { data: out.trim(), error: "", ok: true }
         }
     });
     return action
 }
 
-function _pythonAction(path: string): AgentTask {
-    const action = useAgentTask({
+function pythonAction(path: string): AgentTask<FeatureType> {
+    const action = useAgentTask<FeatureType>({
         id: "python_action",
         title: "",
         run: async (args) => {
@@ -34,7 +37,8 @@ function _pythonAction(path: string): AgentTask {
                 path,
                 args,
             )
-            return { data: out[0], error: "", ok: true }
+            //console.log("PYOUT", out);
+            return { data: out.join("\n"), error: "", ok: true }
         }
     });
     return action
@@ -53,10 +57,10 @@ async function executeActionCmd(args: Array<string> = [], options: any = {}, qui
             act = action as AgentTask;
             break;
         case "yml":
-            act = _systemAction(path);
+            act = systemAction(path);
             break
         case "py":
-            act = _pythonAction(path);
+            act = pythonAction(path);
             break
         default:
             throw new Error(`Action ext ${ext} not implemented`)
@@ -75,4 +79,4 @@ async function executeActionCmd(args: Array<string> = [], options: any = {}, qui
     return { ok: true, data: res.data, error: "" }
 }
 
-export { executeActionCmd };
+export { executeActionCmd, systemAction, pythonAction };

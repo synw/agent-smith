@@ -16,6 +16,7 @@ const runMode = ref<RunMode>("cmd");
 const formatMode = ref<FormatMode>("text");
 const isChatMode = ref(false);
 const isDebug = ref(false);
+const isVerbose = ref(false);
 const promptfile = ref("");
 
 const lastCmd = reactive<{ name: string, args: Array<string> }>({
@@ -57,6 +58,7 @@ export {
     formatMode,
     lastCmd,
     isDebug,
+    isVerbose,
     promptfile,
     initState,
     initFeatures,
