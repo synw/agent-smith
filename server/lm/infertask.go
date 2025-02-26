@@ -76,5 +76,6 @@ func InferTask(
 			system = sys
 		}
 		OaiInfer(finalPrompt, task.Model, task.InferParams, task.Shots, system, c, ch, errCh, ctx)
+		state.IsInfering = false
 	}
 }
