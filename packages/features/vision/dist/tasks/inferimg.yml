@@ -1,0 +1,14 @@
+name: vision
+description: Run an inference query with a vision model
+prompt: |-
+    {prompt}
+model:
+    name: minicpm-v:8b-2.6-q8_0
+    ctx: 8192
+    template: chatml
+inferParams:
+    top_k: 1.0
+    top_p: 1.0
+    min_p: 0.05
+    temperature: 0.2
+    max_tokens: 4096

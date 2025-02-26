@@ -1,0 +1,6 @@
+title: "qimg"
+tasks:
+  - type: "action"
+    name: "imgs2lm"
+  - type: "task"
+    name: "inferimg"
