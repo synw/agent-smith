@@ -75,7 +75,6 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
             try {
                 if (isDebug.value || isVerbose.value) {
                     console.log(i + 1, "Running task", name);
-                    console.log("IP", conf.inferParams.images.length);
                 }
                 try {
                     //console.log("PPP", { ...params, ...vars });
