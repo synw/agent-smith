@@ -2,7 +2,7 @@
   "name": "@agent-smith/cli",
   "description": "Agent Smith: terminal client for language model agents",
   "repository": "https://github.com/synw/agent-smith",
-  "version": "0.0.32",
+  "version": "0.0.33",
   "scripts": {
     "buildrl": "rm -rf dist/* && rollup -c",
     "build": "rm -rf dist/* && tsc --noCheck",
@@ -10,7 +10,7 @@
     "watch": "tsc --noCheck -p . -w"
   },
   "dependencies": {
-    "@agent-smith/brain": "^0.0.36",
+    "@agent-smith/brain": "^0.0.37",
     "@agent-smith/jobs": "^0.0.11",
     "@agent-smith/lmtask": "^0.0.29",
     "@agent-smith/tfm": "^0.1.1",
@@ -21,7 +21,7 @@
     "clipboardy": "^4.0.0",
     "commander": "^13.1.0",
     "marked-terminal": "^7.3.0",
-    "modprompt": "^0.9.5",
+    "modprompt": "^0.9.6",
     "python-shell": "^5.0.0",
     "yaml": "^2.7.0"
   },
