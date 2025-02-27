@@ -1,6 +1,5 @@
 import { useAgentTask } from "@agent-smith/jobs";
 import { convertImageDataToBase64 } from "@locallm/api";
-import { strict } from "assert";
 import { readFile } from 'fs/promises';
 
 // Function to read the image file and return a Buffer
