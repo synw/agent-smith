@@ -1,0 +1,1 @@
+import{_ as s,c as t,o,a}from"./index-D3MkzR98.js";const n={},c={class:"flex justify-around h-full w-full"};function r(l,e){return o(),t("div",c,e[0]||(e[0]=[a("div",{class:"text-3xl"},"Page not found",-1)]))}const _=s(n,[["render",r]]);export{_ as default};

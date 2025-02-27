@@ -1,1 +1,0 @@
-import{d as n,o as s,m as o,f as a,H as t,a3 as l,a4 as r,a5 as p}from"./index-vf8raKft.js";const _=n({__name:"[...all]",setup(u){return(e,i)=>(s(),o(a(p),{hljs:a(t),nav:a(l),url:e.$route.path,"on-open":e.$router.push,"base-title":a(r)},null,8,["hljs","nav","url","on-open","base-title"]))}});export{_ as default};

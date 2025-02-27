@@ -1,1 +1,0 @@
-import{_ as s,c as t,a as o,o as a}from"./index-vf8raKft.js";const n={},c={class:"flex justify-around h-full w-full"};function r(l,e){return a(),t("div",c,e[0]||(e[0]=[o("div",{class:"text-3xl"},"Page not found",-1)]))}const _=s(n,[["render",r]]);export{_ as default};
