@@ -1,11 +1,12 @@
 import type { MapStore } from "nanostores";
 import type { TmemJobs } from "@agent-smith/tmem-jobs";
 
-interface AgentTaskSpec<T = string> {
+interface AgentTaskSpec<T = string, P extends Record<string, any> = Record<string, any>> {
     id: string;
     title: string;
     type?: T;
     description?: string;
+    properties?: P;
     run?: (params: any, conf?: Record<string, any>) => Promise<Record<string, any>>;
     abort?: (params: any) => Promise<void>;
 }
@@ -23,10 +24,11 @@ interface AgentJobState {
     runningTask: string;
 }
 
-interface AgentTask<T = string> {
+interface AgentTask<T = string, P extends Record<string, any> = Record<string, any>> {
     id: string;
     title: string;
     description: string;
+    properties: P;
     type: T;
     state: MapStore<AgentTaskState>;
     run: (params: any, conf?: Record<string, any>) => Promise<Record<string, any>>;

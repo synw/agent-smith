@@ -1,12 +1,13 @@
 import { map } from 'nanostores';
 import { AgentTask, AgentTaskState, type AgentTaskSpec } from "./jobsinterfaces.js";
 
-const useAgentTask = <T = string>(spec: AgentTaskSpec<T>): AgentTask<T> => {
+const useAgentTask = <T = string, P extends Record<string, any> = Record<string, any>>(spec: AgentTaskSpec<T, P>): AgentTask<T, P> => {
     //console.log("Init task:", JSON.stringify(spec, null, "  "));
     const id = spec.id;
     const title = spec.title ?? "";
     const description = spec.description ?? "";
     const type: T = spec.type ?? "" as T;
+    const properties: P = spec?.properties ?? {} as P;
     const runFunc = spec.run;
     const abortFunc = spec.abort;
     //const actions = spec.actions;
@@ -66,6 +67,7 @@ const useAgentTask = <T = string>(spec: AgentTaskSpec<T>): AgentTask<T> => {
         id,
         title,
         description,
+        properties,
         type,
         state,
         run,
