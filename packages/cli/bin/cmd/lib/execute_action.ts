@@ -5,7 +5,7 @@ import { readYmlAction } from "../sys/read_yml_action.js";
 import { execute } from "../sys/execute.js";
 import { runPyScript } from "../sys/run_python.js";
 import { pyShell } from "../../state/state.js";
-import { parseInputOptions, processOutput } from "./utils.js";
+import { createJsAction, parseInputOptions, processOutput } from "./utils.js";
 
 function systemAction(path: string): AgentTask<FeatureType> {
     const action = useAgentTask<FeatureType>({
@@ -55,6 +55,10 @@ async function executeActionCmd(args: Array<string> = [], options: any = {}, qui
         case "js":
             const { action } = await import(path);
             act = action as AgentTask;
+            break;
+        case "mjs":
+            const mjsa = await import(path);
+            act = createJsAction(mjsa.action);
             break;
         case "yml":
             act = systemAction(path);

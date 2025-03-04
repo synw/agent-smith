@@ -33,7 +33,7 @@ const actions = `CREATE TABLE IF NOT EXISTS action (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
     path TEXT NOT NULL,
-    ext TEXT NOT NULL CHECK ( ext IN ('yml', 'js', 'py') )
+    ext TEXT NOT NULL CHECK ( ext IN ('yml', 'js', 'py', 'mjs') )
 );`;
 
 const cmds = `CREATE TABLE IF NOT EXISTS cmd (

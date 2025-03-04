@@ -56,7 +56,7 @@ function readFeaturesDir(dir: string): Features {
     }
     dirpath = path.join(dir, "actions")
     if (fs.existsSync(dirpath)) {
-        const data = _readDir(dirpath, ["yml", ".js", ".py"]);
+        const data = _readDir(dirpath, ["yml", ".js", "mjs", ".py"]);
         data.forEach((filename) => {
             const parts = filename.split(".");
             const ext = parts.pop()!;

@@ -1,12 +1,13 @@
+import { AgentTask } from "@agent-smith/jobs/dist/jobsinterfaces.js";
+import { useAgentTask } from "@agent-smith/jobs";
+import { LmTask } from "@agent-smith/lmtask";
+import { useTemplateForModel } from "@agent-smith/tfm";
 import { default as fs } from "fs";
 import { default as path } from "path";
-import { outputMode, promptfile } from "../../state/state.js";
-import { inputMode } from "../../state/state.js";
-import { readClipboard, writeToClipboard } from "../sys/clipboard.js";
+import { Cmd, FeatureType } from "../../interfaces.js";
+import { inputMode, outputMode, promptfile } from "../../state/state.js";
 import { modes } from "../clicmds/modes.js";
-import { LmTask } from "@agent-smith/lmtask/dist/interfaces.js";
-import { useTemplateForModel } from "@agent-smith/tfm";
-import { Cmd } from "../../interfaces.js";
+import { readClipboard, writeToClipboard } from "../sys/clipboard.js";
 
 const tfm = useTemplateForModel();
 async function setOptions(
@@ -201,14 +202,20 @@ async function parseInputOptions(options: any): Promise<string | null> {
     return out
 }
 
-export {
-    readPromptFile,
-    processOutput,
-    setOptions,
-    readTask,
-    readTasksDir,
-    initTaskVars,
-    initTaskConf,
-    initTaskParams,
-    parseInputOptions,
+function createJsAction(action: CallableFunction): AgentTask<FeatureType> {
+    const task = useAgentTask<FeatureType>({
+        id: "",
+        title: "",
+        run: async (args) => {
+            const res = await action(args);
+            return { ok: true, data: res }
+        }
+    });
+    return task
 }
+
+export {
+    createJsAction, initTaskConf,
+    initTaskParams, initTaskVars, parseInputOptions, processOutput, readPromptFile, readTask,
+    readTasksDir, setOptions
+};

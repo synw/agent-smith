@@ -55,7 +55,7 @@ async function executeTaskCmd(args: Array<string> | Record<string, any> = [], op
     const taskSpec = taskBuilder.readFromYaml(res.ymlTask);
     const task = taskBuilder.fromYaml(res.ymlTask);
     let conf: Record<string, any> = {};
-    let vars: Record<string, any> = {}
+    let vars: Record<string, any> = {};
     if (!isJob) {
         const tv = initTaskVars(args, taskSpec?.inferParams ? taskSpec.inferParams as Record<string, any> : {});
         conf = tv.conf;

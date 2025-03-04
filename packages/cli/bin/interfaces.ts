@@ -31,7 +31,7 @@ type RunMode = "cli" | "cmd";
 type FormatMode = "text" | "markdown";
 
 type FeatureType = "task" | "job" | "action" | "cmd";
-type ActionExtension = "js" | "py" | "yml";
+type ActionExtension = "js" | "mjs" | "py" | "yml";
 type TaskExtension = "yml";
 type JobExtension = "yml";
 type CmdExtension = "js";
