@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/lmtask",
-  "version": "0.0.29",
+  "version": "0.0.30",
   "description": "An api to create human friendly agents: the language model tasks module",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {
@@ -11,28 +11,28 @@
     "docs": "typedoc --entryPointStrategy expand"
   },
   "dependencies": {
-    "@agent-smith/jobs": "^0.0.11",
+    "@agent-smith/jobs": "^0.0.12",
     "@agent-smith/tfm": "^0.1.1",
-    "modprompt": "^0.9.5",
+    "modprompt": "^0.10.3",
     "yaml": "^2.7.0"
   },
   "devDependencies": {
-    "@agent-smith/brain": "^0.0.36",
+    "@agent-smith/brain": "^0.0.38",
     "@agent-smith/tmem-jobs": "^0.0.4",
-    "@locallm/browser": "^0.0.16",
+    "@locallm/browser": "^0.0.17",
     "@locallm/types": "^0.1.5",
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.2",
-    "@types/node": "^22.13.5",
+    "@types/node": "^22.13.10",
     "markdown-it-replace-link": "^1.2.2",
     "restmix": "^0.5.0",
-    "rollup": "^4.34.8",
+    "rollup": "^4.35.0",
     "tslib": "^2.8.1",
     "typedoc": "^0.27.9",
     "typedoc-plugin-markdown": "^4.4.2",
     "typedoc-plugin-rename-defaults": "^0.7.2",
-    "typescript": "^5.7.3"
+    "typescript": "^5.8.2"
   },
   "files": [
     "dist"
