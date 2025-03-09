@@ -1,14 +1,14 @@
 import type { MapStore } from "nanostores";
 import type { TmemJobs } from "@agent-smith/tmem-jobs";
 
-interface AgentTaskSpec<T = string, P extends Record<string, any> = Record<string, any>> {
+interface AgentTaskSpec<T = string, I = any, O = Record<string, any>, P extends Record<string, any> = Record<string, any>> {
     id: string;
     title: string;
     type?: T;
     description?: string;
     properties?: P;
-    run?: (params: any, conf?: Record<string, any>) => Promise<Record<string, any>>;
-    abort?: (params: any) => Promise<void>;
+    run: (params: I, conf?: Record<string, any>) => Promise<O>;
+    abort?: (params: I) => Promise<void>;
 }
 
 interface AgentTaskState {
@@ -24,17 +24,17 @@ interface AgentJobState {
     runningTask: string;
 }
 
-interface AgentTask<T = string, P extends Record<string, any> = Record<string, any>> {
+interface AgentTask<T = string, I = any, O = Record<string, any>, P extends Record<string, any> = Record<string, any>> {
     id: string;
     title: string;
     description: string;
     properties: P;
     type: T;
     state: MapStore<AgentTaskState>;
-    run: (params: any, conf?: Record<string, any>) => Promise<Record<string, any>>;
-    abort: (params?: any) => Promise<void>;
-    start: (params: any, conf?: Record<string, any>) => Promise<Record<string, any>>;
-    finish: (completed: boolean, data?: any) => void;
+    run: (params: I, conf?: Record<string, any>) => Promise<O>;
+    abort: (params?: I) => Promise<void>;
+    start: (params: I, conf?: Record<string, any>) => Promise<O>;
+    finish: (completed: boolean, data?: O) => void;
 }
 
 interface AgentJobSpec<T = string> {

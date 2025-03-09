@@ -1,6 +1,6 @@
 import { map } from 'nanostores';
 import { TaskMem, TmemJobs } from "@agent-smith/tmem-jobs";
-import { AgentJob, AgentJobSpec, AgentJobState, AgentTask } from "./jobsinterfaces.js";
+import { AgentJob, AgentJobSpec, AgentJobState, AgentTask } from "./interfaces.js";
 import { useAgentTask } from './task.js';
 
 const useAgentJob = <T = string>(initParams: AgentJobSpec<T>): AgentJob<T> => {

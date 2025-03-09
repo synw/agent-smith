@@ -5,7 +5,7 @@ import {
     AgentTaskSpec,
     AgentTaskState,
     AgentJobState,
-} from "./jobsinterfaces.js"
+} from "./interfaces.js"
 import { useAgentTask } from "./task.js";
 import { useAgentJob } from "./job.js";
 
