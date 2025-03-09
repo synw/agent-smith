@@ -123,10 +123,17 @@ Sorry no: this library favours local first or private remote inference servers
 
 ### Terminal client
 
-Generate a commit message in a git repository (using the `@agent-smith/feat-cli` plugin):
+Generate a commit message in a git repository (using the [git](https://synw.github.io/agent-smith/terminal_client/plugins/code/git) plugin):
 
 ```bash
-lm commit .
+lm commit
+```
+
+Chat with a Youtube video (using the [video](https://synw.github.io/agent-smith/terminal_client/plugins/web/video) plugin)
+
+```bash
+# provide the video id and a query
+lm ytv "0VLAoVGf_74" "summarize this video"
 ```
 
 ### Nodejs

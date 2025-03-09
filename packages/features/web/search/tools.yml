@@ -1,0 +1,5 @@
+- ddsearch:
+    type: action
+    description: Search the web
+    arguments:
+      query: The query to search for
