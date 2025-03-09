@@ -1,0 +1,15 @@
+{
+  "name": "@agent-smith/feat-video",
+  "version": "0.0.1",
+  "description": "Video features for Agent Smith cli",
+  "repository": "https://github.com/synw/agent-smith",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "license": "MIT"
+}
