@@ -37,8 +37,15 @@ function pythonAction(path: string): AgentTask<FeatureType> {
                 path,
                 args,
             )
-            //console.log("PYOUT", out);
-            return { data: out.join("\n"), error: "", ok: true }
+            /*console.log("----------------");
+            console.log("PYOUT", out);
+            console.log("----------------");*/
+            const txt = out.join("\n");
+            let data: string | Record<string, any> | Array<any> = txt;
+            if (txt.startsWith("{") || txt.startsWith("[")) {
+                data = JSON.parse(data)
+            }
+            return { data: data, error: "", ok: true }
         }
     });
     return action

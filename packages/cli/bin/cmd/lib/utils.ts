@@ -150,8 +150,56 @@ function initTaskParams(params: Record<string, any>, inferParams: Record<string,
         conf.inferParams.images = params.images;
         delete params.images;
     }
+    if (params?.size) {
+        conf.size = params.size;
+        delete params.size;
+    }
+    if (params?.model) {
+        conf.model = params.model;
+        delete params.model;
+    }
+    if (params?.template) {
+        conf.template = params.template;
+        delete params.template;
+    }
     const res = { conf: conf, vars: params };
     return res
+}
+
+function initActionVars(args: Array<any>): Record<string, any> {
+    const vars: Record<string, any> = {};
+    //console.log("ARGS", args);
+    args.forEach((a) => {
+        if (a.includes("=")) {
+            const t = a.split("=");
+            const k = t[0];
+            const v = t[1];
+            switch (k) {
+                case "m":
+                    if (v.includes("/")) {
+                        const _s = v.split("/");
+                        vars.model = _s[0];
+                        vars.template = _s[1];
+                    } else {
+                        vars.model = v;
+                    }
+                    break;
+                case "ip":
+                    v.split(",").forEach((p: string) => {
+                        const s = p.split(":");
+                        vars["inferParams"][s[0]] = parseFloat(s[1]);
+                    });
+                    break;
+                case "s":
+                    vars.size = v;
+                    break;
+                default:
+                    vars[k] = v;
+                    break;
+            }
+        }
+    });
+    return { vars }
 }
 
 function initTaskVars(args: Array<any>, inferParams: Record<string, any>): { conf: Record<string, any>, vars: Record<string, any> } {
@@ -215,7 +263,15 @@ function createJsAction(action: CallableFunction): AgentTask<FeatureType> {
 }
 
 export {
-    createJsAction, initTaskConf,
-    initTaskParams, initTaskVars, parseInputOptions, processOutput, readPromptFile, readTask,
-    readTasksDir, setOptions
+    createJsAction,
+    initTaskConf,
+    initTaskParams,
+    initTaskVars,
+    initActionVars,
+    parseInputOptions,
+    processOutput,
+    readPromptFile,
+    readTask,
+    readTasksDir,
+    setOptions
 };

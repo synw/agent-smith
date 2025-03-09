@@ -6,7 +6,7 @@ import { brain, marked, taskBuilder } from '../../agent.js';
 import { getFeatureSpec } from '../../state/features.js';
 import { FeatureType } from '../../interfaces.js';
 import { formatMode, isDebug, isVerbose } from '../../state/state.js';
-import { createJsAction, initTaskConf, initTaskParams, initTaskVars, parseInputOptions, readTask } from './utils.js';
+import { createJsAction, initActionVars, initTaskConf, initTaskParams, initTaskVars, parseInputOptions, readTask } from './utils.js';
 import { pythonAction, systemAction } from './execute_action.js';
 import { TurnBlock } from 'modprompt/dist/interfaces.js';
 
@@ -60,7 +60,7 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
                     if (params?.text) {
                         params.prompt = params.text;
                     } else {
-                        throw new Error(`No prompt provided for task ${name}.\Params: ${params}`)
+                        throw new Error(`No prompt provided for task ${name}.\Params: ${JSON.stringify(params, null, 2)}`)
                     }
                 }
                 const vs = initTaskParams(params, taskSpec?.inferParams ? taskSpec.inferParams as Record<string, any> : {});
@@ -94,6 +94,7 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
             ex.backend.setOnToken((t) => {
                 process.stdout.write(t)
             });
+            brain.setDefaultExpert(ex);
             conf["expert"] = ex;
             try {
                 if (isDebug.value || isVerbose.value) {
@@ -104,6 +105,7 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
                     const invars = { ...params, ...vars };
                     try {
                         res = await job.runTask(name, invars, conf);
+                        console.log("");
                     } catch (e) {
                         throw new Error(`Error running task ${name}: ${e}`)
                     }
@@ -144,6 +146,13 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
         } else {
             try {
                 const _p = i == 0 ? args : params;
+                let nextParams = {};
+                if (i == 0) {
+                    const { vars } = initActionVars(args);
+                    nextParams = vars;
+                    //console.log("NVARS", nextParams);
+                    //console.log("ARGS0", args);
+                }
                 if (isDebug.value) {
                     console.log(i + 1, "Running action", name, _p);
                 } else if (isVerbose.value) {
@@ -164,7 +173,7 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
                 } else {
                     params = res.data;
                 }
-                params = res.data;
+                params = { ...res.data, ...nextParams };
                 //console.log("Params", params)
             }
             catch (err) {
@@ -207,7 +216,7 @@ async function _createJobFromSpec(spec: Record<string, any>): Promise<{ found: b
         tasks: []
     });
     const tasks: Record<string, AgentTask<FeatureType>> = {};
-    //console.log("Create job. Feats:", spec.tasks);
+    //console.log("Create job. Feats:", spec);
     for (const t of spec.tasks) {
         //console.log("TASK SPEC", t);
         if (t.type == "action") {
