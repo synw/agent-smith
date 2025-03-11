@@ -1,11 +1,10 @@
 import YAML from 'yaml';
 import { AgentBrain, LmExpert } from "@agent-smith/brain";
-//import { AgentBrain, LmExpert } from "../../brain/src/main.js";
 import { AgentTask, AgentTaskSpec, useAgentTask } from "@agent-smith/jobs";
-//import { AgentTask, AgentTaskSpec, useAgentTask } from "../../jobs/src/main";
 import { PromptTemplate } from "modprompt";
 import { useTemplateForModel } from "@agent-smith/tfm";
-import { LmTask, ModelSpec } from "./interfaces.js";
+import { LmTask, LmTaskConf, LmTaskInput, ModelSpec } from "./interfaces.js";
+import { InferenceResult } from '@locallm/types';
 
 const tfm = useTemplateForModel();
 
@@ -22,23 +21,23 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
         return data
     }
 
-    fromYaml(txt: string, type?: T, autoCreateExpert = true): AgentTask<T> {
+    fromYaml(txt: string, type?: T, autoCreateExpert = true): AgentTask<T, LmTaskInput, InferenceResult, P> {
         const data = YAML.parse(txt);
         return this.init(data, type, autoCreateExpert);
     }
 
-    init(task: LmTask, type?: T, autoCreateExpert = true): AgentTask<T> {
-        const ts: AgentTaskSpec<T> = {
+    init(task: LmTask, type?: T, autoCreateExpert = true): AgentTask<T, LmTaskInput, InferenceResult, P> {
+        const ts: AgentTaskSpec<T, LmTaskInput, InferenceResult, P> = {
             id: task.name,
             title: task.description,
             type: type,
-            run: async (params: Record<string, any>, conf?: Record<string, any>) => {
+            run: async (params: LmTaskInput, conf?: LmTaskConf<P>): Promise<InferenceResult> => {
                 //console.log("Conf", conf?.expert?.model);
                 if (!params?.prompt) {
                     throw new Error("Please provide a prompt parameter");
                 }
                 let prompt = params.prompt;
-                const tvars = params;
+                const tvars = params as Record<string, any>;
                 delete tvars.prompt;
                 let overrideModel = false;
                 if (conf) {
@@ -189,7 +188,7 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                 await this.expert.abortThinking()
             }
         }
-        return useAgentTask(ts)
+        return useAgentTask<T, LmTaskInput, InferenceResult, P>(ts)
     }
 }
 

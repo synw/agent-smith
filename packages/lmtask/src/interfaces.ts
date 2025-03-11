@@ -1,3 +1,4 @@
+import { LmExpert } from "@agent-smith/brain";
 import { InferenceParams } from "@locallm/types";
 import { TurnBlock } from "modprompt";
 
@@ -5,6 +6,20 @@ interface ModelSpec {
   name: string
   ctx: number;
   template: string;
+}
+
+interface LmTaskInput {
+  prompt: string;
+  models?: Record<string, ModelSpec>;
+  [key: string]: any;
+}
+
+interface LmTaskConf<T extends Record<string, any> = Record<string, any>> {
+  expert?: LmExpert<T>;
+  model?: ModelSpec;
+  inferParams?: InferenceParams;
+  size?: string;
+  debug?: boolean;
 }
 
 /**
@@ -46,12 +61,11 @@ interface LmTask {
   variables?: { required?: Array<string>, optional?: Array<string> };
 }
 
-//type ModelSize = "xsmall" | "small" | "medium" | "large" | "xlarge" | "xxlarge";
-
 export {
   ModelSpec,
-  //ModelSize,
+  LmTaskInput,
   LmTask,
   TemplateSpec,
+  LmTaskConf,
 };
 

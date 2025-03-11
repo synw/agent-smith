@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/lmtask",
-  "version": "0.0.30",
+  "version": "0.0.31",
   "description": "An api to create human friendly agents: the language model tasks module",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {
@@ -11,9 +11,9 @@
     "docs": "typedoc --entryPointStrategy expand"
   },
   "dependencies": {
-    "@agent-smith/jobs": "^0.0.12",
+    "@agent-smith/jobs": "^0.0.13",
     "@agent-smith/tfm": "^0.1.1",
-    "modprompt": "^0.10.3",
+    "modprompt": "^0.10.4",
     "yaml": "^2.7.0"
   },
   "devDependencies": {
