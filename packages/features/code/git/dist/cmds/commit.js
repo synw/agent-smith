@@ -1,6 +1,6 @@
 import { writeFileSync } from "fs";
 import select from '@inquirer/select';
-import { execute, executeJobCmd, writeToClipboard, initAgent } from "@agent-smith/cli";
+import { execute, executeWorkflowCmd, writeToClipboard, initAgent } from "@agent-smith/cli";
 //import { execute, executeJobCmd, writeToClipboard, initAgent } from "../../../../cli/dist/main.js";
 
 const choices = [
@@ -36,11 +36,11 @@ async function runCmd(args = [], options) {
     if (!isUp) {
         throw new Error("No inference server found, canceling")
     }
-    let job = "git_commit";
+    let wf = "git_commit";
     let gitArgs = [];
     for (const arg of args) {
         if (arg.startsWith("msg=")) {
-            job = "git_commit_details";
+            wf = "git_commit_details";
         } else if (arg.includes("=")) {
             continue
         } else {
@@ -48,13 +48,13 @@ async function runCmd(args = [], options) {
         }
     }
     console.log("Generating a commit message ...");
-    const res = await executeJobCmd(job, args, options);
+    const res = await executeWorkflowCmd(wf, args, options);
     if ("error" in res) {
         console.log(res);
         throw new Error(`Job execution error: ${res.error}`)
     }
     //console.log("JOB RES", res);
-    const final = res.text.replace("```", "").trim();
+    const final = res.data.text.replace("```", "").trim();
     /* console.log("\n--------------------------------------------------------");
     console.log(final);
     console.log("--------------------------------------------------------\n");*/

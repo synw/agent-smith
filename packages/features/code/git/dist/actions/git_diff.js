@@ -24,7 +24,7 @@ const action = useAgentTask({
             msg += "\n" + stagedDiff
         }
         //console.log("Next params:", nextParams);
-        return { ok: true, data: { prompt: msg, ...nextParams } }
+        return { data: { prompt: msg, ...nextParams } }
     }
 });
 
