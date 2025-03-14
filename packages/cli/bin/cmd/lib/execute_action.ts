@@ -1,14 +1,14 @@
 import { AgentTask, useAgentTask } from "@agent-smith/jobs";
 import { getFeatureSpec } from '../../state/features.js';
-import { FeatureType } from "../../interfaces.js";
+import { FeatureType, NodeReturnType } from "../../interfaces.js";
 import { readYmlAction } from "../sys/read_yml_action.js";
 import { execute } from "../sys/execute.js";
 import { runPyScript } from "../sys/run_python.js";
 import { pyShell } from "../../state/state.js";
 import { createJsAction, parseInputOptions, processOutput } from "./utils.js";
 
-function systemAction(path: string): AgentTask<FeatureType> {
-    const action = useAgentTask<FeatureType>({
+function systemAction(path: string): AgentTask<FeatureType, Array<string>, NodeReturnType<string>> {
+    const action = useAgentTask<FeatureType, Array<string>, NodeReturnType<string>>({
         id: "system_action",
         title: "",
         run: async (args) => {
@@ -19,19 +19,21 @@ function systemAction(path: string): AgentTask<FeatureType> {
                 actionSpec.data.args = []
             }
             const out = await execute(actionSpec.data.cmd, [...actionSpec.data.args, ...args]);
-            return { data: out.trim(), error: "", ok: true }
+            return { data: out.trim() }
         }
     });
     return action
 }
 
-function pythonAction(path: string): AgentTask<FeatureType> {
-    const action = useAgentTask<FeatureType>({
+function pythonAction(
+    path: string
+): AgentTask<FeatureType, any, NodeReturnType<string | Record<string, any> | Array<any>>> {
+    const action = useAgentTask<FeatureType, any, NodeReturnType<string | Record<string, any> | Array<any>>>({
         id: "python_action",
         title: "",
         run: async (args) => {
             //console.log("Py action", path);
-            const out = await runPyScript(
+            const { data, error } = await runPyScript(
                 pyShell,
                 "python3",
                 path,
@@ -40,28 +42,32 @@ function pythonAction(path: string): AgentTask<FeatureType> {
             /*console.log("----------------");
             console.log("PYOUT", out);
             console.log("----------------");*/
-            const txt = out.join("\n");
-            let data: string | Record<string, any> | Array<any> = txt;
-            if (txt.startsWith("{") || txt.startsWith("[")) {
-                data = JSON.parse(data)
+            if (error) {
+                return { data: {}, error: error }
             }
-            return { data: data, error: "", ok: true }
+            const txt = data.join("\n");
+            let final: string | Record<string, any> | Array<any> = txt;
+            if (txt.startsWith("{") || txt.startsWith("[")) {
+                final = JSON.parse(final)
+            }
+            const res: NodeReturnType<string | Record<string, any> | Array<any>> = { data: final }
+            return res
         }
     });
     return action
 }
 
-async function executeActionCmd(args: Array<string> = [], options: any = {}, quiet = false): Promise<any> {
+async function executeActionCmd(args: Array<string> = [], options: any = {}, quiet = false): Promise<NodeReturnType<any>> {
     const name = args.shift()!;
     const { found, path, ext } = getFeatureSpec(name, "action" as FeatureType);
     if (!found) {
-        return { ok: false, data: {}, error: "Action not found" };
+        throw new Error("Action not found");
     }
-    let act: AgentTask;
+    let act: AgentTask<FeatureType, any, NodeReturnType<any>>;
     switch (ext) {
         case "js":
             const { action } = await import(path);
-            act = action as AgentTask;
+            act = action as AgentTask<FeatureType, any, NodeReturnType<any>>;
             break;
         case "mjs":
             const mjsa = await import(path);
@@ -83,11 +89,15 @@ async function executeActionCmd(args: Array<string> = [], options: any = {}, qui
     }
     // run
     const res = await act.run(args, {});
+    //console.log("ACT RES", res);
+    if (res?.error) {
+        throw res.error
+    }
     if (!quiet) {
         console.log(res.data);
     }
     await processOutput(res);
-    return { ok: true, data: res.data, error: "" }
+    return { data: res.data }
 }
 
 export { executeActionCmd, systemAction, pythonAction };

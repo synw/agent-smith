@@ -23,6 +23,11 @@ interface ConfigFile {
     plugins?: Array<string>;
 }
 
+interface NodeReturnType<T = Record<string, any>> {
+    data: T;
+    error?: Error;
+}
+
 type CmdExecutor = (args: Array<string>, options: any) => Promise<any>;
 
 type InputMode = "manual" | "promptfile" | "clipboard";
@@ -41,6 +46,7 @@ type AliasType = "task" | "action" | "job";
 export {
     Cmd,
     CmdExecutor,
+    NodeReturnType,
     InputMode,
     OutputMode,
     RunMode,

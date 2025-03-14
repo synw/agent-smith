@@ -1,10 +1,9 @@
-import { AgentTask } from "@agent-smith/jobs/dist/jobsinterfaces.js";
-import { useAgentTask } from "@agent-smith/jobs";
+import { AgentTask, useAgentTask } from "@agent-smith/jobs";
 import { LmTask } from "@agent-smith/lmtask";
 import { useTemplateForModel } from "@agent-smith/tfm";
 import { default as fs } from "fs";
 import { default as path } from "path";
-import { Cmd, FeatureType } from "../../interfaces.js";
+import { Cmd, FeatureType, NodeReturnType } from "../../interfaces.js";
 import { inputMode, outputMode, promptfile } from "../../state/state.js";
 import { modes } from "../clicmds/modes.js";
 import { readClipboard, writeToClipboard } from "../sys/clipboard.js";
@@ -54,7 +53,7 @@ async function processOutput(res: any) {
     if (typeof res == "object") {
         let hasOutput = false;
         if (res?.data) {
-            data = res.data; 0
+            data = res.data;
             hasOutput = true;
         }
         if (res?.text) {
@@ -144,7 +143,7 @@ function initTaskParams(params: Record<string, any>, inferParams: Record<string,
     //console.log("TASK PARAMS", params);
     const conf: Record<string, any> = { inferParams: inferParams };
     if (!params?.prompt) {
-        throw new Error(`Error initializing task variable: provide a prompt`)
+        throw new Error(`Error initializing task params: provide a prompt`)
     }
     if (params?.images) {
         conf.inferParams.images = params.images;
@@ -250,13 +249,19 @@ async function parseInputOptions(options: any): Promise<string | null> {
     return out
 }
 
-function createJsAction(action: CallableFunction): AgentTask<FeatureType> {
-    const task = useAgentTask<FeatureType>({
+function createJsAction(action: CallableFunction): AgentTask<FeatureType, any, NodeReturnType<any>> {
+    const task = useAgentTask<FeatureType, any, NodeReturnType<any>>({
         id: "",
         title: "",
         run: async (args) => {
-            const res = await action(args);
-            return { ok: true, data: res }
+            try {
+                const res = await action(args);
+                return { ok: true, data: res }
+            }
+            catch (e) {
+                const err = new Error(`Error executing action ${e}`);
+                return { ok: false, data: {}, error: err }
+            }
         }
     });
     return task

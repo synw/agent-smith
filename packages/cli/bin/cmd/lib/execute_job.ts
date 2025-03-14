@@ -4,7 +4,7 @@ import { AgentJob, AgentTask, useAgentJob } from "@agent-smith/jobs";
 //import { AgentJob, AgentTask, useAgentJob } from "../../../../jobs/dist/main.js";
 import { brain, marked, taskBuilder } from '../../agent.js';
 import { getFeatureSpec } from '../../state/features.js';
-import { FeatureType } from '../../interfaces.js';
+import { FeatureType, NodeReturnType } from '../../interfaces.js';
 import { formatMode, isDebug, isVerbose } from '../../state/state.js';
 import { createJsAction, initActionVars, initTaskConf, initTaskParams, initTaskVars, parseInputOptions, readTask } from './utils.js';
 import { pythonAction, systemAction } from './execute_action.js';
@@ -16,8 +16,7 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
         console.log("Running job", name, Object.keys(job.tasks).length, "tasks");
     }
     if (!found) {
-        console.log(`Job ${name} not found`);
-        return { error: `Job ${name} not found` }
+        throw new Error(`Job ${name} not found`)
     }
     await job.start();
     let res: Record<string, any> = {};
@@ -31,7 +30,7 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
             const chain = task.properties?.chain;
             const { found, path } = getFeatureSpec(name, "task" as FeatureType);
             if (!found) {
-                return { ok: false, data: {}, error: `Task ${name} not found` };
+                throw new Error(`Task ${name} not found`);
             }
             const tres = readTask(path);
             if (!tres.found) {
@@ -160,6 +159,10 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
                 }
                 try {
                     res = await job.runTask(name, _p, options);
+                    //console.log("JRES", res);
+                    if (res?.error) {
+                        throw new Error(`Error executing job action ${res.error}`)
+                    }
                 } catch (e) {
                     throw new Error(`Error executing job action ${e}`)
                 }
@@ -177,7 +180,7 @@ async function executeJobCmd(name: string, args: Array<any> = [], options: any =
                 //console.log("Params", params)
             }
             catch (err) {
-                return { error: `Error executing (${task.type}) task ${name}: ${err}` }
+                throw new Error(`Error executing (${task.type}) task ${name}: ${err}`)
             }
         }
         ++i
@@ -215,7 +218,7 @@ async function _createJobFromSpec(spec: Record<string, any>): Promise<{ found: b
         title: spec.title,
         tasks: []
     });
-    const tasks: Record<string, AgentTask<FeatureType>> = {};
+    const tasks: Record<string, AgentTask<FeatureType, any, NodeReturnType<any>>> = {};
     //console.log("Create job. Feats:", spec);
     for (const t of spec.tasks) {
         //console.log("TASK SPEC", t);
@@ -226,7 +229,7 @@ async function _createJobFromSpec(spec: Record<string, any>): Promise<{ found: b
             }
             if (ext == "js") {
                 const { action } = await import(path);
-                const at = action as AgentTask<FeatureType>;
+                const at = action as AgentTask<FeatureType, any, NodeReturnType<any>>;
                 at.type = "action";
                 tasks[t.name] = at;
             } else if (ext == "mjs") {
@@ -257,9 +260,12 @@ async function _createJobFromSpec(spec: Record<string, any>): Promise<{ found: b
             if (t?.chain) {
                 at.properties = { "chain": true };
             }
-            tasks[t.name] = at
+            const tsk = at;
+            // @ts-ignore
+            tasks[t.name] = tsk as AgentTask<FeatureType, any, NodeReturnType<any>>;
         }
     }
+    // @ts-ignore
     job.tasks = tasks;
     return { job: job, found: true }
 }

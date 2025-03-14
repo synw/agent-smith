@@ -1,11 +1,12 @@
 import { brain, initAgent, taskBuilder } from "../../agent.js";
 import { getFeatureSpec } from "../../state/features.js";
-import { FeatureType } from "../../interfaces.js";
+import { FeatureType, NodeReturnType } from "../../interfaces.js";
 import { isChatMode, isDebug } from "../../state/state.js";
 import { initTaskConf, initTaskParams, initTaskVars, parseInputOptions, readTask } from "./utils.js";
+import { InferenceResult } from "@locallm/types/dist/interfaces.js";
 
 
-async function executeTaskCmd(args: Array<string> | Record<string, any> = [], options: any = {}): Promise<any> {
+async function executeTaskCmd(args: Array<string> | Record<string, any> = [], options: any = {}): Promise<NodeReturnType<InferenceResult>> {
     //console.log("TARGS", args);
     await initAgent();
     if (isDebug.value) {
@@ -41,11 +42,11 @@ async function executeTaskCmd(args: Array<string> | Record<string, any> = [], op
         name = args.name;
         delete args.name;
         pr = args.prompt;
-        delete args.prompt;
+        //delete args.prompt;
     }
     const { found, path } = getFeatureSpec(name, "task" as FeatureType);
     if (!found) {
-        return { ok: false, data: "", conf: {}, error: `Task ${name} not found` };
+        return { data: {} as InferenceResult, error: new Error(`Task ${name} not found`) };
     }
     //console.log("EFM", brain.expertsForModels);    
     const res = readTask(path);
@@ -56,6 +57,7 @@ async function executeTaskCmd(args: Array<string> | Record<string, any> = [], op
     const task = taskBuilder.fromYaml(res.ymlTask);
     let conf: Record<string, any> = {};
     let vars: Record<string, any> = {};
+    //console.log("TARGS", args);
     if (!isJob) {
         const tv = initTaskVars(args, taskSpec?.inferParams ? taskSpec.inferParams as Record<string, any> : {});
         conf = tv.conf;
@@ -71,7 +73,6 @@ async function executeTaskCmd(args: Array<string> | Record<string, any> = [], op
         console.log("Task vars:", vars);
     }
     const ex = brain.getOrCreateExpertForModel(conf.model.name, conf.model.template);
-    //console.log("EFM", ex?.name);
     if (!ex) {
         throw new Error("No expert found for model " + conf.model.name)
     }
@@ -91,9 +92,10 @@ async function executeTaskCmd(args: Array<string> | Record<string, any> = [], op
     if (isDebug.value) {
         conf.debug = true;
     }
-    const data = await task.run({ prompt: pr, ...vars }, conf) as Record<string, any>;
-    if (data?.error) {
-        return { ok: false, data: "", conf: conf, error: `Error executing task: ${name} ${data.error}` }
+    const fres = await task.run({ prompt: pr, ...vars }, conf);
+    //console.log("FRRES", fres);
+    if (fres.error) {
+        throw new Error(`Error executing task: ${name} ${fres.data.error}`);
     }
     conf.prompt = pr;
     // chat mode
@@ -101,9 +103,13 @@ async function executeTaskCmd(args: Array<string> | Record<string, any> = [], op
         if (brain.ex.name != ex.name) {
             brain.setDefaultExpert(ex);
         }
-        brain.ex.template.pushToHistory({ user: pr, assistant: data.text });
+        brain.ex.template.pushToHistory({ user: pr, assistant: fres.text });
     }
-    return { ok: true, data: data.text, conf: conf, error: "" }
+    const ir = fres as InferenceResult;
+    if (isDebug.value) {
+        console.log("\n", ir.stats)
+    }
+    return { data: ir }
 }
 
 export { executeTaskCmd }

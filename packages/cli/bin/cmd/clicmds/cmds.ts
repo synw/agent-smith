@@ -1,5 +1,5 @@
 import { Cmd, FeatureType } from "../../interfaces.js";
-import { formatMode, isChatMode, promptfile, runMode } from "../../state/state.js";
+import { formatMode, isChatMode, isDebug, promptfile, runMode } from "../../state/state.js";
 import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
 import { readAliases, readFeatures } from "../../db/read.js";
 import { cleanupFeaturePaths, updateAliases, updateFeatures, updatePromptfilePath } from "../../db/write.js";
@@ -98,7 +98,7 @@ async function initCmds(): Promise<Record<string, Cmd>> {
 }
 
 async function pingCmd(args: Array<string> = [], options: any): Promise<boolean> {
-    const isUp = await initAgent(true);
+    const isUp = await initAgent(isDebug.value);
     //console.log(brain.backends);
     return isUp
 }
@@ -138,13 +138,13 @@ async function _executeTaskCmd(args: Array<string> = [], options: any): Promise<
         console.warn("Provide a task name");
         return
     }
-    const { ok, data, conf, error } = await executeTaskCmd(args, options);
-    if (!ok) {
+    const { data, error } = await executeTaskCmd(args, options);
+    if (error) {
         console.warn(error)
     }
     if (formatMode.value == "markdown") {
         console.log("\n------------------\n");
-        console.log((marked.parse(data) as string).trim())
+        console.log((marked.parse(data.text) as string).trim())
     } else {
         console.log()
     }
