@@ -32,11 +32,12 @@ function _readFeaturesType(type: FeatureType): Record<string, string> {
 }
 
 function readFeatures(): Record<FeatureType, Record<string, string>> {
-    const feats: Record<FeatureType, Record<string, string>> = { task: {}, job: {}, action: {}, cmd: {} };
+    const feats: Record<FeatureType, Record<string, string>> = { task: {}, job: {}, action: {}, cmd: {}, workflow: {} };
     feats.task = _readFeaturesType("task");
     feats.job = _readFeaturesType("job");
     feats.action = _readFeaturesType("action");
     feats.cmd = _readFeaturesType("cmd");
+    feats.workflow = _readFeaturesType("workflow");
     return feats
 }
 

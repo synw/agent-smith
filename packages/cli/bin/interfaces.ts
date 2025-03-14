@@ -15,6 +15,7 @@ interface Features {
     job: Array<{ name: string, path: string, ext: JobExtension }>;
     cmd: Array<{ name: string, path: string, ext: CmdExtension }>;
     action: Array<{ name: string, path: string, ext: ActionExtension }>;
+    workflow: Array<{ name: string, path: string, ext: WorkflowExtension }>;
 }
 
 interface ConfigFile {
@@ -35,13 +36,14 @@ type OutputMode = "txt" | "clipboard";
 type RunMode = "cli" | "cmd";
 type FormatMode = "text" | "markdown";
 
-type FeatureType = "task" | "job" | "action" | "cmd";
+type FeatureType = "task" | "job" | "action" | "cmd" | "workflow";
 type ActionExtension = "js" | "mjs" | "py" | "yml";
 type TaskExtension = "yml";
+type WorkflowExtension = "yml";
 type JobExtension = "yml";
 type CmdExtension = "js";
-type FeatureExtension = TaskExtension | JobExtension | CmdExtension | ActionExtension;
-type AliasType = "task" | "action" | "job";
+type FeatureExtension = TaskExtension | JobExtension | CmdExtension | ActionExtension | WorkflowExtension;
+type AliasType = "task" | "action" | "job" | "workflow";
 
 export {
     Cmd,
@@ -55,6 +57,7 @@ export {
     ActionExtension,
     TaskExtension,
     JobExtension,
+    WorkflowExtension,
     CmdExtension,
     FeatureSpec,
     Features,

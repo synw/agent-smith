@@ -218,7 +218,7 @@ async function _createJobFromSpec(spec: Record<string, any>): Promise<{ found: b
         title: spec.title,
         tasks: []
     });
-    const tasks: Record<string, AgentTask<FeatureType, any, NodeReturnType<any>>> = {};
+    const tasks: Record<string, AgentTask<FeatureType, any, NodeReturnType<any>, Record<string, any>>> = {};
     //console.log("Create job. Feats:", spec);
     for (const t of spec.tasks) {
         //console.log("TASK SPEC", t);
@@ -261,8 +261,9 @@ async function _createJobFromSpec(spec: Record<string, any>): Promise<{ found: b
                 at.properties = { "chain": true };
             }
             const tsk = at;
-            // @ts-ignore
-            tasks[t.name] = tsk as AgentTask<FeatureType, any, NodeReturnType<any>>;
+
+            //@ts-ignore
+            tasks[t.name] = tsk;
         }
     }
     // @ts-ignore

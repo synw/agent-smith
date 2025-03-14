@@ -29,6 +29,13 @@ const jobs = `CREATE TABLE IF NOT EXISTS job (
     ext TEXT NOT NULL CHECK ( ext IN ('yml') )
 );`;
 
+const workflow = `CREATE TABLE IF NOT EXISTS workflow (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL,
+    path TEXT NOT NULL,
+    ext TEXT NOT NULL CHECK ( ext IN ('yml') )
+);`;
+
 const actions = `CREATE TABLE IF NOT EXISTS action (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
@@ -46,11 +53,11 @@ const cmds = `CREATE TABLE IF NOT EXISTS cmd (
 const aliases = `CREATE TABLE IF NOT EXISTS aliases (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
-    type TEXT NOT NULL CHECK ( type IN ('task', 'action', 'job') )
+    type TEXT NOT NULL CHECK ( type IN ('task', 'action', 'job', 'workflow') )
 );`;
 
 const schemas = [
-    filepaths, featurespaths, tasks, jobs, actions, cmds, plugins, aliases
+    filepaths, featurespaths, tasks, jobs, workflow, actions, cmds, plugins, aliases
 ];
 
 export { schemas }

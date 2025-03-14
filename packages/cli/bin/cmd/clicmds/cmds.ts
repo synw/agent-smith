@@ -10,6 +10,7 @@ import { executeJobCmd, readJob } from "../lib/execute_job.js";
 import { executeTaskCmd } from "../lib/execute_task.js";
 import { readCmds } from "../sys/read_cmds.js";
 import { readTask } from "../lib/utils.js";
+import { executeWorkflowCmd } from "../lib/workflows/cmd.js";
 
 let cmds: Record<string, Cmd> = {
     q: {
@@ -43,6 +44,11 @@ let cmds: Record<string, Cmd> = {
         cmd: _executeJobCmd,
         description: "execute a job",
         args: "arguments: \n-job (required): the job name\n-args: arguments if any for the job"
+    },
+    w: {
+        cmd: _executeWorkflowCmd,
+        description: "execute a workflow",
+        args: "arguments: \n-workflow (required): the workflow name\n-args: arguments if any for the workflow"
     },
     a: {
         cmd: executeActionCmd,
@@ -79,6 +85,12 @@ function initAliases(): Record<string, Cmd> {
                 _cmds[alias.name] = {
                     cmd: (args: Array<string> = [], options: any) => _executeJobCmd([alias.name, ...args], options),
                     description: "job: " + alias.name,
+                    //args: "arguments: \n-args: other arguments if any for the job"
+                }
+            case "workflow":
+                _cmds[alias.name] = {
+                    cmd: (args: Array<string> = [], options: any) => _executeWorkflowCmd([alias.name, ...args], options),
+                    description: "wokflow: " + alias.name,
                     //args: "arguments: \n-args: other arguments if any for the job"
                 }
         }
@@ -162,6 +174,17 @@ async function _executeJobCmd(args: Array<string> = [], options: any): Promise<a
     }
     const name = args.shift()!;
     const res = await executeJobCmd(name, args, options);
+    return res
+    //console.log("ENDRES", t);
+}
+
+async function _executeWorkflowCmd(args: Array<string> = [], options: any): Promise<any> {
+    if (args.length == 0) {
+        console.warn("Provide a workflow name");
+        return
+    }
+    const name = args.shift()!;
+    const res = await executeWorkflowCmd(name, args, options);
     return res
     //console.log("ENDRES", t);
 }

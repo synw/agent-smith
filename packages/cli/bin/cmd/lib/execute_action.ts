@@ -27,8 +27,8 @@ function systemAction(path: string): AgentTask<FeatureType, Array<string>, NodeR
 
 function pythonAction(
     path: string
-): AgentTask<FeatureType, any, NodeReturnType<string | Record<string, any> | Array<any>>> {
-    const action = useAgentTask<FeatureType, any, NodeReturnType<string | Record<string, any> | Array<any>>>({
+): AgentTask<FeatureType, Array<string>, NodeReturnType<string | Record<string, any> | Array<any>>> {
+    const action = useAgentTask<FeatureType, Array<string>, NodeReturnType<string | Record<string, any> | Array<any>>>({
         id: "python_action",
         title: "",
         run: async (args) => {
@@ -57,13 +57,28 @@ function pythonAction(
     return action
 }
 
-async function executeActionCmd(args: Array<string> = [], options: any = {}, quiet = false): Promise<NodeReturnType<any>> {
-    const name = args.shift()!;
+async function executeActionCmd(args: Array<string> | Record<string, any> = [], options: any = {}, quiet = false): Promise<NodeReturnType<any>> {
+    const isWorkflow = !Array.isArray(args);
+    let name: string;
+    if (!isWorkflow) {
+        name = args.shift()!;
+    } else {
+        if (!args.name) {
+            throw new Error("Provide an action name param")
+        }
+        name = args.name;
+        delete args.name;
+    }
     const { found, path, ext } = getFeatureSpec(name, "action" as FeatureType);
     if (!found) {
         throw new Error("Action not found");
     }
     let act: AgentTask<FeatureType, any, NodeReturnType<any>>;
+    if (!["js", "mjs"].includes(ext)) {
+        if (isWorkflow) {
+            throw new Error(`Action ${name} param error: ${typeof args}, ${args}`)
+        }
+    }
     switch (ext) {
         case "js":
             const { action } = await import(path);
@@ -88,7 +103,8 @@ async function executeActionCmd(args: Array<string> = [], options: any = {}, qui
         args.push(input)
     }
     // run
-    const res = await act.run(args, {});
+    //console.log("AOPT", options);
+    const res = await act.run(args, options);
     //console.log("ACT RES", res);
     if (res?.error) {
         throw res.error

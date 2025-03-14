@@ -68,6 +68,9 @@ function updateAliases(feats: Features) {
     feats.job.forEach((feat) => {
         existingAliases = _updateAlias(existingAliases, feat.name, "job")
     });
+    feats.workflow.forEach((feat) => {
+        existingAliases = _updateAlias(existingAliases, feat.name, "workflow")
+    });
 }
 
 function upsertAndCleanFeatures(feats: Array<FeatureSpec>, type: FeatureType) {
@@ -90,7 +93,7 @@ function upsertAndCleanFeatures(feats: Array<FeatureSpec>, type: FeatureType) {
     });
     feats.forEach((feat) => {
         if (!names.includes(feat.name)) {
-            //console.log("ADD", feat.name);
+            //console.log("ADD", type, feat);
             const insertStmt = db.prepare(`INSERT INTO ${type} (name, path, ext) VALUES (?, ?, ?)`);
             insertStmt.run(feat.name, feat.path, feat.ext);
             console.log("+", "[" + type + "]", feat.name, feat.path);
@@ -103,6 +106,7 @@ function updateFeatures(feats: Features) {
     upsertAndCleanFeatures(feats.job, "job");
     upsertAndCleanFeatures(feats.action, "action");
     upsertAndCleanFeatures(feats.cmd, "cmd");
+    upsertAndCleanFeatures(feats.workflow, "workflow");
 }
 
 export {

@@ -1,4 +1,4 @@
-import { ActionExtension, CmdExtension, Features, JobExtension, TaskExtension } from "../../interfaces.js";
+import { ActionExtension, CmdExtension, Features, JobExtension, TaskExtension, WorkflowExtension } from "../../interfaces.js";
 import { default as fs } from "fs";
 import { default as path } from "path";
 
@@ -25,6 +25,7 @@ function readFeaturesDir(dir: string): Features {
         job: [],
         action: [],
         cmd: [],
+        workflow: []
     }
     let dirpath = path.join(dir, "tasks");
     if (fs.existsSync(dirpath)) {
@@ -51,6 +52,20 @@ function readFeaturesDir(dir: string): Features {
                 name: name,
                 path: path.join(dirpath),
                 ext: ext as JobExtension,
+            })
+        });
+    }
+    dirpath = path.join(dir, "workflows");
+    if (fs.existsSync(dirpath)) {
+        const data = _readDir(dirpath, [".yml"]);
+        data.forEach((filename) => {
+            const parts = filename.split(".");
+            const ext = parts.pop()!;
+            const name = parts.join("");
+            feats.workflow.push({
+                name: name,
+                path: path.join(dirpath),
+                ext: ext as WorkflowExtension,
             })
         });
     }

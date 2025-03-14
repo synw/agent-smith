@@ -1,7 +1,7 @@
 import { brain, initAgent, taskBuilder } from "../../agent.js";
 import { getFeatureSpec } from "../../state/features.js";
 import { FeatureType, NodeReturnType } from "../../interfaces.js";
-import { isChatMode, isDebug } from "../../state/state.js";
+import { isChatMode, isDebug, isVerbose } from "../../state/state.js";
 import { initTaskConf, initTaskParams, initTaskVars, parseInputOptions, readTask } from "./utils.js";
 import { InferenceResult } from "@locallm/types/dist/interfaces.js";
 
@@ -13,10 +13,10 @@ async function executeTaskCmd(args: Array<string> | Record<string, any> = [], op
         console.log("Task args:", args);
         console.log("Task options:", options);
     }
-    const isJob = !Array.isArray(args);
+    const isWorkflow = !Array.isArray(args);
     let name: string;
     let pr: string;
-    if (!isJob) {
+    if (!isWorkflow) {
         name = args.shift()!;
         //const params = args.filter((x) => x.length > 0);
         //console.log("Task run params", params);
@@ -58,7 +58,7 @@ async function executeTaskCmd(args: Array<string> | Record<string, any> = [], op
     let conf: Record<string, any> = {};
     let vars: Record<string, any> = {};
     //console.log("TARGS", args);
-    if (!isJob) {
+    if (!isWorkflow) {
         const tv = initTaskVars(args, taskSpec?.inferParams ? taskSpec.inferParams as Record<string, any> : {});
         conf = tv.conf;
         vars = tv.vars;
@@ -89,13 +89,15 @@ async function executeTaskCmd(args: Array<string> | Record<string, any> = [], op
         process.stdout.write(t)
     });
     conf.expert = ex;
-    if (isDebug.value) {
+    if (isDebug.value || isVerbose.value) {
         conf.debug = true;
     }
-    const fres = await task.run({ prompt: pr, ...vars }, conf);
-    //console.log("FRRES", fres);
-    if (fres.error) {
-        throw new Error(`Error executing task: ${name} ${fres.data.error}`);
+    let ir: InferenceResult;
+    try {
+        ir = await task.run({ prompt: pr, ...vars }, conf);
+    }
+    catch (err) {
+        throw new Error(`Error executing task: ${name} ${err}`);
     }
     conf.prompt = pr;
     // chat mode
@@ -103,9 +105,8 @@ async function executeTaskCmd(args: Array<string> | Record<string, any> = [], op
         if (brain.ex.name != ex.name) {
             brain.setDefaultExpert(ex);
         }
-        brain.ex.template.pushToHistory({ user: pr, assistant: fres.text });
+        brain.ex.template.pushToHistory({ user: pr, assistant: ir.text });
     }
-    const ir = fres as InferenceResult;
     if (isDebug.value) {
         console.log("\n", ir.stats)
     }

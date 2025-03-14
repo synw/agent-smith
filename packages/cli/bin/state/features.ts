@@ -9,6 +9,7 @@ function readFeaturesDirs(featuresPaths: Array<string>): Features {
         job: [],
         action: [],
         cmd: [],
+        workflow: [],
     };
     featuresPaths.forEach((dir: string) => {
         //console.log("Reading feats in", dir);
@@ -17,6 +18,7 @@ function readFeaturesDirs(featuresPaths: Array<string>): Features {
         _f.job.forEach((item) => feats.job.push(item));
         _f.action.forEach((item) => feats.action.push(item));
         _f.cmd.forEach((item) => feats.cmd.push(item));
+        _f.workflow.forEach((item) => feats.workflow.push(item));
     });
     return feats
 }
