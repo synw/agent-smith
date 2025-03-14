@@ -29,18 +29,19 @@ async function executeWorkflowCmd(name: string, args: Array<any> = [], options: 
                     //console.log("EXECT", p);
                     taskRes = await executeTaskCmd(p, options);
                 } catch (e) {
-                    throw new Error(`Wokflow ${i + 1} error: ${e}`)
+                    throw new Error(`Workflow task ${i + 1} error: ${e}`)
                 }
                 break;
             case "action":
                 try {
-                    taskRes = await executeActionCmd(p, options, true);
+                    const ares = await executeActionCmd(p, options, true);
+                    taskRes = ares.data;
                     if (i == finalTaskIndex) {
                         //console.log("LAST ACT", i, finalTaskIndex, p);
                         console.log(taskRes.data);
                     }
                 } catch (e) {
-                    throw new Error(`Wokflow ${i + 1} error: ${e}`)
+                    throw new Error(`Workflow action ${i + 1} error: ${e}`)
                 }
                 break;
             /*case "cmd":
