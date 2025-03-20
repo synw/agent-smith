@@ -1,4 +1,4 @@
-import { TemplateSpec, LmTask, ModelSpec, LmTaskConf, LmTaskInput } from "./interfaces.js";
+import { TemplateSpec, LmTask, ModelSpec, LmTaskConf, LmTaskInput, LmTaskToolSpec } from "./interfaces.js";
 import { LmTaskBuilder } from "./task.js";
 
 export {
@@ -8,4 +8,5 @@ export {
     LmTask,
     LmTaskInput,
     LmTaskConf,
+    LmTaskToolSpec,
 }

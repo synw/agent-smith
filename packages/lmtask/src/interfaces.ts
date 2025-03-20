@@ -1,19 +1,38 @@
+
 import { LmExpert } from "@agent-smith/brain";
-import { InferenceParams } from "@locallm/types";
+import { InferenceParams, InferenceResult } from "@locallm/types";
 import { TurnBlock } from "modprompt";
+import { ToolSpec } from "modprompt/dist/interfaces";
 
 interface ModelSpec {
-  name: string
+  name: string;
   ctx: number;
   template: string;
 }
 
+/**
+ * Represents the input configuration for a language model task.
+ *
+ * @interface LmTaskInput
+ * @param {string} prompt - The user's input prompt for the task.
+ * @param {Record<string, ModelSpec>} [models] - Optional record of model specifications by name.
+ */
 interface LmTaskInput {
   prompt: string;
   models?: Record<string, ModelSpec>;
   [key: string]: any;
 }
 
+/**
+ * Configuration interface for a language model task.
+ *
+ * @interface LmTaskConf
+ * @param {LmExpert<T>} [expert] - Optional expert system for the task.
+ * @param {ModelSpec} [model] - Optional model configuration.
+ * @param {InferenceParams} [inferParams] - Optional inference parameters.
+ * @param {string} [size] - Optional size parameter.
+ * @param {boolean} [debug] - Optional debug flag.
+ */
 interface LmTaskConf<T extends Record<string, any> = Record<string, any>> {
   expert?: LmExpert<T>;
   model?: ModelSpec;
@@ -29,6 +48,11 @@ interface LmTaskConf<T extends Record<string, any> = Record<string, any>> {
  * @param {string} [system] - The system message for the template.
  * @param {Array<string>} [stop] - Extra stop sequences for the template.
  * @param {string} [assistant] - The assistant start message for the template.
+ * @example
+ * const template: TemplateSpec = {
+ *   system: "You are a helpful AI",
+ *   stop: ["\n", "</s>"],
+ * };
  */
 interface TemplateSpec {
   system?: string;
@@ -37,17 +61,25 @@ interface TemplateSpec {
 }
 
 /**
- * Represents a language model task.
+ * Represents a language model task configuration.
  *
  * @interface LmTask
  * @param {string} name - The name of the task.
  * @param {string} description - The description of the task.
- * @param {string} prompt - The prompt for the task.
- * @param {TemplateSpec} template - The template specification for the task.
- * @param {InferenceParams} inferParams - The inference parameters for the task.
- * @param {ModelConf} model - The model configuration for the task.
- * @param {Array<TurnBlock>} shots - The dialogue turns for the task.
- * @param {{ required?: Array<string>, optional?: Array<string> }} [variables] - The variables for the task.
+ * @param {string} prompt - The input prompt for the task.
+ * @param {ModelSpec} model - The primary model configuration.
+ * @param {TemplateSpec} [template] - Optional template specification.
+ * @param {InferenceParams} [inferParams] - Optional inference parameters.
+ * @param {Record<string, ModelSpec>} [models] - Optional additional models by name.
+ * @param {Array<TurnBlock>} [shots] - Optional dialogue examples for the task.
+ * @param {{ required?: Array<string>, optional?: Array<string> }} [variables] - Task variables (required/optional).
+ * @example
+ * const task: LmTask = {
+ *   name: "qa",
+ *   description: "Answer questions",
+ *   prompt: "What is your favorite color?",
+ *   model: { name: "llama", ctx: 2048, template: "default" },
+ * };
  */
 interface LmTask {
   name: string;
@@ -56,9 +88,21 @@ interface LmTask {
   model: ModelSpec;
   template?: TemplateSpec;
   inferParams?: InferenceParams;
-  models?: Record<string, ModelSpec>,
+  models?: Record<string, ModelSpec>;
   shots?: Array<TurnBlock>;
-  variables?: { required?: Array<string>, optional?: Array<string> };
+  variables?: { required?: Array<string>; optional?: Array<string> };
+  tools?: Array<LmTaskToolSpec>;
+  toolsList?: Array<string>;
+}
+
+interface LmTaskToolSpec extends ToolSpec {
+  execute: <O = any>(name: string, args: Record<string, any>) => Promise<O>;
+}
+
+interface LmTaskOutput {
+  answer: InferenceResult;
+  errors: Record<string, string>;
+  toolUsed: string | null;
 }
 
 export {
@@ -67,5 +111,6 @@ export {
   LmTask,
   TemplateSpec,
   LmTaskConf,
+  LmTaskToolSpec,
+  LmTaskOutput
 };
-
