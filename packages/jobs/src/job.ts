@@ -3,11 +3,13 @@ import { TaskMem, TmemJobs } from "@agent-smith/tmem-jobs";
 import { AgentJob, AgentJobSpec, AgentJobState, AgentTask } from "./interfaces.js";
 import { useAgentTask } from './task.js';
 
-const useAgentJob = <T = string>(initParams: AgentJobSpec<T>): AgentJob<T> => {
+const useAgentJob = <T = string>(
+    initParams: AgentJobSpec<T>
+): AgentJob<T> => {
     const _name = initParams.name;
     let _tasks: Record<string, AgentTask<T>> = {};
     initParams.tasks.forEach((ts) => {
-        const _t = useAgentTask(ts);
+        const _t = useAgentTask<T>(ts);
         _tasks[_t.id] = _t
     });
     const _title = initParams.title;
@@ -21,14 +23,16 @@ const useAgentJob = <T = string>(initParams: AgentJobSpec<T>): AgentJob<T> => {
         runningTask: "",
     });
 
-    const _runTask = async (t: AgentTask<T>, params: any, conf: Record<string, any>, autoComplete: boolean): Promise<Record<string, any>> => {
+    const _runTask = async (
+        t: AgentTask<T>, params: any, conf: Record<string, any>, autoComplete: boolean
+    ): Promise<Record<string, any>> => {
         /*try {
             console.log("JOB RUN TASK", t.id, autoComplete, params[0].substring(0, 100));
         } catch (e) {
             console.log("JOB RUN TASK", t.id, autoComplete, params);
         }*/
         try {
-            let res: Record<string, any> = {};
+            let res: Record<string, any>;
             if (autoComplete) {
                 res = await t.run(params, conf);
                 _finishTask(t, res, true);

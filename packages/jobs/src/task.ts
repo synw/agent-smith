@@ -33,10 +33,10 @@ const useAgentTask = <T = string, I = any, O = Record<string, any>, P extends Re
                 }
                 return data
             } catch (e) {
-                throw new Error(`Error running task ${id}: ${e}`)
+                throw new Error(`${id}: ${e}`)
             }
         } else {
-            throw new Error(`Error running task ${id}: no run function is defined for the task`)
+            throw new Error(`${id}: no run function is defined for the task`)
         }
     }
 

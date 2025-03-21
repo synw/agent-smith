@@ -1,7 +1,7 @@
 import type { MapStore } from "nanostores";
 import type { TmemJobs } from "@agent-smith/tmem-jobs";
 
-interface AgentTaskSpec<T = string, I = any, O = Record<string, any>, P extends Record<string, any> = Record<string, any>> {
+interface AgentTaskSpec<T = string, I = any, O = any, P extends Record<string, any> = Record<string, any>> {
     id: string;
     title: string;
     type?: T;
@@ -24,7 +24,7 @@ interface AgentJobState {
     runningTask: string;
 }
 
-interface AgentTask<T = string, I = any, O = Record<string, any>, P extends Record<string, any> = Record<string, any>> {
+interface AgentTask<T = string, I = any, O = any, P extends Record<string, any> = Record<string, any>> {
     id: string;
     title: string;
     description: string;
@@ -37,10 +37,10 @@ interface AgentTask<T = string, I = any, O = Record<string, any>, P extends Reco
     finish: (completed: boolean, data?: O) => void;
 }
 
-interface AgentJobSpec<T = string> {
+interface AgentJobSpec<T = string, I = any, O = any, P extends Record<string, any> = Record<string, any>> {
     name: string;
     title: string;
-    tasks: Array<AgentTaskSpec<T>>;
+    tasks: Array<AgentTaskSpec<T, I, O, P>>;
     tmem?: TmemJobs;
 }
 

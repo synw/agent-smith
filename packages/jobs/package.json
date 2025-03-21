@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/jobs",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "description": "An api to create human friendly agents: the jobs management module",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {
