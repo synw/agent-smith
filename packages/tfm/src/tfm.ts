@@ -6,40 +6,38 @@ const useTemplateForModel = (): TemplateForModel => {
 
     const guess = (model: string): string => {
         const _model = model.toLowerCase();
-        if (_model.includes("hermes") || _model.includes("dolphin") || _model.includes("qwen")) {
-            return "chatml"
+        switch (true) {
+            case _model.includes("deephermes"):
+                return "llama3"
+            case _model.includes("hermes") || _model.includes("dolphin") || _model.includes("qwen"):
+                return "chatml";
+            case _model.includes("deepseek"):
+                return "deepseek3";
+            case _model.includes("mistral") || _model.includes("mixtral"):
+                return "mistral";
+            case _model.includes("codestral"):
+                return "codestral";
+            case _model.includes("phi2"):
+                return "phi";
+            case _model.includes("phi3") || _model.includes("phi-3"):
+                return "phi3";
+            case _model.includes("phi4") || _model.includes("phi-4"):
+                return "phi4";
+            case _model.includes("llama3") || _model.includes("llama-3"):
+                return "llama3";
+            case _model.includes("command-r") || _model.includes("aya"):
+                return "command-r";
+            case _model.includes("gemma"):
+                return "gemma";
+            case _model.includes("granite"):
+                return "granite";
+            case _model.includes("nemotron"):
+                return "nemotron";
+            case _model.includes("exaone"):
+                return "exaone";
+            default:
+                return "none";
         }
-        if (_model.includes("deepseek")) {
-            if (_model.includes("v2") || _model.includes("lite")) {
-                return "deepseek2"
-            }
-            return "deepseek"
-        }
-        if (_model.includes("mistral") || _model.includes("mixtral")) {
-            return "mistral"
-        }
-        if (_model.includes("codestral")) {
-            return "codestral"
-        }
-        if (_model.includes("phi2")) {
-            return "phi"
-        }
-        if (_model.includes("phi3") || _model.includes("phi-3")) {
-            return "phi3"
-        }
-        if (_model.includes("llama3") || _model.includes("llama-3")) {
-            return "llama3"
-        }
-        if (_model.includes("command-r") || _model.includes("aya")) {
-            return "command-r"
-        }
-        if (_model.includes("tinyllama") || _model.includes("zephyr")) {
-            return "zephyr"
-        }
-        if (_model.includes("gemma")) {
-            return "gemma"
-        }
-        return "none"
     };
 
     return {
