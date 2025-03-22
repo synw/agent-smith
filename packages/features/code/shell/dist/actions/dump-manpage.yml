@@ -1,0 +1,4 @@
+cmd: man
+args:
+  - "-P"
+  - "cat"

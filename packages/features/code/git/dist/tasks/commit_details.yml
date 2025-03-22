@@ -64,3 +64,5 @@ inferParams:
 variables:
     required:
         - msg
+    optional:
+        - instructions

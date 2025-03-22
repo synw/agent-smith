@@ -1,0 +1,35 @@
+name: think
+description: Run a raw inference query using a reasoning model
+prompt: "{prompt}"
+model:
+    name: qwq:latest
+    ctx: 16384
+    template: chatml
+models:
+    xxsmall:
+        name: deepscaler:1.5b-preview-q8_0
+        ctx: 16384
+        template: deepseek3
+    xsmall:
+        name: smallthinker:3b-preview-q8_0
+        ctx: 16384
+        template: chatml
+    small:
+        name: exaone-deep:7.8b-q8_0
+        ctx: 16384
+        template: exaone
+    medium:
+        name: fuser1:iq4_xs
+        ctx: 16384
+        template: deepseek3
+    xmedium:
+        name: Qwen_QwQ-32B-IQ4_XS # koboldcpp flash attention q8 kv
+        ctx: 32768
+        template: chatml
+inferParams:
+    top_k: 20
+    top_p: 0.95
+    min_p: 0
+    temperature: 0.4
+    max_tokens: 8192
+    repeat_penalty: 1

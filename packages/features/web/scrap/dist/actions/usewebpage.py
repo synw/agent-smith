@@ -1,8 +1,21 @@
+"""
+# tool
+description: Use a webpage to achieve a task using the page's content
+arguments:
+    url:
+        description: The url of the web page to use
+    task:
+        description: "The task to achieve using the page content, for example: retrieve all the content of the page"
+"""
+
 import sys
 import json
 from scrapegraphai.graphs import SmartScraperGraph
+from scrapegraphai import telemetry
 
-MODEL = "ollama/mistral-small:latest"
+telemetry.disable_telemetry()
+
+MODEL = "ollama/qwen2.5:32b"
 
 nargs = len(sys.argv)
 if nargs < 3:

@@ -5,7 +5,6 @@
   "repository": "https://github.com/synw/agent-smith",
   "dependencies": {
     "@agent-smith/cli": "^0.0.38",
-    "@agent-smith/jobs": "^0.0.13",
     "@inquirer/select": "^4.0.10"
   },
   "type": "module",

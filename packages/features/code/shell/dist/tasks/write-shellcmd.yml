@@ -1,0 +1,44 @@
+name: shellcmd
+description: Write a shell command
+prompt: |-
+      Write a shell command to {prompt}
+template: 
+    system:  |-
+        You are an AI programmer assistant that writes shell commands. Important: you always output only the requested command
+        and never explain it.
+model:
+    name: qwen2.5-coder:7b-instruct-q8_0
+    ctx: 2048
+    template: chatml
+models:
+    small:
+        name: qwen2.5-coder:3b-instruct-q8_0
+        ctx: 2048
+        template: chatml
+    medium:
+        name: deepseek-coder-v2:16b-lite-instruct-q8_0
+        ctx: 2048
+        template: deepseek3
+    xmedium:
+        name: qwen2.5-coder:14b-instruct-q8_0
+        ctx: 2048
+        template: chatml
+    large:
+        name: qwen2.5-coder:32b
+        ctx: 2048
+        template: chatml
+inferParams:
+    top_p: 1
+    top_k: 0
+    min_p: 0.05
+    temperature: 0.15
+    max_tokens: 1024
+shots:
+    - user: |-
+        print the path of the current/working directory
+      assistant: |-
+        pwd
+    - user: |-
+        list the files in the current folder and order them by ascending size. Humanize the size display
+      assistant:
+        ls -lh --sort=size

@@ -1,6 +1,0 @@
-name: translatefile
-tasks:
-  - type: "action"
-    name: "readfile"
-  - type: "task"
-    name: "translate"

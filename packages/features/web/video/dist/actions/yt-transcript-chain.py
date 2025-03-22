@@ -13,7 +13,15 @@ from youtube_transcript_api.formatters import TextFormatter
 nargs = len(sys.argv)
 if nargs < 3:
     raise ValueError("Provide a video id and a prompt")
-transcript = YouTubeTranscriptApi.get_transcript(sys.argv[1], preserve_formatting=True)
+lang = "en"
+if nargs >= 4:
+    lang = sys.argv[3]
+langs = tuple(lang.split(","))
+transcript = YouTubeTranscriptApi.get_transcript(
+    sys.argv[1],
+    preserve_formatting=True,
+    languages=langs,
+)
 formatter = TextFormatter()
 txt = formatter.format_transcript(transcript)
 res = {"prompt": txt, "instructions": sys.argv[2]}

@@ -1,11 +1,10 @@
 {
   "name": "@agent-smith/feat-vision",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Vision features for Agent Smith cli",
   "repository": "https://github.com/synw/agent-smith",
   "dependencies": {
     "@agent-smith/cli": "^0.0.32",
-    "@agent-smith/jobs": "^0.0.11",
     "@locallm/api": "^0.2.0"
   },
   "devDependencies": {

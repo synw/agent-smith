@@ -1,0 +1,52 @@
+name: shellcmd
+description: Write a shell command
+prompt: |-
+      We requested another AI to write a shell command. Initial user request: "{prompt}"
+
+      The AI created this command:
+
+      {command}
+
+      Analyze the user request and review the command to check for:
+
+      - **Correctness**: the command must do exactly what is requested by the user. Verify that it does it all correctly
+      - Security problems if this command is run: only check for serious problems      
+      - Simplicity and best practices: suggest alternatives if you find a better way to do what the user requested
+
+      Provide a confidency score between 0.0 and 1.0 in you final report for:
+
+      - Correctness
+      - Security
+
+      Suggest the good command if the correctness score is not 1.0
+template: 
+    system:  |-
+        You are an AI programmer assistant for shell commands. You are in charge of the security and
+        quality control.
+model:    
+    name: qwen2.5-coder:14b-instruct-q8_0
+    ctx: 16384
+    template: chatml
+models:
+    xsmall:
+        name: qwen2.5-coder:3b-instruct-q8_0
+        ctx: 16384
+        template: chatml
+    small:
+        name: qwen2.5-coder:7b-instruct-q8_0
+        ctx: 16384
+        template: chatml
+    medium:
+        name: qwen2.5-coder:14b-instruct-q8_0
+        ctx: 16384
+        template: chatml
+    large:
+        name: qwen2.5-coder:32b
+        ctx: 16384
+        template: chatml
+inferParams:
+    temperature: 0
+    max_tokens: 8192
+variables:
+    required:
+        - command 

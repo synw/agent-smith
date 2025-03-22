@@ -1,0 +1,68 @@
+steps:
+  write-shellcmd:
+    type: task
+    in:
+      - prompt
+    out:
+      - command
+      - prompt
+  extract-shellcmd:
+    type: task
+    in:
+      - command
+    out:
+      - rawcmd
+  dump-manpage:
+    type: action
+    in:
+      - rawcmd
+    out:
+      - manpage
+  check-shellcmd-think:
+    type: task
+    in:
+      - prompt
+      - manpage
+      - command
+    out:
+      - analysis
+  evaluate-shellcmd:
+    type: decision
+    in:
+      - command
+      - analysis
+    out:
+      - command
+    options:
+      - continue
+      - retry: write-shellcmd
+      - peers-review:
+          peers-write-shellcmds:
+            type: task
+            in:
+              - prompt
+            out:
+              - commands
+              - prompt
+          peers-select-shellcmds:
+            type: task
+            in:
+              - commands
+            out:
+              - command
+              - analysis
+      - peers-rewrite:
+          peers-write-shellcmds:
+            type: task
+            in:
+              - prompt
+            out:
+              - commands
+              - prompt
+          peers-select-shellcmds:
+            type: task
+            in:
+              - commands
+            out:
+              - command
+              - analysis

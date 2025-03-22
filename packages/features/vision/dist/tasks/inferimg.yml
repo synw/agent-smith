@@ -4,11 +4,20 @@ prompt: |-
     {prompt}
 model:
     name: minicpm-v:8b-2.6-q8_0
-    ctx: 8192
+    ctx: 32768
     template: chatml
+models:
+    small:
+        name: granite3.2-vision:2b-q8_0
+        ctx: 32768
+        template: phi3
+    medium:
+        name: llama3.2-vision:latest
+        ctx: 32768
+        template: llama3
 inferParams:
     top_k: 1.0
     top_p: 1.0
     min_p: 0.05
     temperature: 0.2
-    max_tokens: 4096
+    max_tokens: 16384

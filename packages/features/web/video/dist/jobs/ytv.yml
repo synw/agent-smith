@@ -1,5 +1,0 @@
-tasks:
-  - name: yt-transcript-chain
-    type: action
-  - name: yt-chat
-    type: task
