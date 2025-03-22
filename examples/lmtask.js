@@ -1,15 +1,13 @@
 #!/usr/bin/env node
-//import { useLmTask } from "@agent-smith/lmtask";
 import { default as fs } from "fs";
 import { useAgentBrain } from "@agent-smith/brain";
-import { LmTaskBuilder } from "@agent-smith/lmtask";
+//import { LmTaskBuilder } from "@agent-smith/lmtask";
 //import { useAgentBrain } from "../packages/brain/dist/brain.js";
-//import { LmTaskBuilder } from "../packages/lmtask/dist/task.js"
+import { LmTaskBuilder } from "../packages/lmtask/dist/task.js"
 
 // Run an Ollama server
 
-const model = "llama3.1:latest";
-const template = "llama3";
+const model = { name: "llama3.1:latest", ctx: 8192, template: "llama3" };
 
 async function main() {
     const taskPath = "./sample/mytask.yml"
@@ -17,10 +15,6 @@ async function main() {
     const brain = useAgentBrain();
     await brain.initLocal();
     brain.backend("ollama").setOnToken((t) => process.stdout.write(t));
-    const ex = brain.getOrCreateExpertForModel(model, template);
-    if (!ex) {
-        console.error("No backend found for model")
-    }
     const ymlTaskDef = fs.readFileSync(taskPath, 'utf8');
     const taskBuilder = new LmTaskBuilder(brain);
     // build the task
@@ -28,9 +22,7 @@ async function main() {
     console.log("Running task...", ymlTaskDef);
     // run the task    
     const conf = {
-        expert: ex,
         model: model,
-        template: template,
         debug: true,
     };
     await task.run({

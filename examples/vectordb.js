@@ -1,5 +1,6 @@
 #!/usr/bin/env node
-import { useSmem } from "@agent-smith/smem";
+//import { useSmem } from "@agent-smith/smem";
+import { useSmem } from "../packages/smem/dist/main.js"
 
 async function main() {
     const mem = useSmem();
