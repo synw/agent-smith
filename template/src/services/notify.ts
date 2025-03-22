@@ -1,4 +1,4 @@
-import { ToastSeverity, ToastSeverityOptions } from 'primevue/api';
+import { ToastSeverity, ToastSeverityOptions } from '@primevue/core/api';
 import { useToast } from "primevue/usetoast";
 import { useConfirm } from "primevue/useconfirm";
 import { ToastServiceMethods } from 'primevue/toastservice';

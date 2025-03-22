@@ -75,6 +75,7 @@ import { templates } from "modprompt";
 import { useModelConf } from "./use_model_conf";
 import { AgentBrain } from "@agent-smith/brain";
 import { useRoute, useRouter } from "vue-router";
+import LoadingSpinner from "../../widgets/LoadingSpinner.vue";
 import OverlayPanel from "primevue/overlaypanel";
 
 const props = defineProps({
