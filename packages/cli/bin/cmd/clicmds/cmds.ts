@@ -1,19 +1,20 @@
 import { Cmd, FeatureType } from "../../interfaces.js";
-import { formatMode, isChatMode, isDebug, promptfile, runMode } from "../../state/state.js";
+import { formatMode, isChatMode, isDebug, promptfilePath, runMode } from "../../state/state.js";
 import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
 import { readAliases, readFeatures } from "../../db/read.js";
 import { cleanupFeaturePaths, updateAliases, updateFeatures, updatePromptfilePath } from "../../db/write.js";
 import { processConfPath } from "../../conf.js";
-import { executeActionCmd } from "../lib/execute_action.js";
-import { brain, initAgent, marked, taskBuilder } from "../../agent.js";
-import { executeJobCmd, readJob } from "../lib/execute_job.js";
-import { executeTaskCmd } from "../lib/execute_task.js";
+import { executeActionCmd } from "../lib/actions/cmd.js";
+import { initAgent, marked, taskBuilder } from "../../agent.js";
+import { executeTaskCmd } from "../lib/tasks/cmd.js";
 import { readCmds } from "../sys/read_cmds.js";
-import { readTask } from "../lib/utils.js";
 import { executeWorkflowCmd } from "../lib/workflows/cmd.js";
+import { readTask } from "../sys/read_task.js";
+import { deleteFileIfExists } from "../sys/reset.js";
+import { dbPath } from "../../db/db.js";
 
 let cmds: Record<string, Cmd> = {
-    q: {
+    exit: {
         cmd: async () => process.exit(0),
         description: "exit the cli"
     },
@@ -30,20 +31,10 @@ let cmds: Record<string, Cmd> = {
         description: "read a task",
         args: "arguments: \n-task (required): the task name"
     },
-    rj: {
-        cmd: _readJobCmd,
-        description: "read a job",
-        args: "arguments: \n-job (required): the job name"
-    },
     t: {
         cmd: _executeTaskCmd,
         description: "execute a task",
         //args: "arguments: \n-task (required): the task name\n-args: prompt and other arguments if any for the task"
-    },
-    j: {
-        cmd: _executeJobCmd,
-        description: "execute a job",
-        args: "arguments: \n-job (required): the job name\n-args: arguments if any for the job"
     },
     w: {
         cmd: _executeWorkflowCmd,
@@ -59,6 +50,11 @@ let cmds: Record<string, Cmd> = {
         cmd: _updateConfCmd,
         description: "process config file",
         args: "arguments: \n-path (required): the path to the config.yml file"
+    },
+    reset: {
+        cmd: _resetDbCmd,
+        description: "reset the config database",
+        //args: "arguments: \n-path (required): the path to the config.yml file"
     },
 }
 
@@ -81,12 +77,6 @@ function initAliases(): Record<string, Cmd> {
                     //args: "arguments: \n-args: other arguments if any for the action"
                 }
                 break;
-            case "job":
-                _cmds[alias.name] = {
-                    cmd: (args: Array<string> = [], options: any) => _executeJobCmd([alias.name, ...args], options),
-                    description: "job: " + alias.name,
-                    //args: "arguments: \n-args: other arguments if any for the job"
-                }
             case "workflow":
                 _cmds[alias.name] = {
                     cmd: (args: Array<string> = [], options: any) => _executeWorkflowCmd([alias.name, ...args], options),
@@ -123,7 +113,7 @@ async function _updateConfCmd(args: Array<string> = [], options: any): Promise<a
     const { paths, pf } = await processConfPath(args[0]);
     if (pf.length > 0) {
         updatePromptfilePath(pf);
-        promptfile.value = pf;
+        promptfilePath.value = pf;
     }
     const feats = readFeaturesDirs(paths);
     //console.log("CMD FEATS", feats);
@@ -135,13 +125,13 @@ async function _updateConfCmd(args: Array<string> = [], options: any): Promise<a
     }
 }
 
-async function _readJobCmd(args: Array<string> = [], options: any): Promise<any> {
-    if (args.length == 0) {
-        console.warn("Provide a job name");
+async function _resetDbCmd(args: Array<string> = [], options: any): Promise<any> {
+    if (runMode.value == "cli") {
+        console.log("This command can not be run in cli mode")
         return
     }
-    const t = await readJob(args[0]);
-    console.log(t.data);
+    deleteFileIfExists(dbPath);
+    console.log("Config database reset ok. Run the conf command to recreate it")
 }
 
 async function _executeTaskCmd(args: Array<string> = [], options: any): Promise<any> {
@@ -150,13 +140,10 @@ async function _executeTaskCmd(args: Array<string> = [], options: any): Promise<
         console.warn("Provide a task name");
         return
     }
-    const { data, error } = await executeTaskCmd(args, options);
-    if (error) {
-        console.warn(error)
-    }
+    const res = await executeTaskCmd(args, options);
     if (formatMode.value == "markdown") {
         console.log("\n------------------\n");
-        console.log((marked.parse(data.text) as string).trim())
+        console.log((marked.parse(res.answer.text) as string).trim())
     } else {
         console.log()
     }
@@ -164,18 +151,7 @@ async function _executeTaskCmd(args: Array<string> = [], options: any): Promise<
 
     }
     //console.log("ENDRES", data);
-    return data
-}
-
-async function _executeJobCmd(args: Array<string> = [], options: any): Promise<any> {
-    if (args.length == 0) {
-        console.warn("Provide a job name");
-        return
-    }
-    const name = args.shift()!;
-    const res = await executeJobCmd(name, args, options);
     return res
-    //console.log("ENDRES", t);
 }
 
 async function _executeWorkflowCmd(args: Array<string> = [], options: any): Promise<any> {

@@ -12,10 +12,10 @@ interface FeatureSpec {
 
 interface Features {
     task: Array<{ name: string, path: string, ext: TaskExtension }>;
-    job: Array<{ name: string, path: string, ext: JobExtension }>;
     cmd: Array<{ name: string, path: string, ext: CmdExtension }>;
     action: Array<{ name: string, path: string, ext: ActionExtension }>;
     workflow: Array<{ name: string, path: string, ext: WorkflowExtension }>;
+    adaptater: Array<{ name: string, path: string, ext: AdaptaterExtension }>;
 }
 
 interface ConfigFile {
@@ -24,9 +24,16 @@ interface ConfigFile {
     plugins?: Array<string>;
 }
 
-interface NodeReturnType<T = Record<string, any>> {
-    data: T;
-    error?: Error;
+interface Settings {
+    name: string;
+    inputmode: InputMode;
+    outputmode: OutputMode;
+    runmode: RunMode;
+    formatmode: FormatMode;
+    ischatMode: boolean;
+    isdebug: boolean;
+    isverbose: boolean;
+    promptfile: string;
 }
 
 type CmdExecutor = (args: Array<string>, options: any) => Promise<any>;
@@ -36,19 +43,19 @@ type OutputMode = "txt" | "clipboard";
 type RunMode = "cli" | "cmd";
 type FormatMode = "text" | "markdown";
 
-type FeatureType = "task" | "job" | "action" | "cmd" | "workflow";
+type FeatureType = "task" | "action" | "cmd" | "workflow" | "adaptater";
+type ToolType = "task" | "action" | "cmd" | "workflow";
 type ActionExtension = "js" | "mjs" | "py" | "yml";
 type TaskExtension = "yml";
+type AdaptaterExtension = "js";
 type WorkflowExtension = "yml";
-type JobExtension = "yml";
 type CmdExtension = "js";
-type FeatureExtension = TaskExtension | JobExtension | CmdExtension | ActionExtension | WorkflowExtension;
-type AliasType = "task" | "action" | "job" | "workflow";
+type FeatureExtension = TaskExtension | CmdExtension | ActionExtension | WorkflowExtension;
+type AliasType = "task" | "action" | "workflow";
 
 export {
     Cmd,
     CmdExecutor,
-    NodeReturnType,
     InputMode,
     OutputMode,
     RunMode,
@@ -56,12 +63,14 @@ export {
     FeatureType,
     ActionExtension,
     TaskExtension,
-    JobExtension,
     WorkflowExtension,
+    AdaptaterExtension,
     CmdExtension,
     FeatureSpec,
     Features,
     ConfigFile,
     FeatureExtension,
     AliasType,
+    ToolType,
+    Settings,
 }

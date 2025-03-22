@@ -35,14 +35,14 @@ async function initCliCmds() {
     cliCmds = { ..._cmds, ..._alias }
 }
 
-async function runCmd(cmdName: string, args: Array<string> = []) {
+async function runCmd(cmdName: string, args: Array<string> = [], options: any = {}) {
     if (!(cmdName in cliCmds)) {
         console.log(`Command ${cmdName} not found`);
         return
     }
     const cmd = cliCmds[cmdName].cmd;
     //console.log("Running cmd", cmds[cmdName]);
-    await cmd(args, {});
+    await cmd(args, options);
     lastCmd.name = cmdName;
     lastCmd.args = args;
 }
@@ -55,7 +55,9 @@ async function buildCmds(): Promise<Command> {
         const cmd = program.command(name);
         const _cmd = async (args: Array<string> = [], options: any = {}): Promise<any> => {
             //console.log("CMD OPTS", options);
+            //console.log("BARGS", args);
             const _args = await setOptions(args, options);
+            //console.log("FARGS", _args, options);
             const res = await spec.cmd(_args, options);
             //console.log("RES", res);
             await processOutput(res);

@@ -1,14 +1,15 @@
 import { AgentTask, useAgentTask } from "@agent-smith/jobs";
-import { getFeatureSpec } from '../../state/features.js';
-import { FeatureType, NodeReturnType } from "../../interfaces.js";
-import { readYmlAction } from "../sys/read_yml_action.js";
-import { execute } from "../sys/execute.js";
-import { runPyScript } from "../sys/run_python.js";
-import { pyShell } from "../../state/state.js";
-import { createJsAction, parseInputOptions, processOutput } from "./utils.js";
+import { getFeatureSpec } from '../../../state/features.js';
+import { FeatureType } from "../../../interfaces.js";
+import { readYmlAction } from "../../sys/read_yml_action.js";
+import { execute } from "../../sys/execute.js";
+import { runPyScript } from "../../sys/run_python.js";
+import { pyShell } from "../../../state/state.js";
+import { processOutput } from "../utils.js";
+import { createJsAction } from "./read.js";
 
-function systemAction(path: string): AgentTask<FeatureType, Array<string>, NodeReturnType<string>> {
-    const action = useAgentTask<FeatureType, Array<string>, NodeReturnType<string>>({
+function systemAction(path: string): AgentTask<FeatureType, Array<string>, any> {
+    const action = useAgentTask<FeatureType, Array<string>, any>({
         id: "system_action",
         title: "",
         run: async (args) => {
@@ -27,8 +28,8 @@ function systemAction(path: string): AgentTask<FeatureType, Array<string>, NodeR
 
 function pythonAction(
     path: string
-): AgentTask<FeatureType, Array<string>, NodeReturnType<string | Record<string, any> | Array<any>>> {
-    const action = useAgentTask<FeatureType, Array<string>, NodeReturnType<string | Record<string, any> | Array<any>>>({
+): AgentTask<FeatureType, Array<string>> {
+    const action = useAgentTask<FeatureType, Array<string>, any>({
         id: "python_action",
         title: "",
         run: async (args) => {
@@ -43,21 +44,26 @@ function pythonAction(
             console.log("PYOUT", out);
             console.log("----------------");*/
             if (error) {
-                return { data: {}, error: error }
+                throw new Error(`python error: ${error}`)
             }
             const txt = data.join("\n");
             let final: string | Record<string, any> | Array<any> = txt;
             if (txt.startsWith("{") || txt.startsWith("[")) {
-                final = JSON.parse(final)
+                try {
+                    final = JSON.parse(txt)
+                } catch (e) { }
             }
-            const res: NodeReturnType<string | Record<string, any> | Array<any>> = { data: final }
+            const res: Record<string, any> = { data: final }
             return res
         }
     });
     return action
 }
 
-async function executeActionCmd(args: Array<string> | Record<string, any> = [], options: any = {}, quiet = false): Promise<NodeReturnType<any>> {
+async function executeActionCmd(
+    args: Array<string> | Record<string, any> = [], options: any = {}, quiet = false
+): Promise<any> {
+    //console.log("AARGS", args);
     const isWorkflow = !Array.isArray(args);
     let name: string;
     if (!isWorkflow) {
@@ -73,18 +79,14 @@ async function executeActionCmd(args: Array<string> | Record<string, any> = [], 
     if (!found) {
         throw new Error("Action not found");
     }
-    let act: AgentTask<FeatureType, any, NodeReturnType<any>>;
-    if (!["js", "mjs"].includes(ext)) {
-        if (isWorkflow) {
+    let act: AgentTask<FeatureType, any, any>;
+    /*if (isWorkflow) {
+        if (!["js"].includes(ext)) {
             throw new Error(`Action ${name} param error: ${typeof args}, ${args}`)
         }
-    }
+    }*/
     switch (ext) {
         case "js":
-            const { action } = await import(path);
-            act = action as AgentTask<FeatureType, any, NodeReturnType<any>>;
-            break;
-        case "mjs":
             const mjsa = await import(path);
             act = createJsAction(mjsa.action);
             break;
@@ -98,22 +100,24 @@ async function executeActionCmd(args: Array<string> | Record<string, any> = [], 
             throw new Error(`Action ext ${ext} not implemented`)
     }
     // options
+    /*console.log("AARGS2", args);
     const input = await parseInputOptions(options);
     if (input) {
         args.push(input)
-    }
+    }*/
     // run
     //console.log("AOPT", options);
+    //console.log("AARGS3", args);
     const res = await act.run(args, options);
     //console.log("ACT RES", res);
     if (res?.error) {
         throw res.error
     }
     if (!quiet) {
-        console.log(res.data);
+        console.log(res);
     }
     await processOutput(res);
-    return { data: res.data }
+    return res
 }
 
 export { executeActionCmd, systemAction, pythonAction };

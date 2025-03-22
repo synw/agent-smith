@@ -1,8 +1,7 @@
 import { input } from '@inquirer/prompts';
 import { chat, runCmd } from './cmd/cmds.js';
-import { lastCmd, inputMode, isChatMode } from './state/state.js';
-import { readPromptFile, setOptions } from './cmd/lib/utils.js';
-import { readClipboard } from './cmd/sys/clipboard.js';
+import { isChatMode } from './state/state.js';
+import { setOptions } from './cmd/lib/utils.js';
 import { modes } from './cmd/clicmds/modes.js';
 
 /**

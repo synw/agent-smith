@@ -25,18 +25,20 @@ async function runPyScript(
   }
 
   rsShell.on('message', function (message) {
+    //console.log("MSG", message);
     handleLine(message);
   });
-  /*rsShell.on('stderr', function (err) {
+  rsShell.on('stderr', function (err) {
     console.log("STDERR", err);
-  });*/
+  });
   rsShell.on('pythonError', function (err) {
-    console.log("PYERR", `${err.message}, ${err.traceback}`);
-    res.error = new Error(err.traceback.toString());
-    //promiseResolve(true)
+    //console.log("PYERR", `${err.message}, ${err.traceback}`);
+    res.error = new Error(`${err.traceback} ${err.message}`);
+    promiseResolve(true)
   });
   rsShell.end(function (err, code, signal) {
     //console.log("END", code, signal);
+    //console.log("DATA", res);
     promiseResolve(true);
   });
   await promise;

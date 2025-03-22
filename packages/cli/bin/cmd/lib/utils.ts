@@ -1,14 +1,14 @@
-import { AgentTask, useAgentTask } from "@agent-smith/jobs";
-import { LmTask } from "@agent-smith/lmtask";
+//import { LmTask } from "@agent-smith/lmtask";
+import { LmTask } from "../../../../lmtask/dist/interfaces.js";
 import { useTemplateForModel } from "@agent-smith/tfm";
-import { default as fs } from "fs";
-import { default as path } from "path";
-import { Cmd, FeatureType, NodeReturnType } from "../../interfaces.js";
-import { inputMode, outputMode, promptfile } from "../../state/state.js";
+import { Cmd } from "../../interfaces.js";
+import { inputMode, outputMode, promptfilePath } from "../../state/state.js";
 import { modes } from "../clicmds/modes.js";
 import { readClipboard, writeToClipboard } from "../sys/clipboard.js";
+import { readFile } from "../sys/read.js";
 
 const tfm = useTemplateForModel();
+
 async function setOptions(
     args: Array<string> = [], options: Record<string, any>,
 ): Promise<Array<string>> {
@@ -39,11 +39,7 @@ async function setOptions(
 }
 
 function readPromptFile(): string {
-    try {
-        return fs.readFileSync(promptfile.value, 'utf8');
-    } catch (e) {
-        return ""
-    }
+    return readFile(promptfilePath.value)
 }
 
 async function processOutput(res: any) {
@@ -51,17 +47,9 @@ async function processOutput(res: any) {
     let data = "";
     //console.log("Process OUTPUT", typeof res, res);
     if (typeof res == "object") {
-        let hasOutput = false;
-        if (res?.data) {
-            data = res.data;
-            hasOutput = true;
-        }
-        if (res?.text) {
-            data = res.text;
-            hasOutput = true;
-        }
-        if (!hasOutput) {
-            throw new Error(`No data in res: ${JSON.stringify(res, null, "  ")}`);
+        if (res?.answer && res?.stats) {
+            // lm task output
+            data = res.answer.text;
         }
     } else {
         data = res;
@@ -75,28 +63,6 @@ async function processOutput(res: any) {
         }
         await writeToClipboard(data);
     }
-}
-
-function readTask(taskpath: string): { found: boolean, ymlTask: string } {
-    if (!fs.existsSync(taskpath)) {
-        return { ymlTask: "", found: false }
-    }
-    const data = fs.readFileSync(taskpath, 'utf8');
-    return { ymlTask: data, found: true }
-}
-
-function readTasksDir(dir: string): Array<string> {
-    const tasks = new Array<string>();
-    fs.readdirSync(dir).forEach((filename) => {
-        const filepath = path.join(dir, filename);
-        const isDir = fs.statSync(filepath).isDirectory();
-        if (!isDir) {
-            if (filename.endsWith(".yml")) {
-                tasks.push(filename)
-            }
-        }
-    });
-    return tasks
 }
 
 function initTaskConf(conf: Record<string, any>, taskSpec: LmTask): Record<string, any> {
@@ -207,7 +173,19 @@ function initTaskVars(args: Array<any>, inferParams: Record<string, any>): { con
     //console.log("ARGS", args);
     args.forEach((a) => {
         if (a.includes("=")) {
-            const t = a.split("=");
+            //const t = a.split("=");
+            const delimiter = "=";
+            const firstDelimiterIndex = a.indexOf(delimiter);
+            let t = new Array<string>();
+            if (firstDelimiterIndex !== -1) {
+                t = [
+                    a.slice(0, firstDelimiterIndex),
+                    a.slice(firstDelimiterIndex + 1)
+                ];
+            } else {
+                t = [a]; // If no delimiter is found, the whole string is the first element
+            }
+            //console.log("VSPLIT", t);
             const k = t[0];
             const v = t[1];
             switch (k) {
@@ -249,26 +227,7 @@ async function parseInputOptions(options: any): Promise<string | null> {
     return out
 }
 
-function createJsAction(action: CallableFunction): AgentTask<FeatureType, any, NodeReturnType<any>> {
-    const task = useAgentTask<FeatureType, any, NodeReturnType<any>>({
-        id: "",
-        title: "",
-        run: async (args) => {
-            try {
-                const res = await action(args);
-                return { ok: true, data: res }
-            }
-            catch (e) {
-                const err = new Error(`Error executing action ${e}`);
-                return { ok: false, data: {}, error: err }
-            }
-        }
-    });
-    return task
-}
-
 export {
-    createJsAction,
     initTaskConf,
     initTaskParams,
     initTaskVars,
@@ -276,7 +235,5 @@ export {
     parseInputOptions,
     processOutput,
     readPromptFile,
-    readTask,
-    readTasksDir,
     setOptions
 };

@@ -1,4 +1,4 @@
-import { ActionExtension, CmdExtension, Features, JobExtension, TaskExtension, WorkflowExtension } from "../../interfaces.js";
+import { ActionExtension, AdaptaterExtension, CmdExtension, Features, TaskExtension, WorkflowExtension } from "../../interfaces.js";
 import { default as fs } from "fs";
 import { default as path } from "path";
 
@@ -22,10 +22,10 @@ function _readDir(dir: string, ext: Array<string>): Array<string> {
 function readFeaturesDir(dir: string): Features {
     const feats: Features = {
         task: [],
-        job: [],
         action: [],
         cmd: [],
-        workflow: []
+        workflow: [],
+        adaptater: [],
     }
     let dirpath = path.join(dir, "tasks");
     if (fs.existsSync(dirpath)) {
@@ -38,20 +38,6 @@ function readFeaturesDir(dir: string): Features {
                 name: name,
                 path: path.join(dirpath),
                 ext: ext as TaskExtension,
-            })
-        });
-    }
-    dirpath = path.join(dir, "jobs");
-    if (fs.existsSync(dirpath)) {
-        const data = _readDir(dirpath, [".yml"]);
-        data.forEach((filename) => {
-            const parts = filename.split(".");
-            const ext = parts.pop()!;
-            const name = parts.join("");
-            feats.job.push({
-                name: name,
-                path: path.join(dirpath),
-                ext: ext as JobExtension,
             })
         });
     }
@@ -80,6 +66,20 @@ function readFeaturesDir(dir: string): Features {
                 name: name,
                 path: path.join(dirpath),
                 ext: ext as ActionExtension,
+            })
+        });
+    }
+    dirpath = path.join(dir, "adaptaters");
+    if (fs.existsSync(dirpath)) {
+        const data = _readDir(dirpath, [".js"]);
+        data.forEach((filename) => {
+            const parts = filename.split(".");
+            const ext = parts.pop()!;
+            const name = parts.join("");
+            feats.adaptater.push({
+                name: name,
+                path: path.join(dirpath),
+                ext: ext as AdaptaterExtension,
             })
         });
     }

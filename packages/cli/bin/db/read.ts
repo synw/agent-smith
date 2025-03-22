@@ -1,4 +1,5 @@
-import { AliasType, FeatureExtension, FeatureSpec, FeatureType } from "../interfaces.js";
+import { ToolSpec } from "modprompt";
+import { AliasType, FeatureExtension, FeatureSpec, FeatureType, ToolType } from "../interfaces.js";
 import { db } from "./db.js";
 
 function readFeaturePaths(): Array<string> {
@@ -32,12 +33,12 @@ function _readFeaturesType(type: FeatureType): Record<string, string> {
 }
 
 function readFeatures(): Record<FeatureType, Record<string, string>> {
-    const feats: Record<FeatureType, Record<string, string>> = { task: {}, job: {}, action: {}, cmd: {}, workflow: {} };
+    const feats: Record<FeatureType, Record<string, string>> = { task: {}, action: {}, cmd: {}, workflow: {}, adaptater: {} };
     feats.task = _readFeaturesType("task");
-    feats.job = _readFeaturesType("job");
     feats.action = _readFeaturesType("action");
     feats.cmd = _readFeaturesType("cmd");
     feats.workflow = _readFeaturesType("workflow");
+    feats.adaptater = _readFeaturesType("adaptater");
     return feats
 }
 
@@ -68,7 +69,23 @@ function readFeature(name: string, type: FeatureType): { found: boolean, feature
     return { found: false, feature: {} as FeatureSpec }
 }
 
-function readPromptFile(): string {
+function readTool(name: string): { found: boolean, tool: ToolSpec, type: ToolType } {
+    const q = `SELECT id, name, type, spec FROM tool WHERE name='${name}'`;
+    const stmt = db.prepare(q);
+    const result = stmt.get() as Record<string, string>;
+    const tool = JSON.parse(result.spec);
+    tool["name"] = name;
+    if (result?.id) {
+        return {
+            found: true,
+            tool: tool as ToolSpec,
+            type: result.type as ToolType,
+        }
+    }
+    return { found: false, tool: {} as ToolSpec, type: "action" }
+}
+
+function readPromptFilePath(): string {
     const stmt1 = db.prepare("SELECT * FROM filepath WHERE name = ?");
     const result = stmt1.get("promptfile") as Record<string, any>;
     let res = "";
@@ -78,4 +95,12 @@ function readPromptFile(): string {
     return res
 }
 
-export { readFeatures, readFeaturePaths, readFeature, readPlugins, readAliases, readPromptFile }
+export {
+    readFeatures,
+    readFeaturePaths,
+    readFeature,
+    readPlugins,
+    readAliases,
+    readPromptFilePath,
+    readTool,
+}

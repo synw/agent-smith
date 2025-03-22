@@ -1,5 +1,5 @@
 import { Cmd } from "../../interfaces.js";
-import { formatMode, inputMode, isChatMode, isDebug, isVerbose, outputMode, runMode } from "../../state/state.js";
+import { formatMode, inputMode, isChatMode, isDebug, isShowTokens, isVerbose, outputMode, runMode } from "../../state/state.js";
 
 const modes: Record<string, Cmd> = {
     "-d": {
@@ -9,17 +9,24 @@ const modes: Record<string, Cmd> = {
         },
         description: "use debug mode",
     },
+    "-t": {
+        cmd: async () => {
+            isShowTokens.value = !isShowTokens.value;
+            if (runMode.value == "cli") { console.log("Show tokens mode is", isShowTokens.value ? "on" : "off") }
+        },
+        description: "use verbose mode",
+    },
     "-v": {
         cmd: async () => {
-            isVerbose.value = true;
-            if (runMode.value == "cli") { console.log("Verbose mode is on") }
+            isVerbose.value = !isVerbose.value;
+            if (runMode.value == "cli") { console.log("Verbose mode is", isVerbose.value ? "on" : "off") }
         },
         description: "use verbose mode",
     },
     "-c": {
         cmd: async () => {
-            isChatMode.value = true;
-            if (runMode.value == "cli") { console.log("Chat mode is on") }
+            isChatMode.value = !isChatMode;
+            if (runMode.value == "cli") { console.log("Chat mode is", isChatMode.value ? "on" : "off") }
         },
         description: "use chat mode for tasks",
     },

@@ -3,7 +3,7 @@ import { PythonShell } from 'python-shell';
 import { InputMode, RunMode, FormatMode, OutputMode } from "../interfaces.js";
 import { createConfDirIfNotExists, confDir } from "../conf.js";
 import { initDb } from "../db/db.js";
-import { readFeaturePaths, readPromptFile } from "../db/read.js";
+import { readFeaturePaths, readPromptFilePath } from "../db/read.js";
 import { updateAliases, updateFeatures } from "../db/write.js";
 import { readFeaturesDirs } from "./features.js";
 import { readPluginsPaths } from "./plugins.js";
@@ -17,7 +17,8 @@ const formatMode = ref<FormatMode>("text");
 const isChatMode = ref(false);
 const isDebug = ref(false);
 const isVerbose = ref(false);
-const promptfile = ref("");
+const isShowTokens = ref(false);
+const promptfilePath = ref("");
 
 const lastCmd = reactive<{ name: string, args: Array<string> }>({
     name: "",
@@ -41,7 +42,7 @@ async function initFeatures() {
     //console.log("STATE FEATS", feats);
     updateFeatures(feats);
     updateAliases(feats);
-    promptfile.value = readPromptFile();
+    promptfilePath.value = readPromptFilePath();
 }
 
 async function initState() {
@@ -54,12 +55,13 @@ export {
     inputMode,
     outputMode,
     isChatMode,
+    isShowTokens,
     runMode,
     formatMode,
     lastCmd,
     isDebug,
     isVerbose,
-    promptfile,
+    promptfilePath,
     initState,
     initFeatures,
     pyShell,

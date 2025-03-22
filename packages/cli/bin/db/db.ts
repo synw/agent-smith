@@ -1,7 +1,6 @@
 import DatabaseConstructor, { Database } from "better-sqlite3";
 import { schemas } from "./schemas.js";
 import path from "path";
-//import { dbPath } from "../conf.js";
 
 // @ts-ignore
 const confDir = path.join(process.env.HOME, ".config/agent-smith/cli");
@@ -10,7 +9,6 @@ let db: Database;
 
 function initDb(isVerbose = false) {
     db = new DatabaseConstructor(dbPath, { fileMustExist: false });
-    //db = new DatabaseConstructor(dbPath, { fileMustExist: false });
     schemas.forEach((s) => {
         db.exec(s);
         if (isVerbose) {
@@ -21,5 +19,6 @@ function initDb(isVerbose = false) {
 
 export {
     db,
+    dbPath,
     initDb,
 }

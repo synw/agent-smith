@@ -3,14 +3,15 @@ import { default as fs } from "fs";
 import { AgentTask } from "@agent-smith/jobs";
 import { taskBuilder } from '../../../agent.js';
 import { getFeatureSpec } from '../../../state/features.js';
-import { FeatureType, NodeReturnType } from '../../../interfaces.js';
-import { createJsAction, readTask } from '../utils.js';
-import { pythonAction, systemAction } from './../execute_action.js';
+import { FeatureType } from '../../../interfaces.js';
+import { readTask } from "../../sys/read_task.js";
+import { pythonAction, systemAction } from '../actions/cmd.js';
+import { createJsAction } from '../actions/read.js';
 
 async function _createWorkflowFromSpec(
     spec: Record<string, any>
-): Promise<Record<string, AgentTask<FeatureType, any, NodeReturnType<any>, Record<string, any>>>> {
-    const steps: Record<string, AgentTask<FeatureType, any, NodeReturnType<any>, Record<string, any>>> = {};
+): Promise<Record<string, AgentTask<FeatureType, any, any, Record<string, any>>>> {
+    const steps: Record<string, AgentTask<FeatureType, any, any, Record<string, any>>> = {};
     //console.log("Create job. Feats:", spec);
     for (const step of spec.steps) {
         const type = Object.keys(step)[0];
@@ -32,7 +33,7 @@ async function _createWorkflowFromSpec(
             switch (ext) {
                 case "js":
                     const { action } = await import(path);
-                    const at = action as AgentTask<FeatureType, any, NodeReturnType<any>>;
+                    const at = action as AgentTask<FeatureType, any, any>;
                     at.type = "action";
                     steps[name] = at;
                     break;
@@ -55,7 +56,17 @@ async function _createWorkflowFromSpec(
                 default:
                     throw new Error(`Unknown feature extension ${ext}`)
             }
-        } else {
+        } else if (type == "adaptater") {
+            const { found, path } = getFeatureSpec(name, "adaptater" as FeatureType);
+            if (!found) {
+                throw new Error(`Adaptater ${name} not found`)
+            }
+            const jsa = await import(path);
+            const act = createJsAction(jsa.action);
+            act.type = "adaptater";
+            steps[name] = act;
+        }
+        else {
             const { found, path } = getFeatureSpec(name, "task" as FeatureType);
             if (!found) {
                 throw new Error(`Task ${name} not found`)
@@ -68,7 +79,7 @@ async function _createWorkflowFromSpec(
             /*if (t?.chain) {
                 tsk.properties = { "chain": true };
             }*/
-            steps[name] = tsk as unknown as AgentTask<FeatureType, any, NodeReturnType<any>, Record<string, any>>;
+            steps[name] = tsk as unknown as AgentTask<FeatureType, any, any, Record<string, any>>;
         }
     }
     //console.log("WFNT", Object.keys(steps).length);
@@ -92,12 +103,12 @@ async function _readWorkflowFromDisk(name: string): Promise<{ found: boolean, da
 
 async function readWorkflow(
     name: string
-): Promise<{ found: boolean, workflow: Record<string, AgentTask<FeatureType, any, NodeReturnType<any>, Record<string, any>>> }> {
+): Promise<{ found: boolean, workflow: Record<string, AgentTask<FeatureType, any, any, Record<string, any>>> }> {
     const { found, ext } = getFeatureSpec(name, "workflow" as FeatureType);
     if (!found) {
         return { found: false, workflow: {} };
     }
-    let wf: Record<string, AgentTask<FeatureType, any, NodeReturnType<any>, Record<string, any>>> = {};
+    let wf: Record<string, AgentTask<FeatureType, any, any, Record<string, any>>> = {};
     switch (ext) {
         case "yml":
             const { data } = await _readWorkflowFromDisk(name);
@@ -110,11 +121,11 @@ async function readWorkflow(
                 }
                 wf = workflow;
             } catch (e) {
-                throw new Error(`Workflow create error: ${e}`)
+                throw new Error(`Workflow ${name} create error: ${e}`)
             }
             break
         default:
-            throw new Error(`Workflow extension ${ext} not implemented`)
+            throw new Error(`Workflow ${name} extension ${ext} not implemented`)
     }
     return { found: true, workflow: wf }
 }

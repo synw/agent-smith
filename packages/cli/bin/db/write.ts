@@ -1,8 +1,9 @@
+import { extractToolDoc } from "../cmd/lib/tools.js";
 import { AliasType, FeatureSpec, FeatureType, Features } from "../interfaces.js";
 import { db } from "./db.js";
 
 function updatePromptfilePath(pf: string) {
-    const deleteStmt = db.prepare("DELETE FROM featurespath WHERE path = ?");
+    const deleteStmt = db.prepare("DELETE FROM filepath WHERE name = ?");
     deleteStmt.run("promptfile");
     const stmt = db.prepare("INSERT INTO filepath (name, path) VALUES (?, ?)");
     stmt.run("promptfile", pf);
@@ -65,16 +66,12 @@ function updateAliases(feats: Features) {
     feats.action.forEach((feat) => {
         existingAliases = _updateAlias(existingAliases, feat.name, "action")
     });
-    feats.job.forEach((feat) => {
-        existingAliases = _updateAlias(existingAliases, feat.name, "job")
-    });
     feats.workflow.forEach((feat) => {
         existingAliases = _updateAlias(existingAliases, feat.name, "workflow")
     });
 }
 
-function upsertAndCleanFeatures(feats: Array<FeatureSpec>, type: FeatureType) {
-    //console.log("Upsert", type);
+function upsertAndCleanFeatures(feats: Array<FeatureSpec>, type: FeatureType): Array<FeatureSpec> {
     const stmt = db.prepare(`SELECT name FROM ${type}`);
     const rows = stmt.all() as Array<Record<string, any>>;
     const names = rows.map(row => row.name);
@@ -82,6 +79,7 @@ function upsertAndCleanFeatures(feats: Array<FeatureSpec>, type: FeatureType) {
     const availableFeatsNames = feats.map((f) => f.name);
     //console.log("NAMES", names);
     //console.log("AVAILABLE", availableFeatsNames);
+    const newFeatures = new Array<FeatureSpec>();
     names.forEach((name) => {
         //console.log(name, !availableFeatsNames.includes(name));
         if (!availableFeatsNames.includes(name)) {
@@ -89,6 +87,14 @@ function upsertAndCleanFeatures(feats: Array<FeatureSpec>, type: FeatureType) {
             const deleteStmt = db.prepare(`DELETE FROM ${type} WHERE name = ?`);
             deleteStmt.run(name);
             console.log("-", "[" + type + "]", name);
+            // check if the feature has a tool and delete if if so
+            const stmt1 = db.prepare("SELECT * FROM tool WHERE name = ?");
+            const result = stmt1.get(name) as Record<string, any>;
+            if (result?.id) {
+                const deleteStmt = db.prepare("DELETE FROM featurespath WHERE id = ?");
+                deleteStmt.run(result.id);
+                console.log("-", "[tool] from", type, ":", name);
+            }
         }
     });
     feats.forEach((feat) => {
@@ -97,16 +103,39 @@ function upsertAndCleanFeatures(feats: Array<FeatureSpec>, type: FeatureType) {
             const insertStmt = db.prepare(`INSERT INTO ${type} (name, path, ext) VALUES (?, ?, ?)`);
             insertStmt.run(feat.name, feat.path, feat.ext);
             console.log("+", "[" + type + "]", feat.name, feat.path);
+            newFeatures.push(feat)
         }
     });
+    return newFeatures
+}
+
+function upsertTool(name: string, type: FeatureType, toolDoc: string) {
+    const stmt1 = db.prepare("SELECT * FROM tool WHERE name = ?");
+    const result = stmt1.get(name) as Record<string, any>;
+    if (result?.id) {
+        return;
+    }
+    const stmt = db.prepare("INSERT INTO tool (name, spec, type) VALUES (?,?,?)");
+    stmt.run(name, toolDoc, type);
+    console.log("+", "[tool] from", type, ":", name);
 }
 
 function updateFeatures(feats: Features) {
+    //console.log("FEATS", feats);
     upsertAndCleanFeatures(feats.task, "task");
-    upsertAndCleanFeatures(feats.job, "job");
-    upsertAndCleanFeatures(feats.action, "action");
+    const newActions = upsertAndCleanFeatures(feats.action, "action");
+    if (newActions.length > 0) {
+        newActions.forEach((feat) => {
+            const { found, toolDoc } = extractToolDoc(feat.name, feat.ext, feat.path);
+            //console.log("TOOL DOC", toolDoc)
+            if (found) {
+                upsertTool(feat.name, "action", toolDoc)
+            }
+        });
+    }
     upsertAndCleanFeatures(feats.cmd, "cmd");
     upsertAndCleanFeatures(feats.workflow, "workflow");
+    upsertAndCleanFeatures(feats.adaptater, "adaptater");
 }
 
 export {
