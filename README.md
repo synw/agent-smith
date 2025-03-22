@@ -54,7 +54,7 @@ An api to create local first human friendly agents in the browser or Nodejs
     - [Config](https://synw.github.io/agent-smith/terminal_client/config)
     - [Tasks](https://synw.github.io/agent-smith/terminal_client/tasks)
     - [Actions](https://synw.github.io/agent-smith/terminal_client/actions)
-    - [Jobs](https://synw.github.io/agent-smith/terminal_client/jobs)
+    - [Workflows](https://synw.github.io/agent-smith/terminal_client/workflows)
     - [Commands](https://synw.github.io/agent-smith/terminal_client/commands)
     - [Options](https://synw.github.io/agent-smith/terminal_client/options)
      - [Plugins](https://synw.github.io/agent-smith/terminal_client/plugins)
@@ -89,7 +89,7 @@ An agent is an anthropomorphic representation of a bot. It can:
 
 | Version | Name | Description | Nodejs | Browser |
 | --- | --- | --- | --- | --- |
-| [![pub package](https://img.shields.io/npm/v/@agent-smith/body)](https://www.npmjs.com/package/@agent-smith/body) | [@agent-smith/body](https://github.com/synw/agent-smith/tree/main/packages/body) | The body | :white_check_mark: | :white_check_mark:
+| [![pub package](https://img.shields.io/npm/v/@agent-smith/body)](https://www.npmjs.com/package/@agent-smith/body) | [@agent-smith/body](https://github.com/synw/agent-smith/tree/main/packages/body) | The body | :x: | :white_check_mark:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/brain)](https://www.npmjs.com/package/@agent-smith/brain) | [@agent-smith/brain](https://github.com/synw/agent-smith/tree/main/packages/brain) | The brain | :white_check_mark: | :white_check_mark:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/jobs)](https://www.npmjs.com/package/@agent-smith/jobs) | [@agent-smith/jobs](https://github.com/synw/agent-smith/tree/main/packages/jobs) | Jobs | :white_check_mark: | :white_check_mark:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/tmem)](https://www.npmjs.com/package/@agent-smith/tmem) | [@agent-smith/tmem](https://github.com/synw/agent-smith/tree/main/packages/tmem) | Transient memory | :x: | :white_check_mark:
