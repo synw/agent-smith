@@ -53,8 +53,7 @@ function pythonAction(
                     final = JSON.parse(txt)
                 } catch (e) { }
             }
-            const res: Record<string, any> = { data: final }
-            return res
+            return final
         }
     });
     return action
