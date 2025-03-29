@@ -98,7 +98,7 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                 }
                 //console.log("TASK EXPERT", this.expert.name);
                 //const ex = this.brain.expert(expert);
-                const errors: Record<string, any> = {};
+                //const errors: Record<string, any> = {};
                 if (this.expert.lm.providerType == "ollama") {
                     if (this.expert.lm.model.name != task.model.name) {
                         //console.log("Loading model", task.model.name, task.model.ctx);
@@ -106,8 +106,7 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                     }
                 } else if (this.expert.lm.model.name != task.model.name) {
                     const err = `The ${task.model.name} model is not loaded on server (currently ${this.expert.lm.model.name})`;
-                    errors["expert_not_found"] = err;
-                    return { answer: {} as InferenceResult, toolUsed: null, errors: errors }
+                    throw new Error(err)
                 }
                 const tpl = new PromptTemplate(task.model.template);
                 const ip = task?.inferParams ? task.inferParams as Record<string, any> : {};
@@ -222,7 +221,7 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                                 errMsg = `tool call does not includes a name in it's response:\n${toolCall}`;
                                 continue
                             }
-                            const tool = task.tools.find((t) => t.name = toolCall.name);
+                            const tool = task.tools.find((t) => t.name === toolCall.name);
                             if (!tool) {
                                 errMsg = `wrong tool call ${task.name} from the model: it does not exist in ${tpl.name}:\n${toolCall}`;
                                 continue
@@ -251,11 +250,11 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                             });
                             answer = await this.expert.think(tpl.prompt(pr), { ...ip, stream: true }, { skipTemplate: true });
                         } else {
-                            console.log("Error:", errMsg)
+                            throw new Error(errMsg)
                         }
                     }
                 }
-                return { answer: answer, toolUsed: toolUsed, errors: errors }
+                return { answer: answer, toolUsed: toolUsed, errors: {} }
             },
             abort: async (): Promise<void> => {
                 if (!this.expert) {
