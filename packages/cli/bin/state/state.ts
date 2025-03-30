@@ -19,6 +19,7 @@ const isDebug = ref(false);
 const isVerbose = ref(false);
 const isShowTokens = ref(false);
 const promptfilePath = ref("");
+const isStateReady = ref(false);
 
 const lastCmd = reactive<{ name: string, args: Array<string> }>({
     name: "",
@@ -30,10 +31,13 @@ function initConf() {
     if (!exists) {
         console.log("Created configuration directory", confDir);
     }
+    //console.log("INIT DB");
     initDb();
+    //console.log("END INIT DB");
 }
 
 async function initFeatures() {
+    //console.log("INIT FEATURES");
     const fp = readFeaturePaths();
     const pp = await readPluginsPaths();
     const p = [...fp, ...pp];
@@ -46,8 +50,13 @@ async function initFeatures() {
 }
 
 async function initState() {
+    if (isStateReady.value) {
+        return
+    }
+    //sconsole.log("INIT STATE");
     initConf();
-    await initFeatures()
+    await initFeatures();
+    isStateReady.value=true;
     //console.log("State ready, available features:", readFeatures())
 }
 

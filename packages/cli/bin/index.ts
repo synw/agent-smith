@@ -9,6 +9,7 @@ async function main() {
     if (argv.length == 2) {
         runMode.value = "cli";
     }
+    //console.log("START")
     await initState();
     await initAgent();
     switch (runMode.value) {
