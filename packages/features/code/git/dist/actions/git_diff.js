@@ -20,7 +20,7 @@ async function action(args) {
     }
     //console.log("Next params:", nextParams);
     const res = { prompt: msg, ...nextParams };
-    //console.log("TR", res)
+    //console.log("GIT DIFF RES", res)
     return res
 }
 

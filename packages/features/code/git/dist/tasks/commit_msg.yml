@@ -8,7 +8,7 @@ prompt: |-
       ```
 
       Avoid signing the commmit. Important: output only the commit message, no other comments.
-      Think carefully before you write your commit message.
+      Think carefully before you write your commit message.{instructions}
 
 template: 
     system: |- 
@@ -22,15 +22,16 @@ template:
         - Use bullet points for multiple changes
         - Tone: concise and professional
         
-        If there are no changes or the input is blank then return a blank string    
+        If there are no changes or the input is blank then return a blank string. If there are changes
+        sort them by importance. Alway mention all the changes.
         This is the output format that we need:
 
         ```text
         A descriptive summary of the main purpose of the changes
         
-        - A short description of the first change 
-        - A short description of the second change
-        ```
+        - A short description of the first change (most important)
+        - A short description of the second change (less important than the first)s
+        ```        
     stop:
         - |-
             ```
@@ -44,14 +45,16 @@ model:
     ctx: 32768
     template: mistral-system
 models:
-    small:
+    8b:
         name: "llama3.1:latest"
         ctx: 32768
         template: llama3
-    medium:
-        name: Mistral-Small-24B-Instruct-2501-Q5_K_L
-        ctx: 32768
-        template: mistral-system
 inferParams:
+    top_p: 1
+    top_k: 0
     min_p: 0.05
-    temperature: 0.1
+    temperature: 0.2
+    max_tokens: 4096
+variables:
+    optional:
+        - instructions

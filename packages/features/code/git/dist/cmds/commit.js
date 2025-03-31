@@ -42,6 +42,8 @@ async function runCmd(args = [], options) {
     for (const arg of args) {
         if (arg.startsWith("msg=")) {
             wf = "git_commit_details";
+        } else if (arg.startsWith("pkg=")) {
+            wf = "git_commit_pkg";
         } else if (arg.includes("=")) {
             continue
         } else {
@@ -50,9 +52,10 @@ async function runCmd(args = [], options) {
     }
     console.log("Generating a commit message ...");
     const res = await executeWorkflowCmd(wf, args, options);
+    //console.log("RES", res);
     if ("error" in res) {
         console.log(res);
-        throw new Error(`Job execution error: ${res.error}`)
+        throw new Error(`wokflow ${wf} execution error: ${res.error}`)
     }
     //console.log("JOB RES", res);
     const final = res.answer.text.replace("```", "").trim();
