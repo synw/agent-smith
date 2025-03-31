@@ -7,11 +7,11 @@ model:
     ctx: 32768
     template: chatml
 models:
-    small:
+    3b:
         name: granite3.2-vision:2b-q8_0
         ctx: 32768
         template: phi3
-    medium:
+    11b:
         name: llama3.2-vision:latest
         ctx: 32768
         template: llama3

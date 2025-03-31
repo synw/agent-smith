@@ -13,7 +13,9 @@ async function getImageBuffer(imagePath) {
     }
 }
 
-async function action(args) {
+async function action(args, conf) {
+    //console.log("ARGS", args);
+    //console.log("CONF", conf);
     if (args.length < 1) {
         throw new Error("Provide an image path")
     }
@@ -31,7 +33,15 @@ async function action(args) {
         } else {
             if (arg.includes("=")) {
                 const as = arg.split("=");
-                nextArgs[as[0]] = as[1]
+                let name = as[0];
+                if (name=="s") {
+                    name = "size"
+                } else if (name=="m") {
+                    name ="model"
+                } else if (name=="ip") {
+                    name ="inferenceParams"
+                }
+                nextArgs[name] = as[1]                
             } else {
                 let txt;
                 try {

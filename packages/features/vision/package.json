@@ -1,19 +1,10 @@
 {
   "name": "@agent-smith/feat-vision",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Vision features for Agent Smith cli",
   "repository": "https://github.com/synw/agent-smith",
   "dependencies": {
-    "@agent-smith/cli": "^0.0.32",
     "@locallm/api": "^0.2.0"
-  },
-  "devDependencies": {
-    "@commander-js/extra-typings": "^13.1.0",
-    "@locallm/types": "^0.1.5",
-    "@types/node": "^22.13.5",
-    "ts-node": "^10.9.2",
-    "tslib": "2.8.1",
-    "typescript": "^5.7.3"
   },
   "type": "module",
   "files": [
