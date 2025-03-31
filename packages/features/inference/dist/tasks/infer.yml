@@ -2,26 +2,11 @@ name: infer
 description: Run a raw inference query
 prompt: |-
     {prompt}
-model:
-    name: mistral-small:latest
-    ctx: 16384
-    template: mistral
-models:
-    medium-code:
-        name: Qwen2.5-Coder-32B-Instruct-IQ4_XS
-        ctx: 32768
-        template: chatml
-    xsmall:
-        name: granite3.2:2b-instruct-q8_0
-        ctx: 32768
-        template: granite
-    small:
-        name: qwen2.5:3b-instruct-q8_0
-        ctx: 32768
-        template: chatml
+modelset: 
+  name: inference
+  default: 4b
 inferParams:
-    top_k: 0
-    top_p: 1.0
-    min_p: 0.05
-    temperature: 0.2
-    max_tokens: 16384
+  top_p: 1
+  top_k: 0
+  min_p: 0.05
+  temperature: 0.5

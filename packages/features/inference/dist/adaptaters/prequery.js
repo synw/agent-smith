@@ -13,6 +13,7 @@ async function action(args) {
             buf.push(arg);
         }
     });
+    //console.log("NA", nextArgs);
     const res = { prompt: buf.join(" "), ...nextArgs };
     return res;
 }
