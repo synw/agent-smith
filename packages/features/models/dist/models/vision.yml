@@ -1,0 +1,11 @@
+ctx: 32768
+max_tokens: 8192
+granite2b:
+    name: granite3.2-vision:2b-q8_0
+    template: phi3
+llama3:
+    name: llama3.2-vision:latest
+    template: llama3
+minicpm:
+    name: minicpm-v:8b-2.6-q8_0
+    template: chatml

@@ -1,0 +1,20 @@
+ctx: 32768
+max_tokens: 16384
+granite2b:
+  name: granite3.2:2b-instruct-q8_0
+  template: granite
+qwen3b:
+  name: qwen2.5:3b-instruct-q8_0
+  template: chatml
+llama3b:
+  name: llama3.2:3b-instruct-q8_0
+  template: llama3
+phi4b:
+  name: phi4-mini:3.8b-q8_0
+  template: phi4
+nemotron4b:
+  name: nemotron-mini:4b-instruct-q8_0
+  template: nemotron
+gemma4b:
+  name: gemma3:4b-it-q8_0
+  template: gemma

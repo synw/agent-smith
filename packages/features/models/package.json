@@ -1,0 +1,15 @@
+{
+  "name": "@agent-smith/feat-models",
+  "version": "0.0.2",
+  "description": "Language models sets for the Agent Smith cli",
+  "repository": "https://github.com/synw/agent-smith",
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "license": "MIT"
+}
