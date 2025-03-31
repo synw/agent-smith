@@ -1,6 +1,6 @@
 import YAML from 'yaml';
 import { Cmd, FeatureType } from "../../interfaces.js";
-import { formatMode, isChatMode, isDebug, promptfilePath, runMode } from "../../state/state.js";
+import { formatMode, isChatMode, promptfilePath, runMode } from "../../state/state.js";
 import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
 import { readAliases, readFeatures } from "../../db/read.js";
 import { cleanupFeaturePaths, updateAliases, updateFeatures, updatePromptfilePath } from "../../db/write.js";
@@ -23,29 +23,14 @@ let cmds: Record<string, Cmd> = {
         cmd: async () => pingCmd(["verbose"], undefined),
         description: "ping inference servers",
     },
-    lt: {
+    tasks: {
         cmd: _listTasksCmd,
         description: "list all the tasks"
     },
-    rt: {
+    task: {
         cmd: _readTaskCmd,
         description: "read a task",
         args: "arguments: \n-task (required): the task name"
-    },
-    t: {
-        cmd: _executeTaskCmd,
-        description: "execute a task",
-        //args: "arguments: \n-task (required): the task name\n-args: prompt and other arguments if any for the task"
-    },
-    w: {
-        cmd: _executeWorkflowCmd,
-        description: "execute a workflow",
-        args: "arguments: \n-workflow (required): the workflow name\n-args: arguments if any for the workflow"
-    },
-    a: {
-        cmd: executeActionCmd,
-        description: "execute an action",
-        args: "arguments: \n-action (required): the task name\n-args: other arguments if any for the action"
     },
     conf: {
         cmd: _updateConfCmd,
