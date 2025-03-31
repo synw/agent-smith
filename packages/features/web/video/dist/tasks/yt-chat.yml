@@ -8,47 +8,9 @@ prompt: |-
     ```
 
     {instructions}
-model:
-    name: llama3.2:3b-instruct-q8_0
-    ctx: 32768
-    template: llama3
-models:
-    smallthink:
-        name: deepscaler:1.5b-preview-q8_0
-        ctx: 32768
-        template: deepseek3
-    largethink:
-        name: Qwen_QwQ-32B-IQ4_XS # Koboldcpp
-        ctx: 32768
-        template: chatml
-    xxxsmall:
-        name: llama3.2:1b-instruct-q8_0
-        ctx: 32768
-        template: llama3
-    xxsmall:
-        name: qwen2.5:1.5b-instruct-q8_0
-        ctx: 32768
-        template: chatml
-    xsmall:
-        name: qwen2.5:3b-instruct-q8_0
-        ctx: 32768
-        template: chatml
-    small:
-        name: command-r7b:latest
-        ctx: 32768
-        template: command-r
-    medium:
-        name: mistral-nemo:12b-instruct-2407-q8_0
-        ctx: 32768
-        template: mistral
-    xmedium:
-        name: phi4:latest
-        ctx: 32768
-        template: phi4
-    xxmedium:
-        name: mistral-small:latest
-        ctx: 32768
-        template: mistral
+modelset:
+    name: inference
+    default: 3b
 inferParams:
     max_tokens: 8192
     top_k: 0.0
