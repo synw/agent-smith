@@ -1,3 +1,4 @@
+import YAML from 'yaml';
 import { Cmd, FeatureType } from "../../interfaces.js";
 import { formatMode, isChatMode, isDebug, promptfilePath, runMode } from "../../state/state.js";
 import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
@@ -100,7 +101,7 @@ async function initCmds(): Promise<Record<string, Cmd>> {
 }
 
 async function pingCmd(args: Array<string> = [], options: any): Promise<boolean> {
-    const isUp = await initAgent(isDebug.value);
+    const isUp = await initAgent();
     //console.log(brain.backends);
     return isUp
 }
@@ -175,12 +176,14 @@ async function _readTaskCmd(args: Array<string> = [], options: any): Promise<any
         console.warn(`FeatureType ${args[0]} not found`)
         return
     }
+    //console.log("RT", path)
     const res = readTask(path);
     if (!res.found) {
         throw new Error(`Task ${args[0]}, ${path} not found`)
     }
     const ts = taskBuilder.readFromYaml(res.ymlTask);
-    console.log(JSON.stringify(ts, null, "  "));
+    console.log(YAML.stringify(ts))
+    //console.log(JSON.stringify(ts, null, "  "));
 }
 
 async function _listTasksCmd(args: Array<string> = [], options: any): Promise<any> {

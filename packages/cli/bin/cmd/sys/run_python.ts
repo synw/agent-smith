@@ -1,4 +1,3 @@
-import { NodeReturnType } from '../../interfaces.js';
 import { Options, PythonShell } from 'python-shell';
 
 async function runPyScript(
@@ -6,7 +5,7 @@ async function runPyScript(
   pythonPath: string,
   scriptPath: string,
   scriptArgs: Array<string>,
-  onEmitLine?: CallableFunction): Promise<NodeReturnType<Array<string>>> {
+  onEmitLine?: CallableFunction): Promise<{ data: any, error?: Error }> {
   const _options: Options = {
     mode: "text",
     pythonPath: pythonPath,
@@ -16,7 +15,7 @@ async function runPyScript(
   let promiseResolve: (value: unknown) => void;
   let promise = new Promise((resolve) => promiseResolve = resolve);
   rsShell = new PythonShell(scriptPath, _options);
-  const res: NodeReturnType<Array<string>> = { data: new Array<string>() };
+  const res: { data: any, error?: Error } = { data: new Array<string>() };
   function handleLine(msg: string) {
     if (onEmitLine) {
       onEmitLine(msg);

@@ -4,6 +4,7 @@ import { LmTaskBuilder } from "@agent-smith/lmtask";
 import { MarkedExtension, marked } from 'marked';
 import { markedTerminal } from "marked-terminal";
 import { FeatureType } from "./interfaces.js";
+import { isDebug } from "./state/state.js";
 
 marked.use(markedTerminal() as MarkedExtension);
 
@@ -19,18 +20,21 @@ async function initExperts() {
     });
 }
 
-async function initAgent(isVerbose = false): Promise<boolean> {
+async function initAgent(): Promise<boolean> {
     if (!brain.state.get().isOn) {
         brain.resetExperts();
         //console.log("Init", isVerbose);
-        await brain.initLocal(true, isVerbose);
+        await brain.initLocal(true);
         await initExperts();
         //console.log("Backends:", brain.backends.map(x => x.name));
         //console.log("Experts:", brain.experts.map(x => x.name));
         //console.log("Bfm:", brain.backendsForModels);
     }
     const brainUp = brain.state.get().isOn;
-    if (isVerbose) {
+    if (!brainUp) {
+        console.log("❌ No backends found for inference");
+    }
+    /*if (isDebug.value) {
         if (!brainUp) {
             console.log("❌ No backends found for inference");
         }
@@ -44,7 +48,7 @@ async function initAgent(isVerbose = false): Promise<boolean> {
                 }
             })
         }
-    }
+    }*/
     return brainUp
 }
 

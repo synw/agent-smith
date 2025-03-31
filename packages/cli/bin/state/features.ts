@@ -10,6 +10,7 @@ function readFeaturesDirs(featuresPaths: Array<string>): Features {
         cmd: [],
         workflow: [],
         adaptater: [],
+        modelset: [],
     };
     featuresPaths.forEach((dir: string) => {
         //console.log("Reading feats in", dir);
@@ -19,6 +20,7 @@ function readFeaturesDirs(featuresPaths: Array<string>): Features {
         _f.cmd.forEach((item) => feats.cmd.push(item));
         _f.workflow.forEach((item) => feats.workflow.push(item));
         _f.adaptater.forEach((item) => feats.adaptater.push(item));
+        _f.modelset.forEach((item) => feats.modelset.push(item));
     });
     return feats
 }

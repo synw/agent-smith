@@ -2,12 +2,13 @@ import { brain, initAgent, taskBuilder } from "../../../agent.js";
 import { getFeatureSpec } from "../../../state/features.js";
 import { FeatureType } from "../../../interfaces.js";
 import { isChatMode, isDebug, isShowTokens, isVerbose } from "../../../state/state.js";
-import { initTaskConf, initTaskParams, initTaskVars, parseInputOptions } from "../utils.js";
+import { formatStats, initTaskConf, initTaskParams, initTaskVars, parseInputOptions } from "../utils.js";
 import { readTask } from "../../sys/read_task.js";
-import { readTool } from "../../../db/read.js";
-import { LmTaskOutput, LmTaskToolSpec } from "@agent-smith/lmtask";
+import { readFeature, readTool } from "../../../db/read.js";
+import { LmTask, LmTaskBuilder, LmTaskOutput, LmTaskToolSpec } from "../../../../../lmtask/dist/main.js";
 import { executeActionCmd, } from "../actions/cmd.js";
 import { executeWorkflowCmd } from "../workflows/cmd.js";
+import { readModelsFile } from "../../../cmd/sys/read_models.js";
 
 
 async function executeTaskCmd(
@@ -59,7 +60,51 @@ async function executeTaskCmd(
     if (!res.found) {
         throw new Error(`Task ${name}, ${path} not found`)
     }
-    const taskSpec = taskBuilder.readFromYaml(res.ymlTask);
+    const taskRawSpec = taskBuilder.readSpecFromYaml(res.ymlTask);
+    let taskSpec: LmTask;
+    // modelset
+    let defaultCtx: number;
+    if (taskRawSpec?.modelset) {
+        const modelsFeat = readFeature(taskRawSpec.modelset.name, "modelset");
+        if (!modelsFeat.found) {
+            throw new Error(`modelset feature ${taskRawSpec.modelset.name} not found in conf db`)
+        }
+        const { found, ctx, max_tokens, models } = readModelsFile(
+            modelsFeat.feature.path + "/" + modelsFeat.feature.name + "." + modelsFeat.feature.ext
+        );
+        if (!found) {
+            throw new Error(`modelset ${taskRawSpec.modelset.name} not found`)
+        }
+        defaultCtx = ctx;
+        for (const [k, v] of Object.entries(models)) {
+            if (!v?.ctx) {
+                v.ctx = ctx;
+                models[k] = v;
+            }
+        }
+        taskRawSpec.model = models[taskRawSpec.modelset.default];
+        if (!taskRawSpec.model) {
+            throw new Error(`model ${taskRawSpec.modelset.default} not found`)
+        }
+        if (!taskRawSpec.model?.ctx) {
+            taskRawSpec.model.ctx = ctx
+        }
+        if (!taskRawSpec?.inferParams?.max_tokens) {
+            if (!taskRawSpec?.inferParams) {
+                taskRawSpec.inferParams = {}
+            }
+            taskRawSpec.inferParams.max_tokens = max_tokens;
+        }
+        taskRawSpec.models = models;
+        taskSpec = LmTaskBuilder.fromRawSpec(taskRawSpec);
+    } else {
+        taskSpec = taskRawSpec as LmTask;
+        if (!taskSpec.model?.ctx) {
+            throw new Error(`provide a ctx parameter in the task default model`)
+        }
+        defaultCtx = taskSpec.model.ctx;
+    }
+    //console.log("TASK SPEC", taskSpec);
     if (taskSpec.toolsList) {
         taskSpec.tools = []
         for (const toolName of taskSpec.toolsList) {
@@ -104,7 +149,7 @@ async function executeTaskCmd(
         conf = tv.conf;
         vars = tv.vars;
     }
-    conf = initTaskConf(conf, taskSpec);
+    conf = initTaskConf(conf, taskSpec, defaultCtx);
     if (isDebug.value) {
         console.log("Task conf:", conf);
         console.log("Task vars:", vars);
@@ -146,8 +191,8 @@ async function executeTaskCmd(
         }
         brain.ex.template.pushToHistory({ user: pr, assistant: out.answer.text });
     }
-    if (isDebug.value) {
-        console.log("\n", out.answer.stats)
+    if (isDebug.value || isVerbose.value) {
+        console.log("\n", formatStats(out.answer.stats))
     }
     return out
 }

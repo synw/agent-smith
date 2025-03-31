@@ -2,17 +2,17 @@
   "name": "@agent-smith/cli",
   "description": "Agent Smith: terminal client for language model agents",
   "repository": "https://github.com/synw/agent-smith",
-  "version": "0.0.42",
+  "version": "0.0.43",
   "scripts": {
     "buildrl": "rm -rf dist/* && rollup -c",
-    "build": "rm -rf dist/* && tsc --noCheck",
+    "build": "rm -rf dist/* && tsc",
     "cli": "node --loader ts-node/esm bin/index.ts",
     "watch": "tsc --noCheck -p . -w"
   },
   "dependencies": {
     "@agent-smith/brain": "^0.0.41",
     "@agent-smith/jobs": "^0.0.14",
-    "@agent-smith/lmtask": "^0.0.34",
+    "@agent-smith/lmtask": "^0.0.35",
     "@agent-smith/tfm": "^0.1.2",
     "@inquirer/prompts": "^7.4.0",
     "@inquirer/select": "^4.1.0",

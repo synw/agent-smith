@@ -16,6 +16,7 @@ interface Features {
     action: Array<{ name: string, path: string, ext: ActionExtension }>;
     workflow: Array<{ name: string, path: string, ext: WorkflowExtension }>;
     adaptater: Array<{ name: string, path: string, ext: AdaptaterExtension }>;
+    modelset: Array<{ name: string, path: string, ext: ModelsetExtension }>;
 }
 
 interface ConfigFile {
@@ -43,13 +44,14 @@ type OutputMode = "txt" | "clipboard";
 type RunMode = "cli" | "cmd";
 type FormatMode = "text" | "markdown";
 
-type FeatureType = "task" | "action" | "cmd" | "workflow" | "adaptater";
+type FeatureType = "task" | "action" | "cmd" | "workflow" | "adaptater" | "modelset";
 type ToolType = "task" | "action" | "cmd" | "workflow";
 type ActionExtension = "js" | "mjs" | "py" | "yml";
 type TaskExtension = "yml";
 type AdaptaterExtension = "js";
 type WorkflowExtension = "yml";
 type CmdExtension = "js";
+type ModelsetExtension = "yml";
 type FeatureExtension = TaskExtension | CmdExtension | ActionExtension | WorkflowExtension;
 type AliasType = "task" | "action" | "workflow";
 
@@ -66,6 +68,7 @@ export {
     WorkflowExtension,
     AdaptaterExtension,
     CmdExtension,
+    ModelsetExtension,
     FeatureSpec,
     Features,
     ConfigFile,

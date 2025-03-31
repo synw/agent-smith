@@ -136,6 +136,7 @@ function updateFeatures(feats: Features) {
     upsertAndCleanFeatures(feats.cmd, "cmd");
     upsertAndCleanFeatures(feats.workflow, "workflow");
     upsertAndCleanFeatures(feats.adaptater, "adaptater");
+    upsertAndCleanFeatures(feats.modelset, "modelset");
 }
 
 export {

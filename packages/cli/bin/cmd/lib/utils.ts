@@ -1,11 +1,12 @@
-//import { LmTask } from "@agent-smith/lmtask";
-import { LmTask } from "../../../../lmtask/dist/interfaces.js";
+import { LmTask } from "@agent-smith/lmtask";
+//import { LmTask } from "../../../../lmtask/dist/interfaces.js";
 import { useTemplateForModel } from "@agent-smith/tfm";
 import { Cmd } from "../../interfaces.js";
 import { inputMode, outputMode, promptfilePath } from "../../state/state.js";
 import { modes } from "../clicmds/modes.js";
 import { readClipboard, writeToClipboard } from "../sys/clipboard.js";
 import { readFile } from "../sys/read.js";
+import { InferenceStats } from "@locallm/types/dist/interfaces.js";
 
 const tfm = useTemplateForModel();
 
@@ -65,11 +66,14 @@ async function processOutput(res: any) {
     }
 }
 
-function initTaskConf(conf: Record<string, any>, taskSpec: LmTask): Record<string, any> {
+function initTaskConf(conf: Record<string, any>, taskSpec: LmTask, defaultCtx: number): Record<string, any> {
     const _conf = conf;
     let m = taskSpec.model.name;
     let t: string = taskSpec.model.template;
-    let c = taskSpec.model.ctx;
+    let c = taskSpec.model?.ctx ?? defaultCtx;
+    let ip = conf.inferParams;
+    let system = taskSpec.model?.system;
+    let assistant = taskSpec.model?.assistant;
     if (conf?.model) {
         m = conf.model;
         if (conf?.template) {
@@ -91,7 +95,15 @@ function initTaskConf(conf: Record<string, any>, taskSpec: LmTask): Record<strin
             }
             m = taskSpec.models[conf.size].name;
             t = taskSpec.models[conf.size].template;
-            c = taskSpec.models[conf.size].ctx;
+            c = taskSpec.models[conf.size]?.ctx ?? defaultCtx;
+            if (taskSpec.models[conf.size]?.inferParams) {
+                const tip = taskSpec.models[conf.size].inferParams as Record<string, any>;
+                for (const [k, v] of Object.entries(tip)) {
+                    ip[k] = v;
+                }
+            }
+            system = taskSpec.models[conf.size]?.system;
+            assistant = taskSpec.models[conf.size]?.assistant;
         }
     }
     _conf.model = {
@@ -99,9 +111,17 @@ function initTaskConf(conf: Record<string, any>, taskSpec: LmTask): Record<strin
         template: t,
         ctx: c,
     };
+    if (system) {
+        _conf.model.system = system;
+    }
+    if (assistant) {
+        _conf.model.assistant = assistant
+    }
+    _conf.inferParams = ip;
     if (_conf?.template) {
         delete conf.template
     }
+    //console.log("CONF", _conf);
     return _conf
 }
 
@@ -227,6 +247,15 @@ async function parseInputOptions(options: any): Promise<string | null> {
     return out
 }
 
+function formatStats(stats: InferenceStats): string {
+    const buf = new Array<string>();
+    buf.push(`${stats.tokensPerSecond} tps`);
+    buf.push(`- ${stats.totalTimeSeconds}s`);
+    buf.push(`(${stats.ingestionTimeSeconds}s ingestion /`);
+    buf.push(`${stats.inferenceTimeSeconds}s inference)`);
+    return buf.join(" ")
+}
+
 export {
     initTaskConf,
     initTaskParams,
@@ -235,5 +264,6 @@ export {
     parseInputOptions,
     processOutput,
     readPromptFile,
-    setOptions
+    setOptions,
+    formatStats,
 };
