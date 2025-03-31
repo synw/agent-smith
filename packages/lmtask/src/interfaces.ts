@@ -6,8 +6,16 @@ import { ToolSpec } from "modprompt/dist/interfaces";
 
 interface ModelSpec {
   name: string;
-  ctx: number;
   template: string;
+  ctx?: number;
+  system?: string;
+  assistant?: string;
+  inferParams?: InferenceParams;
+}
+
+interface ModelSet {
+  name: string;
+  default: string;
 }
 
 /**
@@ -60,6 +68,19 @@ interface TemplateSpec {
   assistant?: string;
 }
 
+interface BaseLmTask {
+  name: string;
+  description: string;
+  prompt: string;
+  template?: TemplateSpec;
+  inferParams?: InferenceParams;
+  models?: Record<string, ModelSpec>;
+  shots?: Array<TurnBlock>;
+  variables?: { required?: Array<string>; optional?: Array<string> };
+  tools?: Array<LmTaskToolSpec>;
+  toolsList?: Array<string>;
+}
+
 /**
  * Represents a language model task configuration.
  *
@@ -81,18 +102,13 @@ interface TemplateSpec {
  *   model: { name: "llama", ctx: 2048, template: "default" },
  * };
  */
-interface LmTask {
-  name: string;
-  description: string;
-  prompt: string;
+interface LmTask extends BaseLmTask {
   model: ModelSpec;
-  template?: TemplateSpec;
-  inferParams?: InferenceParams;
-  models?: Record<string, ModelSpec>;
-  shots?: Array<TurnBlock>;
-  variables?: { required?: Array<string>; optional?: Array<string> };
-  tools?: Array<LmTaskToolSpec>;
-  toolsList?: Array<string>;
+}
+
+interface LmTaskSpec extends BaseLmTask {
+  model?: ModelSpec;
+  modelset?: ModelSet;
 }
 
 interface LmTaskToolSpec extends ToolSpec {
@@ -107,8 +123,10 @@ interface LmTaskOutput {
 
 export {
   ModelSpec,
+  ModelSet,
   LmTaskInput,
   LmTask,
+  LmTaskSpec,
   TemplateSpec,
   LmTaskConf,
   LmTaskToolSpec,

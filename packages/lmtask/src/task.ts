@@ -3,8 +3,7 @@ import { AgentBrain, LmExpert } from "@agent-smith/brain";
 import { AgentTask, AgentTaskSpec, useAgentTask } from "@agent-smith/jobs";
 import { PromptTemplate } from "modprompt";
 import { useTemplateForModel } from "@agent-smith/tfm";
-import { LmTask, LmTaskConf, LmTaskInput, LmTaskOutput, ModelSpec } from "./interfaces.js";
-import { InferenceResult } from '@locallm/types';
+import { LmTask, LmTaskConf, LmTaskInput, LmTaskOutput, LmTaskSpec, ModelSpec } from "./interfaces.js";
 
 const tfm = useTemplateForModel();
 
@@ -21,9 +20,25 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
         return data
     }
 
+    readSpecFromYaml(txt: string): LmTaskSpec {
+        const data = YAML.parse(txt);
+        return data
+    }
+
     fromYaml(txt: string, type?: T, autoCreateExpert = true): AgentTask<T, LmTaskInput, LmTaskOutput, P> {
         const data = YAML.parse(txt);
         return this.init(data, type, autoCreateExpert);
+    }
+
+    static fromRawSpec(spec: LmTaskSpec): LmTask {
+        if (spec?.modelset) {
+            delete spec.modelset
+        }
+        if (!spec?.model) {
+            throw new Error("provide a model")
+        }
+        //console.log("TS", spec)
+        return spec as LmTask
     }
 
     init(task: LmTask, type?: T, autoCreateExpert = true): AgentTask<T, LmTaskInput, LmTaskOutput, P> {
@@ -110,8 +125,12 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                 }
                 const tpl = new PromptTemplate(task.model.template);
                 const ip = task?.inferParams ? task.inferParams as Record<string, any> : {};
-                if (task?.inferParams) {
-                    task.inferParams.stop = tpl?.stop ?? [];
+                if (!ip?.stop) {
+                    ip.stop = tpl?.stop ?? [];
+                } else {
+                    if (tpl?.stop) {
+                        ip.stop.push(tpl.stop);
+                    }
                 }
                 if (task?.template) {
                     if (task.template?.system) {
@@ -127,6 +146,25 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                         ip.stop.push(...task.template.stop);
                     }
                 }
+                // model overrides
+                if (task.model?.system) {
+                    tpl.replaceSystem(task.model.system)
+                }
+                if (task.model?.assistant) {
+                    tpl.afterAssistant(task.model.assistant)
+                }
+                if (task.model?.inferParams) {
+                    for (const [k, v] of Object.entries(task.model.inferParams)) {
+                        ip[k] = v
+                    }
+                }
+                // override infer params
+                if (conf?.inferParams) {
+                    for (const [k, v] of Object.entries(conf.inferParams)) {
+                        ip[k] = v
+                    }
+                }
+                // shots
                 if (task?.shots) {
                     task.shots.forEach((s) => {
                         //console.log("** SHOT", s);
@@ -177,16 +215,10 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                 }
                 if (this.expert.lm.providerType == "ollama") {
                     // tell Ollama to apply no template
-                    if (!task?.inferParams?.extra) {
+                    if (!task.inferParams?.extra) {
                         ip["extra"] = { "raw": true }
                     } else {
                         ip["extra"]["raw"] = true
-                    }
-                }
-                // override infer params
-                if (conf?.inferParams) {
-                    for (const [k, v] of Object.entries(conf.inferParams)) {
-                        ip[k] = v
                     }
                 }
                 //console.log("THINK")
