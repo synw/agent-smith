@@ -172,7 +172,9 @@ async function _readTaskCmd(args: Array<string> = [], options: any): Promise<any
 }
 
 async function _listTasksCmd(args: Array<string> = [], options: any): Promise<any> {
-    Object.keys(readFeatures().task).forEach((t) => console.log("-", t));
+    const ts = Object.keys(readFeatures().task).sort();
+    //.forEach((t) => console.log("-", t))
+    console.table(ts)
 }
 
 export { cmds, initCmds, pingCmd, initAliases }

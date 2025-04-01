@@ -52,6 +52,7 @@ async function buildCmds(): Promise<Command> {
     const aliases = initAliases();
     const excmds = await initCmds();
     for (const [name, spec] of Object.entries({ ...cmds, ...excmds, ...aliases })) {
+        //console.log("N", name, "S", spec);
         const cmd = program.command(name);
         const _cmd = async (args: Array<string> = [], options: any = {}): Promise<any> => {
             //console.log("CMD OPTS", options);

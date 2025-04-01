@@ -22,6 +22,9 @@ async function readCmds(dir: string): Promise<Record<string, Cmd>> {
     const fileNames = _readCmdsDir(dir);
     for (const name of fileNames) {
         const { cmd } = await import(path.join(dir, name + ".js"));
+        if (!cmd) {
+            throw new Error(`command ${name} not found in ${dir}`)
+        }
         cmds[name] = cmd
     }
     return cmds

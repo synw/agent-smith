@@ -1,3 +1,6 @@
+//import { LmTask, LmTaskBuilder, LmTaskOutput, LmTaskToolSpec } from "../../../../../lmtask/dist/main.js";
+import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
+import { LmTask, LmTaskBuilder, LmTaskOutput, LmTaskToolSpec } from "@agent-smith/lmtask";
 import { brain, initAgent, taskBuilder } from "../../../agent.js";
 import { getFeatureSpec } from "../../../state/features.js";
 import { FeatureType } from "../../../interfaces.js";
@@ -5,7 +8,6 @@ import { isChatMode, isDebug, isShowTokens, isVerbose } from "../../../state/sta
 import { formatStats, initTaskConf, initTaskParams, initTaskVars, parseInputOptions } from "../utils.js";
 import { readTask } from "../../sys/read_task.js";
 import { readFeature, readTool } from "../../../db/read.js";
-import { LmTask, LmTaskBuilder, LmTaskOutput, LmTaskToolSpec } from "../../../../../lmtask/dist/main.js";
 import { executeActionCmd, } from "../actions/cmd.js";
 import { executeWorkflowCmd } from "../workflows/cmd.js";
 import { readModelsFile } from "../../../cmd/sys/read_models.js";
@@ -150,10 +152,17 @@ async function executeTaskCmd(
         vars = tv.vars;
     }
     conf = initTaskConf(conf, taskSpec, defaultCtx);
+    // check for grammars
+    if (conf?.inferParams?.tsGrammar) {
+        console.log("TSG");
+        conf.inferParams.grammar = serializeGrammar(await compile(conf.inferParams.tsGrammar, "Grammar"));
+        delete conf.inferParams.tsGrammar;
+    }
     if (isDebug.value) {
         console.log("Task conf:", conf);
         console.log("Task vars:", vars);
     }
+    // expert
     const ex = brain.getOrCreateExpertForModel(conf.model.name, conf.model.template);
     if (!ex) {
         throw new Error("No expert found for model " + conf.model.name)
