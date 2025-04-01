@@ -1,4 +1,4 @@
-import { Connection, Table } from "vectordb";
+import { Connection, Table } from "@lancedb/lancedb";
 import { Schema } from "apache-arrow";
 
 interface SmemNodeFieldSchema {

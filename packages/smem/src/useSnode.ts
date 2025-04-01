@@ -1,4 +1,4 @@
-import { Connection, Table } from "vectordb";
+import { Connection, Table } from "@lancedb/lancedb";
 import { SmemNode } from "./smeminterfaces.js";
 
 const useSnode = (
@@ -50,10 +50,11 @@ const useSnode = (
         if (!table) {
             table = await open();
         }
-        await table.mergeInsert(idCol, data, {
-            whenMatchedUpdateAll: true,
-            whenNotMatchedInsertAll: true,
-        });
+        await table
+            .mergeInsert(idCol)
+            .whenMatchedUpdateAll()
+            .whenNotMatchedInsertAll()
+            .execute(data);
     }
 
     const upsert = async (data: Array<Record<string, unknown>>, idCol = "id") => {
@@ -69,10 +70,11 @@ const useSnode = (
             ...row,
             vector: await vector(`${row[vectorSourceCol]}`)
         }));
-        await table.mergeInsert(idCol, vectorData, {
-            whenMatchedUpdateAll: true,
-            whenNotMatchedInsertAll: true,
-        });
+        await table
+            .mergeInsert(idCol)
+            .whenMatchedUpdateAll()
+            .whenNotMatchedInsertAll()
+            .execute(vectorData);
     }
 
     function _assertDbIsConnected(from: string, value: Connection = db): asserts value is NonNullable<Connection> {

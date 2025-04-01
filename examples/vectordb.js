@@ -26,8 +26,8 @@ async function main() {
     const q = "a sweet fruit to eat";
     const results = await mem.nodes.food.table
         .search(await mem.vector(q))
-        .filter("type='fruit'")
-        .execute()
+        .where("type='fruit'")
+        .toArray()
     //console.log(results)
     console.log(results.map(r => r.text))
 }

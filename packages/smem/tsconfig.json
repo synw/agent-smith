@@ -43,14 +43,5 @@
     "node_modules",
     "dist",
     "test"
-  ],
-  "typedocOptions": {
-    "name": "Agent Smith documentation",
-    "readme": "none",
-    "entryPoints": [
-      "src/interfaces.ts",
-      "src/main.ts",
-    ],
-    "out": "docsite/public/apidoc/auto",
-  }
+  ]
 }

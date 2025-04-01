@@ -1,4 +1,4 @@
-import { Connection, connect, Table } from "vectordb";
+import { Connection, connect, Table } from "@lancedb/lancedb";
 import { FeatureExtractionPipeline, pipeline } from "@xenova/transformers";
 import { Schema, Field, Float64, Int32, Utf8, FixedSizeList, Bool } from "apache-arrow";
 import { useSnode } from "./useSnode.js";
@@ -92,12 +92,12 @@ const useSmem = (isVerbose = true): Smem => {
             tables[tbl.name] = t;
             return t
         }
-        let tbl: Table<unknown>;
+        let tbl: Table;
         if (isVerbose) {
             console.log("Creating node")
         }
         if (schema) {
-            tbl = await db.createTable({ name: name, schema: schema });
+            tbl = await db.createEmptyTable(name, schema);
         } else if (data) {
             tbl = await db.createTable({ name: name, data: data });
         } else {
