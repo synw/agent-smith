@@ -7,23 +7,24 @@ interface SmemNodeFieldSchema {
     nullable?: boolean;
 }
 
-interface SmemNode {
+interface SmemNode<T extends Record<string, any> = Record<string, any>> {
     table: Table;
     vectorSourceCol: string;
     open: () => Promise<Table>;
-    add: (data: Array<Record<string, unknown>>) => Promise<void>;
-    addRaw: (data: Array<Record<string, unknown>>) => Promise<void>;
-    upsert: (data: Array<Record<string, unknown>>, idCol?: string) => Promise<void>;
-    upsertRaw: (data: Array<Record<string, unknown>>, idCol?: string) => Promise<void>;
+    add: (data: Array<T>) => Promise<void>;
+    addRaw: (data: Array<T>) => Promise<void>;
+    upsert: (data: Array<T>, idCol?: string) => Promise<void>;
+    insertIfNotExists: (data: Array<T>, idCol?: string) => Promise<void>;
+    upsertRaw: (data: Array<T>, idCol?: string) => Promise<void>;
 }
 
 interface Smem {
     nodes: Record<string, SmemNode>;
     init: (dbpath: string) => Promise<Connection>;
-    node: (name: string, schema: SmemNodeSchema, vectorSourceCol: string) => Promise<SmemNode>;
+    node: <T extends Record<string, any> = Record<string, any>>(name: string, schema: SmemNodeSchema, vectorSourceCol: string) => Promise<SmemNode<T>>;
     nodeNames: () => Promise<string[]>;
-    nodeFromSchema: (name: string, schema: Schema, vectorSourceCol: string) => Promise<SmemNode>;
-    nodeFromData: (name: string, data: Array<Record<string, unknown>>, vectorSourceCol: string) => Promise<SmemNode>;
+    nodeFromSchema: <T extends Record<string, any> = Record<string, any>> (name: string, schema: Schema, vectorSourceCol: string) => Promise<SmemNode<T>>;
+    nodeFromData: <T extends Record<string, any> = Record<string, any>> (name: string, data: Array<Record<string, unknown>>, vectorSourceCol: string) => Promise<SmemNode<T>>;
     openTable: (name: string, sourceCol: string) => Promise<Table>;
     vector: (text: string) => Promise<number[]>;
     embed: (data: unknown[]) => Promise<number[][]>;

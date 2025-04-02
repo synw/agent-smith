@@ -4,7 +4,7 @@ import { Schema, Field, Float64, Int32, Utf8, FixedSizeList, Bool } from "apache
 import { useSnode } from "./useSnode.js";
 import { SmemNodeSchema, SmemNode, Smem } from "./smeminterfaces.js";
 
-const useSmem = (isVerbose = true): Smem => {
+const useSmem = (isVerbose = false): Smem => {
     const tables: Record<string, SmemNode> = {};
 
     let pipe: typeof FeatureExtractionPipeline;
@@ -36,28 +36,28 @@ const useSmem = (isVerbose = true): Smem => {
         return db
     }
 
-    const nodeFromSchema = async (
+    const nodeFromSchema = async <T extends Record<string, any> = Record<string, any>>(
         name: string,
         schema: Schema,
         vectorSourceCol: string
-    ): Promise<SmemNode> => {
+    ): Promise<SmemNode<T>> => {
         return await _initNode(name, vectorSourceCol, schema)
     }
 
-    const nodeFromData = async (
+    const nodeFromData = async <T extends Record<string, any> = Record<string, any>>(
         name: string,
         data: Array<Record<string, unknown>>,
         vectorSourceCol: string,
-    ): Promise<SmemNode> => {
-        return await _initNode(name, vectorSourceCol, undefined, data)
+    ): Promise<SmemNode<T>> => {
+        return await _initNode<T>(name, vectorSourceCol, undefined, data)
     }
 
-    const node = async (
+    const node = async <T extends Record<string, any> = Record<string, any>>(
         name: string,
         schema: SmemNodeSchema,
         vectorSourceCol: string
-    ): Promise<SmemNode> => {
-        return await _initNode(name, vectorSourceCol, _createSchema(schema))
+    ): Promise<SmemNode<T>> => {
+        return await _initNode<T>(name, vectorSourceCol, _createSchema(schema))
     }
 
     const nodeNames = async () => {
@@ -72,12 +72,12 @@ const useSmem = (isVerbose = true): Smem => {
 
     const vector = async (text: string): Promise<Array<number>> => (await embed([text]))[0];
 
-    const _initNode = async (
+    const _initNode = async <T extends Record<string, any> = Record<string, any>>(
         name: string,
         vectorSourceCol: string,
         schema?: Schema,
         data?: Array<Record<string, unknown>>,
-    ): Promise<SmemNode> => {
+    ): Promise<SmemNode<T>> => {
         _assertDbIsConnected("Init node");
         if (isVerbose) {
             console.log("Initializing node", name);
@@ -88,8 +88,8 @@ const useSmem = (isVerbose = true): Smem => {
                 console.log("Opening node")
             }
             const tbl = await db.openTable(name);
-            const t = useSnode(db, tbl, vectorSourceCol, vector, isVerbose);
-            tables[tbl.name] = t;
+            const t = useSnode<T>(db, tbl, vectorSourceCol, vector, isVerbose);
+            tables[tbl.name] = t as SmemNode;
             return t
         }
         let tbl: Table;
@@ -104,8 +104,8 @@ const useSmem = (isVerbose = true): Smem => {
             throw new Error("Provide a schema or data to init a node")
         }
 
-        const t = useSnode(db, tbl, vectorSourceCol, vector, isVerbose);
-        tables[name] = t;
+        const t = useSnode<T>(db, tbl, vectorSourceCol, vector, isVerbose);
+        tables[name] = t as SmemNode;
         return t
     }
 
