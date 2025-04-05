@@ -1,4 +1,4 @@
-import { Connection, Table } from "@lancedb/lancedb";
+import { Connection, IvfPqOptions, Table } from "@lancedb/lancedb";
 import { Schema } from "apache-arrow";
 
 interface SmemNodeFieldSchema {
@@ -16,6 +16,8 @@ interface SmemNode<T extends Record<string, any> = Record<string, any>> {
     upsert: (data: Array<T>, idCol?: string) => Promise<void>;
     insertIfNotExists: (data: Array<T>, idCol?: string) => Promise<void>;
     upsertRaw: (data: Array<T>, idCol?: string) => Promise<void>;
+    search: (q: string, searchParams?: SearchParams) => Promise<Array<Record<string, any>>>;
+    filter: (searchParams?: SearchParams) => Promise<Array<Record<string, any>>>;
 }
 
 interface Smem {
@@ -30,6 +32,13 @@ interface Smem {
     embed: (data: unknown[]) => Promise<number[][]>;
 }
 
+interface SearchParams {
+    limit?: number;
+    filters?: Array<string>;
+    select?: Array<string>;
+    distanceType?: IvfPqOptions["distanceType"];
+}
+
 type SmemNodeSchema = Array<SmemNodeFieldSchema>;
 
 type FieldDataType = "string" | "int" | "float" | "boolean";
@@ -39,4 +48,5 @@ export {
     SmemNodeSchema,
     SmemNode,
     Smem,
+    SearchParams,
 }

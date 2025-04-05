@@ -1,5 +1,5 @@
-import { Connection, Data, Table } from "@lancedb/lancedb";
-import { SmemNode } from "./smeminterfaces.js";
+import { Connection, Data, Query, Table, VectorQuery } from "@lancedb/lancedb";
+import { SearchParams, SmemNode } from "./smeminterfaces.js";
 
 const useSnode = <T extends Record<string, any> = Record<string, any>>(
     db: Connection,
@@ -65,6 +65,65 @@ const useSnode = <T extends Record<string, any> = Record<string, any>>(
         return await _ingest(data, idCol, "insert")
     }
 
+    const search = async (q: string | null, searchParams: SearchParams = {
+        limit: -1,
+        select: [],
+        distanceType: "cosine",
+        filters: [],
+    }): Promise<Array<Record<string, any>>> => {
+        return _search(q, searchParams);
+    }
+
+    const filter = async (searchParams: SearchParams = {
+        limit: -1,
+        select: [],
+        filters: [],
+    }): Promise<Array<Record<string, any>>> => {
+        return _search(null, searchParams);
+    }
+
+    const _search = async (q: string | null, searchParams: SearchParams): Promise<Array<Record<string, any>>> => {
+        const finalSearchParams: Record<string, any> = {
+            limit: -1,
+            select: [],
+            distanceType: "cosine",
+            filters: [],
+        }
+        if (searchParams?.limit) {
+            finalSearchParams.limit = searchParams.limit;
+        }
+        if (searchParams?.select) {
+            finalSearchParams.select = searchParams.select;
+        }
+        if (searchParams?.distanceType) {
+            finalSearchParams.distanceType = searchParams.distanceType;
+        }
+        if (searchParams?.filters) {
+            finalSearchParams.filters = searchParams.filters;
+        }
+        let v = new Array<number>();
+        let res: VectorQuery | Query;
+        if (q) {
+            v = await vector(q);
+            res = table.search(v) as VectorQuery;
+            res.distanceType(finalSearchParams.distanceType);
+        } else {
+            res = table.query();
+        }
+        if (finalSearchParams?.filters.length > 0) {
+            finalSearchParams.filters.forEach((f: string) => {
+                res.where(`(${f})`)
+            });
+        }
+        if (finalSearchParams.limit > 0) {
+            res.limit(finalSearchParams.limit);
+        }
+        if (finalSearchParams.select.length > 0) {
+            res.select(finalSearchParams.select)
+        }
+        return res.toArray();
+    }
+
     const _ingest = async (data: Array<T>, idCol: string, mode: "insert" | "update" | "upsert") => {
         if (isVerbose) {
             console.log(`Upserting ${data.length} datapoints`)
@@ -114,6 +173,8 @@ const useSnode = <T extends Record<string, any> = Record<string, any>>(
         upsert,
         insertIfNotExists,
         upsertRaw,
+        search,
+        filter,
     }
 }
 
