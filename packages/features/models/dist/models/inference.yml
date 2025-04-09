@@ -18,12 +18,18 @@ llama3b:
 4b:
   name: nemotron-mini:4b-instruct-q8_0
   template: nemotron
+gemma4b:
+  name: gemma3:4b-it-q8_0
+  template: gemma
 7b:
   name: command-r7b:latest
   template: command-r
 8b:
   name: llama3.1:latest
   template: llama3
+granite8b:
+  name: granite3.2:latest
+  template: granite
 12b:
   name: mistral-nemo:latest
   template: mistral
@@ -41,7 +47,7 @@ phi14b:
     max_tokens: 8192
 27b:
   name: gemma3:27b
-  template: gemma3
+  template: gemma
   ctx: 16384
   inferParams:
     max_tokens: 8192
@@ -54,6 +60,12 @@ phi14b:
 72b:
   name: qwen2.5:72b
   template: chatml
+  ctx: 16384
+  inferParams:
+    max_tokens: 8192
+123b:
+  name: Mistral-Large-Instruct-2411-IQ4_XS # Koboldcpp
+  template: mistral-system
   ctx: 16384
   inferParams:
     max_tokens: 8192
