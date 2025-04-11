@@ -3,7 +3,7 @@ import { AgentBrain, LmExpert } from "@agent-smith/brain";
 import { AgentTask, AgentTaskSpec, useAgentTask } from "@agent-smith/jobs";
 import { PromptTemplate } from "modprompt";
 import { useTemplateForModel } from "@agent-smith/tfm";
-import { LmTask, LmTaskConf, LmTaskInput, LmTaskOutput, LmTaskSpec, ModelSpec } from "./interfaces.js";
+import { LmTask, LmTaskConf, LmTaskInput, LmTaskOutput, ModelSpec } from "./interfaces.js";
 
 const tfm = useTemplateForModel();
 
@@ -20,25 +20,9 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
         return data
     }
 
-    readSpecFromYaml(txt: string): LmTaskSpec {
-        const data = YAML.parse(txt);
-        return data
-    }
-
     fromYaml(txt: string, type?: T, autoCreateExpert = true): AgentTask<T, LmTaskInput, LmTaskOutput, P> {
         const data = YAML.parse(txt);
         return this.init(data, type, autoCreateExpert);
-    }
-
-    static fromRawSpec(spec: LmTaskSpec): LmTask {
-        if (spec?.modelset) {
-            delete spec.modelset
-        }
-        if (!spec?.model) {
-            throw new Error("provide a model")
-        }
-        //console.log("TS", spec)
-        return spec as LmTask
     }
 
     init(task: LmTask, type?: T, autoCreateExpert = true): AgentTask<T, LmTaskInput, LmTaskOutput, P> {
@@ -74,11 +58,11 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                     }
                 }
                 if (!overrideModel) {
-                    if (conf?.size) {
+                    if (conf?.modelname) {
                         let found = false;
                         if (params?.models) {
-                            for (const [size, _mod] of Object.entries(params.models)) {
-                                if (size == conf.size) {
+                            for (const [modelName, _mod] of Object.entries(params.models)) {
+                                if (modelName == conf.modelname) {
                                     found = true;
                                     const m = _mod as ModelSpec;
                                     task.model = m;
@@ -87,7 +71,7 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                             }
                         }
                         if (!found) {
-                            throw new Error(`No model found for ${conf.size}`)
+                            throw new Error(`No model found for ${conf.modelname}`)
                         }
                     }
                 }

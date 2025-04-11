@@ -1,8 +1,6 @@
-
 import { LmExpert } from "@agent-smith/brain";
 import { InferenceParams, InferenceResult } from "@locallm/types";
-import { TurnBlock } from "modprompt";
-import { ToolSpec } from "modprompt/dist/interfaces";
+import { TurnBlock, ToolSpec } from "modprompt";
 
 interface ModelSpec {
   name: string;
@@ -11,11 +9,6 @@ interface ModelSpec {
   system?: string;
   assistant?: string;
   inferParams?: InferenceParams;
-}
-
-interface ModelSet {
-  name: string;
-  default: string;
 }
 
 /**
@@ -38,14 +31,14 @@ interface LmTaskInput {
  * @param {LmExpert<T>} [expert] - Optional expert system for the task.
  * @param {ModelSpec} [model] - Optional model configuration.
  * @param {InferenceParams} [inferParams] - Optional inference parameters.
- * @param {string} [size] - Optional size parameter.
+ * @param {string} [modelname] - Optional modelname parameter.
  * @param {boolean} [debug] - Optional debug flag.
  */
 interface LmTaskConf<T extends Record<string, any> = Record<string, any>> {
   expert?: LmExpert<T>;
   model?: ModelSpec;
   inferParams?: InferenceParams;
-  size?: string;
+  modelname?: string;
   debug?: boolean;
 }
 
@@ -98,17 +91,12 @@ interface BaseLmTask {
  * const task: LmTask = {
  *   name: "qa",
  *   description: "Answer questions",
- *   prompt: "What is your favorite color?",
- *   model: { name: "llama", ctx: 2048, template: "default" },
+ *   prompt: "Answer this question: {prompt}",
+ *   model: { name: "mistral-nemo:latest", ctx: 16384, template: "mistral" },
  * };
  */
 interface LmTask extends BaseLmTask {
   model: ModelSpec;
-}
-
-interface LmTaskSpec extends BaseLmTask {
-  model?: ModelSpec;
-  modelset?: ModelSet;
 }
 
 interface LmTaskToolSpec extends ToolSpec {
@@ -123,10 +111,9 @@ interface LmTaskOutput {
 
 export {
   ModelSpec,
-  ModelSet,
   LmTaskInput,
+  BaseLmTask,
   LmTask,
-  LmTaskSpec,
   TemplateSpec,
   LmTaskConf,
   LmTaskToolSpec,
