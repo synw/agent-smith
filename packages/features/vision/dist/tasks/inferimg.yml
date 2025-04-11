@@ -7,16 +7,28 @@ model:
     ctx: 32768
     template: chatml
 models:
-    3b:
+    granite2b:
         name: granite3.2-vision:2b-q8_0
         ctx: 32768
         template: phi3
-    11b:
+    llama11b:
         name: llama3.2-vision:latest
         ctx: 32768
         template: llama3
+    gemma12b:
+        name: gemma3:12b
+        ctx: 32768
+        template: gemma
+    gemma27b:
+        name: gemma3:27b
+        ctx: 32768
+        template: gemma
+    mistral24b:
+        name: mistral-small3.1:24b
+        ctx: 32768
+        template: mistral-system
 inferParams:
-    top_k: 1.0
+    top_k: 0
     top_p: 1.0
     min_p: 0.05
     temperature: 0.2

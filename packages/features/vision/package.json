@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/feat-vision",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "Vision features for Agent Smith cli",
   "repository": "https://github.com/synw/agent-smith",
   "dependencies": {
