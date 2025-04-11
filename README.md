@@ -98,7 +98,6 @@ An agent is an anthropomorphic representation of a bot. It can:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/tfm)](https://www.npmjs.com/package/@agent-smith/tfm) | [@agent-smith/tfm](https://github.com/synw/agent-smith/tree/main/packages/tfm) | Templates for models | :white_check_mark: | :white_check_mark:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/lmtask)](https://www.npmjs.com/package/@agent-smith/lmtask) | [@agent-smith/lmtask](https://github.com/synw/agent-smith/tree/main/packages/lmtask) | Yaml model task | :white_check_mark: | :white_check_mark:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/cli)](https://www.npmjs.com/package/@agent-smith/cli) | [@agent-smith/cli](https://github.com/synw/agent-smith/tree/main/packages/cli) | Terminal client | :white_check_mark: | :x:
-| [![pub package](https://img.shields.io/npm/v/@agent-smith/feat-git)](https://www.npmjs.com/package/@agent-smith/feat-git) | [@agent-smith/feat-git](https://github.com/synw/agent-smith/tree/main/packages/features/git) | Git features | :white_check_mark: | :x:
 
 ## Philosophy
 
@@ -147,7 +146,15 @@ Generate a commit message in a git repository (using the [git](https://synw.gith
 lm commit
 ```
 
-### Nodejs
+## Terminal client plugins
+
+| Version | Name | Description | Doc |
+| --- | --- | --- | --- |
+| [![pub package](https://img.shields.io/npm/v/@agent-smith/feat-inference)](https://www.npmjs.com/package/@agent-smith/feat-inference) | [@agent-smith/feat-inference](https://github.com/synw/agent-smith/tree/main/packages/features/inference) | Inference | [doc](https://synw.github.io/agent-smith/terminal_client/plugins/inference)
+| [![pub package](https://img.shields.io/npm/v/@agent-smith/feat-vision)](https://www.npmjs.com/package/@agent-smith/feat-vision) | [@agent-smith/feat-vision](https://github.com/synw/agent-smith/tree/main/packages/features/vision) | Vision | [doc](https://synw.github.io/agent-smith/terminal_client/plugins/vision)
+| [![pub package](https://img.shields.io/npm/v/@agent-smith/feat-git)](https://www.npmjs.com/package/@agent-smith/feat-git) | [@agent-smith/feat-git](https://github.com/synw/agent-smith/tree/main/packages/features/git) | Git | [doc](https://synw.github.io/agent-smith/terminal_client/plugins/code/git)
+
+## Nodejs example
 
 ```ts
 const backend = useLmBackend({
@@ -178,7 +185,7 @@ await brain.think(_prompt, {
 });
 ```
 
-### Server api
+## Server api example
 
 To execute a task using the server http api:
 
