@@ -1,69 +1,48 @@
 ctx: 32768
 max_tokens: 16384
-1b:
-  name: llama3.2:1b-instruct-q8_0
-  template: llama3
-2b:
-  name: granite3.2:2b-instruct-q8_0
-  template: granite
-3b:
-  name: qwen2.5:3b-instruct-q8_0
-  template: chatml
-llama3b:
-  name: llama3.2:3b-instruct-q8_0
-  template: llama3
-3.8b:
-  name: phi4-mini:3.8b-q8_0
-  template: phi4
-4b:
-  name: nemotron-mini:4b-instruct-q8_0
-  template: nemotron
-gemma4b:
-  name: gemma3:4b-it-q8_0
-  template: gemma
-7b:
+command-r7b:
   name: command-r7b:latest
   template: command-r
-8b:
+llama8b:
   name: llama3.1:latest
   template: llama3
 granite8b:
   name: granite3.2:latest
   template: granite
-12b:
+nemo:
   name: mistral-nemo:latest
   template: mistral
-14b:
+qwen14b:
   name: qwen2.5:14b
   template: chatml
 phi14b:
   name: phi4:latest
   template: phi4
-24b:
+mistral-small:
   name: mistral-small:latest
   template: mistral-system
   ctx: 16384
   inferParams:
     max_tokens: 8192
-27b:
+gemma27b:
   name: gemma3:27b
   template: gemma
   ctx: 16384
   inferParams:
     max_tokens: 8192
-32b:
+qwen32b:
   name: qwen2.5:32b
   template: chatml
   ctx: 16384
   inferParams:
     max_tokens: 8192
-72b:
+qwen72b:
   name: qwen2.5:72b
   template: chatml
   ctx: 16384
   inferParams:
     max_tokens: 8192
-123b:
+mistral-large:
   name: Mistral-Large-Instruct-2411-IQ4_XS # Koboldcpp
   template: mistral-system
   ctx: 16384
