@@ -2,11 +2,24 @@ name: infer
 description: Run a raw inference query
 prompt: |-
     {prompt}
-modelset: 
-  name: inference
-  default: 4b
+ctx: 16384
+modelpack:  
+  default: nemotron4b
+  recommended:
+    - granite2b
+    - qwen3b
+    - gemma4b
+    - llama8b
+    - nemo
+    - qwen14b
+    - mistral-small
+    - gemma27b
+    - qwen32b
+    - qwen72b
+    - mistral-large
 inferParams:
   top_p: 1
   top_k: 0
   min_p: 0.05
   temperature: 0.5
+  max_tokens: 8192

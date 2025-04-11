@@ -1,11 +1,19 @@
 name: think
 description: Run a raw inference query using a reasoning model
 prompt: "{prompt}"
-modelset:
-    name: thinking
-    default: 3b
+ctx: 32768
+modelpack:
+    default: smallthinker
+    recommended:
+        - deepscaler
+        - exaone2b
+        - exaone8b
+        - deephermes
+        - qwq
+        - qwq-q8
 inferParams:
     top_k: 0
     top_p: 1
     min_p: 0.05
     temperature: 0.4
+    max_tokens: 16384
