@@ -1,8 +1,11 @@
 {
   "name": "@agent-smith/feat-inference",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Inference features for Agent Smith cli",
   "repository": "https://github.com/synw/agent-smith",
+  "dependencies": {
+    "@agent-smith/feat-models": "^0.0.4"
+  },
   "type": "module",
   "files": [
     "dist"
