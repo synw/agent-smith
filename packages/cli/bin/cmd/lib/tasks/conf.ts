@@ -1,12 +1,12 @@
-import { InferenceParams } from "@locallm/types/dist/interfaces.js";
-import { LmTaskConfig, FinalLmTaskConfig, LmTaskFileSpec, ModelSpec } from "../../../interfaces.js";
+import { InferenceParams } from "@locallm/types";
+import { useTemplateForModel } from "@agent-smith/tfm";
+import { LmTaskConfig, LmTaskFileSpec, ModelSpec } from "../../../interfaces.js";
 import { readModel } from "../../../db/read.js";
 
-function configureTask(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): FinalLmTaskConfig {
-    //console.log("IT CONF", itConf);
-    const _conf: FinalLmTaskConfig = {
+const tfm = useTemplateForModel();
 
-    };
+function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): ModelSpec {
+    //console.log("IT CONF", itConf);
     let modelName: string = "";
     let templateName: string = "";
     let ip = itConf.inferParams;
@@ -68,26 +68,30 @@ function configureTask(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): FinalLmT
             }
         }
     }
-    // map params
-    if (found) {
-        //console.log("Model", model);
-        model.inferParams = ip;
-        // use default ctx if the model is not from defined in the task file
-        if (!model?.ctx || !isModelFromTaskFile) {
-            model.ctx = taskSpec.ctx
-        }
-        _conf.model = model;
-        _conf.model.inferParams = ip;
-        if (templateName.length > 0) {
-            _conf.model.template = templateName;
-        }
-    }
     // fallback to use the model name directly
-    else {
+    if (!found) {
         //console.log("Model name end param", modelName);
-        _conf.modelname = modelName
+        // try to guess the template
+        const gt = tfm.guess(modelName);
+        if (gt == "none") {
+            throw new Error(`Unable to guess the template for ${modelName}: please provide a template name: m="modelname/templatename"`)
+        }
+        const m: ModelSpec = {
+            name: modelName,
+            template: gt
+        };
+        model = m;
     }
-    return _conf
+    model.inferParams = ip;
+    // use default ctx if the model is not from defined in the task file
+    if (!model?.ctx || !isModelFromTaskFile) {
+        model.ctx = taskSpec.ctx
+    }
+    model.inferParams = ip;
+    if (templateName.length > 0) {
+        model.template = templateName;
+    }
+    return model
 }
 
 function parseTaskVars(
@@ -167,5 +171,5 @@ function _initTaskVars(
 
 export {
     parseTaskVars,
-    configureTask,
+    configureTaskModel,
 }

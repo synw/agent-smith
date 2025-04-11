@@ -1,7 +1,7 @@
 //import { LmTask, LmTaskBuilder, LmTaskOutput, LmTaskToolSpec } from "../../../../../lmtask/dist/main.js";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import YAML from 'yaml';
-import { LmTask, LmTaskBuilder, LmTaskOutput, LmTaskToolSpec } from "@agent-smith/lmtask";
+import { LmTask, LmTaskBuilder, LmTaskConf, LmTaskOutput, LmTaskToolSpec, ModelSpec } from "@agent-smith/lmtask";
 import { brain, initAgent, taskBuilder } from "../../../agent.js";
 import { getFeatureSpec } from "../../../state/features.js";
 import { FeatureType, LmTaskFileSpec } from "../../../interfaces.js";
@@ -11,8 +11,7 @@ import { readTask } from "../../sys/read_task.js";
 import { readFeature, readTool } from "../../../db/read.js";
 import { executeActionCmd, } from "../actions/cmd.js";
 import { executeWorkflowCmd } from "../workflows/cmd.js";
-import { readModelsFile } from "../../sys/read_modelfile.js";
-import { configureTask, parseTaskVars } from "./conf.js";
+import { configureTaskModel, parseTaskVars } from "./conf.js";
 
 
 async function executeTaskCmd(
@@ -67,19 +66,19 @@ async function executeTaskCmd(
     //const taskRawSpec = taskBuilder.readFromYaml(res.ymlTask);
     const taskFileSpec = YAML.parse(res.ymlTask) as LmTaskFileSpec;
     // model
-    let conf: Record<string, any> = {};
+    let model: ModelSpec;
     let vars: Record<string, any> = {};
     //console.log("TARGS", args);
     if (!isWorkflow) {
         const tv = parseTaskVars(args, taskFileSpec?.inferParams ? taskFileSpec.inferParams as Record<string, any> : {});
         vars = tv.vars;
-        conf = configureTask(tv.conf, taskFileSpec);
+        model = configureTaskModel(tv.conf, taskFileSpec);
     } else {
         const tv = parseTaskVars({ name: name, prompt: pr, ...args }, taskFileSpec?.inferParams ? taskFileSpec.inferParams as Record<string, any> : {});
         vars = tv.vars;
-        conf = configureTask(tv.conf, taskFileSpec);
+        model = configureTaskModel(tv.conf, taskFileSpec);
     }
-    //console.log("CONF", conf);
+    //console.log("MODEL", model);
     // tools
     const taskSpec = taskFileSpec as LmTask;
     if (taskSpec.toolsList) {
@@ -115,19 +114,19 @@ async function executeTaskCmd(
     //console.log("TASK SPEC:", JSON.stringify(taskSpec, null, "  "));
     const task = taskBuilder.init(taskSpec);
     // check for grammars
-    if (conf?.inferParams?.tsGrammar) {
+    if (model?.inferParams?.tsGrammar) {
         //console.log("TSG");
-        conf.inferParams.grammar = serializeGrammar(await compile(conf.inferParams.tsGrammar, "Grammar"));
-        delete conf.inferParams.tsGrammar;
+        model.inferParams.grammar = serializeGrammar(await compile(model.inferParams.tsGrammar, "Grammar"));
+        delete model.inferParams.tsGrammar;
     }
     if (isDebug.value) {
-        console.log("Task conf:", conf);
+        console.log("Task model:", model);
         console.log("Task vars:", vars);
     }
     // expert
-    const ex = brain.getOrCreateExpertForModel(conf.model.name, conf.model.template);
+    const ex = brain.getOrCreateExpertForModel(model.name, model.template);
     if (!ex) {
-        throw new Error("No expert found for model " + conf.model.name)
+        throw new Error("No expert found for model " + model.name)
     }
     ex.checkStatus();
     //ex.backend.setOnStartEmit(() => console.log("[START]"));
@@ -146,6 +145,11 @@ async function executeTaskCmd(
             c = !c
         });
     }
+    const conf: LmTaskConf = {
+        expert: ex,
+        model: model,
+        debug: isDebug.value,
+    }
     conf.expert = ex;
     if (isDebug.value || isVerbose.value) {
         conf.debug = true;
@@ -158,7 +162,6 @@ async function executeTaskCmd(
     catch (err) {
         throw new Error(`Error executing task: ${name} ${err}`);
     }
-    conf.prompt = pr;
     // chat mode
     if (isChatMode.value) {
         if (brain.ex.name != ex.name) {
