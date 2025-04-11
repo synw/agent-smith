@@ -123,17 +123,28 @@ Sorry no: this library favours local first or private remote inference servers
 
 ### Terminal client
 
+Simple inference query (using the [inference](https://synw.github.io/agent-smith/terminal_client/plugins/inference) plugin):
+
+```bash
+lm q list the planets of the solar system
+```
+
+Query a thinking model, use qwq (from the [models](https://synw.github.io/agent-smith/terminal_client/plugins/models) plugin)::
+
+```bash
+lm think "solve this math problem: ..." m=qwq
+```
+
+Compare images (using the [vision](https://synw.github.io/agent-smith/terminal_client/plugins/vision) plugin):
+
+```bash
+lm vision img1.jpg img2.jpg "Compare the images"
+```
+
 Generate a commit message in a git repository (using the [git](https://synw.github.io/agent-smith/terminal_client/plugins/code/git) plugin):
 
 ```bash
 lm commit
-```
-
-Chat with a Youtube video (using the [video](https://synw.github.io/agent-smith/terminal_client/plugins/web/video) plugin)
-
-```bash
-# provide the video id and a query
-lm ytv "0VLAoVGf_74" "summarize this video"
 ```
 
 ### Nodejs
