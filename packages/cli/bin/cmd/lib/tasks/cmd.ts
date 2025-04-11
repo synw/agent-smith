@@ -1,20 +1,22 @@
 //import { LmTask, LmTaskBuilder, LmTaskOutput, LmTaskToolSpec } from "../../../../../lmtask/dist/main.js";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
+import YAML from 'yaml';
 import { LmTask, LmTaskBuilder, LmTaskOutput, LmTaskToolSpec } from "@agent-smith/lmtask";
 import { brain, initAgent, taskBuilder } from "../../../agent.js";
 import { getFeatureSpec } from "../../../state/features.js";
-import { FeatureType } from "../../../interfaces.js";
+import { FeatureType, LmTaskFileSpec } from "../../../interfaces.js";
 import { isChatMode, isDebug, isShowTokens, isVerbose } from "../../../state/state.js";
-import { formatStats, initTaskConf, initTaskParams, initTaskVars, parseInputOptions } from "../utils.js";
+import { formatStats, parseInputOptions } from "../utils.js";
 import { readTask } from "../../sys/read_task.js";
 import { readFeature, readTool } from "../../../db/read.js";
 import { executeActionCmd, } from "../actions/cmd.js";
 import { executeWorkflowCmd } from "../workflows/cmd.js";
-import { readModelsFile } from "../../../cmd/sys/read_models.js";
+import { readModelsFile } from "../../sys/read_modelfile.js";
+import { configureTask, parseTaskVars } from "./conf.js";
 
 
 async function executeTaskCmd(
-    args: Array<string> | Record<string, any> = [], options: any = {}
+    args: Array<string> | Record<string, any> = [], options: Record<string, any> = {}
 ): Promise<LmTaskOutput> {
     //console.log("TARGS", args);
     await initAgent();
@@ -62,51 +64,24 @@ async function executeTaskCmd(
     if (!res.found) {
         throw new Error(`Task ${name}, ${path} not found`)
     }
-    const taskRawSpec = taskBuilder.readSpecFromYaml(res.ymlTask);
-    let taskSpec: LmTask;
-    // modelset
-    let defaultCtx: number;
-    if (taskRawSpec?.modelset) {
-        const modelsFeat = readFeature(taskRawSpec.modelset.name, "modelset");
-        if (!modelsFeat.found) {
-            throw new Error(`modelset feature ${taskRawSpec.modelset.name} not found in conf db`)
-        }
-        const { found, ctx, max_tokens, models } = readModelsFile(
-            modelsFeat.feature.path + "/" + modelsFeat.feature.name + "." + modelsFeat.feature.ext
-        );
-        if (!found) {
-            throw new Error(`modelset ${taskRawSpec.modelset.name} not found`)
-        }
-        defaultCtx = ctx;
-        for (const [k, v] of Object.entries(models)) {
-            if (!v?.ctx) {
-                v.ctx = ctx;
-                models[k] = v;
-            }
-        }
-        taskRawSpec.model = models[taskRawSpec.modelset.default];
-        if (!taskRawSpec.model) {
-            throw new Error(`model ${taskRawSpec.modelset.default} not found`)
-        }
-        if (!taskRawSpec.model?.ctx) {
-            taskRawSpec.model.ctx = ctx
-        }
-        if (!taskRawSpec?.inferParams?.max_tokens) {
-            if (!taskRawSpec?.inferParams) {
-                taskRawSpec.inferParams = {}
-            }
-            taskRawSpec.inferParams.max_tokens = max_tokens;
-        }
-        taskRawSpec.models = models;
-        taskSpec = LmTaskBuilder.fromRawSpec(taskRawSpec);
+    //const taskRawSpec = taskBuilder.readFromYaml(res.ymlTask);
+    const taskFileSpec = YAML.parse(res.ymlTask) as LmTaskFileSpec;
+    // model
+    let conf: Record<string, any> = {};
+    let vars: Record<string, any> = {};
+    //console.log("TARGS", args);
+    if (!isWorkflow) {
+        const tv = parseTaskVars(args, taskFileSpec?.inferParams ? taskFileSpec.inferParams as Record<string, any> : {});
+        vars = tv.vars;
+        conf = configureTask(tv.conf, taskFileSpec);
     } else {
-        taskSpec = taskRawSpec as LmTask;
-        if (!taskSpec.model?.ctx) {
-            throw new Error(`provide a ctx parameter in the task default model`)
-        }
-        defaultCtx = taskSpec.model.ctx;
+        const tv = parseTaskVars({ name: name, prompt: pr, ...args }, taskFileSpec?.inferParams ? taskFileSpec.inferParams as Record<string, any> : {});
+        vars = tv.vars;
+        conf = configureTask(tv.conf, taskFileSpec);
     }
-    //console.log("TASK SPEC", taskSpec);
+    //console.log("CONF", conf);
+    // tools
+    const taskSpec = taskFileSpec as LmTask;
     if (taskSpec.toolsList) {
         taskSpec.tools = []
         for (const toolName of taskSpec.toolsList) {
@@ -139,22 +114,9 @@ async function executeTaskCmd(
     };
     //console.log("TASK SPEC:", JSON.stringify(taskSpec, null, "  "));
     const task = taskBuilder.init(taskSpec);
-    let conf: Record<string, any> = {};
-    let vars: Record<string, any> = {};
-    //console.log("TARGS", args);
-    if (!isWorkflow) {
-        const tv = initTaskVars(args, taskSpec?.inferParams ? taskSpec.inferParams as Record<string, any> : {});
-        conf = tv.conf;
-        vars = tv.vars;
-    } else {
-        const tv = initTaskParams({ name: name, prompt: pr, ...args }, taskSpec?.inferParams ? taskSpec.inferParams as Record<string, any> : {});
-        conf = tv.conf;
-        vars = tv.vars;
-    }
-    conf = initTaskConf(conf, taskSpec, defaultCtx);
     // check for grammars
     if (conf?.inferParams?.tsGrammar) {
-        console.log("TSG");
+        //console.log("TSG");
         conf.inferParams.grammar = serializeGrammar(await compile(conf.inferParams.tsGrammar, "Grammar"));
         delete conf.inferParams.tsGrammar;
     }
@@ -171,15 +133,19 @@ async function executeTaskCmd(
     //ex.backend.setOnStartEmit(() => console.log("[START]"));
     let i = 0;
     let c = false;
-    ex.backend.setOnToken((t) => {
-        let txt = t;
-        if (isShowTokens.value) {
-            txt = c ? t : `\x1b[100m${t}\x1b[0m`
-        }
-        process.stdout.write(txt);
-        ++i;
-        c = !c
-    });
+    if (options?.onToken) {
+        ex.backend.setOnToken(options.onToken);
+    } else {
+        ex.backend.setOnToken((t) => {
+            let txt = t;
+            if (isShowTokens.value) {
+                txt = c ? t : `\x1b[100m${t}\x1b[0m`
+            }
+            process.stdout.write(txt);
+            ++i;
+            c = !c
+        });
+    }
     conf.expert = ex;
     if (isDebug.value || isVerbose.value) {
         conf.debug = true;

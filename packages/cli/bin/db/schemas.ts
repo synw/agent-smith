@@ -63,11 +63,18 @@ const alias = `CREATE TABLE IF NOT EXISTS aliases (
     type TEXT NOT NULL CHECK ( type IN ('task', 'action', 'workflow') )
 );`;
 
-const model = `CREATE TABLE IF NOT EXISTS modelset (
+const modelfile = `CREATE TABLE IF NOT EXISTS modelfile (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
     path TEXT NOT NULL,
     ext TEXT NOT NULL CHECK ( ext IN ('yml') )
+);`;
+
+const model = `CREATE TABLE IF NOT EXISTS model (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL,
+    shortname TEXT UNIQUE NOT NULL,
+    data TEXT NOT NULL
 );`;
 
 /*const override = `CREATE TABLE IF NOT EXISTS override (
@@ -87,6 +94,7 @@ const schemas = [
     plugin,
     alias,
     model,
+    modelfile,
     adaptater,
 ];
 

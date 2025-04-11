@@ -1,9 +1,9 @@
 import YAML from 'yaml';
 import { Cmd, FeatureType } from "../../interfaces.js";
-import { formatMode, isChatMode, promptfilePath, runMode } from "../../state/state.js";
+import { dataDirPath, formatMode, isChatMode, promptfilePath, runMode } from "../../state/state.js";
 import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
 import { readAliases, readFeatures } from "../../db/read.js";
-import { cleanupFeaturePaths, updateAliases, updateFeatures, updatePromptfilePath } from "../../db/write.js";
+import { cleanupFeaturePaths, updateAliases, updateDataDirPath, updateFeatures, updatePromptfilePath } from "../../db/write.js";
 import { processConfPath } from "../../conf.js";
 import { executeActionCmd } from "../lib/actions/cmd.js";
 import { initAgent, marked, taskBuilder } from "../../agent.js";
@@ -11,7 +11,7 @@ import { executeTaskCmd } from "../lib/tasks/cmd.js";
 import { readCmds } from "../sys/read_cmds.js";
 import { executeWorkflowCmd } from "../lib/workflows/cmd.js";
 import { readTask } from "../sys/read_task.js";
-import { deleteFileIfExists } from "../sys/reset.js";
+import { deleteFileIfExists } from "../sys/delete_file.js";
 import { dbPath } from "../../db/db.js";
 
 let cmds: Record<string, Cmd> = {
@@ -96,10 +96,14 @@ async function _updateConfCmd(args: Array<string> = [], options: any): Promise<a
         console.warn("Provide a config.yml file path");
         return
     }
-    const { paths, pf } = await processConfPath(args[0]);
+    const { paths, pf, dd } = await processConfPath(args[0]);
     if (pf.length > 0) {
         updatePromptfilePath(pf);
         promptfilePath.value = pf;
+    }
+    if (dd.length > 0) {
+        updateDataDirPath(dd);
+        dataDirPath.value = dd;
     }
     const feats = readFeaturesDirs(paths);
     //console.log("CMD FEATS", feats);

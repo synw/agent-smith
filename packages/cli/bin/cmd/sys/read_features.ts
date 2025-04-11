@@ -1,4 +1,4 @@
-import { ActionExtension, AdaptaterExtension, CmdExtension, Features, ModelsetExtension, TaskExtension, WorkflowExtension } from "../../interfaces.js";
+import { ActionExtension, AdaptaterExtension, CmdExtension, Features, ModelFileExtension, TaskExtension, WorkflowExtension } from "../../interfaces.js";
 import { default as fs } from "fs";
 import { default as path } from "path";
 
@@ -26,7 +26,7 @@ function readFeaturesDir(dir: string): Features {
         cmd: [],
         workflow: [],
         adaptater: [],
-        modelset: []
+        modelfile: []
     }
     let dirpath = path.join(dir, "tasks");
     if (fs.existsSync(dirpath)) {
@@ -105,10 +105,10 @@ function readFeaturesDir(dir: string): Features {
             const parts = filename.split(".");
             const ext = parts.pop()!;
             const name = parts.join("");
-            feats.modelset.push({
+            feats.modelfile.push({
                 name: name,
                 path: path.join(dirpath),
-                ext: ext as ModelsetExtension,
+                ext: ext as ModelFileExtension,
             })
         });
     }

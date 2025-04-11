@@ -17,7 +17,7 @@ function createConfDirIfNotExists(): boolean {
     return true
 }
 
-async function processConfPath(confPath: string): Promise<{ paths: Array<string>, pf: string }> {
+async function processConfPath(confPath: string): Promise<{ paths: Array<string>, pf: string, dd: string }> {
     const { found, data } = readConf(confPath);
     if (!found) {
         console.warn(`Config file ${confPath} not found`);
@@ -43,10 +43,14 @@ async function processConfPath(confPath: string): Promise<{ paths: Array<string>
         });
     }
     let pf = "";
-    if (data.promptfile) {
+    if (data?.promptfile) {
         pf = data.promptfile
     }
-    return { paths: allPaths, pf: pf }
+    let dd = "";
+    if (data?.datadir) {
+        dd = data.datadir
+    }
+    return { paths: allPaths, pf: pf, dd: dd }
 }
 
 export {

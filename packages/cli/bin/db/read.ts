@@ -1,5 +1,5 @@
 import { ToolSpec } from "modprompt";
-import { AliasType, FeatureExtension, FeatureSpec, FeatureType, ToolType } from "../interfaces.js";
+import { AliasType, FeatureExtension, FeatureSpec, FeatureType, DbModelDef, ToolType, ModelSpec } from "../interfaces.js";
 import { db } from "./db.js";
 
 function readFeaturePaths(): Array<string> {
@@ -33,13 +33,15 @@ function _readFeaturesType(type: FeatureType): Record<string, string> {
 }
 
 function readFeatures(): Record<FeatureType, Record<string, string>> {
-    const feats: Record<FeatureType, Record<string, string>> = { task: {}, action: {}, cmd: {}, workflow: {}, adaptater: {}, modelset: {} };
+    const feats: Record<FeatureType, Record<string, string>> = {
+        task: {}, action: {}, cmd: {}, workflow: {}, adaptater: {}, modelfile: {}
+    };
     feats.task = _readFeaturesType("task");
     feats.action = _readFeaturesType("action");
     feats.cmd = _readFeaturesType("cmd");
     feats.workflow = _readFeaturesType("workflow");
     feats.adaptater = _readFeaturesType("adaptater");
-    feats.modelset = _readFeaturesType("modelset");
+    feats.modelfile = _readFeaturesType("modelfile");
     return feats
 }
 
@@ -86,14 +88,45 @@ function readTool(name: string): { found: boolean, tool: ToolSpec, type: ToolTyp
     return { found: false, tool: {} as ToolSpec, type: "action" }
 }
 
-function readPromptFilePath(): string {
-    const stmt1 = db.prepare("SELECT * FROM filepath WHERE name = ?");
-    const result = stmt1.get("promptfile") as Record<string, any>;
-    let res = "";
+function readFilePaths(): Array<{ name: string, path: string }> {
+    const stmt1 = db.prepare("SELECT name, path FROM filepath");
+    const data = stmt1.all() as Array<{ name: string, path: string }>;
+    let f = new Array<{ name: string, path: string }>();
+    data.forEach((row) => {
+        f.push({ name: row.name, path: row.path })
+    });
+    return f
+}
+
+function readModelfiles(): Array<Record<string, string>> {
+    const stmt = db.prepare("SELECT name, path, ext FROM modelfile");
+    const data = stmt.all() as Array<Record<string, string>>;
+    let f = new Array<Record<string, string>>();
+    data.forEach((row) => {
+        f.push(row)
+    });
+    return f
+}
+
+function readModels(): Array<DbModelDef> {
+    const stmt = db.prepare("SELECT name, shortname, data FROM model");
+    const data = stmt.all() as Array<DbModelDef>;
+    let f = new Array<DbModelDef>();
+    data.forEach((row) => {
+        f.push(row)
+    });
+    return f
+}
+
+function readModel(shortname: string): { found: boolean, modelData: Record<string, any> } {
+    const q = `SELECT id, data FROM model WHERE shortname='${shortname}'`;
+    const stmt = db.prepare(q);
+    const result = stmt.get() as Record<string, string>;
     if (result?.id) {
-        res = result.path
+        const data = JSON.parse(result.data);
+        return { found: true, modelData: data }
     }
-    return res
+    return { found: false, modelData: {} }
 }
 
 export {
@@ -102,6 +135,9 @@ export {
     readFeature,
     readPlugins,
     readAliases,
-    readPromptFilePath,
+    readFilePaths,
     readTool,
+    readModels,
+    readModelfiles,
+    readModel,
 }

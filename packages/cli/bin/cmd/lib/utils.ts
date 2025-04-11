@@ -1,7 +1,7 @@
 import { LmTask } from "@agent-smith/lmtask";
 //import { LmTask } from "../../../../lmtask/dist/interfaces.js";
 import { useTemplateForModel } from "@agent-smith/tfm";
-import { Cmd } from "../../interfaces.js";
+import { Cmd, LmTaskFileSpec } from "../../interfaces.js";
 import { inputMode, outputMode, promptfilePath } from "../../state/state.js";
 import { modes } from "../clicmds/modes.js";
 import { readClipboard, writeToClipboard } from "../sys/clipboard.js";
@@ -48,17 +48,19 @@ async function processOutput(res: any) {
     let data = "";
     //console.log("Process OUTPUT", typeof res, res);
     if (typeof res == "object") {
-        if (res?.answer && res?.stats) {
+        if (res?.answer?.text) {
             // lm task output
             data = res.answer.text;
+        } else {
+            data = JSON.stringify(res);
         }
     } else {
         data = res;
     }
     //console.log("MODE", inputMode.value);
-    //console.log("OUTPUT", typeof res, res);
+    //onsole.log("OUTPUT", typeof res, data);
     if (outputMode.value == "clipboard") {
-        //console.log("Writing to kb", res)
+        //console.log("Writing to kb", data)
         if (typeof data == "object") {
             data = JSON.stringify(data)
         }
@@ -66,7 +68,7 @@ async function processOutput(res: any) {
     }
 }
 
-function initTaskConf(conf: Record<string, any>, taskSpec: LmTask, defaultCtx: number): Record<string, any> {
+/*function initTaskConf(conf: Record<string, any>, taskSpec: LmTaskFileSpec): Record<string, any> {
     const _conf = conf;
     let m = taskSpec.model.name;
     let t: string = taskSpec.model.template;
@@ -95,7 +97,7 @@ function initTaskConf(conf: Record<string, any>, taskSpec: LmTask, defaultCtx: n
             }
             m = taskSpec.models[conf.size].name;
             t = taskSpec.models[conf.size].template;
-            c = taskSpec.models[conf.size]?.ctx ?? defaultCtx;
+            c = taskSpec.models[conf.size]?.ctx ?? taskSpec.ctx;
             if (taskSpec.models[conf.size]?.inferParams) {
                 const tip = taskSpec.models[conf.size].inferParams as Record<string, any>;
                 for (const [k, v] of Object.entries(tip)) {
@@ -151,42 +153,6 @@ function initTaskParams(params: Record<string, any>, inferParams: Record<string,
     return res
 }
 
-function initActionVars(args: Array<any>): Record<string, any> {
-    const vars: Record<string, any> = {};
-    //console.log("ARGS", args);
-    args.forEach((a) => {
-        if (a.includes("=")) {
-            const t = a.split("=");
-            const k = t[0];
-            const v = t[1];
-            switch (k) {
-                case "m":
-                    if (v.includes("/")) {
-                        const _s = v.split("/");
-                        vars.model = _s[0];
-                        vars.template = _s[1];
-                    } else {
-                        vars.model = v;
-                    }
-                    break;
-                case "ip":
-                    v.split(",").forEach((p: string) => {
-                        const s = p.split(":");
-                        vars["inferParams"][s[0]] = parseFloat(s[1]);
-                    });
-                    break;
-                case "s":
-                    vars.size = v;
-                    break;
-                default:
-                    vars[k] = v;
-                    break;
-            }
-        }
-    });
-    return { vars }
-}
-
 function initTaskVars(args: Array<any>, inferParams: Record<string, any>): { conf: Record<string, any>, vars: Record<string, any> } {
     const conf: Record<string, any> = { inferParams: inferParams };
     const vars: Record<string, any> = {};
@@ -234,7 +200,7 @@ function initTaskVars(args: Array<any>, inferParams: Record<string, any>): { con
         }
     });
     return { conf, vars }
-}
+}*/
 
 async function parseInputOptions(options: any): Promise<string | null> {
     let out: string | null = null;
@@ -257,10 +223,9 @@ function formatStats(stats: InferenceStats): string {
 }
 
 export {
-    initTaskConf,
-    initTaskParams,
-    initTaskVars,
-    initActionVars,
+    //initTaskConf,
+    //initTaskParams,
+    //initTaskVars,
     parseInputOptions,
     processOutput,
     readPromptFile,

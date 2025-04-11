@@ -1,5 +1,5 @@
 import { extractToolDoc } from "../cmd/lib/tools.js";
-import { AliasType, FeatureSpec, FeatureType, Features } from "../interfaces.js";
+import { AliasType, FeatureSpec, FeatureType, Features, DbModelDef } from "../interfaces.js";
 import { db } from "./db.js";
 
 function updatePromptfilePath(pf: string) {
@@ -7,6 +7,13 @@ function updatePromptfilePath(pf: string) {
     deleteStmt.run("promptfile");
     const stmt = db.prepare("INSERT INTO filepath (name, path) VALUES (?, ?)");
     stmt.run("promptfile", pf);
+}
+
+function updateDataDirPath(dd: string) {
+    const deleteStmt = db.prepare("DELETE FROM filepath WHERE name = ?");
+    deleteStmt.run("datadir");
+    const stmt = db.prepare("INSERT INTO filepath (name, path) VALUES (?, ?)");
+    stmt.run("datadir", dd);
 }
 
 function insertFeaturesPathIfNotExists(path: string): boolean {
@@ -120,6 +127,32 @@ function upsertTool(name: string, type: FeatureType, toolDoc: string) {
     console.log("+", "[tool] from", type, ":", name);
 }
 
+function upsertModels(models: Array<DbModelDef>) {
+    const stmt1 = db.prepare("SELECT shortname FROM model");
+    const rows = stmt1.all() as Array<Record<string, any>>;
+    const existingModelShortNames = rows.map(row => row.shortname) as Array<string>;
+    const stmt = db.prepare(`INSERT INTO model (name, shortname, data) VALUES (?,?,?)`);
+    existingModelShortNames.forEach((name) => {
+        //console.log(name, !availableFeatsNames.includes(name));
+        if (!existingModelShortNames.includes(name)) {
+            //console.log("DELETE", name);
+            const deleteStmt = db.prepare("DELETE FROM model WHERE name = ?");
+            deleteStmt.run(name);
+            console.log("-", "[model]", name);
+        }
+    });
+    db.transaction(() => {
+        for (const model of models) {
+            const stmt1 = db.prepare("SELECT * FROM model WHERE shortname = ?");
+            const result = stmt1.get(model.shortname) as Record<string, any>;
+            if (result?.id) {
+                continue
+            }
+            stmt.run(model.name, model.shortname, JSON.stringify(model.data));
+        }
+    })();
+}
+
 function updateFeatures(feats: Features) {
     //console.log("FEATS", feats);
     upsertAndCleanFeatures(feats.task, "task");
@@ -136,14 +169,16 @@ function updateFeatures(feats: Features) {
     upsertAndCleanFeatures(feats.cmd, "cmd");
     upsertAndCleanFeatures(feats.workflow, "workflow");
     upsertAndCleanFeatures(feats.adaptater, "adaptater");
-    upsertAndCleanFeatures(feats.modelset, "modelset");
+    upsertAndCleanFeatures(feats.modelfile, "modelfile");
 }
 
 export {
     updatePromptfilePath,
+    updateDataDirPath,
     insertFeaturesPathIfNotExists,
     insertPluginIfNotExists,
     updateFeatures,
     updateAliases,
     cleanupFeaturePaths,
+    upsertModels,
 }

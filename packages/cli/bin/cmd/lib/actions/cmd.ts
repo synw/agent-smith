@@ -113,7 +113,9 @@ async function executeActionCmd(
         throw res.error
     }
     if (!quiet) {
-        console.log(res);
+        if (res) {
+            console.log(res);
+        }
     }
     await processOutput(res);
     return res
