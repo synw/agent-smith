@@ -20,9 +20,6 @@
     "markdown-it-replace-link": "^1.2.1",
     "rollup": "^4.22.2",
     "tslib": "^2.7.0",
-    "typedoc": "^0.26.7",
-    "typedoc-plugin-markdown": "^4.2.7",
-    "typedoc-plugin-rename-defaults": "^0.7.1",
     "typescript": "^5.6.2"
   },
   "files": [
