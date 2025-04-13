@@ -1,20 +1,15 @@
-async function action(args) {
-    const nextArgs = {};
+import { parseTaskVars } from "@agent-smith/cli";
+
+async function action(args, options) {
+    //console.log("OPTS", options);
+    const { vars } = parseTaskVars(args);
     let buf = [];
     args.forEach(arg => {
-        if (arg.includes("=")) {
-            const [key, value] = arg.split("=");
-            if (["m", "s", "ip"].includes(key)) {
-                nextArgs[key] = value;
-            } else {
-                buf.push(arg);
-            }
-        } else {
+        if (!arg.includes("=")) {
             buf.push(arg);
         }
     });
-    //console.log("NA", nextArgs);
-    const res = { prompt: buf.join(" "), ...nextArgs };
+    const res = { prompt: buf.join(" "), ...vars };
     return res;
 }
 
