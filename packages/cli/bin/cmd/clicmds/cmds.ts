@@ -1,18 +1,20 @@
 import YAML from 'yaml';
 import { Cmd, FeatureType } from "../../interfaces.js";
-import { dataDirPath, formatMode, isChatMode, promptfilePath, runMode } from "../../state/state.js";
+import { dataDirPath, isChatMode, isDebug, promptfilePath, runMode } from "../../state/state.js";
 import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
-import { readAliases, readFeatures } from "../../db/read.js";
+import { readAliases, readFeaturePaths, readFeatures } from "../../db/read.js";
 import { cleanupFeaturePaths, updateAliases, updateDataDirPath, updateFeatures, updatePromptfilePath } from "../../db/write.js";
 import { processConfPath } from "../../conf.js";
 import { executeActionCmd } from "../lib/actions/cmd.js";
-import { initAgent, marked, taskBuilder } from "../../agent.js";
+import { initAgent, taskBuilder } from "../../agent.js";
 import { executeTaskCmd } from "../lib/tasks/cmd.js";
 import { readCmds } from "../sys/read_cmds.js";
 import { executeWorkflowCmd } from "../lib/workflows/cmd.js";
 import { readTask } from "../sys/read_task.js";
 import { deleteFileIfExists } from "../sys/delete_file.js";
-import { dbPath } from "../../db/db.js";
+import { dbPath, initDb } from "../../db/db.js";
+import { showModelsCmd, updateModels } from '../lib/models.js';
+import { readPluginsPaths } from '../../state/plugins.js';
 
 let cmds: Record<string, Cmd> = {
     exit: {
@@ -32,8 +34,16 @@ let cmds: Record<string, Cmd> = {
         description: "read a task",
         args: "arguments: \n-task (required): the task name"
     },
+    models: {
+        cmd: showModelsCmd,
+        description: "list the available models",
+    },
+    update: {
+        cmd: _updateFeatures,
+        description: "update the available features: run this after adding a new feature",
+    },
     conf: {
-        cmd: _updateConfCmd,
+        cmd: updateConfCmd,
         description: "process config file",
         args: "arguments: \n-path (required): the path to the config.yml file"
     },
@@ -91,11 +101,27 @@ async function pingCmd(args: Array<string> = [], options: any): Promise<boolean>
     return isUp
 }
 
-async function _updateConfCmd(args: Array<string> = [], options: any): Promise<any> {
+async function _updateFeatures(args: Array<string> = [], options: any): Promise<any> {
+    const fp = readFeaturePaths();
+    const pp = await readPluginsPaths();
+    const paths = [...fp, ...pp];
+    const feats = readFeaturesDirs(paths);
+    //console.log("CMD FEATS", feats);
+    updateFeatures(feats);
+    updateAliases(feats);
+    updateModels();
+    const deleted = cleanupFeaturePaths(paths);
+    for (const el of deleted) {
+        console.log("- [feature path]", el)
+    }
+}
+
+async function updateConfCmd(args: Array<string> = [], options: any): Promise<any> {
     if (args.length == 0) {
         console.warn("Provide a config.yml file path");
         return
     }
+    initDb(isDebug.value, true);
     const { paths, pf, dd } = await processConfPath(args[0]);
     if (pf.length > 0) {
         updatePromptfilePath(pf);
@@ -109,6 +135,7 @@ async function _updateConfCmd(args: Array<string> = [], options: any): Promise<a
     //console.log("CMD FEATS", feats);
     updateFeatures(feats);
     updateAliases(feats);
+    updateModels();
     const deleted = cleanupFeaturePaths(paths);
     for (const el of deleted) {
         console.log("- [feature path]", el)
@@ -131,12 +158,6 @@ async function _executeTaskCmd(args: Array<string> = [], options: any): Promise<
         return
     }
     const res = await executeTaskCmd(args, options);
-    if (formatMode.value == "markdown") {
-        console.log("\n------------------\n");
-        console.log((marked.parse(res.answer.text) as string).trim())
-    } else {
-        console.log()
-    }
     if (isChatMode.value) {
 
     }
@@ -181,4 +202,4 @@ async function _listTasksCmd(args: Array<string> = [], options: any): Promise<an
     console.table(ts)
 }
 
-export { cmds, initCmds, pingCmd, initAliases }
+export { cmds, initCmds, pingCmd, initAliases, updateConfCmd }

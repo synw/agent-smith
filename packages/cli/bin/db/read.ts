@@ -110,10 +110,16 @@ function readModelfiles(): Array<Record<string, string>> {
 
 function readModels(): Array<DbModelDef> {
     const stmt = db.prepare("SELECT name, shortname, data FROM model");
-    const data = stmt.all() as Array<DbModelDef>;
+    const data = stmt.all() as Array<Record<string, any>>;
     let f = new Array<DbModelDef>();
     data.forEach((row) => {
-        f.push(row)
+        const ips = JSON.parse(row.data);
+        const mod: DbModelDef = {
+            name: row.name,
+            shortname: row.shortname,
+            data: ips,
+        }
+        f.push(mod)
     });
     return f
 }

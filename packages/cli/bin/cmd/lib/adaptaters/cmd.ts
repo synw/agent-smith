@@ -1,6 +1,5 @@
 import { getFeatureSpec } from "../../../state/features.js";
 import { FeatureType } from "../../../interfaces.js";
-import { processOutput } from "../utils.js";
 import { AgentTask } from "@agent-smith/jobs";
 import { createJsAction } from "../actions/read.js";
 
@@ -36,7 +35,7 @@ async function executeAdaptaterCmd(
     if (res?.error) {
         throw res.error
     }
-    await processOutput(res);
+    //await processOutput(res);
     return res
 }
 

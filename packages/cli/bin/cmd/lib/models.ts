@@ -1,8 +1,30 @@
 import path from "path";
-import { readModelfiles } from "../../db/read.js";
+import { readModelfiles, readModels } from "../../db/read.js";
 import { readModelsFile } from "../sys/read_modelfile.js";
 import { DbModelDef } from "../../interfaces.js";
 import { upsertModels } from "../../db/write.js";
+import color from "ansi-colors";
+
+async function showModelsCmd(args: Array<string>, options: any) {
+    let models = readModels();
+    models.sort((a, b) => a.name.localeCompare(b.name));
+    if (args.length > 0) {
+        args.forEach((a) => {
+            models = models.filter((m) => m.shortname.includes(a) || m.name.includes(a));
+        });
+    }
+    models.forEach((model) => {
+        const ips = model.data.inferParams;
+        if (!ips?.max_tokens) {
+            throw new Error(`no max tokens in ${model.shortname}`)
+        }
+        const mt = ips.max_tokens;
+        delete ips.max_tokens;
+        const vip = Object.keys(ips).length > 0 ? JSON.stringify(ips) : "";
+        const m = `- ${color.yellow(model.shortname)}: ${color.bold(model.data.name)} - ${model.data.ctx} ctx / ${mt} max tokens ${vip}`;
+        console.log(m)
+    })
+}
 
 function updateModels() {
     const mfs = readModelfiles();
@@ -41,4 +63,5 @@ function updateModels() {
 
 export {
     updateModels,
+    showModelsCmd,
 }

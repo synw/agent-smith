@@ -117,7 +117,7 @@ async function executeActionCmd(
             console.log(res);
         }
     }
-    await processOutput(res);
+    //await processOutput(res);
     return res
 }
 

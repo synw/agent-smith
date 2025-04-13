@@ -1,15 +1,11 @@
 import { reactive, ref } from "@vue/reactivity";
 import { PythonShell } from 'python-shell';
 import { InputMode, RunMode, FormatMode, OutputMode } from "../interfaces.js";
-import { createConfDirIfNotExists, confDir } from "../conf.js";
+import { confDir } from "../conf.js";
 import { initDb } from "../db/db.js";
-import { readFeaturePaths, readFilePaths } from "../db/read.js";
-import { updateAliases, updateFeatures } from "../db/write.js";
-import { readFeaturesDirs } from "./features.js";
-import { readPluginsPaths } from "./plugins.js";
+import { readFilePaths } from "../db/read.js";
 import path from "path";
 import { createDirectoryIfNotExists } from "../cmd/sys/dirs.js";
-import { updateModels } from "../cmd/lib/models.js";
 
 let pyShell: PythonShell;
 
@@ -30,28 +26,7 @@ const lastCmd = reactive<{ name: string, args: Array<string> }>({
     args: [],
 });
 
-function initConf() {
-    const exists = createConfDirIfNotExists();
-    if (!exists) {
-        console.log("Created configuration directory", confDir);
-    }
-    //console.log("INIT DB");
-    initDb();
-    //console.log("END INIT DB");
-}
-
-async function initFeatures() {
-    //console.log("INIT FEATURES");
-    const fp = readFeaturePaths();
-    const pp = await readPluginsPaths();
-    const p = [...fp, ...pp];
-    //console.log("STATE FPATHS", p);
-    const feats = readFeaturesDirs(p);
-    //console.log("STATE FEATS", feats);
-    updateFeatures(feats);
-    updateAliases(feats);
-    updateModels();
-    //promptfilePath.value = readPromptFilePath();
+function initFilepaths() {
     const filePaths = readFilePaths();
     //console.log("FP", filePaths);
     for (const fp of filePaths) {
@@ -70,8 +45,7 @@ async function initState() {
         return
     }
     //sconsole.log("INIT STATE");
-    initConf();
-    await initFeatures();
+    initDb(isDebug.value);
     isStateReady.value = true;
     //console.log("State ready, available features:", readFeatures())
 }
@@ -106,6 +80,6 @@ export {
     dataDirPath,
     pluginDataDir,
     initState,
-    initFeatures,
+    initFilepaths,
     pyShell,
 }
