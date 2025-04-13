@@ -1,0 +1,1 @@
+import{d as n,m as s,o,f as a,a4 as t,a5 as l,H as r,a6 as p}from"./index-ruRH7gpx.js";const _=n({__name:"[...all]",setup(u){return(e,i)=>(o(),s(a(p),{hljs:a(r),nav:a(l),url:e.$route.path,"on-open":e.$router.push,"base-title":a(t)},null,8,["hljs","nav","url","on-open","base-title"]))}});export{_ as default};

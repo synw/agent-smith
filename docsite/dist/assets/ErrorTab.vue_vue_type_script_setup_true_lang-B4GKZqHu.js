@@ -1,0 +1,1 @@
+import{d as a,c as t,o,a as e,t as n}from"./index-ruRH7gpx.js";const p=a({__name:"ErrorTab",props:{data:{type:Object,required:!0}},setup(r){return(c,s)=>(o(),t("div",null,[e("code",null,[e("pre",null,n(r.data.error),1)])]))}});export{p as _};
