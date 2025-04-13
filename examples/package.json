@@ -6,20 +6,19 @@
   },
   "dependencies": {
     "@agent-smith/body": "^0.0.8",
-    "@agent-smith/brain": "^0.0.41",
-    "@agent-smith/jobs": "^0.0.13",
-    "@agent-smith/lmtask": "^0.0.31",
-    "@agent-smith/smem": "^0.0.2",
-    "@agent-smith/tfm": "^0.1.1",
-    "@locallm/api": "^0.2.0",
+    "@agent-smith/brain": "^0.0.42",
+    "@agent-smith/jobs": "^0.0.14",
+    "@agent-smith/lmtask": "^0.0.37",
+    "@agent-smith/smem": "^0.0.5",
+    "@agent-smith/tfm": "^0.1.2",
+    "@locallm/api": "^0.2.1",
     "@xenova/transformers": "^2.17.2",
-    "modprompt": "^0.10.7",
-    "vectordb": "^0.18.1"
+    "modprompt": "^0.10.9"
   },
   "devDependencies": {
-    "@locallm/types": "^0.1.5",
-    "@types/node": "^22.13.10",
+    "@locallm/types": "^0.1.9",
+    "@types/node": "^22.14.1",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.3"
   }
 }

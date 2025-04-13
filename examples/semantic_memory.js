@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-//import { useSmem } from "@agent-smith/smem";
-import { useSmem } from "../packages/smem/dist/main.js"
+import { useSmem } from "@agent-smith/smem";
+//import { useSmem } from "../packages/smem/dist/main.js"
 
 async function main() {
     const mem = useSmem();
@@ -22,12 +22,12 @@ async function main() {
 
     const node = await mem.node("food", schema, "text");
     await node.upsert(data)
-
+    // search
     const q = "a sweet fruit to eat";
-    const results = await mem.nodes.food.table
-        .search(await mem.vector(q))
-        .where("type='fruit'")
-        .toArray()
+    const results = await node.search(q, {
+        select: ["text"],
+        filters: ["type='fruit'"]
+    });
     //console.log(results)
     console.log(results.map(r => r.text))
 }
