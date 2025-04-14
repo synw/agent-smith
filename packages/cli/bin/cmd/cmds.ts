@@ -88,6 +88,7 @@ async function buildCmds(): Promise<Command> {
 async function parseCmd() {
     const program = await buildCmds();
     await program.parseAsync();
+    //console.log("CHAT MODE", isChatMode.value);
     if (isChatMode.value) {
         await chat()
     }

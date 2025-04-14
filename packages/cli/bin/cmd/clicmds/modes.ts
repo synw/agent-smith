@@ -25,7 +25,7 @@ const modes: Record<string, Cmd> = {
     },
     "-c": {
         cmd: async () => {
-            isChatMode.value = !isChatMode;
+            isChatMode.value = !isChatMode.value;
             if (runMode.value == "cli") { console.log("Chat mode is", isChatMode.value ? "on" : "off") }
         },
         description: "use chat mode for tasks",

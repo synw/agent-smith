@@ -16,7 +16,6 @@ async function setOptions(
     /*if (runMode.value == "cli") {
         return args
     };*/
-    //console.log("OPTIONS", options);
     for (const k of Object.keys(options)) {
         let opt: Cmd;
         if (k.length == 1) {
