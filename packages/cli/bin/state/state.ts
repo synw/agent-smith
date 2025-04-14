@@ -46,6 +46,7 @@ async function initState() {
     }
     //sconsole.log("INIT STATE");
     initDb(isDebug.value);
+    initFilepaths();
     isStateReady.value = true;
     //console.log("State ready, available features:", readFeatures())
 }
