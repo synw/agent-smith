@@ -59,13 +59,15 @@ function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): Mod
                 }
             }
         }
-        // try to find the models from db models
-        if (!found) {
-            const m = readModel(modelName);
-            if (m.found) {
-                model = m.modelData as ModelSpec;
-                found = true
-            }
+    }
+    // try to find the models from db models
+    if (!found) {
+        const m = readModel(modelName);
+        //console.log("DBM", m);
+        if (m.found) {
+            model = m.modelData as ModelSpec;
+            model.template = m.modelData.template;
+            found = true
         }
     }
     // fallback to use the model name directly
@@ -95,8 +97,9 @@ function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): Mod
 }
 
 function parseTaskVars(
-    params: Array<any> | Record<string, any>, inferParams: Record<string, any>
+    params: Array<any> | Record<string, any>, inferParams: Record<string, any> = {}
 ): { conf: LmTaskConfig, vars: Record<string, any> } {
+    //console.log("")
     switch (Array.isArray(params)) {
         case true:
             return _initTaskVars(params as Array<any>, inferParams)
@@ -117,13 +120,22 @@ function _initTaskParams(
         conf.inferParams.images = params.images;
         delete params.images;
     }
-    if (params?.model) {
-        conf.modelname = params.model;
-        delete params.model;
+    if (params?.modelname) {
+        conf.modelname = params.modelname;
+        delete params.modelname;
     }
     if (params?.template) {
-        conf.templateName = params.template;
-        delete params.template;
+        conf.templateName = params.templateName;
+        delete params.templateName;
+    }
+    const ip = conf.inferParams as Record<string, any>;
+    //console.log("IP", ip);
+    if (params?.inferParams) {
+        for (const [k, v] of Object.entries(params.inferParams)) {
+            ip[k] = v
+        }
+        conf.inferParams = ip as InferenceParams;
+        delete params.inferParams;
     }
     const res = { conf: conf, vars: params };
     return res
@@ -134,7 +146,7 @@ function _initTaskVars(
 ): { conf: LmTaskConfig, vars: Record<string, any> } {
     const conf: LmTaskConfig = { inferParams: inferParams, modelname: "", templateName: "" };
     const vars: Record<string, any> = {};
-    //console.log("ARGS", args);
+    //console.log("Init task vars:", args);
     args.forEach((a) => {
         if (a.includes("=")) {
             const delimiter = "=";

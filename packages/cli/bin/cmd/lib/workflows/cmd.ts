@@ -49,6 +49,8 @@ async function executeWorkflowCmd(name: string, args: Array<any> = [], options: 
                 break;
             case "adaptater":
                 try {
+                    //console.log("AD ARGS IN", p);
+                    //console.log("AD OPTS IN", options);
                     const ares = await executeAdaptaterCmd(p, options);
                     //console.log("WF ADAPT RES", ares);
                     taskRes = ares;

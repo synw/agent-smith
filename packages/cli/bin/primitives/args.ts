@@ -2,9 +2,9 @@ function parseInferenceArgs(args: Array<string>): {
     inferenceVars: Record<string, any>,
     currentArgs: Array<string>
 } {
-    const vars: Record<string, any> = {};
+    const vars: Record<string, any> = { "inferParams": {} };
     const nargs = new Array<string>();
-    //console.log("ARGS", args);
+    //console.log("PARSE INFER ARGS", args);
     args.forEach((a) => {
         if (a.includes("=")) {
             const t = a.split("=");
@@ -14,10 +14,10 @@ function parseInferenceArgs(args: Array<string>): {
                 case "m":
                     if (v.includes("/")) {
                         const _s = v.split("/");
-                        vars.model = _s[0];
-                        vars.template = _s[1];
+                        vars.modelname = _s[0];
+                        vars.templateName = _s[1];
                     } else {
-                        vars.model = v;
+                        vars.modelname = v;
                     }
                     break;
                 case "ip":
@@ -26,12 +26,8 @@ function parseInferenceArgs(args: Array<string>): {
                         vars["inferParams"][s[0]] = parseFloat(s[1]);
                     });
                     break;
-                case "s":
-                    vars.size = v;
-                    break;
                 default:
-                    vars[k] = v;
-                    break;
+                    throw new Error(`unknown arg ${a}`)
             }
         } else {
             nargs.push(a)

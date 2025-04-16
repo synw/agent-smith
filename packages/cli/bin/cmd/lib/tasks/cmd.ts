@@ -1,15 +1,15 @@
 //import { LmTask, LmTaskBuilder, LmTaskOutput, LmTaskToolSpec } from "../../../../../lmtask/dist/main.js";
+import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec, ModelSpec } from "@agent-smith/lmtask";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import YAML from 'yaml';
-import { LmTask, LmTaskBuilder, LmTaskConf, LmTaskOutput, LmTaskToolSpec, ModelSpec } from "@agent-smith/lmtask";
 import { brain, initAgent, taskBuilder } from "../../../agent.js";
-import { getFeatureSpec } from "../../../state/features.js";
+import { readTool } from "../../../db/read.js";
 import { FeatureType, LmTaskFileSpec } from "../../../interfaces.js";
+import { getFeatureSpec } from "../../../state/features.js";
 import { isChatMode, isDebug, isShowTokens, isVerbose } from "../../../state/state.js";
-import { formatStats, parseInputOptions } from "../utils.js";
 import { readTask } from "../../sys/read_task.js";
-import { readFeature, readTool } from "../../../db/read.js";
 import { executeActionCmd, } from "../actions/cmd.js";
+import { formatStats, parseInputOptions } from "../utils.js";
 import { executeWorkflowCmd } from "../workflows/cmd.js";
 import { configureTaskModel, parseTaskVars } from "./conf.js";
 
@@ -74,10 +74,12 @@ async function executeTaskCmd(
         vars = tv.vars;
         model = configureTaskModel(tv.conf, taskFileSpec);
     } else {
+        //console.log("TV IN", args);
         const tv = parseTaskVars({ name: name, prompt: pr, ...args }, taskFileSpec?.inferParams ? taskFileSpec.inferParams as Record<string, any> : {});
         vars = tv.vars;
         model = configureTaskModel(tv.conf, taskFileSpec);
     }
+    //console.log("V", vars);
     //console.log("MODEL", model);
     // tools
     const taskSpec = taskFileSpec as LmTask;
@@ -175,4 +177,4 @@ async function executeTaskCmd(
     return out
 }
 
-export { executeTaskCmd }
+export { executeTaskCmd };
