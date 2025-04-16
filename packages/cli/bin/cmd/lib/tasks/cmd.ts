@@ -75,10 +75,12 @@ async function executeTaskCmd(
         vars = tv.vars;
         model = configureTaskModel(tv.conf, taskFileSpec);
     } else {
+        //console.log("TV IN", args);
         const tv = parseTaskVars({ name: name, prompt: pr, ...args }, taskFileSpec?.inferParams ? taskFileSpec.inferParams as Record<string, any> : {});
         vars = tv.vars;
         model = configureTaskModel(tv.conf, taskFileSpec);
     }
+    //console.log("V", vars);
     //console.log("MODEL", model);
     // tools
     const taskSpec = taskFileSpec as LmTask;

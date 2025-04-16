@@ -2,11 +2,17 @@ import { getFeatureSpec } from "../../../state/features.js";
 import { FeatureType } from "../../../interfaces.js";
 import { AgentTask } from "@agent-smith/jobs";
 import { createJsAction } from "../actions/read.js";
+import { parseTaskVars } from "../tasks/conf.js";
+
 
 async function executeAdaptaterCmd(
     args: Array<string> | Record<string, any> = [], options: any = {}
 ): Promise<any> {
-    //console.log("AARGS", args);
+    //console.log("AD -* AARGS", args);
+    //console.log("AD -* OPTs", options);
+    /*const { conf, vars } = parseTaskVars(args, {});
+    console.log("AD -* CONF", conf);
+    console.log("AD -* VARS", vars);*/
     const isWorkflow = !Array.isArray(args);
     let name: string;
     if (!isWorkflow) {
@@ -27,6 +33,7 @@ async function executeAdaptaterCmd(
     act = createJsAction(jsa.action);
     let res;
     try {
+        //console.log("ADAPT RUN", { ...conf, ...vars });
         res = await act.run(args, options);
         //sconsole.log("ADAPT RES", res);
     } catch (e) {
