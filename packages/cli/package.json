@@ -2,7 +2,7 @@
   "name": "@agent-smith/cli",
   "description": "Agent Smith: terminal client for language model agents",
   "repository": "https://github.com/synw/agent-smith",
-  "version": "0.0.51",
+  "version": "0.0.52",
   "scripts": {
     "buildrl": "rm -rf dist/* && rollup -c",
     "build": "rm -rf dist/* && tsc",
