@@ -1,17 +1,18 @@
 //import { LmTask, LmTaskBuilder, LmTaskOutput, LmTaskToolSpec } from "../../../../../lmtask/dist/main.js";
+import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec, ModelSpec } from "@agent-smith/lmtask";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import YAML from 'yaml';
-import { LmTask, LmTaskBuilder, LmTaskConf, LmTaskOutput, LmTaskToolSpec, ModelSpec } from "@agent-smith/lmtask";
 import { brain, initAgent, taskBuilder } from "../../../agent.js";
-import { getFeatureSpec } from "../../../state/features.js";
+import { readTool } from "../../../db/read.js";
 import { FeatureType, LmTaskFileSpec } from "../../../interfaces.js";
+import { getFeatureSpec } from "../../../state/features.js";
 import { isChatMode, isDebug, isShowTokens, isVerbose } from "../../../state/state.js";
-import { formatStats, parseInputOptions } from "../utils.js";
 import { readTask } from "../../sys/read_task.js";
-import { readFeature, readTool } from "../../../db/read.js";
 import { executeActionCmd, } from "../actions/cmd.js";
+import { formatStats, parseInputOptions } from "../utils.js";
 import { executeWorkflowCmd } from "../workflows/cmd.js";
 import { configureTaskModel, parseTaskVars } from "./conf.js";
+import { PromptTemplate } from "modprompt";
 
 
 async function executeTaskCmd(
@@ -162,6 +163,20 @@ async function executeTaskCmd(
     catch (err) {
         throw new Error(`Error executing task: ${name} ${err}`);
     }
+    // execute tool calls
+    /*const toolCallSeq = new PromptTemplate(model.template).toolsDef?.call.split("{tools}");
+    if (!toolCallSeq) {
+        throw new Error(`tool call error: can not find tool call definition for ${model.template} template`)
+    }
+    const toolCallStart = toolCallSeq[0];
+    let toolCallEnd: string | null = null;
+    if (toolCallSeq.length > 1) {
+        toolCallEnd = toolCallSeq[1]
+    }
+    console.log("TSEQ", toolCallSeq, out.answer.text.includes(toolCallSeq[0].trim()));
+    if (out.answer.text.includes(toolCallStart)) {
+        console.log("TOOL CALL", out.answer.text)
+    }*/
     // chat mode
     if (isChatMode.value) {
         if (brain.ex.name != ex.name) {
@@ -175,4 +190,4 @@ async function executeTaskCmd(
     return out
 }
 
-export { executeTaskCmd }
+export { executeTaskCmd };

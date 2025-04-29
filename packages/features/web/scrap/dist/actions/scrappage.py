@@ -1,6 +1,6 @@
 """
 # tool
-description: Scrap a webpage's content
+description: Retrieve a webpage's content
 arguments:
     url:
         description: The url of the web page to read

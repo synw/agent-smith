@@ -10,7 +10,7 @@ import { LmTaskBuilder } from "../packages/lmtask/dist/task.js"
 const model = { name: "llama3.1:latest", ctx: 8192, template: "llama3" };
 
 async function main() {
-    const taskPath = "./sample/mytask.yml"
+    const taskPath = "./sample/toolsdemo.yml"
 
     const brain = useAgentBrain();
     await brain.initLocal();

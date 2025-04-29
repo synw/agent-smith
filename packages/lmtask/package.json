@@ -16,7 +16,7 @@
   "dependencies": {
     "@agent-smith/jobs": "^0.0.14",
     "@agent-smith/tfm": "^0.1.2",
-    "modprompt": "^0.10.9",
+    "modprompt": "file:/home/ggg/dev/js/modprompt",
     "yaml": "^2.7.1"
   },
   "devDependencies": {

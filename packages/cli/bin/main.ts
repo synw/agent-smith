@@ -10,6 +10,7 @@ import { usePerfTimer } from "./primitives/perf.js";
 import { parseInferenceArgs } from "./primitives/args.js";
 import { parseTaskVars } from "./cmd/lib/tasks/conf.js";
 import { LmTaskConf } from "@agent-smith/lmtask/dist/interfaces.js";
+import { extractToolDoc } from "./cmd/lib/tools.js";
 
 export {
     execute,
@@ -25,5 +26,6 @@ export {
     usePerfTimer,
     parseInferenceArgs,
     parseTaskVars,
+    extractToolDoc,
     LmTaskConf,
 }

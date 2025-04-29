@@ -12,7 +12,7 @@
   "dependencies": {
     "@agent-smith/brain": "^0.0.42",
     "@agent-smith/jobs": "^0.0.14",
-    "@agent-smith/lmtask": "^0.0.37",
+    "@agent-smith/lmtask": "file:/home/ggg/dev/js/agent-smith/packages/lmtask",
     "@agent-smith/tfm": "^0.1.2",
     "@inquirer/prompts": "^7.4.1",
     "@inquirer/select": "^4.1.1",
@@ -23,7 +23,7 @@
     "clipboardy": "^4.0.0",
     "commander": "^13.1.0",
     "marked-terminal": "^7.3.0",
-    "modprompt": "^0.10.9",
+    "modprompt": "file:/home/ggg/dev/js/modprompt",
     "python-shell": "^5.0.0",
     "yaml": "^2.7.1"
   },
