@@ -1,7 +1,7 @@
 ctx: 32768
 max_tokens: 8192
 granite2b:
-    name: granite3.2-vision:2b-q8_0
+    name: granite3.2-vision:2b-q8
     template: phi3
 gemma4b:
   name: gemma3:4b-it-q8_0

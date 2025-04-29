@@ -2,6 +2,11 @@ name: vision
 description: Run an inference query with a vision model
 prompt: |-
     {prompt}
+modelpack:
+    default: minicpm-v:8b-2.6-q8_0
+    recommended:
+        - granite3.2-vision:2b-q8_0
+        - 
 model:
     name: minicpm-v:8b-2.6-q8_0
     ctx: 32768

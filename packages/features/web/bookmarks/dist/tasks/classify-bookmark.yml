@@ -1,0 +1,96 @@
+description: Classify a bookmark
+prompt: |-
+    I have this bookmark:
+    
+    ```
+    {prompt}
+    ```
+
+    Classify this bookmark by choosing the most relevant keywords for the topic described in the bookmark. Provide 2 to 5 keywords maximum.
+    If some information is missing ommit it in the response: for example omit "programming_language" if no language information is found in the data. 
+    Important: never output any comment.
+modelpack: 
+  default: granite8b
+ctx: 2048
+inferParams:
+  temperature: 0.2
+  max_tokens: 512
+  top_k: 0
+  top_p: 1
+  min_p: 0.08
+  extra:
+    format:
+      type: object
+      properties:
+        keywords:
+          type: array
+          items:
+            type: string
+        topics:
+          type: array
+          items:
+            type: string
+        programming_language:
+          type: string
+        project_name:
+          type: string
+        is_github_repository:
+          type: boolean
+        is_huggingface_repository:
+          type: boolean
+      required:
+        - keywords
+        - topics
+        - is_github_repository
+        - is_huggingface_repository
+shots:
+  - user: |-
+      {
+        "title": "tangledgroup/llama-cpp-wasm: WebAssembly (Wasm) Build and Bindings for llama.cpp",
+        "uri": "https://github.com/tangledgroup/llama-cpp-wasm"
+      }
+    assistant: |-
+      {
+        "title": "tangledgroup/llama-cpp-wasm: WebAssembly (Wasm) Build and Bindings for llama.cpp",
+        "uri": "https://github.com/tangledgroup/llama-cpp-wasm",
+        "keywords": [
+          "WebAssembly",
+          "Wasm",
+          "llama.cpp"
+        ],
+        "topics": [
+          "AI",
+          "Machine Learning"
+        ],
+        "project_name": "llama-cpp-wasm",
+        "is_github_repository": true,
+        "is_huggingface_repository": false
+      }
+      user: |-
+      {
+        "title": "tangledgroup/llama-cpp-wasm: WebAssembly (Wasm) Build and Bindings for llama.cpp",
+        "uri": "https://github.com/tangledgroup/llama-cpp-wasm"
+      }
+  - user: |-
+      {
+        "title": "LoneStriker/OpenCodeInterpreter-DS-6.7B-GGUF · Hugging Face",
+        "uri": "https://huggingface.co/LoneStriker/OpenCodeInterpreter-DS-6.7B-GGUF"
+      }
+    assistant: |-
+      {
+        "title": "LoneStriker/OpenCodeInterpreter-DS-6.7B-GGUF · Hugging Face",
+        "uri": "https://huggingface.co/LoneStriker/OpenCodeInterpreter-DS-6.7B-GGUF",
+        "keywords": [
+          "Hugging Face",
+          "OpenCodeInterpreter",
+          "GGUF"
+        ],
+        "topics": [
+          "Machine Learning",
+          "Model"
+        ],
+        "project_name": "OpenCodeInterpreter-DS-6.7B-GGUF",
+        "is_github_repository": false,
+        "is_huggingface_repository": true
+      }
+    

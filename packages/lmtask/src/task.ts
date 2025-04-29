@@ -234,7 +234,7 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                                 continue
                             }
                             if (!("arguments" in toolCall)) {
-                                errMsg = `tool call does not includes a name in it's response:\n${toolCall}`;
+                                errMsg = `tool call does not includes arguments in it's response:\n${toolCall}`;
                                 continue
                             }
                             const tool = task.tools.find((t) => t.name === toolCall.name);

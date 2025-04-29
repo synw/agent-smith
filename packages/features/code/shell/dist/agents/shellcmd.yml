@@ -1,3 +1,5 @@
+state:
+  max_retries: 3
 steps:
   write-shellcmd:
     type: task

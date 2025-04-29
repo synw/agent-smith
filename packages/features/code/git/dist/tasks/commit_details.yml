@@ -45,16 +45,12 @@ template:
             Here is the final commit message:
             
             ```text
-            
-model: 
-    name: "mistral-small:latest"
-    ctx: 32768
-    template: mistral-system
-models:
-    8b:
-        name: "llama3.1:latest"
-        ctx: 32768
-        template: llama3
+
+ctx: 8192
+modelpack:
+    default: "mistral-small:latest"
+    recommended:
+        - "llama3.1:latest"
 inferParams:
     top_p: 1
     top_k: 0
