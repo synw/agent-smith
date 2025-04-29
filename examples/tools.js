@@ -8,13 +8,21 @@ import { LmTaskBuilder } from "../packages/lmtask/dist/main.js"
 
 // Run an Ollama server
 
-const model = { name: "granite3.3:2b", ctx: 2048, template: "granite-tools" };
-//const model = { name: "qwen2.5:3b", ctx: 2048, template: "chatml-tools" };
+//const model = { name: "granite3.3:2b", ctx: 2048, template: "granite-tools" };
+//const model = { name: "qwen3:4b", ctx: 2048, template: "chatml-tools" };
+const model = { name: "mistral-small3.1:24b", ctx: 2048, template: "mistral-system-tools" };
 
+//const _prompt = "What are the current weather and trafic conditions in Barcelona?"
+const _prompt = "What is the current weather in Barcelona?"
 
 function get_current_weather(args) {
     console.log("Running the get_current_weather tool with args", args);
     return '{“temp”: 20.5, “unit”: “C”}'
+}
+
+function get_current_trafic(args) {
+    console.log("Running the get_current_trafic tool with args", args);
+    return '{“trafic”: "normal"}'
 }
 
 const weatherToolDef = {
@@ -27,7 +35,16 @@ const weatherToolDef = {
     },
     "execute": get_current_weather,
 };
-
+const traficToolDef = {
+    "name": "get_current_trafic",
+    "description": "Get the current road trafic conditions",
+    "arguments": {
+        "location": {
+            "description": "The city and state, e.g. San Francisco, CA"
+        }
+    },
+    "execute": get_current_trafic,
+};
 
 async function main() {
     const taskPath = "./tasks/toolsexample.yml"
@@ -39,7 +56,7 @@ async function main() {
     const taskBuilder = new LmTaskBuilder(brain);
     // build the task
     const taskSpec = taskBuilder.readFromYaml(ymlTaskDef);
-    taskSpec.tools = [weatherToolDef];
+    taskSpec.tools = [weatherToolDef, traficToolDef];
     const task = taskBuilder.init(taskSpec);
     console.log("Running task...", ymlTaskDef);
     // run the tasks
@@ -49,7 +66,7 @@ async function main() {
     };
     const template = new PromptTemplate(model.template);
     const res = await task.run({
-        prompt: "What is the current weather in Barcelona?",
+        prompt: _prompt,
     }, conf);
     const { isToolCall, toolsCall, error } = template.processAnswer(res.text);
     if (error) {
