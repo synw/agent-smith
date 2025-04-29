@@ -10,25 +10,17 @@ prompt: |-
     Please translate it to {lang}. Return only the translation. {instructions}
 template: 
     system: You are an AI translator assistant
-model:
-    name: aya-expanse:8b-q6_K
-    ctx: 8192
-    template: command-r
-models:
-    xsmall:
-        name: granite3.1-dense:2b-instruct-q8_0
-        ctx: 8192
-        template: chatml
-    small:
-        name: aya-expanse:8b-q6_K
-        ctx: 8192
-        template: command-r
-    large:
-        name: aya-expanse-32b-IQ4_XS
-        ctx: 8192
-        template: command-r
+ctx: 16384
+modelpack:
+    default: aya-expanse:8b-q6_K
+    recommended:
+        - granite2b
+        - aya-expanse:latest
+        - gemma3:12b
+        - gemma3:27b
+        - aya:35b
 inferParams:
-    max_tokens: 4096
+    max_tokens: 8192
     top_k: 0.0
     top_p: 0.0
     min_p: 0.05

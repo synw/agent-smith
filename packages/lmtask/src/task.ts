@@ -211,9 +211,64 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                 //console.log("TASK TOOLS", task.tools);
                 let finalResp = answer.text;
                 if (task?.tools) {
-                    //@ts-ignore
-                    finalResp = await this.processAnswer(answer.text, tpl, task, conf ?? {}, pr, ip);
-                    answer.text = finalResp;
+                    const toolResponseStart = tpl.toolsDef?.response.split("{tools_response}")[0];
+                    const toolCallStart = tpl.toolsDef?.response.split("{tool}")[0];
+                    if (!toolCallStart || !toolResponseStart) {
+                        throw new Error(`Tool definition malformed in template ${tpl.name} (executing task ${task.name})`)
+                    }
+                    const { isToolCall, toolsCall, error } = tpl.processAnswer(answer.text);
+                    if (error) {
+                        throw new Error(`Error processing tool call answer:\n, ${answer}`);
+                    }
+                    //console.log("\nProcessed answer", isToolCall, toolsCall, error);
+                    if (isToolCall) {
+                        //if (conf?.debug) {console.log("LMC", conf);}
+                        // 1. find the which tool
+                        //const tres = tpl.tools.find((t) => t.name == "")
+                        let toolsResponses = new Array<string>();
+                        let errMsg = "";
+                        for (const toolCall of toolsCall) {
+                            // get the tool
+                            if (!("name" in toolCall)) {
+                                errMsg = `tool call does not includes a name in it's response:\n${toolCall}`;
+                                continue
+                            }
+                            if (!("arguments" in toolCall)) {
+                                errMsg = `tool call does not includes arguments in it's response:\n${toolCall}`;
+                                continue
+                            }
+                            const tool = task.tools.find((t) => t.name === toolCall.name);
+                            if (!tool) {
+                                errMsg = `wrong tool call ${task.name} from the model: it does not exist in ${tpl.name}:\n${toolCall}`;
+                                continue
+                            }
+                            // execute tool
+                            if (conf?.debug) {
+                                console.log("Calling tool", toolCall.name, "with arguments", toolCall.arguments);
+                            }
+                            const toolResp = await tool.execute(toolCall.name, toolCall.arguments);
+                            // process tool response
+                            const resp = tpl.encodeToolResponse(toolResp);
+                            toolsResponses.push(resp);
+                            toolUsed = toolCall.name;
+                        }
+                        if (!errMsg) {
+                            let toolsRespMsg = "";
+                            if (toolsResponses.length == 1) {
+                                toolsRespMsg = toolsResponses[0];
+                            } else {
+                                toolsRespMsg = JSON.stringify(toolsResponses);
+                            }
+                            tpl.pushToHistory({
+                                user: prompt,
+                                assistant: answer.text,
+                                tool: toolsRespMsg,
+                            });
+                            answer = await this.expert.think(tpl.prompt(pr), { ...ip, stream: true }, { skipTemplate: true });
+                        } else {
+                            throw new Error(errMsg)
+                        }
+                    }
                 }
                 return { answer: answer, toolUsed: toolUsed, errors: {} }
             },
