@@ -5,7 +5,6 @@ import { readYmlAction } from "../../sys/read_yml_action.js";
 import { execute } from "../../sys/execute.js";
 import { runPyScript } from "../../sys/run_python.js";
 import { pyShell } from "../../../state/state.js";
-import { processOutput } from "../utils.js";
 import { createJsAction } from "./read.js";
 
 function systemAction(path: string): AgentTask<FeatureType, Array<string>, any> {
@@ -76,7 +75,7 @@ async function executeActionCmd(
     }
     const { found, path, ext } = getFeatureSpec(name, "action" as FeatureType);
     if (!found) {
-        throw new Error("Action not found");
+        throw new Error(`Action ${name} not found at ${path}`);
     }
     let act: AgentTask<FeatureType, any, any>;
     /*if (isWorkflow) {

@@ -1,4 +1,4 @@
-//import { LmTask, LmTaskBuilder, LmTaskOutput, LmTaskToolSpec } from "../../../../../lmtask/dist/main.js";
+//import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec, ModelSpec } from "../../../../../lmtask/dist/main.js";
 import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec, ModelSpec } from "@agent-smith/lmtask";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import YAML from 'yaml';
@@ -12,7 +12,6 @@ import { executeActionCmd, } from "../actions/cmd.js";
 import { formatStats, parseInputOptions } from "../utils.js";
 import { executeWorkflowCmd } from "../workflows/cmd.js";
 import { configureTaskModel, parseTaskVars } from "./conf.js";
-import { PromptTemplate } from "modprompt";
 
 
 async function executeTaskCmd(
@@ -84,31 +83,33 @@ async function executeTaskCmd(
     //console.log("MODEL", model);
     // tools
     const taskSpec = taskFileSpec as LmTask;
+    //console.log("Task tools list:", taskSpec.toolsList);
     if (taskSpec.toolsList) {
         taskSpec.tools = []
         for (const toolName of taskSpec.toolsList) {
             const { found, tool, type } = readTool(toolName);
+            if (!found) {
+                throw new Error(`tool ${toolName} not found for task ${taskSpec.name}`);
+            }
+            //console.log("Tool found:", toolName, tool);
             const lmTool: LmTaskToolSpec = {
                 ...tool,
-                execute: async (name, args) => {
+                execute: async (args) => {
+                    //console.log("Execute tool", type, toolName, args);
                     switch (type) {
                         case "action":
-                            const res = await executeActionCmd([name, ...Object.values(args)], options, true);
+                            const res = await executeActionCmd([toolName, ...Object.values(args)], options, true);
                             return res
                         case "task":
-                            const tres = await executeTaskCmd([name, args], options);
+                            const tres = await executeTaskCmd([toolName, args], options);
                             return tres
                         case "workflow":
-                            const wres = await executeWorkflowCmd(name, ...Object.values(args), options);
+                            const wres = await executeWorkflowCmd(toolName, ...Object.values(args), options);
                             return wres
                         default:
-                            throw new Error(`unknown tool execution function type: ${type}`)
+                            throw new Error(`unknown tool execution function type: ${type} for ${toolName}`)
                     }
                 }
-            }
-            if (!found) {
-                console.warn(`Problem: tool ${toolName} not found for task ${taskSpec.name}`);
-                continue
             }
             taskSpec.tools.push(lmTool)
         }
