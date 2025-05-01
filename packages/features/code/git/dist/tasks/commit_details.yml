@@ -32,12 +32,12 @@ template:
         sort them by importance. Alway mention all the changes.
         This is the output format that we need:
 
-        ```text
+        <commit>
         [User provided first line message]
         
         - A short description of the first change (most important)
         - A short description of the second change (less important than the first)
-        ```
+        </commit>
     stop:
         - |-
             ```
@@ -48,9 +48,15 @@ template:
 
 ctx: 8192
 modelpack:
-    default: "mistral-small:latest"
+    default: mistral-small
     recommended:
-        - "llama3.1:latest"
+        - qwen4b
+        - qwen8b
+        - qwen14b
+        - qwen30b
+        - qwen32b
+        - qwencoder14bq8
+        - llama8b
 inferParams:
     top_p: 1
     top_k: 0

@@ -11,7 +11,7 @@ async function action(args) {
             nextParams[sp[0]] = sp[1];
         }
     }
-    //console.log("git diff", ...gitParams)
+    //console.log("************ git diff", ...gitParams)
     const diff = await execute("git", ["diff", ...gitParams]);
     let msg = diff;
     const stagedDiff = await execute("git", ["diff", "--staged", ...gitParams]);
