@@ -30,7 +30,7 @@ template:
         
         If there are no changes or the input is blank then return a blank string. If there are changes
         sort them by importance. Alway mention all the changes.
-        This is the output format that we need:
+        We need to output the final message between <commit></commit> tags, like this:
 
         <commit>
         [User provided first line message]
@@ -38,14 +38,6 @@ template:
         - A short description of the first change (most important)
         - A short description of the second change (less important than the first)
         </commit>
-    stop:
-        - |-
-            ```
-    assistant: |-
-            Here is the final commit message:
-            
-            ```text
-
 ctx: 8192
 modelpack:
     default: mistral-small
