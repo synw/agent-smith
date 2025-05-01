@@ -4,7 +4,7 @@ import { executeTaskCmd } from "../tasks/cmd.js";
 import { executeActionCmd } from "../actions/cmd.js";
 import { executeAdaptaterCmd } from "../adaptaters/cmd.js";
 
-async function executeWorkflowCmd(name: string, args: Array<any> = [], options: any = {}): Promise<any> {
+async function executeWorkflowCmd(name: string, args: Array<any> | Record<string, any> = [], options: any = {}): Promise<any> {
     const { workflow, found } = await readWorkflow(name);
     if (!found) {
         throw new Error(`Workflow ${name} not found`)
@@ -14,7 +14,7 @@ async function executeWorkflowCmd(name: string, args: Array<any> = [], options: 
     if (isDebug.value || isVerbose.value) {
         console.log("Running workflow", name, stepNames.length, "steps");
     }
-    let params: Record<string, any> = {};
+    let params: Record<string, any> = Array.isArray(args) ? {} : args;
     let i = 0;
     const finalTaskIndex = stepNames.length + 1;
     let taskRes: any = {};
@@ -22,6 +22,7 @@ async function executeWorkflowCmd(name: string, args: Array<any> = [], options: 
         if (isDebug.value || isVerbose.value) {
             console.log(`${i + 1}: ${step.type} ${name}`)
         }
+        // @ts-ignore
         const p: Array<any> | Record<string, any> = i == 0 ? [name, ...args] : { name: name, ...params };
         //console.log("P", p);
         switch (step.type) {
@@ -36,7 +37,7 @@ async function executeWorkflowCmd(name: string, args: Array<any> = [], options: 
                 break;
             case "action":
                 try {
-                    //console.log("WP", p);
+                    //console.log("EXECA", p);
                     const ares = await executeActionCmd(p, options, true);
                     taskRes = ares;
                     if (i == finalTaskIndex) {

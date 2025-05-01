@@ -63,6 +63,7 @@ async function executeActionCmd(
 ): Promise<any> {
     //console.log("AARGS", args);
     const isWorkflow = !Array.isArray(args);
+    //console.log("Action is workflow", isWorkflow);
     let name: string;
     if (!isWorkflow) {
         name = args.shift()!;

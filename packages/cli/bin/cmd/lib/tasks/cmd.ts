@@ -13,7 +13,6 @@ import { formatStats, parseInputOptions } from "../utils.js";
 import { executeWorkflowCmd } from "../workflows/cmd.js";
 import { configureTaskModel, parseTaskVars } from "./conf.js";
 
-
 async function executeTaskCmd(
     args: Array<string> | Record<string, any> = [], options: Record<string, any> = {}
 ): Promise<LmTaskOutput> {
@@ -29,8 +28,11 @@ async function executeTaskCmd(
     if (!isWorkflow) {
         name = args.shift()!;
         //const params = args.filter((x) => x.length > 0);
-        //console.log("Task run params", params);
+        //console.log("TaskARGS", args);
         const _pr = await parseInputOptions(options);
+        //console.log("PROMPT:", _pr);
+        //const { inferenceVars, currentArgs } = parseInferenceArgs(args);
+        //sconsole.log("IV", inferenceVars, "CA", currentArgs);
         if (!_pr) {
             const p = args.shift();
             if (p) {
@@ -41,6 +43,7 @@ async function executeTaskCmd(
         } else {
             pr = _pr;
         }
+        //console.log("TaskARGS F", args);
     } else {
         //console.log("ARGS", args)
         if (!(args?.name)) {
@@ -54,6 +57,7 @@ async function executeTaskCmd(
         pr = args.prompt;
         delete args.prompt;
     }
+    //console.log("TARGS", args);
     const { found, path } = getFeatureSpec(name, "task" as FeatureType);
     if (!found) {
         throw new Error(`Task ${name} not found`);
@@ -68,7 +72,6 @@ async function executeTaskCmd(
     // model
     let model: ModelSpec;
     let vars: Record<string, any> = {};
-    //console.log("TARGS", args);
     if (!isWorkflow) {
         const tv = parseTaskVars(args, taskFileSpec?.inferParams ? taskFileSpec.inferParams as Record<string, any> : {});
         vars = tv.vars;
@@ -79,7 +82,7 @@ async function executeTaskCmd(
         vars = tv.vars;
         model = configureTaskModel(tv.conf, taskFileSpec);
     }
-    //console.log("V", vars);
+    //console.log("V", Object.keys(vars));
     //console.log("MODEL", model);
     // tools
     const taskSpec = taskFileSpec as LmTask;

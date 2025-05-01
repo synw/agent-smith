@@ -128,6 +128,15 @@ function _initTaskParams(
         conf.templateName = params.templateName;
         delete params.templateName;
     }
+    if (params?.m) {
+        if (params.m.includes("/")) {
+            const _s = params.m.split("/");
+            conf.modelname = _s[0];
+            conf.templateName = _s[1];
+        } else {
+            conf.modelname = params.m;
+        }
+    }
     const ip = conf.inferParams as Record<string, any>;
     //console.log("IP", ip);
     if (params?.inferParams) {

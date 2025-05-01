@@ -27,7 +27,8 @@ function parseInferenceArgs(args: Array<string>): {
                     });
                     break;
                 default:
-                    throw new Error(`unknown arg ${a}`)
+                    vars[k] = v
+                //throw new Error(`unknown arg ${a}`)
             }
         } else {
             nargs.push(a)
