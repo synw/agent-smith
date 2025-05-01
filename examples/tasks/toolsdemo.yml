@@ -3,23 +3,54 @@ description: Tools use demo
 prompt: |-
     {prompt}
 model:
-    name: qwen2.5:3b
-    ctx: 8192
+    name: qwen3:4b
+    ctx: 32768
     template: chatml-tools
+    afterSystem: |-     
+        
+        Recommended method if information is needed: perform a web search, then select
+        the best page in the search results and run scrap page to gather more information
 models:
-    xsmall:
-        name: granite3.2:2b-instruct-q8_0
-        ctx: 8192
+    granite2b-tools:
+        name: granite3.3:2b
+        ctx: 32768
         template: granite-tools
-    medium:
-        name: mistral-small:latest
-        ctx: 8192
+        afterSystem: |-     
+        
+            Recommended method if information is needed: perform a web search, then select
+            the best page in the search results and run scrap page to gather more information
+    granite8b-tools:
+        name: granite3.3:8b
+        ctx: 32768
+        template: granite-tools
+        afterSystem: |-     
+        
+            Recommended method if information is needed: perform a web search, then select
+            the best page in the search results and run scrap page to gather more information
+    mistral24b:
+        name: mistral-small3.1:24b
+        ctx: 32768
         template: mistral-system-tools
+        system: |-
+            You are an AI search assistant with tools.
+
+            Recommended method if information is needed: perform a web search, then select
+            the best page in the search results and run scrap page to gather more information
+    qwen30b:
+        name: qwen3:30b
+        ctx: 32768
+        template: chatml-tools
+        afterSystem: |-
+            
+            Recommended method if information is needed: perform a web search, then select
+            the best page in the search results and run scrap page to gather more information
 inferParams:
     top_k: 0
     top_p: 1.0
     min_p: 0.05
     temperature: 0.2
-    max_tokens: 4096
+    max_tokens: 16384
 toolsList:
     - ddsearch
+    - scrappage
+    #- astronomy-expert
