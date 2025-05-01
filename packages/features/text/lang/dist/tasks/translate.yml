@@ -15,6 +15,7 @@ modelpack:
     default: aya-expanse:8b-q6_K
     recommended:
         - granite2b
+        - granite8b
         - aya-expanse:latest
         - gemma3:12b
         - gemma3:27b
