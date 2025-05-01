@@ -3,6 +3,9 @@ max_tokens: 8192
 granite2b:
   name: granite3.2:2b-instruct-q8_0
   template: granite
+granite8b:
+  name: granite3.3:8b
+  template: granite
 aya8b:
   name: aya-expanse:latest
   template: command-r

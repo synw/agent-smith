@@ -5,13 +5,16 @@ llama1b:
   template: llama3
 granite2b:
   name: granite3.3:2b
-  template: granite-tools
+  template: granite
 qwen3b:
   name: qwen2.5:3b-instruct-q8_0
-  template: chatml-tools
+  template: chatml
 llama3b:
   name: llama3.2:3b-instruct-q8_0
   template: llama3
+qwen4b:
+  name: qwen3:4b
+  template: chatml
 phi4mini:
   name: phi4-mini:3.8b-q8_0
   template: phi4
