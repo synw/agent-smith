@@ -15,7 +15,7 @@ from scrapegraphai import telemetry
 
 telemetry.disable_telemetry()
 
-MODEL = "ollama/qwen2.5:32b"
+MODEL = "ollama/qwen3:8b"
 
 nargs = len(sys.argv)
 if nargs < 3:

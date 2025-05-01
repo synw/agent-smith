@@ -4,7 +4,7 @@ llama1b:
   name: llama3.2:1b-instruct-q8_0
   template: llama3
 granite2b:
-  name: granite3.2:2b-instruct-q8_0
+  name: granite3.3:2b
   template: granite
 qwen3b:
   name: qwen2.5:3b-instruct-q8_0
@@ -12,6 +12,9 @@ qwen3b:
 llama3b:
   name: llama3.2:3b-instruct-q8_0
   template: llama3
+qwen4b:
+  name: qwen3:4b
+  template: chatml
 phi4mini:
   name: phi4-mini:3.8b-q8_0
   template: phi4
@@ -19,5 +22,5 @@ nemotron4b:
   name: nemotron-mini:4b-instruct-q8_0
   template: nemotron
 gemma4b:
-  name: gemma3:4b-it-q8_0
+  name: gemma3:4b-it-qat
   template: gemma

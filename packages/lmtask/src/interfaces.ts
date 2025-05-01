@@ -1,12 +1,13 @@
 import { LmExpert } from "@agent-smith/brain";
 import { InferenceParams, InferenceResult } from "@locallm/types";
-import { TurnBlock, ToolSpec } from "modprompt";
+import { HistoryTurn, ToolSpec, PromptTemplate } from "modprompt";
 
 interface ModelSpec {
   name: string;
   template: string;
   ctx?: number;
   system?: string;
+  afterSystem?: string;
   assistant?: string;
   inferParams?: InferenceParams;
 }
@@ -57,6 +58,7 @@ interface LmTaskConf<T extends Record<string, any> = Record<string, any>> {
  */
 interface TemplateSpec {
   system?: string;
+  afterSystem?: string;
   stop?: Array<string>;
   assistant?: string;
 }
@@ -68,7 +70,7 @@ interface BaseLmTask {
   template?: TemplateSpec;
   inferParams?: InferenceParams;
   models?: Record<string, ModelSpec>;
-  shots?: Array<TurnBlock>;
+  shots?: Array<HistoryTurn>;
   variables?: { required?: Array<string>; optional?: Array<string> };
   tools?: Array<LmTaskToolSpec>;
   toolsList?: Array<string>;
@@ -85,7 +87,7 @@ interface BaseLmTask {
  * @param {TemplateSpec} [template] - Optional template specification.
  * @param {InferenceParams} [inferParams] - Optional inference parameters.
  * @param {Record<string, ModelSpec>} [models] - Optional additional models by name.
- * @param {Array<TurnBlock>} [shots] - Optional dialogue examples for the task.
+ * @param {Array<HistoryTurn>} [shots] - Optional dialogue examples for the task.
  * @param {{ required?: Array<string>, optional?: Array<string> }} [variables] - Task variables (required/optional).
  * @example
  * const task: LmTask = {
@@ -100,13 +102,13 @@ interface LmTask extends BaseLmTask {
 }
 
 interface LmTaskToolSpec extends ToolSpec {
-  execute: <O = any>(name: string, args: Record<string, any>) => Promise<O>;
+  execute: <O = any>(args: Record<string, any>) => Promise<O>;
 }
 
 interface LmTaskOutput {
   answer: InferenceResult;
   errors: Record<string, string>;
-  toolUsed: string | null;
+  template: PromptTemplate;
 }
 
 export {

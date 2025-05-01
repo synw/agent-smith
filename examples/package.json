@@ -13,7 +13,7 @@
     "@agent-smith/tfm": "^0.1.2",
     "@locallm/api": "^0.2.1",
     "@xenova/transformers": "^2.17.2",
-    "modprompt": "^0.10.9"
+    "modprompt": "file:/home/ggg/dev/js/modprompt"
   },
   "devDependencies": {
     "@locallm/types": "^0.1.9",

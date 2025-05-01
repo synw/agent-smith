@@ -1,4 +1,4 @@
-//import { LmTask, LmTaskBuilder, LmTaskOutput, LmTaskToolSpec } from "../../../../../lmtask/dist/main.js";
+//import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec, ModelSpec } from "../../../../../lmtask/dist/main.js";
 import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec, ModelSpec } from "@agent-smith/lmtask";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import YAML from 'yaml';
@@ -12,7 +12,6 @@ import { executeActionCmd, } from "../actions/cmd.js";
 import { formatStats, parseInputOptions } from "../utils.js";
 import { executeWorkflowCmd } from "../workflows/cmd.js";
 import { configureTaskModel, parseTaskVars } from "./conf.js";
-
 
 async function executeTaskCmd(
     args: Array<string> | Record<string, any> = [], options: Record<string, any> = {}
@@ -29,8 +28,11 @@ async function executeTaskCmd(
     if (!isWorkflow) {
         name = args.shift()!;
         //const params = args.filter((x) => x.length > 0);
-        //console.log("Task run params", params);
+        //console.log("TaskARGS", args);
         const _pr = await parseInputOptions(options);
+        //console.log("PROMPT:", _pr);
+        //const { inferenceVars, currentArgs } = parseInferenceArgs(args);
+        //sconsole.log("IV", inferenceVars, "CA", currentArgs);
         if (!_pr) {
             const p = args.shift();
             if (p) {
@@ -41,6 +43,7 @@ async function executeTaskCmd(
         } else {
             pr = _pr;
         }
+        //console.log("TaskARGS F", args);
     } else {
         //console.log("ARGS", args)
         if (!(args?.name)) {
@@ -54,6 +57,7 @@ async function executeTaskCmd(
         pr = args.prompt;
         delete args.prompt;
     }
+    //console.log("TARGS", args);
     const { found, path } = getFeatureSpec(name, "task" as FeatureType);
     if (!found) {
         throw new Error(`Task ${name} not found`);
@@ -68,7 +72,6 @@ async function executeTaskCmd(
     // model
     let model: ModelSpec;
     let vars: Record<string, any> = {};
-    //console.log("TARGS", args);
     if (!isWorkflow) {
         const tv = parseTaskVars(args, taskFileSpec?.inferParams ? taskFileSpec.inferParams as Record<string, any> : {});
         vars = tv.vars;
@@ -79,35 +82,37 @@ async function executeTaskCmd(
         vars = tv.vars;
         model = configureTaskModel(tv.conf, taskFileSpec);
     }
-    //console.log("V", vars);
+    //console.log("V", Object.keys(vars));
     //console.log("MODEL", model);
     // tools
     const taskSpec = taskFileSpec as LmTask;
+    //console.log("Task tools list:", taskSpec.toolsList);
     if (taskSpec.toolsList) {
         taskSpec.tools = []
         for (const toolName of taskSpec.toolsList) {
             const { found, tool, type } = readTool(toolName);
+            if (!found) {
+                throw new Error(`tool ${toolName} not found for task ${taskSpec.name}`);
+            }
+            //console.log("Tool found:", toolName, tool);
             const lmTool: LmTaskToolSpec = {
                 ...tool,
-                execute: async (name, args) => {
+                execute: async (args) => {
+                    //console.log("Execute tool", type, toolName, args);
                     switch (type) {
                         case "action":
-                            const res = await executeActionCmd([name, ...Object.values(args)], options, true);
+                            const res = await executeActionCmd([toolName, ...Object.values(args)], options, true);
                             return res
                         case "task":
-                            const tres = await executeTaskCmd([name, args], options);
+                            const tres = await executeTaskCmd([toolName, args], options);
                             return tres
                         case "workflow":
-                            const wres = await executeWorkflowCmd(name, ...Object.values(args), options);
+                            const wres = await executeWorkflowCmd(toolName, ...Object.values(args), options);
                             return wres
                         default:
-                            throw new Error(`unknown tool execution function type: ${type}`)
+                            throw new Error(`unknown tool execution function type: ${type} for ${toolName}`)
                     }
                 }
-            }
-            if (!found) {
-                console.warn(`Problem: tool ${toolName} not found for task ${taskSpec.name}`);
-                continue
             }
             taskSpec.tools.push(lmTool)
         }
@@ -164,6 +169,20 @@ async function executeTaskCmd(
     catch (err) {
         throw new Error(`Error executing task: ${name} ${err}`);
     }
+    // execute tool calls
+    /*const toolCallSeq = new PromptTemplate(model.template).toolsDef?.call.split("{tools}");
+    if (!toolCallSeq) {
+        throw new Error(`tool call error: can not find tool call definition for ${model.template} template`)
+    }
+    const toolCallStart = toolCallSeq[0];
+    let toolCallEnd: string | null = null;
+    if (toolCallSeq.length > 1) {
+        toolCallEnd = toolCallSeq[1]
+    }
+    console.log("TSEQ", toolCallSeq, out.answer.text.includes(toolCallSeq[0].trim()));
+    if (out.answer.text.includes(toolCallStart)) {
+        console.log("TOOL CALL", out.answer.text)
+    }*/
     // chat mode
     if (isChatMode.value) {
         if (brain.ex.name != ex.name) {

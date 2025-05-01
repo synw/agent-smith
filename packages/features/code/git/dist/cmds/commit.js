@@ -1,7 +1,37 @@
 import { writeFileSync } from "fs";
 import select from '@inquirer/select';
-import { execute, executeWorkflowCmd, writeToClipboard, initAgent, initState } from "@agent-smith/cli";
-//import { execute, executeWorkflowCmd, writeToClipboard, initAgent, initState } from "../../../../../cli/dist/main.js";
+//import { execute, executeWorkflowCmd, writeToClipboard, initAgent, initState, parseInferenceArgs } from "@agent-smith/cli";
+import { execute, executeWorkflowCmd, writeToClipboard, initAgent, initState, parseInferenceArgs } from "../../../../../cli/dist/main.js";
+
+function extractBetweenTags(
+    text,
+    startTag,
+    endTag,
+) {
+    try {
+        // Find start position
+        const startIndex = text.indexOf(startTag);
+        if (startIndex === -1) return text;
+
+        // Calculate content boundaries
+        let contentStart = startIndex + startTag.length;
+        let contentEnd;
+
+        if (endTag) {
+            contentEnd = text.indexOf(endTag, contentStart);
+            if (contentEnd === -1) return text;
+        } else {
+            // Find next newline for self-closing tags
+            contentEnd = text.indexOf('\n', contentStart);
+            if (contentEnd === -1) contentEnd = text.length;
+        }
+
+        // Extract content
+        return text.substring(contentStart, contentEnd).trim();
+    } catch (error) {
+        throw new Error(`Error parsing content between tags ${startTag} ${endTag}: ${error}`);
+    }
+}
 
 const choices = [
     {
@@ -38,30 +68,39 @@ async function runCmd(args = [], options) {
         throw new Error("No inference server found, canceling")
     }
     let wf = "git_commit";
+    const nargs = [];
     let gitArgs = [];
     for (const arg of args) {
         if (arg.startsWith("msg=")) {
             wf = "git_commit_details";
+            nargs.push(arg)
         } else if (arg.startsWith("pkg=")) {
             wf = "git_commit_pkg";
+            nargs.push(arg)
         } else if (arg.includes("=")) {
-            continue
+            nargs.push(arg)
         } else {
             gitArgs.push(arg)
         }
     }
+    //const { inferenceVars } = parseInferenceArgs(nargs);
+    //console.log("NARGS", nargs);
+    //console.log("GIT ARGS", gitArgs);
     console.log("Generating a commit message ...");
-    const res = await executeWorkflowCmd(wf, args, options);
+    const res = await executeWorkflowCmd(wf, [...gitArgs, ...nargs], options);
     //console.log("RES", res);
     if ("error" in res) {
         console.log(res);
-        throw new Error(`wokflow ${wf} execution error: ${res.error}`)
+        throw new Error(`workflow ${wf} execution error: ${res.error}`)
     }
     //console.log("JOB RES", res);
-    const final = res.answer.text.replace("```", "").trim();
-    /* console.log("\n--------------------------------------------------------");
+    //const final = res.answer.text.replace("```", "").trim();
+    const sresp = res.answer.text.split("</think>");
+    const resp = sresp.length == 1 ? sresp[0] : sresp[1];
+    const final = extractBetweenTags(resp, "<commit>", "</commit>");
+    console.log("\n--------------------------------------------------------");
     console.log(final);
-    console.log("--------------------------------------------------------\n");*/
+    console.log("--------------------------------------------------------\n");
     const answer = await select({
         message: 'Select an action',
         default: "commit",

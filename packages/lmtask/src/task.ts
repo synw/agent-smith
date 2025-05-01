@@ -4,6 +4,8 @@ import { AgentTask, AgentTaskSpec, useAgentTask } from "@agent-smith/jobs";
 import { PromptTemplate } from "modprompt";
 import { useTemplateForModel } from "@agent-smith/tfm";
 import { LmTask, LmTaskConf, LmTaskInput, LmTaskOutput, ModelSpec } from "./interfaces.js";
+import { InferenceParams, InferenceResult } from '@locallm/types';
+import { ToolTurn } from 'modprompt/dist/interfaces.js';
 
 const tfm = useTemplateForModel();
 
@@ -120,6 +122,9 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                     if (task.template?.system) {
                         tpl.replaceSystem(task.template.system)
                     }
+                    if (task.template?.afterSystem) {
+                        tpl.afterSystem(task.template.afterSystem)
+                    }
                     if (task.template?.assistant) {
                         tpl.afterAssistant(" " + task.template.assistant)
                     }
@@ -133,6 +138,9 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                 // model overrides
                 if (task.model?.system) {
                     tpl.replaceSystem(task.model.system)
+                }
+                if (task.model?.afterSystem) {
+                    tpl.afterSystem(task.model.afterSystem)
                 }
                 if (task.model?.assistant) {
                     tpl.afterAssistant(task.model.assistant)
@@ -192,8 +200,6 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                     console.log("-----------", task.model.name, "/", task.model.template, "-----------");
                     console.log(pr);
                     console.log("----------------------------------------------")
-                }
-                if (conf?.debug) {
                     console.log("Infer params:", task.inferParams);
                     console.log("----------------------------------------------")
                 }
@@ -205,72 +211,11 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                         ip["extra"]["raw"] = true
                     }
                 }
-                //console.log("THINK")
                 let answer = await this.expert.think(pr, { ...ip, stream: true }, { skipTemplate: true });
-                // process with tools
-                let toolUsed: string | null = null;
-                //console.log("TASK TOOLS", task.tools);
-                if (task?.tools) {
-                    const toolResponseStart = tpl.toolsDef?.response.split("{tools_response}")[0];
-                    const toolCallStart = tpl.toolsDef?.response.split("{tool}")[0];
-                    if (!toolCallStart || !toolResponseStart) {
-                        throw new Error(`Tool definition malformed in template ${tpl.name} (executing task ${task.name})`)
-                    }
-                    const { isToolCall, toolsCall, error } = tpl.processAnswer(answer.text);
-                    if (error) {
-                        throw new Error(`Error processing tool call answer:\n, ${answer}`);
-                    }
-                    //console.log("\nProcessed answer", isToolCall, toolsCall, error);
-                    if (isToolCall) {
-                        //if (conf?.debug) {console.log("LMC", conf);}
-                        // 1. find the which tool
-                        //const tres = tpl.tools.find((t) => t.name == "")
-                        let toolsResponses = new Array<string>();
-                        let errMsg = "";
-                        for (const toolCall of toolsCall) {
-                            // get the tool
-                            if (!("name" in toolCall)) {
-                                errMsg = `tool call does not includes a name in it's response:\n${toolCall}`;
-                                continue
-                            }
-                            if (!("arguments" in toolCall)) {
-                                errMsg = `tool call does not includes arguments in it's response:\n${toolCall}`;
-                                continue
-                            }
-                            const tool = task.tools.find((t) => t.name === toolCall.name);
-                            if (!tool) {
-                                errMsg = `wrong tool call ${task.name} from the model: it does not exist in ${tpl.name}:\n${toolCall}`;
-                                continue
-                            }
-                            // execute tool
-                            if (conf?.debug) {
-                                console.log("Calling tool", toolCall.name, "with arguments", toolCall.arguments);
-                            }
-                            const toolResp = await tool.execute(toolCall.name, toolCall.arguments);
-                            // process tool response
-                            const resp = tpl.encodeToolResponse(toolResp);
-                            toolsResponses.push(resp);
-                            toolUsed = toolCall.name;
-                        }
-                        if (!errMsg) {
-                            let toolsRespMsg = "";
-                            if (toolsResponses.length == 1) {
-                                toolsRespMsg = toolsResponses[0];
-                            } else {
-                                toolsRespMsg = JSON.stringify(toolsResponses);
-                            }
-                            tpl.pushToHistory({
-                                user: prompt,
-                                assistant: answer.text,
-                                tool: toolsRespMsg,
-                            });
-                            answer = await this.expert.think(tpl.prompt(pr), { ...ip, stream: true }, { skipTemplate: true });
-                        } else {
-                            throw new Error(errMsg)
-                        }
-                    }
-                }
-                return { answer: answer, toolUsed: toolUsed, errors: {} }
+                const { inferenceResult, template } = await this.processAnswer(
+                    answer, tpl, task, conf ?? {}, prompt, { ...ip, stream: true },
+                );
+                return { answer: inferenceResult, template: template, errors: {} }
             },
             abort: async (): Promise<void> => {
                 if (!this.expert) {
@@ -281,6 +226,96 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
             }
         }
         return useAgentTask<T, LmTaskInput, LmTaskOutput, P>(ts)
+    }
+
+    async processAnswer(
+        res: InferenceResult,
+        tpl: PromptTemplate,
+        task: LmTask,
+        conf: Record<string, any>,
+        pr: string,
+        ip: InferenceParams,
+    ): Promise<{ inferenceResult: InferenceResult, template: PromptTemplate }> {
+        if (task?.tools) {
+            const toolResponseStart = tpl.toolsDef?.response.split("{tools_response}")[0];
+            const toolCallStart = tpl.toolsDef?.response.split("{tool}")[0];
+            if (!toolCallStart || !toolResponseStart) {
+                throw new Error(`Tool definition malformed in template ${tpl.name} (executing task ${task.name})`)
+            }
+        }
+        //console.log("\nProcessing answer", res.text);
+        const { isToolCall, toolsCall, error } = tpl.processAnswer(res.text);
+        if (error) {
+            throw new Error(`error processing tool call answer:\n, ${error}`);
+        }
+        //console.log("\nProcessed answer", isToolCall, toolsCall, error);
+        const toolsUsed: Record<string, ToolTurn> = {};
+        if (isToolCall) {
+            //if (conf?.debug) {console.log("LMC", conf);}
+            // 1. find the which tool
+            //const tres = tpl.tools.find((t) => t.name == "")
+            let toolsResponses = new Array<string>();
+            for (const toolCall of toolsCall) {
+                // get the tool
+                if (!("name" in toolCall)) {
+                    throw new Error(`tool call does not includes a name in it's response:\n${toolCall}`);
+                }
+                if (!("arguments" in toolCall)) {
+                    throw new Error(`tool call does not includes a name in it's response:\n${toolCall}`);
+                }
+                //@ts-ignore
+                const tool = task.tools.find((t) => t.name === toolCall.name);
+                if (!tool) {
+                    throw new Error(
+                        `wrong tool call ${task.name} from the model: it does not exist in ${tpl.name}:\n${toolCall}
+                    `);
+                }
+                // execute tool
+                if (conf?.debug === true) {
+                    console.log("\n> Calling tool", toolCall);
+                }
+                //console.log("")
+                const toolResp = await tool.execute(toolCall.arguments);
+                toolsUsed[toolCall.name] = {
+                    call: toolCall,
+                    response: toolResp,
+                };
+                //console.log("RAW TOOL RESP", toolResp);
+                // process tool response
+                //const resp = tpl.encodeToolResponse(toolResp);
+                if (conf?.debug === true) {
+                    console.log("> Tool response:", toolResp);
+                }
+                //toolsResponses.push(toolResp);
+                //toolUsed = toolCall.name;
+            }
+
+            /*let toolsRespMsg = "";
+            if (toolsResponses.length == 1) {
+                toolsRespMsg = toolsResponses[0];
+            } else {
+                toolsRespMsg = JSON.stringify(toolsResponses);
+            }*/
+            //console.log("TOOLS RESPONSES", toolsResponses);
+            tpl.pushToHistory({
+                user: pr,
+                assistant: res.text,
+                tools: toolsUsed,
+            });
+            //@ts-ignore
+            res = await this.expert.think(
+                tpl.prompt(pr),
+                { ...ip, stream: true },
+                { skipTemplate: true },
+            );
+            return await this.processAnswer(res, tpl, task, conf, pr, ip)
+        } else {
+            tpl.pushToHistory({
+                user: pr,
+                assistant: res.text,
+            });
+            return { inferenceResult: res, template: tpl }
+        }
     }
 }
 

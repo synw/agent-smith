@@ -4,7 +4,6 @@ import { LmTaskBuilder } from "@agent-smith/lmtask";
 import { MarkedExtension, marked } from 'marked';
 import { markedTerminal } from "marked-terminal";
 import { FeatureType } from "./interfaces.js";
-import { isDebug } from "./state/state.js";
 
 marked.use(markedTerminal() as MarkedExtension);
 

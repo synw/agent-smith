@@ -1,0 +1,25 @@
+description: Tools use example
+prompt: |-
+    {prompt}
+model:
+    name: qwen3:4b
+    ctx: 8192
+    template: chatml-tools
+models:
+    granite3-2b:
+        name: granite3.3:2b
+        ctx: 8192
+        template: granite-tools
+    mistral-small-24b:
+        name: mistral-small:latest
+        ctx: 8192
+        template: mistral-system-tools
+inferParams:
+    top_k: 0
+    top_p: 1.0
+    min_p: 0.05
+    temperature: 0.2
+    max_tokens: 4096
+toolsList:
+    - weather # from the tool declared in actions/weather.py
+    - traffic # from the tool declared in actions/traffic.js

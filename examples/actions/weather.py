@@ -9,4 +9,4 @@ arguments:
 
 # Fake action for the lmtask_tools demo
 
-print("{“temp”: 20.5, “unit”: “C”}")
+print('{"temp": 18, weather: "rain"}')

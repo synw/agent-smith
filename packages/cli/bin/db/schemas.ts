@@ -72,7 +72,7 @@ const modelfile = `CREATE TABLE IF NOT EXISTS modelfile (
 
 const model = `CREATE TABLE IF NOT EXISTS model (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL,
+    name TEXT NOT NULL,
     shortname TEXT UNIQUE NOT NULL,
     data TEXT NOT NULL
 );`;
