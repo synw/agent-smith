@@ -1,8 +1,8 @@
-import { parseInferenceArgs } from "@agent-smith/cli";
+import { parseArgs } from "@agent-smith/cli";
 
-async function action(args) {
-    const { inferenceVars, currentArgs } = parseInferenceArgs(args);
-    const res = { prompt: currentArgs.join(" "), ...inferenceVars };
+async function action(_args) {
+    const { conf, vars, args } = parseArgs(_args);
+    const res = { prompt: args.join(" "), ...vars, ...conf };
     return res;
 }
 
