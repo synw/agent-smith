@@ -1,0 +1,1 @@
+import{d as a,c as r,o,a as e,t as n}from"./index-_xxmxxzb.js";const l=a({__name:"PromptTab",props:{data:{type:Object,required:!0}},setup(t){return(c,p)=>(o(),r("div",null,[e("code",null,[e("pre",null,n(t.data.finalPrompt),1)])]))}});export{l as _};

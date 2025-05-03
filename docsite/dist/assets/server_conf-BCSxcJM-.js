@@ -1,0 +1,1 @@
+import{d as o,c as a,o as n,a as s,g as t,w as r}from"./index-_xxmxxzb.js";const c={class:"w-full h-full"},f=o({__name:"server_conf",setup(l){return(_,e)=>(n(),a("div",c,[e[0]||(e[0]=s("div",{class:"prosed"},[s("h2",null,"Agent config")],-1)),t(r)]))}});export{f as default};
