@@ -2,8 +2,6 @@ import { getFeatureSpec } from "../../../state/features.js";
 import { FeatureType } from "../../../interfaces.js";
 import { AgentTask } from "@agent-smith/jobs";
 import { createJsAction } from "../actions/read.js";
-import { parseTaskVars } from "../tasks/conf.js";
-
 
 async function executeAdaptaterCmd(
     args: Array<string> | Record<string, any> = [], options: any = {}

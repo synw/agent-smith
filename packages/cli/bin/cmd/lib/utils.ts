@@ -1,12 +1,11 @@
-import { LmTaskOutput } from "@agent-smith/lmtask";
 //import { LmTask } from "../../../../lmtask/dist/interfaces.js";
+import { InferenceStats } from "@locallm/types";
+import { marked } from "../../agent.js";
 import { Cmd } from "../../interfaces.js";
 import { formatMode, initFilepaths, inputMode, outputMode, promptfilePath } from "../../state/state.js";
 import { modes } from "../clicmds/modes.js";
 import { readClipboard, writeToClipboard } from "../sys/clipboard.js";
 import { readFile } from "../sys/read.js";
-import { InferenceStats } from "@locallm/types/dist/interfaces.js";
-import { marked } from "../../agent.js";
 
 async function setOptions(
     args: Array<string> = [], options: Record<string, any>,
@@ -92,12 +91,13 @@ function formatStats(stats: InferenceStats): string {
 }
 
 export {
+    formatStats,
     //initTaskConf,
     //initTaskParams,
     //initTaskVars,
     parseInputOptions,
     processOutput,
     readPromptFile,
-    setOptions,
-    formatStats,
+    setOptions
 };
+

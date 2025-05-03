@@ -96,7 +96,19 @@ function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): Mod
     return model
 }
 
-function parseTaskVars(
+function mergeInferParams(
+    userInferParams: Record<string, any>,
+    taskInferParams: InferenceParams
+): InferenceParams {
+    const ip = taskInferParams as Record<string, any>;
+    //console.log("IP", ip);
+    for (const [k, v] of Object.entries(userInferParams)) {
+        ip[k] = v
+    }
+    return ip as InferenceParams
+}
+
+/*function parseTaskVars(
     params: Array<any> | Record<string, any>, inferParams: Record<string, any> = {}
 ): { conf: LmTaskConfig, vars: Record<string, any> } {
     //console.log("")
@@ -188,9 +200,10 @@ function _initTaskVars(
         }
     });
     return { conf, vars }
-}
+}*/
 
 export {
-    parseTaskVars,
+    mergeInferParams,
+    //parseTaskVars,
     configureTaskModel,
 }

@@ -11,7 +11,8 @@ import { readTask } from "../../sys/read_task.js";
 import { executeActionCmd, } from "../actions/cmd.js";
 import { formatStats, parseInputOptions } from "../utils.js";
 import { executeWorkflowCmd } from "../workflows/cmd.js";
-import { configureTaskModel, parseTaskVars } from "./conf.js";
+import { configureTaskModel, mergeInferParams } from "./conf.js";
+import { parseArgs } from "../../../primitives/args.js";
 
 async function executeTaskCmd(
     args: Array<string> | Record<string, any> = [], options: Record<string, any> = {}
@@ -45,7 +46,7 @@ async function executeTaskCmd(
         }
         //console.log("TaskARGS F", args);
     } else {
-        //console.log("ARGS", args)
+        //console.log("TW ARGS", args);
         if (!(args?.name)) {
             throw new Error("Provide a task name param")
         }
@@ -53,9 +54,9 @@ async function executeTaskCmd(
             throw new Error("Provide a task prompt param")
         }
         name = args.name;
-        delete args.name;
+        //delete args.name;
         pr = args.prompt;
-        delete args.prompt;
+        //delete args.prompt;
     }
     //console.log("TARGS", args);
     const { found, path } = getFeatureSpec(name, "task" as FeatureType);
@@ -70,18 +71,24 @@ async function executeTaskCmd(
     //const taskRawSpec = taskBuilder.readFromYaml(res.ymlTask);
     const taskFileSpec = YAML.parse(res.ymlTask) as LmTaskFileSpec;
     // model
-    let model: ModelSpec;
-    let vars: Record<string, any> = {};
-    if (!isWorkflow) {
-        const tv = parseTaskVars(args, taskFileSpec?.inferParams ? taskFileSpec.inferParams as Record<string, any> : {});
-        vars = tv.vars;
-        model = configureTaskModel(tv.conf, taskFileSpec);
+    //console.log("ARGSIN", args);
+    const { conf, vars } = parseArgs(args);
+    //console.log("PCONF", conf);
+    //console.log("PVARS", vars);
+    conf.inferParams = mergeInferParams(conf.inferParams, taskFileSpec.inferParams ?? {});
+    const model = configureTaskModel(conf, taskFileSpec);
+    /*if (!isWorkflow) {
+        const { conf, vars } = parseArgs(args);
+        conf.inferParams = mergeInferParams(conf.inferParams);
+        //const tv = parseTaskVars(args, taskFileSpec?.inferParams ? taskFileSpec.inferParams as Record<string, any> : {});
+        model = configureTaskModel(conf, taskFileSpec);
     } else {
         //console.log("TV IN", args);
+        const { conf, vars } = parseArgs(args);
         const tv = parseTaskVars({ name: name, prompt: pr, ...args }, taskFileSpec?.inferParams ? taskFileSpec.inferParams as Record<string, any> : {});
         vars = tv.vars;
         model = configureTaskModel(tv.conf, taskFileSpec);
-    }
+    }*/
     //console.log("V", Object.keys(vars));
     //console.log("MODEL", model);
     // tools
@@ -152,37 +159,24 @@ async function executeTaskCmd(
             c = !c
         });
     }
-    const conf: LmTaskConf = {
+    const tconf: LmTaskConf = {
         expert: ex,
         model: model,
         debug: isDebug.value,
+        ...conf,
     }
-    conf.expert = ex;
+    tconf.expert = ex;
     if (isDebug.value || isVerbose.value) {
-        conf.debug = true;
+        tconf.debug = true;
     }
     let out: LmTaskOutput;
     try {
-        out = await task.run({ prompt: pr, ...vars }, conf);
+        out = await task.run({ prompt: pr, ...vars }, tconf);
         console.log()
     }
     catch (err) {
         throw new Error(`Error executing task: ${name} ${err}`);
     }
-    // execute tool calls
-    /*const toolCallSeq = new PromptTemplate(model.template).toolsDef?.call.split("{tools}");
-    if (!toolCallSeq) {
-        throw new Error(`tool call error: can not find tool call definition for ${model.template} template`)
-    }
-    const toolCallStart = toolCallSeq[0];
-    let toolCallEnd: string | null = null;
-    if (toolCallSeq.length > 1) {
-        toolCallEnd = toolCallSeq[1]
-    }
-    console.log("TSEQ", toolCallSeq, out.answer.text.includes(toolCallSeq[0].trim()));
-    if (out.answer.text.includes(toolCallStart)) {
-        console.log("TOOL CALL", out.answer.text)
-    }*/
     // chat mode
     if (isChatMode.value) {
         if (brain.ex.name != ex.name) {

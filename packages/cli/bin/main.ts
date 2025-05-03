@@ -7,8 +7,7 @@ import { pingCmd } from "./cmd/clicmds/cmds.js";
 import { initAgent } from "./agent.js";
 import { initState, pluginDataDir } from "./state/state.js";
 import { usePerfTimer } from "./primitives/perf.js";
-import { parseInferenceArgs } from "./primitives/args.js";
-import { parseTaskVars } from "./cmd/lib/tasks/conf.js";
+import { parseArgs } from "./primitives/args.js";
 import { LmTaskConf } from "@agent-smith/lmtask/dist/interfaces.js";
 import { extractToolDoc } from "./cmd/lib/tools.js";
 
@@ -24,8 +23,7 @@ export {
     initState,
     pluginDataDir,
     usePerfTimer,
-    parseInferenceArgs,
-    parseTaskVars,
+    parseArgs,
     extractToolDoc,
     LmTaskConf,
 }

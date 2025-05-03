@@ -1,42 +1,96 @@
-function parseInferenceArgs(args: Array<string>): {
-    inferenceVars: Record<string, any>,
-    currentArgs: Array<string>
+import { InferenceParams } from "@locallm/types";
+import { LmTaskConfig } from "../interfaces.js";
+
+function parseArgs(params: Record<string, any> | Array<any>): {
+    conf: LmTaskConfig,
+    vars: Record<string, any>,
+    args: Array<string>,
 } {
-    const vars: Record<string, any> = { "inferParams": {} };
-    const nargs = new Array<string>();
-    //console.log("PARSE INFER ARGS", args);
+    switch (Array.isArray(params)) {
+        case true:
+            return parseArrayArgs(params as Array<any>)
+        default:
+            return { ...parseObjectArgs(params as Record<string, any>), args: [] }
+    }
+}
+
+function parseObjectArgs(params: Record<string, any>): {
+    conf: LmTaskConfig,
+    vars: Record<string, any>,
+} {
+    const conf: LmTaskConfig = { inferParams: {}, modelname: "", templateName: "" };
+    if (!params?.prompt) {
+        throw new Error(`Error initializing task params: provide a prompt`)
+    }
+    if (params?.images) {
+        conf.inferParams.images = params.images;
+        delete params.images;
+    }
+    if (params?.modelname) {
+        conf.modelname = params.modelname;
+        delete params.modelname;
+    }
+    if (params?.template) {
+        conf.templateName = params.templateName;
+        delete params.templateName;
+    }
+    if (params?.m) {
+        if (params.m.includes("/")) {
+            const _s = params.m.split("/");
+            conf.modelname = _s[0];
+            conf.templateName = _s[1];
+        } else {
+            conf.modelname = params.m;
+        }
+    }
+    if (params?.ip) {
+        conf.inferParams = params.ip as InferenceParams;
+    }
+    const res = { conf: conf, vars: params };
+    return res
+}
+
+function parseArrayArgs(args: Array<string>): {
+    conf: LmTaskConfig,
+    vars: Record<string, any>,
+    args: Array<string>,
+} {
+    const _vars: Record<string, any> = {};
+    const _conf: Record<string, any> = { inferParams: {} };
+    const _nargs = new Array<string>();
+    //console.log("PARSE ARGS", args);
     args.forEach((a) => {
         if (a.includes("=")) {
-            const t = a.split("=");
+            const t = a.split("=", 2);
             const k = t[0];
             const v = t[1];
             switch (k) {
                 case "m":
                     if (v.includes("/")) {
                         const _s = v.split("/");
-                        vars.modelname = _s[0];
-                        vars.templateName = _s[1];
+                        _conf.modelname = _s[0];
+                        _conf.templateName = _s[1];
                     } else {
-                        vars.modelname = v;
+                        _conf.modelname = v;
                     }
                     break;
                 case "ip":
                     v.split(",").forEach((p: string) => {
                         const s = p.split(":");
-                        vars["inferParams"][s[0]] = parseFloat(s[1]);
+                        _conf.inferParams[s[0]] = parseFloat(s[1]);
                     });
                     break;
                 default:
-                    vars[k] = v
-                //throw new Error(`unknown arg ${a}`)
+                    _vars[k] = v;
+                    break
             }
         } else {
-            nargs.push(a)
+            _nargs.push(a)
         }
     });
-    return { inferenceVars: vars, currentArgs: nargs }
+    return { conf: _conf as LmTaskConfig, vars: _vars, args: _nargs }
 }
 
 export {
-    parseInferenceArgs,
+    parseArgs,
 }
