@@ -1,0 +1,14 @@
+{
+  "name": "@agent-smith/autodoc",
+  "private": true,
+  "version": "0.0.1",
+  "description": "Auto documentation features Agent Smith cli",
+  "repository": "https://github.com/synw/agent-smith",
+  "dependencies": {
+    "@agent-smith/cli": "^0.0.53"
+  },
+  "type": "module",
+  "files": [
+    "dist"
+  ]
+}
