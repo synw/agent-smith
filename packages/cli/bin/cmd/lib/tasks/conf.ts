@@ -7,6 +7,7 @@ const tfm = useTemplateForModel();
 
 function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): ModelSpec {
     //console.log("IT CONF", itConf);
+    //console.log("TASK SPEC", taskSpec);
     let modelName: string = "";
     let templateName: string = "";
     let ip = itConf.inferParams;
@@ -22,8 +23,8 @@ function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): Mod
             isModelFromTaskFile = true;
             found = true;
         } else {
-            if (!taskSpec?.modelpack) {
-                throw new Error("provide a default model or a use a modelpack in the task definition")
+            if (!taskSpec?.modelpack?.default) {
+                throw new Error(`provide a default model or a use a modelpack in the ${taskSpec.name} task yaml file`)
             }
             modelName = taskSpec.modelpack.default;
         }
@@ -108,102 +109,7 @@ function mergeInferParams(
     return ip as InferenceParams
 }
 
-/*function parseTaskVars(
-    params: Array<any> | Record<string, any>, inferParams: Record<string, any> = {}
-): { conf: LmTaskConfig, vars: Record<string, any> } {
-    //console.log("")
-    switch (Array.isArray(params)) {
-        case true:
-            return _initTaskVars(params as Array<any>, inferParams)
-        default:
-            return _initTaskParams(params as Record<string, any>, inferParams)
-    }
-}
-
-function _initTaskParams(
-    params: Record<string, any>, inferParams: Record<string, any>
-): { conf: LmTaskConfig, vars: Record<string, any> } {
-    //console.log("TASK PARAMS", params);
-    const conf: LmTaskConfig = { inferParams: inferParams, modelname: "", templateName: "" };
-    if (!params?.prompt) {
-        throw new Error(`Error initializing task params: provide a prompt`)
-    }
-    if (params?.images) {
-        conf.inferParams.images = params.images;
-        delete params.images;
-    }
-    if (params?.modelname) {
-        conf.modelname = params.modelname;
-        delete params.modelname;
-    }
-    if (params?.template) {
-        conf.templateName = params.templateName;
-        delete params.templateName;
-    }
-    if (params?.m) {
-        if (params.m.includes("/")) {
-            const _s = params.m.split("/");
-            conf.modelname = _s[0];
-            conf.templateName = _s[1];
-        } else {
-            conf.modelname = params.m;
-        }
-    }
-    const ip = conf.inferParams as Record<string, any>;
-    //console.log("IP", ip);
-    if (params?.inferParams) {
-        for (const [k, v] of Object.entries(params.inferParams)) {
-            ip[k] = v
-        }
-        conf.inferParams = ip as InferenceParams;
-        delete params.inferParams;
-    }
-    const res = { conf: conf, vars: params };
-    return res
-}
-
-function _initTaskVars(
-    args: Array<any>, inferParams: Record<string, any>
-): { conf: LmTaskConfig, vars: Record<string, any> } {
-    const conf: LmTaskConfig = { inferParams: inferParams, modelname: "", templateName: "" };
-    const vars: Record<string, any> = {};
-    //console.log("Init task vars:", args);
-    args.forEach((a) => {
-        if (a.includes("=")) {
-            const delimiter = "=";
-            const [k, v] = a.split(delimiter, 2);
-            if (v === undefined) {
-                throw new Error(`invalid parameter ${a}`)
-            }
-            switch (k) {
-                case "m":
-                    if (v.includes("/")) {
-                        const _s = v.split("/");
-                        conf.modelname = _s[0];
-                        conf.templateName = _s[1];
-                    } else {
-                        conf.modelname = v;
-                    }
-                    break;
-                case "ip":
-                    v.split(",").forEach((p: string) => {
-                        const s = p.split(":");
-                        const cip = conf.inferParams as Record<string, any>;
-                        cip[s[0]] = parseFloat(s[1]);
-                        conf.inferParams = cip as InferenceParams;
-                    });
-                    break;
-                default:
-                    vars[k] = v;
-                    break;
-            }
-        }
-    });
-    return { conf, vars }
-}*/
-
 export {
     mergeInferParams,
-    //parseTaskVars,
     configureTaskModel,
 }

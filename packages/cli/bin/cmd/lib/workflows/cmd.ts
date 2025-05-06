@@ -23,13 +23,23 @@ async function executeWorkflowCmd(name: string, args: Array<any> | Record<string
             console.log(`${i + 1}: ${step.type} ${name}`)
         }
         // @ts-ignore
-        const p: Array<any> | Record<string, any> = i == 0 ? [name, ...args] : { name: name, ...params };
+        let pval: Array<any> | Record<string, any> = new Array<any>();
+        if (i == 0) {
+            pval = [name, ...args as Array<any>]
+        } else {
+            if (Array.isArray(params)) {
+                pval = [name, ...params]
+            } else {
+                pval = { name: name, ...params }
+            }
+        }
+        //const p: Array<any> | Record<string, any> = i == 0 ? [name, ...args] : { name: name, ...params };
         //console.log("P", p);
         switch (step.type) {
             case "task":
                 try {
-                    //console.log("EXECT", p);
-                    const tr = await executeTaskCmd(p, options);
+                    //console.log("EXECT", pval);
+                    const tr = await executeTaskCmd(pval, options);
                     taskRes = tr;
                 } catch (e) {
                     throw new Error(`workflow task ${i + 1}: ${e}`)
@@ -38,8 +48,13 @@ async function executeWorkflowCmd(name: string, args: Array<any> | Record<string
             case "action":
                 try {
                     //console.log("EXECA", p);
-                    const ares = await executeActionCmd(p, options, true);
-                    taskRes = ares;
+                    const ares = await executeActionCmd(pval, options, true);
+                    if (typeof ares == "string") {
+                        // if the adaptater returns a string convert it to array to pass to the next node
+                        taskRes = [ares]
+                    } else {
+                        taskRes = ares;
+                    }
                     if (i == finalTaskIndex) {
                         //console.log("LAST ACT", i, finalTaskIndex, p);
                         console.log(taskRes);
@@ -52,9 +67,14 @@ async function executeWorkflowCmd(name: string, args: Array<any> | Record<string
                 try {
                     //console.log("AD ARGS IN", p);
                     //console.log("AD OPTS IN", options);
-                    const ares = await executeAdaptaterCmd(p, options);
-                    //console.log("WF ADAPT RES", ares);
-                    taskRes = ares;
+                    const ares = await executeAdaptaterCmd(pval, options);
+                    if (typeof ares == "string") {
+                        // if the adaptater returns a string convert it to array to pass to the next node
+                        taskRes = [ares]
+                    } else {
+                        taskRes = ares;
+                    }
+                    //console.log("WF ADAPT RES", typeof ares, Array.isArray(ares) ? ares.length : "NA");
                 } catch (e) {
                     throw new Error(`workflow adaptater ${i + 1}: ${e}`)
                 }
@@ -69,6 +89,7 @@ async function executeWorkflowCmd(name: string, args: Array<any> | Record<string
             default:
                 throw new Error(`unknown task type ${step.type} in workflow ${name}`)
         }
+        //console.log("WF NODE RES", step.type, taskRes);
         params = taskRes;
         /*if (isDebug.value) {
             console.log("->", params);

@@ -2,6 +2,7 @@ import YAML from 'yaml';
 import * as fs from 'fs';
 import { FeatureExtension } from '../../interfaces.js';
 import { ToolSpec } from 'modprompt';
+import { readYmlFile } from '../sys/read_yml_file.js';
 
 function _extractToolDoc(filePath: string, startComment: string, endComment: string): { found: boolean, doc: string } {
     try {
@@ -39,22 +40,35 @@ function _extractJsToolDoc(filePath: string): { found: boolean, doc: string } {
     return _extractToolDoc(filePath, '/*', '*/')
 }
 
+function _extractYamlToolDoc(filePath: string, name: string): { found: boolean, tspec: ToolSpec } {
+    const { data, found } = readYmlFile(filePath);
+    //console.log("_extractYamlToolDoc from", name, data?.tool);
+    if (!found) {
+        return { found: false, tspec: {} as ToolSpec }
+    }
+    if (!data.tool) {
+        return { found: false, tspec: {} as ToolSpec }
+    }
+    data.tool.name = name;
+    return { found: true, tspec: data.tool as ToolSpec }
+}
+
 function _parseToolDoc(rawTxt: string, name: string): ToolSpec {
     try {
-
         const res = YAML.parse(rawTxt) as Record<string, any>;
         res["name"] = name;
+        //console.log("PARSE TOOL DOC", res);
         return res as ToolSpec
     } catch (e) {
         throw new Error(`Error parsing tool ${name}: data:\n${rawTxt}\n`)
     }
-
 }
 
 function extractToolDoc(name: string, ext: FeatureExtension, dirPath: string): { found: boolean, toolDoc: string } {
     let spec: string;
     let found = false;
-    let doc: string;
+    let doc: string = "";
+    let docts: ToolSpec | null = null
     switch (ext) {
         case "py":
             let res = _extractPyToolDoc(dirPath + "/" + name + "." + ext);
@@ -66,12 +80,22 @@ function extractToolDoc(name: string, ext: FeatureExtension, dirPath: string): {
             found = res2.found;
             doc = res2.doc;
             break;
+        case "yml":
+            let res3 = _extractYamlToolDoc(dirPath + "/" + name + "." + ext, name);
+            found = res3.found;
+            docts = res3.tspec;
+            break;
         default:
             return { found: false, toolDoc: "" }
         //throw new Error(`Unknown tool doc feature type`)        
     }
     if (found) {
-        const ts = _parseToolDoc(doc, name);
+        let ts: ToolSpec;
+        if (docts) {
+            ts = docts
+        } else {
+            ts = _parseToolDoc(doc, name);
+        }
         spec = JSON.stringify(ts, null, "  ");
     } else {
         return { found: false, toolDoc: "" }

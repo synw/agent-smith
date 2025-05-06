@@ -1,7 +1,7 @@
 import { AgentTask, useAgentTask } from "@agent-smith/jobs";
 import { getFeatureSpec } from '../../../state/features.js';
 import { FeatureType } from "../../../interfaces.js";
-import { readYmlAction } from "../../sys/read_yml_action.js";
+import { readYmlFile } from "../../sys/read_yml_file.js";
 import { execute } from "../../sys/execute.js";
 import { runPyScript } from "../../sys/run_python.js";
 import { pyShell } from "../../../state/state.js";
@@ -12,7 +12,7 @@ function systemAction(path: string): AgentTask<FeatureType, Array<string>, any> 
         id: "system_action",
         title: "",
         run: async (args) => {
-            const actionSpec = readYmlAction(path);
+            const actionSpec = readYmlFile(path);
             //console.log("Yml action", JSON.stringify(actionSpec, null, "  "));
             //console.log("Args", args)
             if (!actionSpec.data?.args) {
@@ -40,17 +40,22 @@ function pythonAction(
                 args,
             )
             /*console.log("----------------");
-            console.log("PYOUT", out);
+            console.log("PYOUT", data);
             console.log("----------------");*/
             if (error) {
                 throw new Error(`python error: ${error}`)
             }
-            const txt = data.join("\n");
+            let txt = data[0];
+            if (data.length > 1) {
+                txt = data.join("\n");
+            }
             let final: string | Record<string, any> | Array<any> = txt;
             if (txt.startsWith("{") || txt.startsWith("[")) {
                 try {
                     final = JSON.parse(txt)
-                } catch (e) { }
+                } catch (e) {
+                    //throw new Error(`python error: ${error}`) 
+                }
             }
             return final
         }

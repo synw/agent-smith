@@ -41,6 +41,7 @@ async function executeAdaptaterCmd(
         throw res.error
     }
     //await processOutput(res);
+    //console.log("ADRES", res);
     return res
 }
 

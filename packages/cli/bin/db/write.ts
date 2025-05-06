@@ -155,20 +155,32 @@ function upsertModels(models: Array<DbModelDef>) {
 
 function updateFeatures(feats: Features) {
     //console.log("FEATS", feats);
-    upsertAndCleanFeatures(feats.task, "task");
+    const newTasks = upsertAndCleanFeatures(feats.task, "task");
+    newTasks.forEach((feat) => {
+        const { found, toolDoc } = extractToolDoc(feat.name, feat.ext, feat.path);
+        //console.log(`TASK ${feat.name} TOOL DOC`, toolDoc);
+        if (found) {
+            upsertTool(feat.name, "task", toolDoc)
+        }
+    });
     const newActions = upsertAndCleanFeatures(feats.action, "action");
-    if (newActions.length > 0) {
-        newActions.forEach((feat) => {
-            const { found, toolDoc } = extractToolDoc(feat.name, feat.ext, feat.path);
-            //console.log("TOOL DOC", toolDoc)
-            if (found) {
-                upsertTool(feat.name, "action", toolDoc)
-            }
-        });
-    }
-    upsertAndCleanFeatures(feats.cmd, "cmd");
-    upsertAndCleanFeatures(feats.workflow, "workflow");
+    newActions.forEach((feat) => {
+        const { found, toolDoc } = extractToolDoc(feat.name, feat.ext, feat.path);
+        //console.log(`ACTION ${feat.name} TOOL DOC`, toolDoc);
+        if (found) {
+            upsertTool(feat.name, "action", toolDoc)
+        }
+    });
+    const newWorkflows = upsertAndCleanFeatures(feats.workflow, "workflow");
+    newWorkflows.forEach((feat) => {
+        const { found, toolDoc } = extractToolDoc(feat.name, feat.ext, feat.path);
+        //console.log(`WORKFLOW ${feat.name} TOOL DOC`, toolDoc);
+        if (found) {
+            upsertTool(feat.name, "workflow", toolDoc)
+        }
+    });
     upsertAndCleanFeatures(feats.adaptater, "adaptater");
+    upsertAndCleanFeatures(feats.cmd, "cmd");
     upsertAndCleanFeatures(feats.modelfile, "modelfile");
 }
 

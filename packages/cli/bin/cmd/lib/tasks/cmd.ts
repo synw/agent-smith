@@ -1,18 +1,15 @@
-//import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec, ModelSpec } from "../../../../../lmtask/dist/main.js";
-import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec, ModelSpec } from "@agent-smith/lmtask";
+//import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec } from "../../../../../lmtask/dist/main.js";
+import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec } from "@agent-smith/lmtask";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
-import YAML from 'yaml';
 import { brain, initAgent, taskBuilder } from "../../../agent.js";
 import { readTool } from "../../../db/read.js";
-import { FeatureType, LmTaskFileSpec } from "../../../interfaces.js";
-import { getFeatureSpec } from "../../../state/features.js";
+import { parseArgs } from "../../../primitives/args.js";
 import { isChatMode, isDebug, isShowTokens, isVerbose } from "../../../state/state.js";
-import { readTask } from "../../sys/read_task.js";
 import { executeActionCmd, } from "../actions/cmd.js";
 import { formatStats, parseInputOptions } from "../utils.js";
 import { executeWorkflowCmd } from "../workflows/cmd.js";
 import { configureTaskModel, mergeInferParams } from "./conf.js";
-import { parseArgs } from "../../../primitives/args.js";
+import { openTaskSpec } from "./utils.js";
 
 async function executeTaskCmd(
     args: Array<string> | Record<string, any> = [], options: Record<string, any> = {}
@@ -59,7 +56,7 @@ async function executeTaskCmd(
         //delete args.prompt;
     }
     //console.log("TARGS", args);
-    const { found, path } = getFeatureSpec(name, "task" as FeatureType);
+    /*const { found, path } = getFeatureSpec(name, "task" as FeatureType);
     if (!found) {
         throw new Error(`Task ${name} not found`);
     }
@@ -69,28 +66,20 @@ async function executeTaskCmd(
         throw new Error(`Task ${name}, ${path} not found`)
     }
     //const taskRawSpec = taskBuilder.readFromYaml(res.ymlTask);
-    const taskFileSpec = YAML.parse(res.ymlTask) as LmTaskFileSpec;
+    const taskFileSpec = YAML.parse(res.ymlTask) as LmTaskFileSpec;*/
+    //console.log("Opening task");
+    const taskFileSpec = openTaskSpec(name);
+    //console.log("Opened task");
     // model
     //console.log("ARGSIN", args);
     const { conf, vars } = parseArgs(args);
+    //console.log("Parsed args");
     //console.log("PCONF", conf);
     //console.log("PVARS", vars);
     conf.inferParams = mergeInferParams(conf.inferParams, taskFileSpec.inferParams ?? {});
+    //console.log("Merged infer params");
     const model = configureTaskModel(conf, taskFileSpec);
-    /*if (!isWorkflow) {
-        const { conf, vars } = parseArgs(args);
-        conf.inferParams = mergeInferParams(conf.inferParams);
-        //const tv = parseTaskVars(args, taskFileSpec?.inferParams ? taskFileSpec.inferParams as Record<string, any> : {});
-        model = configureTaskModel(conf, taskFileSpec);
-    } else {
-        //console.log("TV IN", args);
-        const { conf, vars } = parseArgs(args);
-        const tv = parseTaskVars({ name: name, prompt: pr, ...args }, taskFileSpec?.inferParams ? taskFileSpec.inferParams as Record<string, any> : {});
-        vars = tv.vars;
-        model = configureTaskModel(tv.conf, taskFileSpec);
-    }*/
-    //console.log("V", Object.keys(vars));
-    //console.log("MODEL", model);
+    //console.log("Configured task model");
     // tools
     const taskSpec = taskFileSpec as LmTask;
     //console.log("Task tools list:", taskSpec.toolsList);
@@ -105,16 +94,21 @@ async function executeTaskCmd(
             const lmTool: LmTaskToolSpec = {
                 ...tool,
                 execute: async (args) => {
-                    //console.log("Execute tool", type, toolName, args);
+                    //console.log("TASK: Execute tool", type, toolName, args);
+                    const normalizedArgs = Array.isArray(args) ? [toolName, ...args] : {
+                        name: toolName,
+                        ...args,
+                    };
                     switch (type) {
                         case "action":
-                            const res = await executeActionCmd([toolName, ...Object.values(args)], options, true);
+                            const res = await executeActionCmd(normalizedArgs, options, true);
                             return res
                         case "task":
-                            const tres = await executeTaskCmd([toolName, args], options);
-                            return tres
+                            const tres = await executeTaskCmd(normalizedArgs, options);
+                            //console.log("WFTRESP", tres.answer.text);
+                            return tres.answer.text
                         case "workflow":
-                            const wres = await executeWorkflowCmd(toolName, ...Object.values(args), options);
+                            const wres = await executeWorkflowCmd(toolName, normalizedArgs, options);
                             return wres
                         default:
                             throw new Error(`unknown tool execution function type: ${type} for ${toolName}`)
