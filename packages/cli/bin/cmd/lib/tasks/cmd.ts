@@ -169,7 +169,7 @@ async function executeTaskCmd(
         console.log()
     }
     catch (err) {
-        throw new Error(`Error executing task: ${name} ${err}`);
+        throw new Error(`executing task: ${name} (${err})`);
     }
     // chat mode
     if (isChatMode.value) {

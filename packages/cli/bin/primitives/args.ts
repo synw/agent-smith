@@ -1,7 +1,7 @@
 import { InferenceParams } from "@locallm/types";
 import { LmTaskConfig } from "../interfaces.js";
 
-function parseArgs(params: Record<string, any> | Array<any>): {
+function parseArgs(params: Record<string, any> | Array<any>, checkPrompt = false): {
     conf: LmTaskConfig,
     vars: Record<string, any>,
     args: Array<string>,
@@ -10,17 +10,19 @@ function parseArgs(params: Record<string, any> | Array<any>): {
         case true:
             return parseArrayArgs(params as Array<any>)
         default:
-            return { ...parseObjectArgs(params as Record<string, any>), args: [] }
+            return { ...parseObjectArgs(params, checkPrompt), args: [] }
     }
 }
 
-function parseObjectArgs(params: Record<string, any>): {
+function parseObjectArgs(params: Record<string, any>, checkPrompt: boolean): {
     conf: LmTaskConfig,
     vars: Record<string, any>,
 } {
     const conf: LmTaskConfig = { inferParams: {}, modelname: "", templateName: "" };
-    if (!params?.prompt) {
-        throw new Error(`Error initializing task params: provide a prompt`)
+    if (checkPrompt) {
+        if (!params?.prompt) {
+            throw new Error(`args parsing error: provide a prompt`)
+        }
     }
     if (params?.images) {
         conf.inferParams.images = params.images;
