@@ -8,9 +8,9 @@ prompt: |-
     ```
 
     {instructions}
-modelset:
-    name: inference
-    default: 3b
+ctx: 32768
+modelpack:
+    default: mistral-small
 inferParams:
     max_tokens: 8192
     top_k: 0.0

@@ -11,7 +11,18 @@ from youtube_transcript_api.formatters import TextFormatter
 nargs = len(sys.argv)
 if nargs < 2:
     raise ValueError("Provide a video id")
-transcript = YouTubeTranscriptApi.get_transcript(sys.argv[1], preserve_formatting=True)
+langs = []
+if nargs >= 4:
+    for ln in sys.argv[3].split(","):
+        langs.append(ln)
+langs.append("en")
+vid = sys.argv[1]
+#print("Fetching video", vid)
+transcript = YouTubeTranscriptApi().fetch(
+    vid,
+    preserve_formatting=True,
+    languages=langs,
+)
 formatter = TextFormatter()
 txt = formatter.format_transcript(transcript)
 print(txt)
