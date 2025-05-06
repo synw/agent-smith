@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/lmtask",
-  "version": "0.0.38",
+  "version": "0.0.39",
   "description": "A toolkit to create human friendly agents: the language model tasks module",
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
   "dependencies": {
     "@agent-smith/jobs": "^0.0.14",
     "@agent-smith/tfm": "^0.1.2",
-    "modprompt": "^0.11.0",
+    "modprompt": "^0.11.2",
     "yaml": "^2.7.1"
   },
   "devDependencies": {
@@ -26,12 +26,12 @@
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.2",
-    "@types/node": "^22.15.3",
+    "@types/node": "^22.15.12",
     "markdown-it-replace-link": "^1.2.2",
     "restmix": "^0.5.0",
-    "rollup": "^4.40.1",
+    "rollup": "^4.40.2",
     "tslib": "^2.8.1",
-    "typedoc": "^0.28.3",
+    "typedoc": "^0.28.4",
     "typedoc-plugin-markdown": "^4.6.3",
     "typedoc-plugin-rename-defaults": "^0.7.3",
     "typescript": "^5.8.3"

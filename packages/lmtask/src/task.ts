@@ -275,19 +275,24 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                     console.log("\n> Calling tool", toolCall);
                 }
                 //console.log("")
+                //console.log("RAW TOOL CALL", toolCall);
+                //console.log("-------- tool call -----------");
                 const toolResp = await tool.execute(toolCall.arguments);
+                //console.log("-------- end tool call -----------");
                 toolsUsed[toolCall.name] = {
                     call: toolCall,
                     response: toolResp,
                 };
-                //console.log("RAW TOOL RESP", toolResp);
+                /*const resp = tpl.encodeToolResponse(toolResp);
+                console.log("TOOL RESP", resp);
+                toolsResponses.push(resp);*/
+                //sconsole.log("RAW TOOL RESP", toolResp);
                 // process tool response
                 //const resp = tpl.encodeToolResponse(toolResp);
                 if (conf?.debug === true) {
                     console.log("> Tool response:", toolResp);
                 }
                 //toolsResponses.push(toolResp);
-                //toolUsed = toolCall.name;
             }
 
             /*let toolsRespMsg = "";
@@ -302,6 +307,9 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                 assistant: res.text,
                 tools: toolsUsed,
             });
+            /*console.log("----------------- TPL ------------------");
+            console.log(tpl.render())
+            console.log("----------------- END TPL ------------------");*/
             //@ts-ignore
             res = await this.expert.think(
                 tpl.prompt(pr),
