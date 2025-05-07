@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/brain",
-  "version": "0.0.42",
+  "version": "0.0.43",
   "description": "An api to create human friendly agents: the AI brain module",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {
@@ -13,23 +13,23 @@
     "@intrinsicai/gbnfgen": "^0.12.0",
     "@locallm/api": "^0.2.1",
     "@locallm/browser": "^0.0.21",
-    "@wllama/wllama": "^2.3.0",
-    "modprompt": "^0.10.9",
-    "nanostores": "^0.10.3"
+    "@wllama/wllama": "^2.3.1",
+    "modprompt": "^0.11.2",
+    "nanostores": "^1.0.1"
   },
   "devDependencies": {
     "@locallm/types": "^0.1.9",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.2",
-    "@types/node": "^22.13.16",
+    "@types/node": "^22.15.14",
     "markdown-it-replace-link": "^1.2.2",
-    "rollup": "^4.38.0",
+    "rollup": "^4.40.2",
     "tslib": "^2.8.1",
-    "typedoc": "^0.28.1",
-    "typedoc-plugin-markdown": "^4.6.0",
+    "typedoc": "^0.28.4",
+    "typedoc-plugin-markdown": "^4.6.3",
     "typedoc-plugin-rename-defaults": "^0.7.3",
-    "typescript": "^5.8.2"
+    "typescript": "^5.8.3"
   },
   "files": [
     "dist"
