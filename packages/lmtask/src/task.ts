@@ -212,6 +212,8 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                         ip["extra"]["raw"] = true
                     }
                 }
+                //console.log("TLV INFER", task.name);
+                //console.log("CONF", conf);
                 let answer = await this.expert.think(pr, { ...ip, stream: true }, { skipTemplate: true });
                 const { inferenceResult, template } = await this.processAnswer(
                     answer, tpl, task, conf ?? {}, prompt, { ...ip, stream: true }, 1
@@ -264,7 +266,7 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                     throw new Error(`tool call does not includes a name in it's response:\n${toolCall}`);
                 }
                 if (!("arguments" in toolCall)) {
-                    throw new Error(`tool call does not includes a name in it's response:\n${toolCall}`);
+                    throw new Error(`tool call does not includes arguments in it's response:\n${toolCall}`);
                 }
                 //@ts-ignore
                 const tool = task.tools.find((t) => t.name === toolCall.name);
@@ -289,6 +291,9 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                 //console.log("-------- tool call -----------");
                 const toolResp = await tool.execute(toolCall.arguments);
                 //console.log("-------- end tool call -----------");
+                if (conf?.onToolCallEnd) {
+                    conf.onToolCallEnd(toolResp);
+                }
                 toolsUsed[toolCall.name] = {
                     call: toolCall,
                     response: toolResp,
@@ -311,7 +316,8 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
             } else {
                 toolsRespMsg = JSON.stringify(toolsResponses);
             }*/
-            //console.log("TOOLS RESPONSES", toolsResponses);
+            //console.log("TOOL CALLS", toolsCall.map(t => t.name));
+            //console.log("TOOLS USED", toolsUsed.length);
             if (nTurn == 1) {
                 tpl.pushToHistory({
                     user: task.prompt.replace("{prompt}", pr),
@@ -329,12 +335,26 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                 console.log(tpl.render())
                 console.log("----------------- END TPL ------------------");
             }
-            //@ts-ignore
+
+            //const toolCallOnToken = options?.isDebug ? undefined : (t) => null;
+            /*if (conf?.debug) {
+                //@ts-ignore
+                res = await this.expert.think(
+                    tpl.prompt(pr),
+                    { ...ip, stream: true },
+                    { skipTemplate: true },
+                );
+            } else {*/
+            const stream = !conf?.quiet;
+            //console.log("\n----------------- T -----------------", task.name, stream);
+            //@ts-ignore                
             res = await this.expert.think(
                 tpl.prompt(pr),
-                { ...ip, stream: true },
+                { ...ip, stream: stream },
                 { skipTemplate: true },
             );
+            //console.log("\n----------------- END T -----------------");
+            //}
             return await this.processAnswer(res, tpl, task, conf, pr, ip, nTurn + 1)
         } else {
             if (nTurn == 1) {

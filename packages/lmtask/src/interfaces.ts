@@ -42,7 +42,9 @@ interface LmTaskConf<T extends Record<string, any> = Record<string, any>> {
   inferParams?: InferenceParams;
   modelname?: string;
   debug?: boolean;
+  quiet?: boolean;
   onToolCall?: (tc: ToolCallSpec) => void;
+  onToolCallEnd?: (tr: any) => void;
 }
 
 /**
