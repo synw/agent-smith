@@ -1,6 +1,7 @@
 import { LmExpert } from "@agent-smith/brain";
 import { InferenceParams, InferenceResult } from "@locallm/types";
 import { HistoryTurn, ToolSpec, PromptTemplate } from "modprompt";
+import { ToolCallSpec } from "modprompt/dist/interfaces";
 
 interface ModelSpec {
   name: string;
@@ -41,6 +42,7 @@ interface LmTaskConf<T extends Record<string, any> = Record<string, any>> {
   inferParams?: InferenceParams;
   modelname?: string;
   debug?: boolean;
+  onToolCall?: (tc: ToolCallSpec) => void;
 }
 
 /**

@@ -6,6 +6,7 @@ import { useTemplateForModel } from "@agent-smith/tfm";
 import { LmTask, LmTaskConf, LmTaskInput, LmTaskOutput, ModelSpec } from "./interfaces.js";
 import { InferenceParams, InferenceResult } from '@locallm/types';
 import { ToolTurn } from 'modprompt/dist/interfaces.js';
+import { extractBetweenTags } from "./utils.js";
 
 const tfm = useTemplateForModel();
 
@@ -160,7 +161,7 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                 if (task?.shots) {
                     task.shots.forEach((s) => {
                         //console.log("** SHOT", s);
-                        tpl.addShot(s.user, s.assistant)
+                        tpl.addShot(s)
                     });
                 }
                 // check task variables
@@ -213,7 +214,7 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                 }
                 let answer = await this.expert.think(pr, { ...ip, stream: true }, { skipTemplate: true });
                 const { inferenceResult, template } = await this.processAnswer(
-                    answer, tpl, task, conf ?? {}, prompt, { ...ip, stream: true },
+                    answer, tpl, task, conf ?? {}, prompt, { ...ip, stream: true }, 1
                 );
                 return { answer: inferenceResult, template: template, errors: {} }
             },
@@ -232,9 +233,10 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
         res: InferenceResult,
         tpl: PromptTemplate,
         task: LmTask,
-        conf: Record<string, any>,
+        conf: LmTaskConf<P>,
         pr: string,
         ip: InferenceParams,
+        nTurn: number,
     ): Promise<{ inferenceResult: InferenceResult, template: PromptTemplate }> {
         if (task?.tools) {
             const toolResponseStart = tpl.toolsDef?.response.split("{tools_response}")[0];
@@ -244,7 +246,8 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
             }
         }
         //console.log("\nProcessing answer", res.text);
-        const { isToolCall, toolsCall, error } = tpl.processAnswer(res.text);
+        const atxt = tpl?.tags?.think ? extractBetweenTags(res.text, tpl.tags.think.start, tpl.tags.think.end) : res.text;
+        const { isToolCall, toolsCall, error } = tpl.processAnswer(atxt);
         if (error) {
             throw new Error(`error processing tool call answer:\n, ${error}`);
         }
@@ -254,7 +257,7 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
             //if (conf?.debug) {console.log("LMC", conf);}
             // 1. find the which tool
             //const tres = tpl.tools.find((t) => t.name == "")
-            let toolsResponses = new Array<string>();
+            //let toolsResponses = new Array<string>();
             for (const toolCall of toolsCall) {
                 // get the tool
                 if (!("name" in toolCall)) {
@@ -266,13 +269,20 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                 //@ts-ignore
                 const tool = task.tools.find((t) => t.name === toolCall.name);
                 if (!tool) {
-                    throw new Error(
-                        `wrong tool call ${task.name} from the model: it does not exist in ${tpl.name}:\n${toolCall}
-                    `);
+                    const buf = new Array<string>(
+                        `wrong tool call from [${task.name}] from the model: it does not exist in task tools list:`,
+                        JSON.stringify(toolCall, null, "  "),
+                        `Available tools:`,
+                        JSON.stringify(task.tools, null, "  "),
+                    );
+                    throw new Error(buf.join("\n"));
                 }
                 // execute tool
                 if (conf?.debug === true) {
-                    console.log("\n> Calling tool", toolCall);
+                    console.log("\n> Calling tool from", task.name + ":", toolCall);
+                }
+                if (conf?.onToolCall) {
+                    conf.onToolCall(toolCall);
                 }
                 //console.log("")
                 //console.log("RAW TOOL CALL", toolCall);
@@ -302,26 +312,41 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                 toolsRespMsg = JSON.stringify(toolsResponses);
             }*/
             //console.log("TOOLS RESPONSES", toolsResponses);
-            tpl.pushToHistory({
-                user: pr,
-                assistant: res.text,
-                tools: toolsUsed,
-            });
-            /*console.log("----------------- TPL ------------------");
-            console.log(tpl.render())
-            console.log("----------------- END TPL ------------------");*/
+            if (nTurn == 1) {
+                tpl.pushToHistory({
+                    user: task.prompt.replace("{prompt}", pr),
+                    assistant: res.text,
+                    tools: toolsUsed,
+                });
+            } else {
+                tpl.pushToHistory({
+                    assistant: res.text,
+                    tools: toolsUsed,
+                });
+            }
+            if (conf?.debug) {
+                console.log("----------------- TPL ------------------");
+                console.log(tpl.render())
+                console.log("----------------- END TPL ------------------");
+            }
             //@ts-ignore
             res = await this.expert.think(
                 tpl.prompt(pr),
                 { ...ip, stream: true },
                 { skipTemplate: true },
             );
-            return await this.processAnswer(res, tpl, task, conf, pr, ip)
+            return await this.processAnswer(res, tpl, task, conf, pr, ip, nTurn + 1)
         } else {
-            tpl.pushToHistory({
-                user: pr,
-                assistant: res.text,
-            });
+            if (nTurn == 1) {
+                tpl.pushToHistory({
+                    user: task.prompt.replace("{prompt}", pr),
+                    assistant: res.text,
+                });
+            } else {
+                tpl.pushToHistory({
+                    assistant: res.text,
+                });
+            }
             return { inferenceResult: res, template: tpl }
         }
     }
