@@ -246,8 +246,8 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
             }
         }
         //console.log("\nProcessing answer", res.text);
-        const atxt = tpl?.tags?.think ? extractBetweenTags(res.text, tpl.tags.think.start, tpl.tags.think.end) : res.text;
-        const { isToolCall, toolsCall, error } = tpl.processAnswer(atxt);
+        //const atxt = tpl?.tags?.think ? extractBetweenTags(res.text, tpl.tags.think.start, tpl.tags.think.end) : res.text;
+        const { isToolCall, toolsCall, error } = tpl.processAnswer(res.text);
         if (error) {
             throw new Error(`error processing tool call answer:\n, ${error}`);
         }
