@@ -1,37 +1,14 @@
 import { writeFileSync } from "fs";
 import select from '@inquirer/select';
-//import { execute, executeWorkflowCmd, writeToClipboard, initAgent, initState, parseInferenceArgs } from "@agent-smith/cli";
-import { execute, executeWorkflowCmd, writeToClipboard, initAgent, initState, parseInferenceArgs } from "../../../../../cli/dist/main.js";
-
-function extractBetweenTags(
-    text,
-    startTag,
-    endTag,
-) {
-    try {
-        // Find start position
-        const startIndex = text.indexOf(startTag);
-        if (startIndex === -1) return text;
-
-        // Calculate content boundaries
-        let contentStart = startIndex + startTag.length;
-        let contentEnd;
-
-        if (endTag) {
-            contentEnd = text.indexOf(endTag, contentStart);
-            if (contentEnd === -1) return text;
-        } else {
-            // Find next newline for self-closing tags
-            contentEnd = text.indexOf('\n', contentStart);
-            if (contentEnd === -1) contentEnd = text.length;
-        }
-
-        // Extract content
-        return text.substring(contentStart, contentEnd).trim();
-    } catch (error) {
-        throw new Error(`Error parsing content between tags ${startTag} ${endTag}: ${error}`);
-    }
-}
+import { execute, executeWorkflowCmd, writeToClipboard, initAgent, initState, extractBetweenTags } from "@agent-smith/cli";
+/*import {
+    execute,
+    executeWorkflowCmd,
+    writeToClipboard,
+    initAgent,
+    initState,
+    extractBetweenTags,
+} from "../../../../../cli/dist/main.js";*/
 
 const choices = [
     {
@@ -61,16 +38,27 @@ const choices = [
     },
 ];
 
-async function runCmd(args = [], options) {
+async function runCmd(_args = [], options) {
     await initState();
     const isUp = await initAgent();
     if (!isUp) {
         throw new Error("No inference server found, canceling")
     }
     let wf = "git_commit";
+    /*const { conf, vars, args } = parseArgs(_args);
+    const gitArgs = [];
+    const vkeys = Object.keys(vars);
+    if (vkeys.includes("msg")) {
+        gitArgs.msg = vars.msg;
+        delete vars.msg
+    }
+    if (vkeys.includes("pkg")) {
+        gitArgs.pkg = vars.pkg;
+        delete vars.pkg
+    }*/
     const nargs = [];
     let gitArgs = [];
-    for (const arg of args) {
+    for (const arg of _args) {
         if (arg.startsWith("msg=")) {
             wf = "git_commit_details";
             nargs.push(arg)
@@ -87,7 +75,7 @@ async function runCmd(args = [], options) {
     //console.log("NARGS", nargs);
     //console.log("GIT ARGS", gitArgs);
     console.log("Generating a commit message ...");
-    const res = await executeWorkflowCmd(wf, [...gitArgs, ...nargs], options);
+    const res = await executeWorkflowCmd(wf, [...nargs, ...gitArgs], options);
     //console.log("RES", res);
     if ("error" in res) {
         console.log(res);
@@ -95,8 +83,11 @@ async function runCmd(args = [], options) {
     }
     //console.log("JOB RES", res);
     //const final = res.answer.text.replace("```", "").trim();
-    const sresp = res.answer.text.split("</think>");
-    const resp = sresp.length == 1 ? sresp[0] : sresp[1];
+    let resp = res.answer.text;
+    if (res.template.tags?.think) {
+        const sresp = res.answer.text.split(res.template.tags.think.end);
+        resp = sresp.length == 1 ? sresp[0] : sresp[1];
+    }
     const final = extractBetweenTags(resp, "<commit>", "</commit>");
     console.log("\n--------------------------------------------------------");
     console.log(final);

@@ -28,8 +28,8 @@ template:
         - Focus on what was changed and why, rather than how it was changed
         - Tone: concise and professional
         
-        If there are no changes or the input is blank then return a blank string. If there are changes
-        sort them by importance. Alway mention all the changes.
+        If there are no changes or the input is blank then return a blank string.
+        If there are changes sort them by importance (code changes are more important than version update for example). Alway mention all the changes.
         We need to output the final message between <commit></commit> tags, like this:
 
         <commit>
@@ -40,7 +40,7 @@ template:
         </commit>
 ctx: 8192
 modelpack:
-    default: mistral-small
+    default: qwen30b
     recommended:
         - qwen4b
         - qwen8b
@@ -49,6 +49,7 @@ modelpack:
         - qwen32b
         - qwencoder14bq8
         - llama8b
+        - mistral-small
 inferParams:
     top_p: 1
     top_k: 0

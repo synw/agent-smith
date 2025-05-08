@@ -18,25 +18,26 @@ template:
 
         Instructions for the commit messages writing:
       
-        - The first line should be a short, general and descriptive summary of all the changes
+        - The first line should be a short, general and descriptive code changes summary of the most important changes (code structure is more important than version change for example). Focus on the features and code changes
         - Remember to mention the files that were changed, and what was changed
         - Focus on what was changed and why, rather than how it was changed
         - Use bullet points for multiple changes
         - Tone: concise and professional
         
-        If there are no changes or the input is blank then return a blank string. If there are changes
-        sort them by importance. Alway mention all the changes.
-        We need to output the final message between <commit></commit> tags, like this:
+        If there are no changes or the input is blank then return just <commit></commit>.
+        If there are changes sort them by importance (code changes are more important than version update for example). Alway mention all the changes.
+        
+        Important: we need the final message to be wraped between <commit></commit> tags, in order to parse it. Example output:
 
         <commit>
         A descriptive summary of the main purpose of the changes
         
-        - A short description of the first change (most important)
-        - A short description of the second change (less important than the first)s
-        </commit>   
+        - A short description of the first change (most important change)
+        - A short description of the second change (less important change than the first)
+        </commit>
 ctx: 8192
 modelpack:
-    default: mistral-small
+    default: qwen30b
     recommended:
         - qwen4b
         - qwen8b
@@ -45,6 +46,7 @@ modelpack:
         - qwen32b
         - qwencoder14bq8
         - llama8b
+        - mistral-small
 inferParams:
     top_p: 1
     top_k: 0
