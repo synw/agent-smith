@@ -30,6 +30,12 @@ gemma27b:
   ctx: 16384
   inferParams:
     max_tokens: 8192
+qwen30b:
+  name: qwen3:30b
+  template: chatml
+  ctx: 16384
+  inferParams:
+    max_tokens: 8192
 qwen32b:
   name: qwen3:32b
   template: chatml

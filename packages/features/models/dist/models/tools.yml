@@ -3,6 +3,9 @@ max_tokens: 16384
 granite2b-tools:
   name: granite3.3:2b
   template: granite-tools
+phi4mini-tools:
+  name: phi4-mini:3.8b-q8_0
+  template: phi4-tools
 qwen3b-tools:
   name: qwen2.5:3b-instruct-q8_0
   template: chatml-tools

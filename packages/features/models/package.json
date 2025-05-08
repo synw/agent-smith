@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/feat-models",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "Language models sets for the Agent Smith cli",
   "repository": "https://github.com/synw/agent-smith",
   "type": "module",

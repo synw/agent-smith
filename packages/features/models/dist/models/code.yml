@@ -1,5 +1,8 @@
 ctx: 32768
 max_tokens: 16384
+qwencoder3bq8:
+  name: qwen2.5-coder:3b-instruct-q8_0
+  template: chatml
 qwencoder7b:
   name: qwen2.5-coder:latest
   template: chatml
