@@ -6,9 +6,9 @@
   },
   "dependencies": {
     "@agent-smith/body": "^0.0.8",
-    "@agent-smith/brain": "^0.0.42",
+    "@agent-smith/brain": "^0.0.43",
     "@agent-smith/jobs": "^0.0.14",
-    "@agent-smith/lmtask": "^0.0.37",
+    "@agent-smith/lmtask": "^0.0.41",
     "@agent-smith/smem": "^0.0.5",
     "@agent-smith/tfm": "^0.1.2",
     "@locallm/api": "^0.2.1",
@@ -17,7 +17,7 @@
   },
   "devDependencies": {
     "@locallm/types": "^0.1.9",
-    "@types/node": "^22.14.1",
+    "@types/node": "^22.15.16",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }

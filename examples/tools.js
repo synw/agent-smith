@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { default as fs } from "fs";
 import { useAgentBrain } from "@agent-smith/brain";
-//import { LmTaskBuilder } from "@agent-smith/lmtask";
-import { LmTaskBuilder } from "../packages/lmtask/dist/main.js"
+import { LmTaskBuilder } from "@agent-smith/lmtask";
+//import { LmTaskBuilder } from "../packages/lmtask/dist/main.js"
 
 /* 
 To use this as a cli task (will use the toolsList param from the toolsexample.yml task):
@@ -14,11 +14,12 @@ Otherwise use as an independant lmtask as shown below, providing the functions t
 
 // Run an Ollama server
 
-const model = { name: "granite3.3:2b", ctx: 2048, template: "granite-tools" };
-//const model = { name: "qwen3:4b", ctx: 2048, template: "chatml-tools" };
+//const model = { name: "granite3.3:2b", ctx: 2048, template: "granite-tools" };
+const model = { name: "qwen3:4b", ctx: 2048, template: "chatml-tools" };
 //const model = { name: "mistral-small:latest", ctx: 2048, template: "mistral-system-tools" };
 
-const _prompt = "What are the current weather and trafic conditions in Barcelona?"
+const _prompt = `I am landing in Barcelona soon: I plan to reach my hotel and then go for outdoor sport. 
+How are the conditions in the city?`;
 //const _prompt = "What is the current weather in Barcelona?"
 
 function get_current_weather(args) {
@@ -76,8 +77,8 @@ async function main() {
     }, conf);
     console.log("\n\n----------- Template history:");
     console.log(res.template.history);
-    //console.log("\n\n----------- Next turn prompt template:");
-    //console.log(res.template.render());
+    console.log("\n\n----------- Next turn prompt template:");
+    console.log(res.template.render());
 }
 
 (async () => {

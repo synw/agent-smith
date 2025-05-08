@@ -1,13 +1,13 @@
 #!/usr/bin/env node
-import { useLmBackend, useLmExpert } from "@agent-smith/brain";
-//import { useLmBackend } from "../packages/brain/dist/backend.js";
-//import { useLmExpert } from "../packages/brain/dist/expert.js";
+//import { useLmBackend, useLmExpert } from "@agent-smith/brain";
+import { useLmBackend } from "../packages/brain/dist/backend.js";
+import { useLmExpert } from "../packages/brain/dist/expert.js";
 
 // run a local Ollama instance before running this example
 
-const model = "llama3.1:latest";
+const model = "qwen3:4b";
 const ctx = 8192;
-const templateName = "llama3";
+const templateName = "chatml";
 const prompt = "Give me a short list of the planets names in the solar system";
 
 const backend = useLmBackend({

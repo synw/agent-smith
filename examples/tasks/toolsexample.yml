@@ -1,6 +1,10 @@
 description: Tools use example
 prompt: |-
     {prompt}
+template:
+    afterSystem: |-
+        
+        You are an AI touristic assistant
 model:
     name: qwen3:4b
     ctx: 8192
