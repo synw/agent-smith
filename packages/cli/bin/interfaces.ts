@@ -73,6 +73,7 @@ interface BaseLmTaskConfig {
 
 interface LmTaskConfig extends BaseLmTaskConfig {
     modelname?: string;
+    quiet?: boolean;
 }
 
 interface FinalLmTaskConfig {
@@ -86,6 +87,7 @@ type InputMode = "manual" | "promptfile" | "clipboard";
 type OutputMode = "txt" | "clipboard";
 type RunMode = "cli" | "cmd";
 type FormatMode = "text" | "markdown";
+type VerbosityMode = "quiet" | "verbose" | "debug";
 
 type FeatureType = "task" | "action" | "cmd" | "workflow" | "adaptater" | "modelfile";
 type ToolType = "task" | "action" | "cmd" | "workflow";
@@ -102,6 +104,7 @@ export {
     Cmd,
     CmdExecutor,
     InputMode,
+    VerbosityMode,
     OutputMode,
     RunMode,
     FormatMode,

@@ -60,7 +60,7 @@ async function buildCmds(): Promise<Command> {
             const _args = await setOptions(args, options);
             //console.log("FARGS", _args, options);
             const res = await spec.cmd(_args, options);
-            //console.log("CMD RES", res);
+            //console.log("OUTPUT", res);
             await processOutput(res);
             return res
         }

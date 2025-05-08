@@ -63,7 +63,12 @@ function parseArrayArgs(args: Array<string>): {
     //console.log("PARSE ARGS", args);
     args.forEach((a) => {
         if (a.includes("=")) {
-            const t = a.split("=", 2);
+            const index = a.indexOf('=');
+            const t = [
+                a.slice(0, index),
+                a.slice(index + 1)
+            ];
+            //console.log("T", t);
             const k = t[0];
             const v = t[1];
             switch (k) {

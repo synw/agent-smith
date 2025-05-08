@@ -2,7 +2,7 @@
   "name": "@agent-smith/cli",
   "description": "Agent Smith: terminal client for language model agents",
   "repository": "https://github.com/synw/agent-smith",
-  "version": "0.0.59",
+  "version": "0.0.61",
   "scripts": {
     "buildrl": "rm -rf dist/* && rollup -c",
     "build": "rm -rf dist/* && tsc",
@@ -10,22 +10,23 @@
     "watch": "tsc --noCheck -p . -w"
   },
   "dependencies": {
-    "@agent-smith/brain": "^0.0.42",
+    "@agent-smith/brain": "^0.0.43",
     "@agent-smith/jobs": "^0.0.14",
-    "@agent-smith/lmtask": "^0.0.39",
+    "@agent-smith/lmtask": "^0.0.43",
     "@agent-smith/tfm": "^0.1.2",
     "@inquirer/prompts": "^7.5.0",
     "@inquirer/select": "^4.2.0",
     "@vue/reactivity": "^3.5.13",
     "@wllama/wllama": "^2.3.1",
     "ansi-colors": "^4.1.3",
-    "better-sqlite3": "^11.9.1",
+    "better-sqlite3": "^11.10.0",
     "clipboardy": "^4.0.0",
     "commander": "^13.1.0",
     "marked-terminal": "^7.3.0",
-    "modprompt": "^0.11.2",
+    "modprompt": "^0.11.6",
     "python-shell": "^5.0.0",
-    "yaml": "^2.7.1"
+    "yaml": "^2.7.1",
+    "ora": "^8.2.0"
   },
   "devDependencies": {
     "@agent-smith/tmem-jobs": "^0.0.4",
@@ -35,7 +36,7 @@
     "@rollup/plugin-typescript": "^12.1.2",
     "@types/better-sqlite3": "^7.6.13",
     "@types/marked-terminal": "^6.1.1",
-    "@types/node": "^22.15.12",
+    "@types/node": "^22.15.17",
     "restmix": "^0.5.0",
     "rollup": "^4.40.2",
     "ts-node": "^10.9.2",

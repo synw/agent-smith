@@ -1,10 +1,10 @@
 import { Cmd } from "../../interfaces.js";
-import { formatMode, inputMode, isChatMode, isDebug, isShowTokens, isVerbose, outputMode, runMode } from "../../state/state.js";
+import { formatMode, inputMode, isChatMode, isDebug, isShowTokens, isVerbose, outputMode, runMode, setVerbosity } from "../../state/state.js";
 
 const modes: Record<string, Cmd> = {
     "-d": {
         cmd: async () => {
-            isDebug.value = true;
+            setVerbosity("debug");
             if (runMode.value == "cli") { console.log("Debug mode is on") }
         },
         description: "use debug mode",
@@ -18,7 +18,7 @@ const modes: Record<string, Cmd> = {
     },
     "-v": {
         cmd: async () => {
-            isVerbose.value = !isVerbose.value;
+            setVerbosity("verbose");;
             if (runMode.value == "cli") { console.log("Verbose mode is", isVerbose.value ? "on" : "off") }
         },
         description: "use verbose mode",

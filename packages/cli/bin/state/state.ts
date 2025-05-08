@@ -1,7 +1,6 @@
-import { reactive, ref } from "@vue/reactivity";
+import { computed, reactive, ref } from "@vue/reactivity";
 import { PythonShell } from 'python-shell';
-import { InputMode, RunMode, FormatMode, OutputMode } from "../interfaces.js";
-import { confDir } from "../conf.js";
+import { InputMode, RunMode, FormatMode, OutputMode, VerbosityMode } from "../interfaces.js";
 import { initDb } from "../db/db.js";
 import { readFilePaths } from "../db/read.js";
 import path from "path";
@@ -14,8 +13,10 @@ const outputMode = ref<OutputMode>("txt");
 const runMode = ref<RunMode>("cmd");
 const formatMode = ref<FormatMode>("text");
 const isChatMode = ref(false);
-const isDebug = ref(false);
-const isVerbose = ref(false);
+const verbosity = ref<VerbosityMode>("quiet");
+const isDebug = computed(() => verbosity.value == "debug");
+const isVerbose = computed(() => verbosity.value == "verbose");
+const isQuiet = computed(() => verbosity.value == "quiet");
 const isShowTokens = ref(false);
 const promptfilePath = ref("");
 const dataDirPath = ref("");
@@ -66,6 +67,10 @@ function pluginDataDir(pluginName: string): string {
     return pluginDatapath
 }
 
+function setVerbosity(mode: VerbosityMode) {
+    verbosity.value = mode
+}
+
 
 export {
     inputMode,
@@ -77,10 +82,12 @@ export {
     lastCmd,
     isDebug,
     isVerbose,
+    isQuiet,
     promptfilePath,
     dataDirPath,
     pluginDataDir,
     initState,
     initFilepaths,
+    setVerbosity,
     pyShell,
 }

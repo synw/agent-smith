@@ -14,8 +14,9 @@ function openTaskSpec(name: string) {
         throw new Error(`Task ${name}, ${path} not found`)
     }
     //const taskRawSpec = taskBuilder.readFromYaml(res.ymlTask);
-    const taskFileSpec = YAML.parse(res.ymlTask) as LmTaskFileSpec;
-    return taskFileSpec
+    const taskFileSpec = YAML.parse(res.ymlTask);
+    taskFileSpec.name = name;
+    return taskFileSpec as LmTaskFileSpec
 }
 
 export {

@@ -6,6 +6,7 @@ import { formatMode, initFilepaths, inputMode, outputMode, promptfilePath } from
 import { modes } from "../clicmds/modes.js";
 import { readClipboard, writeToClipboard } from "../sys/clipboard.js";
 import { readFile } from "../sys/read.js";
+import { extractBetweenTags, splitThinking } from "../../utils/text.js";
 
 async function setOptions(
     args: Array<string> = [], options: Record<string, any>,
@@ -47,8 +48,13 @@ async function processOutput(res: any) {
     let hasTextData = false;
     if (typeof res == "object") {
         if (res?.answer?.text) {
-            // lm task output
-            data = res.answer.text;
+            //console.log("****************** TPL", res?.answer?.template);
+            if (res?.template?.tags?.think) {
+                const { finalAnswer } = splitThinking(res.answer.text, res.template.tags.think.start, res.template.tags.think.end);
+                data = finalAnswer;
+            } else {
+                data = res.answer.text;
+            }
             hasTextData = true;
         } else {
             data = JSON.stringify(res);
@@ -62,8 +68,8 @@ async function processOutput(res: any) {
         //console.log("Writing to kb", data)
         await writeToClipboard(data);
     }
-    if (formatMode.value == "markdown") {
-        if (hasTextData) {
+    if (hasTextData) {
+        if (formatMode.value == "markdown") {
             console.log("\n------------------\n");
             console.log((marked.parse(data) as string).trim())
         }

@@ -11,15 +11,27 @@ function systemAction(path: string): AgentTask<FeatureType, Array<string>, any> 
     const action = useAgentTask<FeatureType, Array<string>, any>({
         id: "system_action",
         title: "",
-        run: async (args) => {
+        run: async (args: Array<string> | Record<string, any>) => {
+            // convert args for tool calls
+            let runArgs = new Array<string>();
+            if (!Array.isArray(args)) {
+                try {
+                    // obviously a tool call
+                    runArgs = Object.values(args)
+                } catch (e) {
+                    throw new Error(`wrong system action args: ${e}`)
+                }
+            } else {
+                runArgs = args
+            }
             const actionSpec = readYmlFile(path);
             //console.log("Yml action", JSON.stringify(actionSpec, null, "  "));
             //console.log("Args", args)
             if (!actionSpec.data?.args) {
                 actionSpec.data.args = []
             }
-            const out = await execute(actionSpec.data.cmd, [...actionSpec.data.args, ...args]);
-            return { data: out.trim() }
+            const out = await execute(actionSpec.data.cmd, [...actionSpec.data.args, ...runArgs]);
+            return out.trim()
         }
     });
     return action
@@ -66,7 +78,7 @@ function pythonAction(
 async function executeActionCmd(
     args: Array<string> | Record<string, any> = [], options: any = {}, quiet = false
 ): Promise<any> {
-    //console.log("AARGS", args);
+    //console.log("ACTION ARGS", args);
     const isWorkflow = !Array.isArray(args);
     //console.log("Action is workflow", isWorkflow);
     let name: string;
@@ -113,13 +125,9 @@ async function executeActionCmd(
     //console.log("AOPT", options);
     //console.log("AARGS3", args);
     const res = await act.run(args, options);
-    //console.log("ACT RES", res);
-    if (res?.error) {
-        throw res.error
-    }
     if (!quiet) {
         if (res) {
-            console.log(res);
+            console.log("ARES", res);
         }
     }
     //await processOutput(res);
