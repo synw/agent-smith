@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/lmtask",
-  "version": "0.0.43",
+  "version": "0.0.44",
   "description": "A toolkit to create human friendly agents: the language model tasks module",
   "repository": {
     "type": "git",
@@ -16,7 +16,7 @@
   "dependencies": {
     "@agent-smith/jobs": "^0.0.14",
     "@agent-smith/tfm": "^0.1.2",
-    "modprompt": "^0.11.6",
+    "modprompt": "^0.11.7",
     "yaml": "^2.7.1"
   },
   "devDependencies": {
