@@ -3,6 +3,7 @@ import path from "path";
 import { readConf } from "./cmd/sys/read_conf.js";
 import { insertFeaturesPathIfNotExists, insertPluginIfNotExists } from "./db/write.js";
 import { buildPluginsPaths } from "./state/plugins.js";
+import { runtimeError } from "./cmd/lib/user_msgs.js";
 
 // @ts-ignore
 const confDir = path.join(process.env.HOME, ".config/agent-smith/cli");
@@ -20,7 +21,7 @@ const dbPath = path.join(confDir, "config.db");
 async function processConfPath(confPath: string): Promise<{ paths: Array<string>, pf: string, dd: string }> {
     const { found, data } = readConf(confPath);
     if (!found) {
-        console.warn(`Config file ${confPath} not found`);
+        runtimeError(`Config file ${confPath} not found`);
     }
     //console.log(data)
     const allPaths = new Array<string>();

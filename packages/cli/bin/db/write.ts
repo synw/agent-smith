@@ -1,6 +1,7 @@
 import { extractToolDoc } from "../cmd/lib/tools.js";
 import { AliasType, FeatureSpec, FeatureType, Features, DbModelDef } from "../interfaces.js";
 import { db } from "./db.js";
+import { readModels } from "./read.js";
 
 function updatePromptfilePath(pf: string) {
     const deleteStmt = db.prepare("DELETE FROM filepath WHERE name = ?");
@@ -127,28 +128,36 @@ function upsertTool(name: string, type: FeatureType, toolDoc: string) {
     console.log("+", "[tool] from", type, ":", name);
 }
 
-function upsertModels(models: Array<DbModelDef>) {
-    const stmt1 = db.prepare("SELECT shortname FROM model");
-    const rows = stmt1.all() as Array<Record<string, any>>;
-    const existingModelShortNames = rows.map(row => row.shortname) as Array<string>;
-    const stmt = db.prepare(`INSERT INTO model (name, shortname, data) VALUES (?,?,?)`);
-    existingModelShortNames.forEach((name) => {
-        //console.log(name, !availableFeatsNames.includes(name));
-        if (!existingModelShortNames.includes(name)) {
-            //console.log("DELETE", name);
-            const deleteStmt = db.prepare("DELETE FROM model WHERE name = ?");
+function updateModels(models: Array<DbModelDef>) {
+    const allDbModels = readModels();
+    //console.log("ADB", allDbModels.length);
+    const existingModelShortNames = allDbModels.map(row => row.shortname) as Array<string>;
+    const newModelShortNames = models.filter(m => !existingModelShortNames.includes(m.shortname)).map(m => m.shortname);
+    //console.log("Existing models", existingModelShortNames, existingModelShortNames.length);
+    //console.log("New models", newModelShortNames);
+    // Identify models to delete
+    const mm = models.map(m => m.shortname);
+    const modelsToDelete = existingModelShortNames.filter(name => !mm.includes(name));
+    //console.log("Models to delete", modelsToDelete);
+    db.transaction(() => {
+        // Insert or update models
+        for (const model of models) {
+            if (!existingModelShortNames.includes(model.shortname)) {
+                // Insert the new model
+                const insertStmt = db.prepare("INSERT INTO model (name, shortname, data) VALUES (?, ?, ?)");
+                insertStmt.run(model.name, model.shortname, JSON.stringify(model.data));
+                console.log("+", "[model]", model.name);
+            } else {
+                // Update the existing model
+                const updateStmt = db.prepare("UPDATE model SET name = ?, data = ? WHERE shortname = ?");
+                updateStmt.run(model.name, JSON.stringify(model.data), model.shortname);
+            }
+        }
+        // Delete models that are not in the new list
+        for (const name of modelsToDelete) {
+            const deleteStmt = db.prepare("DELETE FROM model WHERE shortname = ?");
             deleteStmt.run(name);
             console.log("-", "[model]", name);
-        }
-    });
-    db.transaction(() => {
-        for (const model of models) {
-            const stmt1 = db.prepare("SELECT * FROM model WHERE shortname = ?");
-            const result = stmt1.get(model.shortname) as Record<string, any>;
-            if (result?.id) {
-                continue
-            }
-            stmt.run(model.name, model.shortname, JSON.stringify(model.data));
         }
     })();
 }
@@ -184,6 +193,24 @@ function updateFeatures(feats: Features) {
     upsertAndCleanFeatures(feats.modelfile, "modelfile");
 }
 
+function upsertFilePath(name: string, newPath: string): boolean {
+    const selectStmt = db.prepare("SELECT * FROM filepath WHERE name = ?");
+    const result = selectStmt.get(name) as Record<string, any>;
+
+    if (result?.id) {
+        // If the filepath exists, update it
+        const q = `UPDATE filepath SET path = ? WHERE name = ?`;
+        const stmt = db.prepare(q);
+        const updateResult = stmt.run(newPath, name);
+        return updateResult.changes > 0;
+    } else {
+        // If the filepath does not exist, insert it
+        const insertStmt = db.prepare("INSERT INTO filepath (name, path) VALUES (?, ?)");
+        insertStmt.run(name, newPath);
+        return true;
+    }
+}
+
 export {
     updatePromptfilePath,
     updateDataDirPath,
@@ -192,5 +219,6 @@ export {
     updateFeatures,
     updateAliases,
     cleanupFeaturePaths,
-    upsertModels,
+    updateModels,
+    upsertFilePath,
 }

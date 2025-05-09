@@ -2,8 +2,8 @@ import YAML from 'yaml';
 import { Cmd, FeatureType } from "../../interfaces.js";
 import { dataDirPath, isChatMode, isDebug, promptfilePath, runMode } from "../../state/state.js";
 import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
-import { readAliases, readFeaturePaths, readFeatures } from "../../db/read.js";
-import { cleanupFeaturePaths, updateAliases, updateDataDirPath, updateFeatures, updatePromptfilePath } from "../../db/write.js";
+import { readAliases, readFeaturePaths, readFeatures, readFilePath } from "../../db/read.js";
+import { cleanupFeaturePaths, updateAliases, updateDataDirPath, updateFeatures, upsertFilePath, updatePromptfilePath } from "../../db/write.js";
 import { processConfPath } from "../../conf.js";
 import { executeActionCmd } from "../lib/actions/cmd.js";
 import { initAgent, taskBuilder } from "../../agent.js";
@@ -13,8 +13,9 @@ import { executeWorkflowCmd } from "../lib/workflows/cmd.js";
 import { readTask } from "../sys/read_task.js";
 import { deleteFileIfExists } from "../sys/delete_file.js";
 import { dbPath, initDb } from "../../db/db.js";
-import { showModelsCmd, updateModels } from '../lib/models.js';
+import { showModelsCmd, updateAllModels } from '../lib/models.js';
 import { readPluginsPaths } from '../../state/plugins.js';
+import { runtimeDataError, runtimeInfo } from '../lib/user_msgs.js';
 
 let cmds: Record<string, Cmd> = {
     exit: {
@@ -109,7 +110,6 @@ async function _updateFeatures(args: Array<string> = [], options: any): Promise<
     //console.log("CMD FEATS", feats);
     updateFeatures(feats);
     updateAliases(feats);
-    updateModels();
     const deleted = cleanupFeaturePaths(paths);
     for (const el of deleted) {
         console.log("- [feature path]", el)
@@ -117,12 +117,26 @@ async function _updateFeatures(args: Array<string> = [], options: any): Promise<
 }
 
 async function updateConfCmd(args: Array<string> = [], options: any): Promise<any> {
-    if (args.length == 0) {
-        console.warn("Provide a config.yml file path");
-        return
-    }
     initDb(isDebug.value, true);
-    const { paths, pf, dd } = await processConfPath(args[0]);
+    // try to find a conf path in db
+    const { found, path } = readFilePath("conf");
+    const userProvidedConfPath = (args[0] != "conf") ? args[0] : null;
+    if (!found && !userProvidedConfPath) {
+        runtimeDataError("conf file path not found in db: please provide a conf path parameter to the command")
+    }
+
+    let confPath: string;
+    if (userProvidedConfPath) {
+        confPath = userProvidedConfPath;
+        const isu = upsertFilePath("conf", confPath);
+        if (isu) {
+            runtimeInfo("Config path", confPath, "updated")
+        }
+    } else {
+        confPath = path;
+    }
+    console.log("Using", confPath, "to update features");
+    const { paths, pf, dd } = await processConfPath(confPath);
     if (pf.length > 0) {
         updatePromptfilePath(pf);
         promptfilePath.value = pf;
@@ -135,7 +149,7 @@ async function updateConfCmd(args: Array<string> = [], options: any): Promise<an
     //console.log("CMD FEATS", feats);
     updateFeatures(feats);
     updateAliases(feats);
-    updateModels();
+    updateAllModels();
     const deleted = cleanupFeaturePaths(paths);
     for (const el of deleted) {
         console.log("- [feature path]", el)

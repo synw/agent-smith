@@ -97,6 +97,16 @@ function readFilePaths(): Array<{ name: string, path: string }> {
     return f
 }
 
+function readFilePath(name: string): { found: boolean, path: string } {
+    const q = `SELECT id, path FROM filepath WHERE name= ?`;
+    const stmt = db.prepare(q);
+    const result = stmt.get(name) as Record<string, string>;
+    if (result?.id) {
+        return { found: true, path: result.path }
+    }
+    return { found: false, path: "" }
+}
+
 function readModelfiles(): Array<Record<string, string>> {
     const stmt = db.prepare("SELECT name, path, ext FROM modelfile");
     const data = stmt.all() as Array<Record<string, string>>;
@@ -140,6 +150,7 @@ export {
     readFeature,
     readPlugins,
     readAliases,
+    readFilePath,
     readFilePaths,
     readTool,
     readModels,

@@ -2,7 +2,7 @@ import path from "path";
 import { readModelfiles, readModels } from "../../db/read.js";
 import { readModelsFile } from "../sys/read_modelfile.js";
 import { DbModelDef } from "../../interfaces.js";
-import { upsertModels } from "../../db/write.js";
+import { updateModels as dbUpdateModels } from "../../db/write.js";
 import color from "ansi-colors";
 
 async function showModelsCmd(args: Array<string>, options: any) {
@@ -26,10 +26,10 @@ async function showModelsCmd(args: Array<string>, options: any) {
     })
 }
 
-function updateModels() {
+function updateAllModels() {
     const mfs = readModelfiles();
     //console.log("Update models", mfs);
-    const modelNames = new Array<string>();
+    //const modelNames = new Array<string>();
     const modelDefs = new Array<DbModelDef>();
     mfs.forEach((mf) => {
         const filePath = path.join(mf.path + "/" + mf.name + "." + mf.ext);
@@ -40,10 +40,10 @@ function updateModels() {
             throw new Error(`model file ${filePath} not found`)
         }
         for (const [name, m] of (Object.entries(models))) {
-            if (modelNames.includes(m.name)) {
+            /*if (modelNames.includes(m.name)) {
                 console.log("🔴 [models] error: duplicate model name", m.name, "found in", filePath);
                 continue
-            }
+            }*/
             if (!m?.ctx) {
                 m.ctx = ctx;
             }
@@ -56,12 +56,12 @@ function updateModels() {
             const md: DbModelDef = { name: m.name, shortname: name, data: m };
             modelDefs.push(md)
         }
-        //console.log("FMD", modelDefs);
-        upsertModels(modelDefs)
     });
+    //console.log("******************** FMD", modelDefs.length);
+    dbUpdateModels(modelDefs)
 }
 
 export {
-    updateModels,
+    updateAllModels,
     showModelsCmd,
 }
