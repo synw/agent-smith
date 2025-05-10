@@ -6,12 +6,14 @@ import { execute } from "../../sys/execute.js";
 import { runPyScript } from "../../sys/run_python.js";
 import { pyShell } from "../../../state/state.js";
 import { createJsAction } from "./read.js";
+import { runtimeError } from "../../../main.js";
 
 function systemAction(path: string): AgentTask<FeatureType, Array<string>, any> {
     const action = useAgentTask<FeatureType, Array<string>, any>({
         id: "system_action",
         title: "",
         run: async (args: Array<string> | Record<string, any>) => {
+            //console.log("SYS ARGS", args);
             // convert args for tool calls
             let runArgs = new Array<string>();
             if (!Array.isArray(args)) {
@@ -25,11 +27,15 @@ function systemAction(path: string): AgentTask<FeatureType, Array<string>, any> 
                 runArgs = args
             }
             const actionSpec = readYmlFile(path);
-            //console.log("Yml action", JSON.stringify(actionSpec, null, "  "));
+            if (!actionSpec.found) {
+                runtimeError("System action yml file", path, "not found")
+            }
+            console.log("Yml action", JSON.stringify(actionSpec.data, null, "  "));
             //console.log("Args", args)
             if (!actionSpec.data?.args) {
                 actionSpec.data.args = []
             }
+            //console.log("EXEC", actionSpec.data.cmd, [...actionSpec.data.args, ...runArgs]);
             const out = await execute(actionSpec.data.cmd, [...actionSpec.data.args, ...runArgs]);
             return out.trim()
         }
@@ -101,6 +107,7 @@ async function executeActionCmd(
             throw new Error(`Action ${name} param error: ${typeof args}, ${args}`)
         }
     }*/
+    //console.log("CREATE ACTION", name, ext, path);
     switch (ext) {
         case "js":
             const mjsa = await import(path);
@@ -127,7 +134,7 @@ async function executeActionCmd(
     const res = await act.run(args, options);
     if (!quiet) {
         if (res) {
-            console.log("ARES", res);
+            console.log(res);
         }
     }
     //await processOutput(res);
