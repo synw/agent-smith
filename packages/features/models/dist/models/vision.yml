@@ -18,6 +18,6 @@ gemma12b-vision:
 mistral-small-vision:
   name: mistral-small3.1:24b
   template: mistral-system
-gemma27b:
+gemma27b-vision:
   name: gemma3:27b
   template: gemma
