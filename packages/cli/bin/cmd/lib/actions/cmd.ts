@@ -6,7 +6,7 @@ import { execute } from "../../sys/execute.js";
 import { runPyScript } from "../../sys/run_python.js";
 import { pyShell } from "../../../state/state.js";
 import { createJsAction } from "./read.js";
-import { runtimeError } from "../../../main.js";
+import { runtimeError } from "../../../utils/user_msgs.js";
 
 function systemAction(path: string): AgentTask<FeatureType, Array<string>, any> {
     const action = useAgentTask<FeatureType, Array<string>, any>({
