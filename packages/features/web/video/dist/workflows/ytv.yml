@@ -1,3 +1,0 @@
-steps:
-  - action: yt-transcript-chain
-  - task: yt-chat

@@ -1,4 +1,0 @@
-title: "Generate a git commit message from a git diff and a user provided first line"
-steps:
-  - action: git_diff
-  - task: commit_details

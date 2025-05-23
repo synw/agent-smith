@@ -1,4 +1,0 @@
-title: "Generate a git commit message from a git diff for a package"
-steps:
-  - action: git_diff
-  - task: commit_msg_pkg
