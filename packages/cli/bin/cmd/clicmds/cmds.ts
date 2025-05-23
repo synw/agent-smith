@@ -1,23 +1,20 @@
 import YAML from 'yaml';
-import { Cmd, FeatureType } from "../../interfaces.js";
-import { dataDirPath, isChatMode, isDebug, promptfilePath, runMode } from "../../state/state.js";
-import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
-import { readAliases, readFeaturePaths, readFeatures, readFilePath } from "../../db/read.js";
-import { cleanupFeaturePaths, updateAliases, updateDataDirPath, updateFeatures, upsertFilePath, updatePromptfilePath } from "../../db/write.js";
-import { processConfPath } from "../../conf.js";
-import { executeActionCmd } from "../lib/actions/cmd.js";
 import { initAgent, taskBuilder } from "../../agent.js";
-import { executeTaskCmd } from "../lib/tasks/cmd.js";
-import { readCmds } from "../sys/read_cmds.js";
-import { executeWorkflowCmd } from "../lib/workflows/cmd.js";
-import { readTask } from "../sys/read_task.js";
-import { deleteFileIfExists } from "../sys/delete_file.js";
+import { processConfPath } from "../../conf.js";
 import { dbPath, initDb } from "../../db/db.js";
-import { showModelsCmd, updateAllModels } from '../lib/models.js';
+import { readFeaturePaths, readFeatures, readFilePath } from "../../db/read.js";
+import { cleanupFeaturePaths, updateAliases, updateDataDirPath, updateFeatures, updatePromptfilePath, upsertFilePath } from "../../db/write.js";
+import { Cmd, FeatureType } from "../../interfaces.js";
+import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
 import { readPluginsPaths } from '../../state/plugins.js';
+import { dataDirPath, isChatMode, isDebug, promptfilePath, runMode } from "../../state/state.js";
+import { showModelsCmd, updateAllModels } from '../lib/models.js';
+import { executeTaskCmd } from "../lib/tasks/cmd.js";
 import { runtimeDataError, runtimeInfo } from '../lib/user_msgs.js';
-import { Command } from 'commander';
-import { actionOptions, taskOptions, workflowOptions } from '../options.js';
+import { executeWorkflowCmd } from "../lib/workflows/cmd.js";
+import { deleteFileIfExists } from "../sys/delete_file.js";
+import { readCmds } from "../sys/read_cmds.js";
+import { readTask } from "../sys/read_task.js";
 
 let cmds: Record<string, Cmd> = {
     exit: {
@@ -57,7 +54,7 @@ let cmds: Record<string, Cmd> = {
     },
 }
 
-function initAliases(): Record<string, Cmd> {
+/*function initAliases(): Record<string, Cmd> {
     const aliases = readAliases();
     const _cmds: Record<string, Cmd> = {};
     aliases.forEach((alias) => {
@@ -85,7 +82,7 @@ function initAliases(): Record<string, Cmd> {
         }
     });
     return _cmds
-}
+}*/
 
 async function initCmds(): Promise<Record<string, Cmd>> {
     //console.log("CMDS", feats.cmds)
@@ -218,4 +215,9 @@ async function _listTasksCmd(args: Array<string> = [], options: any): Promise<an
     console.table(ts)
 }
 
-export { cmds, initCmds, pingCmd, initAliases, updateConfCmd }
+export {
+    cmds,
+    initCmds,
+    pingCmd,
+    updateConfCmd
+};

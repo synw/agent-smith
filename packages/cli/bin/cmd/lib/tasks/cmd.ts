@@ -14,6 +14,7 @@ import { readPromptFile } from "../utils.js";
 import { executeWorkflowCmd } from "../workflows/cmd.js";
 import { configureTaskModel, mergeInferParams } from "./conf.js";
 import { openTaskSpec } from "./utils.js";
+import { parseTaskConfigOptions } from "../options_parsers.js";
 //import { usePerfTimer } from "../../../primitives/perf.js";
 
 async function executeTaskCmd(
@@ -45,39 +46,14 @@ async function executeTaskCmd(
     }
     const taskFileSpec = openTaskSpec(name);
     let vars: Record<string, any> = {};
-    const conf: LmTaskConfig = { inferParams: {}, modelname: "", templateName: "" };
-    const optionsInferParams: InferenceParams = {};
-    if (options?.temperature) {
-        optionsInferParams.temperature = options.temperature
+    const conf = parseTaskConfigOptions(options);
+    if (options.debug) {
+        console.log("conf:", conf);
     }
-    if (options?.top_k) {
-        optionsInferParams.top_k = options.top_k
-    }
-    if (options?.top_p) {
-        optionsInferParams.top_p = options.top_p
-    }
-    if (options?.min_p) {
-        optionsInferParams.min_p = options.min_p
-    }
-    if (options?.max_tokens) {
-        optionsInferParams.max_tokens = options.max_tokens
-    }
-    if (options?.repeat_penalty) {
-        optionsInferParams.repeat_penalty = options.repeat_penalty
-    }
-    if (options?.model) {
-        conf.modelname = options.model;
-    }
-    if (options?.template) {
-        conf.templateName = options.template
-    }
-    conf.inferParams = mergeInferParams(optionsInferParams, taskFileSpec.inferParams ?? {});
+    conf.inferParams = mergeInferParams(conf.inferParams, taskFileSpec.inferParams ?? {});
     const model = configureTaskModel(conf, taskFileSpec);
     if (options?.ctx) {
         model.ctx = options.ctx
-    }
-    if (options.debug) {
-        console.log("model:", model);
     }
     // tools
     const taskSpec = taskFileSpec as LmTask;
@@ -100,8 +76,8 @@ async function executeTaskCmd(
                     };
                     switch (type) {
                         case "action":
-                            const res = await executeActionCmd(normalizedArgs, conf, true);
-                            return res
+                        //const res = await executeActionCmd(normalizedArgs, conf, true);
+                        //return res
                         case "task":
                             conf.quiet = !options.debug;
                         //const tres = await executeTaskCmd(normalizedArgs, conf);

@@ -6,7 +6,7 @@ import { query } from "../cli.js";
 import { Cmd } from "../interfaces.js";
 import { chatInferenceParams } from "../state/chat.js";
 import { isChatMode, lastCmd, runMode } from "../state/state.js";
-import { cmds, initAliases, initCmds } from "./clicmds/cmds.js";
+import { cmds, initCmds } from "./clicmds/cmds.js";
 import { modes } from "./clicmds/modes.js";
 import { processOutput, setOptions } from "./lib/utils.js";
 import { initCommandsFromAliases } from "./clicmds/commands.js";
@@ -32,8 +32,8 @@ async function chat() {
 
 async function initCliCmds() {
     const _cmds = await initCmds();
-    const _alias = initAliases();
-    cliCmds = { ..._cmds, ..._alias }
+    //const _alias = initCommandsFromAliases();
+    //cliCmds = { ..._cmds, ..._alias }
 }
 
 async function runCmd(cmdName: string, args: Array<string> = [], options: any = {}) {

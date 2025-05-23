@@ -51,7 +51,7 @@ async function executeWorkflowCmd(name: string, wargs: Array<any> | Record<strin
             case "action":
                 try {
                     //console.log("EXECA", p);
-                    const ares = await executeActionCmd(pval, options, true);
+                    /*const ares = await executeActionCmd(pval, options, true);
                     if (typeof ares == "string") {
                         // if the adaptater returns a string convert it to array to pass to the next node
                         taskRes = [ares]
@@ -61,7 +61,7 @@ async function executeWorkflowCmd(name: string, wargs: Array<any> | Record<strin
                     if (i == finalTaskIndex) {
                         //console.log("LAST ACT", i, finalTaskIndex, p);
                         console.log(taskRes);
-                    }
+                    }*/
                 } catch (e) {
                     throw new Error(`workflow action ${i + 1}: ${e}`)
                 }

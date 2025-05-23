@@ -3,11 +3,10 @@ import { InvalidArgumentError, Option } from "commander";
 const baseOptions: Array<Option> = [
     new Option("-v, --verbose", "use the verbose mode"),
     new Option("-d, --debug", "use the debug mode"),
-    new Option("--tokens", "toggle show tokens mode"),
 ];
 
 const inferenceOptions: Array<Option> = [
-    new Option("-s, --stream", "use the stream mode"),
+    //new Option("-s, --stream", "use the stream mode"),
     new Option("-m, --model <name>", "the model name").argParser(parseString),
     new Option("-x, --ctx", "context window size").argParser(parseIntValue),
     new Option("-t, --template <template>", "the template to use"),
@@ -17,7 +16,7 @@ const inferenceOptions: Array<Option> = [
     new Option("-i, --min_p <number>", "the minimum probability for a token to be considered, relative to the probability of the most likely token").argParser(parseFloatValue),
     new Option("-u, --temperature <number>", "adjusts randomness in sampling; higher values mean more randomness").argParser(parseFloatValue),
     new Option("-r, --repeat_penalty <number>", "adjusts penalty for repeated tokens").argParser(parseFloatValue),
-]
+];
 
 const ioOptions: Array<Option> = [
     new Option("--if, --input-file", "use promptfile input mode"),
@@ -26,12 +25,14 @@ const ioOptions: Array<Option> = [
     new Option("--oc, --clipboard-output", "use clipboard output mode"),
     new Option("--omd, --markdown-output", "use markdown output"),
     new Option("--otxt, --text-output", "use text output (default)"),
-]
+];
 
 const taskOptions: Array<Option> = [
     ...baseOptions,
     ...ioOptions,
     ...inferenceOptions,
+    new Option("-a, --vars", "task variables"),
+    new Option("--tokens", "toggle show tokens mode"),
     new Option("-c, --chat-mode", "toggle chat mode for tasks"),
 ];
 

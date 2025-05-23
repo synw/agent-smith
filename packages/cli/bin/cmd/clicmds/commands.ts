@@ -21,7 +21,7 @@ function initCommandsFromAliases(program: Command): Command {
                 const acmd = program.command(`${alias.name} [args...]`)
                     .description("action: " + alias.name)
                     .action(async (...args: Array<any>) => {
-                        await executeActionCmd([alias.name, ...args])
+                        await executeActionCmd(alias.name, args)
                     });
                 actionOptions.forEach(o => acmd.addOption(o))
                 break;

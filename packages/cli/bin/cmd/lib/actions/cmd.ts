@@ -7,6 +7,77 @@ import { runPyScript } from "../../sys/run_python.js";
 import { pyShell } from "../../../state/state.js";
 import { createJsAction } from "./read.js";
 import { runtimeError } from "../../../utils/user_msgs.js";
+import { readClipboard } from "../../sys/clipboard.js";
+import { readPromptFile } from "../utils.js";
+
+async function executeActionCmd(
+    name: string, aargs: Array<string> | Record<string, any> = [], quiet = false
+): Promise<any> {
+    const args = aargs;
+    args.pop()
+    console.log("ACTION ARGS", args);
+    /*const isWorkflow = !Array.isArray(args);
+    //console.log("Action is workflow", isWorkflow);
+    let name: string;
+    if (!isWorkflow) {
+        name = args.shift()!;
+    } else {
+        if (!args.name) {
+            throw new Error("Provide an action name param")
+        }
+        name = args.name;
+        delete args.name;
+    }*/
+    const { found, path, ext } = getFeatureSpec(name, "action" as FeatureType);
+    if (!found) {
+        throw new Error(`Action ${name} not found at ${path}`);
+    }
+    let act: AgentTask<FeatureType, any, any>;
+    /*if (isWorkflow) {
+        if (!["js"].includes(ext)) {
+            throw new Error(`Action ${name} param error: ${typeof args}, ${args}`)
+        }
+    }*/
+    let options: Record<string, any> = args.pop();
+    if (options?.clipBoardInput) {
+        args.push(await readClipboard())
+    } else if (options?.inputFile) {
+        args.push(readPromptFile())
+    }
+    //console.log("CREATE ACTION", name, ext, path);
+    switch (ext) {
+        case "js":
+            const mjsa = await import(path);
+            act = createJsAction(mjsa.action);
+            break;
+        case "yml":
+            act = systemAction(path);
+            break
+        case "py":
+            act = pythonAction(path);
+            break
+        default:
+            throw new Error(`Action ext ${ext} not implemented`)
+    }
+    // options
+    /*console.log("AARGS2", args);
+    const input = await parseInputOptions(options);
+    if (input) {
+        args.push(input)
+    }*/
+    // run
+    //console.log("AOPT", options);
+    //console.log("AARGS3", args);
+    const res = await act.run(args, {});
+    if (!quiet) {
+        if (res) {
+            console.log(res);
+        }
+    }
+    //await processOutput(res);
+    return res
+}
+
 
 function systemAction(path: string): AgentTask<FeatureType, Array<string>, any> {
     const action = useAgentTask<FeatureType, Array<string>, any>({
@@ -79,66 +150,6 @@ function pythonAction(
         }
     });
     return action
-}
-
-async function executeActionCmd(
-    args: Array<string> | Record<string, any> = [], options: any = {}, quiet = false
-): Promise<any> {
-    //console.log("ACTION ARGS", args);
-    const isWorkflow = !Array.isArray(args);
-    //console.log("Action is workflow", isWorkflow);
-    let name: string;
-    if (!isWorkflow) {
-        name = args.shift()!;
-    } else {
-        if (!args.name) {
-            throw new Error("Provide an action name param")
-        }
-        name = args.name;
-        delete args.name;
-    }
-    const { found, path, ext } = getFeatureSpec(name, "action" as FeatureType);
-    if (!found) {
-        throw new Error(`Action ${name} not found at ${path}`);
-    }
-    let act: AgentTask<FeatureType, any, any>;
-    /*if (isWorkflow) {
-        if (!["js"].includes(ext)) {
-            throw new Error(`Action ${name} param error: ${typeof args}, ${args}`)
-        }
-    }*/
-    //console.log("CREATE ACTION", name, ext, path);
-    switch (ext) {
-        case "js":
-            const mjsa = await import(path);
-            act = createJsAction(mjsa.action);
-            break;
-        case "yml":
-            act = systemAction(path);
-            break
-        case "py":
-            act = pythonAction(path);
-            break
-        default:
-            throw new Error(`Action ext ${ext} not implemented`)
-    }
-    // options
-    /*console.log("AARGS2", args);
-    const input = await parseInputOptions(options);
-    if (input) {
-        args.push(input)
-    }*/
-    // run
-    //console.log("AOPT", options);
-    //console.log("AARGS3", args);
-    const res = await act.run(args, options);
-    if (!quiet) {
-        if (res) {
-            console.log(res);
-        }
-    }
-    //await processOutput(res);
-    return res
 }
 
 export { executeActionCmd, systemAction, pythonAction };
