@@ -1,90 +1,84 @@
 //import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec } from "../../../../../lmtask/dist/main.js";
 import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec } from "@agent-smith/lmtask";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
+import { InferenceParams } from "@locallm/types/dist/interfaces.js";
 import ora from 'ora';
 import { brain, initAgent, taskBuilder } from "../../../agent.js";
+import { readClipboard } from "../../../cmd/sys/clipboard.js";
 import { readTool } from "../../../db/read.js";
-import { isChatMode, isDebug, isQuiet, isShowTokens, isVerbose } from "../../../state/state.js";
-import { parseArgs } from "../../../utils/args.js";
+import { LmTaskConfig } from "../../../interfaces.js";
+import { isChatMode, isQuiet, isShowTokens, isVerbose } from "../../../state/state.js";
 import { executeActionCmd, } from "../actions/cmd.js";
-import { formatStats, parseInputOptions } from "../utils.js";
+import { runtimeDataError } from "../user_msgs.js";
+import { readPromptFile } from "../utils.js";
 import { executeWorkflowCmd } from "../workflows/cmd.js";
-import { configureTaskModel, mergeConfOptions, mergeInferParams } from "./conf.js";
+import { configureTaskModel, mergeInferParams } from "./conf.js";
 import { openTaskSpec } from "./utils.js";
 //import { usePerfTimer } from "../../../primitives/perf.js";
 
 async function executeTaskCmd(
-    targs: Array<string> | Record<string, any> = [], options: Record<string, any> = {}
+    name: string,
+    targs: Array<any> = []
 ): Promise<LmTaskOutput> {
     const args = targs;
     args.pop();
-    console.log("TARGS", args);
+    //console.log("TARGS", args);
+    let pr: string;
+    let options: Record<string, any> = args.pop();
+    if (options?.clipBoardInput) {
+        pr = await readClipboard()
+    } else if (options?.inputFile) {
+        pr = readPromptFile()
+    } else {
+        if (args[0] !== undefined) {
+            pr = args[0]
+        }
+        else {
+            runtimeDataError("task", name, "provide a prompt or use input options")
+            throw new Error()
+        }
+    }
     await initAgent();
-    if (isDebug.value) {
-        console.log("Task args:", args);
+    if (options.debug) {
+        console.log("Prompt:", pr);
         console.log("Task options:", options);
     }
-    const isWorkflow = !Array.isArray(args);
-    let name: string;
-    let pr: string;
-    if (!isWorkflow) {
-        name = args.shift()!;
-        //const params = args.filter((x) => x.length > 0);
-        //console.log("TaskARGS", args);
-        const _pr = await parseInputOptions(options);
-        //console.log("PROMPT:", _pr);
-        //const { inferenceVars, currentArgs } = parseInferenceArgs(args);
-        //sconsole.log("IV", inferenceVars, "CA", currentArgs);
-        if (!_pr) {
-            const p = args.shift();
-            if (p) {
-                pr = p
-            } else {
-                throw new Error("Please provide a prompt")
-            }
-        } else {
-            pr = _pr;
-        }
-        //console.log("TaskARGS F", args);
-    } else {
-        //console.log("TW ARGS", args);
-        if (!(args?.name)) {
-            throw new Error("Provide a task name param")
-        }
-        if (!(args?.prompt)) {
-            throw new Error("Provide a task prompt param")
-        }
-        name = args.name;
-        //delete args.name;
-        pr = args.prompt;
-        //delete args.prompt;
-    }
-    //console.log("TARGS", args);
-    /*const { found, path } = getFeatureSpec(name, "task" as FeatureType);
-    if (!found) {
-        throw new Error(`Task ${name} not found`);
-    }
-    //console.log("EFM", brain.expertsForModels);    
-    const res = readTask(path);
-    if (!res.found) {
-        throw new Error(`Task ${name}, ${path} not found`)
-    }
-    //const taskRawSpec = taskBuilder.readFromYaml(res.ymlTask);
-    const taskFileSpec = YAML.parse(res.ymlTask) as LmTaskFileSpec;*/
-    //console.log("Opening task");
     const taskFileSpec = openTaskSpec(name);
-    //console.log("Opened task");
-    // model
-    //console.log("ARGSIN", args);
-    let { conf, vars } = parseArgs(args, true);
-    //console.log("Parsed args");
-    //console.log("PCONF", conf);
-    //console.log("PVARS", vars);
-    conf = mergeConfOptions(conf, options);
-    conf.inferParams = mergeInferParams(conf.inferParams, taskFileSpec.inferParams ?? {});
-    //console.log("Merged infer params");
+    let vars: Record<string, any> = {};
+    const conf: LmTaskConfig = { inferParams: {}, modelname: "", templateName: "" };
+    const optionsInferParams: InferenceParams = {};
+    if (options?.temperature) {
+        optionsInferParams.temperature = options.temperature
+    }
+    if (options?.top_k) {
+        optionsInferParams.top_k = options.top_k
+    }
+    if (options?.top_p) {
+        optionsInferParams.top_p = options.top_p
+    }
+    if (options?.min_p) {
+        optionsInferParams.min_p = options.min_p
+    }
+    if (options?.max_tokens) {
+        optionsInferParams.max_tokens = options.max_tokens
+    }
+    if (options?.repeat_penalty) {
+        optionsInferParams.repeat_penalty = options.repeat_penalty
+    }
+    if (options?.model) {
+        conf.modelname = options.model;
+    }
+    if (options?.template) {
+        conf.templateName = options.template
+    }
+    conf.inferParams = mergeInferParams(optionsInferParams, taskFileSpec.inferParams ?? {});
     const model = configureTaskModel(conf, taskFileSpec);
-    //console.log("Configured task model");
+    if (options?.ctx) {
+        model.ctx = options.ctx
+    }
+    if (options.debug) {
+        console.log("model:", model);
+    }
     // tools
     const taskSpec = taskFileSpec as LmTask;
     //console.log("Task tools list:", taskSpec.toolsList);
@@ -109,10 +103,10 @@ async function executeTaskCmd(
                             const res = await executeActionCmd(normalizedArgs, conf, true);
                             return res
                         case "task":
-                            conf.quiet = !isDebug.value;
-                            const tres = await executeTaskCmd(normalizedArgs, conf);
-                            //console.log("WFTRESP", tres.answer.text);
-                            return tres.answer.text
+                            conf.quiet = !options.debug;
+                        //const tres = await executeTaskCmd(normalizedArgs, conf);
+                        //console.log("WFTRESP", tres.answer.text);
+                        //return tres.answer.text
                         case "workflow":
                             const wres = await executeWorkflowCmd(toolName, normalizedArgs, conf);
                             return wres
@@ -133,9 +127,9 @@ async function executeTaskCmd(
         model.inferParams.grammar = serializeGrammar(await compile(model.inferParams.tsGrammar, "Grammar"));
         delete model.inferParams.tsGrammar;
     }
-    if (isDebug.value) {
+    if (options.debug) {
         console.log("Task model:", model);
-        console.log("Task vars:", vars);
+        //console.log("Task vars:", vars);
     }
     // expert
     const ex = brain.getOrCreateExpertForModel(model.name, model.template);
@@ -171,7 +165,7 @@ async function executeTaskCmd(
         }
     };
     let processToken = printToken;
-    if ((hasThink || hasTools) && !isDebug.value) {
+    if ((hasThink || hasTools) && !options.debug) {
         let continueWrite = true;
         let skipNextEmptyLinesToken = false;
         const spinner = ora("Thinking ...");
@@ -190,7 +184,7 @@ async function executeTaskCmd(
                         //console.log("End thinking token", thinkEnd);
                         continueWrite = true;
                         skipNextEmptyLinesToken = true;
-                        /*if (isVerbose.value || isDebug.value) {
+                        /*if (isVerbose.value || options.debug) {
                             spinner.stopAndPersist({ text: "Thinking time: " + timer.time() });
                         } else {
                             spinner.stop()
@@ -245,7 +239,7 @@ async function executeTaskCmd(
     const tconf: LmTaskConf = {
         expert: ex,
         model: model,
-        debug: isDebug.value,
+        debug: options.debug,
         onToolCall: onToolCall,
         //onToolCallEnd: onToolCallEnd,
         ...conf,
@@ -266,11 +260,12 @@ async function executeTaskCmd(
         if (brain.ex.name != ex.name) {
             brain.setDefaultExpert(ex);
         }
-        brain.ex.template.pushToHistory({ user: pr, assistant: out.answer.text });
+        //brain.ex.template.pushToHistory({ user: pr, assistant: out.answer.text });
     }
-    if (isDebug.value || isVerbose.value) {
-        console.log("\n", formatStats(out.answer.stats))
+    if (options.debug || isVerbose.value) {
+        //console.log("\n", formatStats(out.answer.stats))
     }
+    //@ts-ignore
     return out
 }
 

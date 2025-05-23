@@ -42,8 +42,8 @@ async function executeWorkflowCmd(name: string, wargs: Array<any> | Record<strin
             case "task":
                 try {
                     //console.log("EXECT", pval);
-                    const tr = await executeTaskCmd(pval, options);
-                    taskRes = tr;
+                    //const tr = await executeTaskCmd(pval, options);
+                    //taskRes = tr;
                 } catch (e) {
                     throw new Error(`workflow task ${i + 1}: ${e}`)
                 }

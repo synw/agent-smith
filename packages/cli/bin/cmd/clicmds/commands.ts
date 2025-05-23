@@ -13,7 +13,7 @@ function initCommandsFromAliases(program: Command): Command {
                 const tcmd = program.command(`${alias.name} [prompt]`)
                     .description("task: " + alias.name)
                     .action(async (...args: Array<any>) => {
-                        await executeTaskCmd([alias.name, ...args], {});
+                        await executeTaskCmd(alias.name, args);
                     });
                 taskOptions.forEach(o => tcmd.addOption(o));
                 break;

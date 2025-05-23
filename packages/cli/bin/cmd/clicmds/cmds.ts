@@ -173,7 +173,7 @@ async function _executeTaskCmd(args: Array<string> = [], options: any): Promise<
         console.warn("Provide a task name");
         return
     }
-    const res = await executeTaskCmd(args, options);
+    const res = await executeTaskCmd("n", args);
     if (isChatMode.value) {
 
     }
