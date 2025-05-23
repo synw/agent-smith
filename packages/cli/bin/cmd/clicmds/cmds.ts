@@ -16,6 +16,8 @@ import { dbPath, initDb } from "../../db/db.js";
 import { showModelsCmd, updateAllModels } from '../lib/models.js';
 import { readPluginsPaths } from '../../state/plugins.js';
 import { runtimeDataError, runtimeInfo } from '../lib/user_msgs.js';
+import { Command } from 'commander';
+import { actionOptions, taskOptions, workflowOptions } from '../options.js';
 
 let cmds: Record<string, Cmd> = {
     exit: {

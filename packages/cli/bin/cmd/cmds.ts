@@ -9,6 +9,7 @@ import { isChatMode, lastCmd, runMode } from "../state/state.js";
 import { cmds, initAliases, initCmds } from "./clicmds/cmds.js";
 import { modes } from "./clicmds/modes.js";
 import { processOutput, setOptions } from "./lib/utils.js";
+import { initCommandsFromAliases } from "./clicmds/commands.js";
 
 let cliCmds: Record<string, Cmd> = {};
 
@@ -49,9 +50,10 @@ async function runCmd(cmdName: string, args: Array<string> = [], options: any = 
 
 async function buildCmds(): Promise<Command> {
     const program = new Command();
-    const aliases = initAliases();
+    //const aliases = initAliases();
+    initCommandsFromAliases(program);
     const excmds = await initCmds();
-    for (const [name, spec] of Object.entries({ ...cmds, ...excmds, ...aliases })) {
+    for (const [name, spec] of Object.entries({ ...cmds, ...excmds })) {
         //console.log("N", name, "S", spec);
         const cmd = program.command(name);
         const _cmd = async (args: Array<string> = [], options: any = {}): Promise<any> => {

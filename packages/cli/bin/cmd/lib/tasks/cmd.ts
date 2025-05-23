@@ -14,9 +14,11 @@ import { openTaskSpec } from "./utils.js";
 //import { usePerfTimer } from "../../../primitives/perf.js";
 
 async function executeTaskCmd(
-    args: Array<string> | Record<string, any> = [], options: Record<string, any> = {}
+    targs: Array<string> | Record<string, any> = [], options: Record<string, any> = {}
 ): Promise<LmTaskOutput> {
-    //console.log("TARGS", args);
+    const args = targs;
+    args.pop();
+    console.log("TARGS", args);
     await initAgent();
     if (isDebug.value) {
         console.log("Task args:", args);

@@ -4,11 +4,14 @@ import { executeTaskCmd } from "../tasks/cmd.js";
 import { executeActionCmd } from "../actions/cmd.js";
 import { executeAdaptaterCmd } from "../adaptaters/cmd.js";
 
-async function executeWorkflowCmd(name: string, args: Array<any> | Record<string, any> = [], options: any = {}): Promise<any> {
+async function executeWorkflowCmd(name: string, wargs: Array<any> | Record<string, any> = [], options: any = {}): Promise<any> {
     const { workflow, found } = await readWorkflow(name);
     if (!found) {
         throw new Error(`Workflow ${name} not found`)
     }
+    const args = wargs;
+    args.pop();
+    console.log("WARGS", args);
     //console.log("WFCMD", workflow);
     const stepNames = Object.keys(workflow);
     if (isDebug.value || isVerbose.value) {
