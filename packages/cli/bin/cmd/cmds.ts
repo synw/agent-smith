@@ -6,11 +6,10 @@ import { query } from "../cli.js";
 import { Cmd } from "../interfaces.js";
 import { chatInferenceParams } from "../state/chat.js";
 import { isChatMode, lastCmd, runMode } from "../state/state.js";
-import { cmds, initCmds } from "./clicmds/cmds.js";
-import { modes } from "./clicmds/modes.js";
-import { processOutput, setOptions } from "./lib/utils.js";
 import { initCommandsFromAliases } from "./clicmds/aliases.js";
 import { initBaseCommands } from "./clicmds/base.js";
+import { initUserCmds } from "./clicmds/cmds.js";
+import { readFeatures } from "../db/read.js";
 
 let cliCmds: Record<string, Cmd> = {};
 
@@ -32,7 +31,7 @@ async function chat() {
 }
 
 async function initCliCmds() {
-    const _cmds = await initCmds();
+    //const _cmds = await initCmds();
     //const _alias = initCommandsFromAliases();
     //cliCmds = { ..._cmds, ..._alias }
 }
@@ -53,6 +52,12 @@ async function buildCmds(): Promise<Command> {
     const program = new Command();
     initBaseCommands(program);
     initCommandsFromAliases(program);
+    const feats = readFeatures();
+    const cmds = await initUserCmds(feats.cmd);
+    cmds.forEach(c => {
+        //console.log("Add cmd", c);
+        program.addCommand(c)
+    });
     /*const excmds = await initCmds();
     for (const [name, spec] of Object.entries({ ...cmds, ...excmds })) {
         //console.log("N", name, "S", spec);
