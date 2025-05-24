@@ -5,9 +5,9 @@ function createJsAction(action: CallableFunction): AgentTask<FeatureType, any, a
     const task = useAgentTask<FeatureType, any, any>({
         id: "",
         title: "",
-        run: async (args) => {
+        run: async (args, options) => {
             try {
-                const res = await action(args);
+                const res = await action(args, options);
                 return res
             }
             catch (e) {

@@ -29,7 +29,7 @@ function initCommandsFromAliases(program: Command): Command {
                 const wcmd = program.command(`${alias.name} [args...]`)
                     .description("workflow: " + alias.name)
                     .action(async (...args: Array<any>) => {
-                        executeWorkflowCmd(alias.name, args, {})
+                        executeWorkflowCmd(alias.name, args)
                     });
                 workflowOptions.forEach(o => wcmd.addOption(o));
         }

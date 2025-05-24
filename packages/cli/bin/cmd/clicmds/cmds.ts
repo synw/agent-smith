@@ -7,11 +7,9 @@ import { cleanupFeaturePaths, updateAliases, updateDataDirPath, updateFeatures, 
 import { Cmd, FeatureType } from "../../interfaces.js";
 import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
 import { readPluginsPaths } from '../../state/plugins.js';
-import { dataDirPath, isChatMode, isDebug, promptfilePath, runMode } from "../../state/state.js";
+import { dataDirPath, isDebug, promptfilePath, runMode } from "../../state/state.js";
 import { showModelsCmd, updateAllModels } from '../lib/models.js';
-import { executeTaskCmd } from "../lib/tasks/cmd.js";
 import { runtimeDataError, runtimeInfo } from '../lib/user_msgs.js';
-import { executeWorkflowCmd } from "../lib/workflows/cmd.js";
 import { deleteFileIfExists } from "../sys/delete_file.js";
 import { readCmds } from "../sys/read_cmds.js";
 import { readTask } from "../sys/read_task.js";
@@ -53,36 +51,6 @@ let cmds: Record<string, Cmd> = {
         //args: "arguments: \n-path (required): the path to the config.yml file"
     },
 }
-
-/*function initAliases(): Record<string, Cmd> {
-    const aliases = readAliases();
-    const _cmds: Record<string, Cmd> = {};
-    aliases.forEach((alias) => {
-        switch (alias.type) {
-            case "task":
-                _cmds[alias.name] = {
-                    cmd: (args: Array<string> = [], options: any) => _executeTaskCmd([alias.name, ...args], options),
-                    description: "task: " + alias.name,
-                    //args: "arguments: \n-args: prompt and other arguments if any for the task"
-                }
-                break;
-            case "action":
-                _cmds[alias.name] = {
-                    cmd: (args: Array<string> = [], options: any = {}, quiet = false) => executeActionCmd([alias.name, ...args], options, quiet),
-                    description: "action: " + alias.name,
-                    //args: "arguments: \n-args: other arguments if any for the action"
-                }
-                break;
-            case "workflow":
-                _cmds[alias.name] = {
-                    cmd: (args: Array<string> = [], options: any) => _executeWorkflowCmd([alias.name, ...args], options),
-                    description: "wokflow: " + alias.name,
-                    //args: "arguments: \n-args: other arguments if any for the job"
-                }
-        }
-    });
-    return _cmds
-}*/
 
 async function initCmds(): Promise<Record<string, Cmd>> {
     //console.log("CMDS", feats.cmds)
@@ -162,31 +130,6 @@ async function _resetDbCmd(args: Array<string> = [], options: any): Promise<any>
     }
     deleteFileIfExists(dbPath);
     console.log("Config database reset ok. Run the conf command to recreate it")
-}
-
-async function _executeTaskCmd(args: Array<string> = [], options: any): Promise<any> {
-    //console.log("ETA", args);
-    if (args.length == 0) {
-        console.warn("Provide a task name");
-        return
-    }
-    const res = await executeTaskCmd("n", args);
-    if (isChatMode.value) {
-
-    }
-    //console.log("ENDRES", data);
-    return res
-}
-
-async function _executeWorkflowCmd(args: Array<string> = [], options: any): Promise<any> {
-    if (args.length == 0) {
-        console.warn("Provide a workflow name");
-        return
-    }
-    const name = args.shift()!;
-    const res = await executeWorkflowCmd(name, args, options);
-    return res
-    //console.log("ENDRES", t);
 }
 
 async function _readTaskCmd(args: Array<string> = [], options: any): Promise<any> {

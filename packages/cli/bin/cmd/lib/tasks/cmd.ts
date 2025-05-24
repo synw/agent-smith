@@ -1,47 +1,25 @@
 //import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec } from "../../../../../lmtask/dist/main.js";
 import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec } from "@agent-smith/lmtask";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
-import { InferenceParams } from "@locallm/types/dist/interfaces.js";
 import ora from 'ora';
 import { brain, initAgent, taskBuilder } from "../../../agent.js";
 import { readClipboard } from "../../../cmd/sys/clipboard.js";
 import { readTool } from "../../../db/read.js";
-import { LmTaskConfig } from "../../../interfaces.js";
 import { isChatMode, isQuiet, isShowTokens, isVerbose } from "../../../state/state.js";
-import { executeActionCmd, } from "../actions/cmd.js";
+import { executeAction } from "../actions/cmd.js";
+import { parseCommandArgs, parseTaskConfigOptions } from "../options_parsers.js";
 import { runtimeDataError } from "../user_msgs.js";
 import { readPromptFile } from "../utils.js";
-import { executeWorkflowCmd } from "../workflows/cmd.js";
+import { executeWorkflow } from "../workflows/cmd.js";
 import { configureTaskModel, mergeInferParams } from "./conf.js";
 import { openTaskSpec } from "./utils.js";
-import { parseTaskConfigOptions } from "../options_parsers.js";
-//import { usePerfTimer } from "../../../primitives/perf.js";
 
-async function executeTaskCmd(
-    name: string,
-    targs: Array<any> = []
+async function executeTask(
+    name: string, payload: Record<string, any>, options: Record<string, any>, quiet = false
 ): Promise<LmTaskOutput> {
-    const args = targs;
-    args.pop();
-    //console.log("TARGS", args);
-    let pr: string;
-    let options: Record<string, any> = args.pop();
-    if (options?.clipBoardInput) {
-        pr = await readClipboard()
-    } else if (options?.inputFile) {
-        pr = readPromptFile()
-    } else {
-        if (args[0] !== undefined) {
-            pr = args[0]
-        }
-        else {
-            runtimeDataError("task", name, "provide a prompt or use input options")
-            throw new Error()
-        }
-    }
     await initAgent();
     if (options.debug) {
-        console.log("Prompt:", pr);
+        console.log("Payload:", payload);
         console.log("Task options:", options);
     }
     const taskFileSpec = openTaskSpec(name);
@@ -68,23 +46,18 @@ async function executeTaskCmd(
             //console.log("Tool found:", toolName, tool);
             const lmTool: LmTaskToolSpec = {
                 ...tool,
-                execute: async (args) => {
-                    //console.log("TASK: Execute tool", type, toolName, args);
-                    const normalizedArgs = Array.isArray(args) ? [toolName, ...args] : {
-                        name: toolName,
-                        ...args,
-                    };
+                execute: async (params) => {
                     switch (type) {
                         case "action":
-                        //const res = await executeActionCmd(normalizedArgs, conf, true);
-                        //return res
+                            const res = await executeAction(toolName, params, options, true);
+                            return res
                         case "task":
                             conf.quiet = !options.debug;
-                        //const tres = await executeTaskCmd(normalizedArgs, conf);
-                        //console.log("WFTRESP", tres.answer.text);
-                        //return tres.answer.text
+                            const tres = await executeTask(name, params, options, true);
+                            //console.log("WFTRESP", tres.answer.text);
+                            return tres.answer.text
                         case "workflow":
-                            const wres = await executeWorkflowCmd(toolName, normalizedArgs, conf);
+                            const wres = await executeWorkflow(toolName, params, options);
                             return wres
                         default:
                             throw new Error(`unknown tool execution function type: ${type} for ${toolName}`)
@@ -223,7 +196,7 @@ async function executeTaskCmd(
     tconf.expert = ex;
     let out: LmTaskOutput;
     try {
-        out = await task.run({ prompt: pr, ...vars }, tconf);
+        out = await task.run({ prompt: payload.prompt, ...vars }, tconf);
         if (!out.answer.text.endsWith("\n")) {
             console.log()
         }
@@ -245,4 +218,31 @@ async function executeTaskCmd(
     return out
 }
 
-export { executeTaskCmd };
+async function executeTaskCmd(
+    name: string,
+    targs: Array<any> = []
+): Promise<LmTaskOutput> {
+    const { args, options } = parseCommandArgs(targs);
+    let pr: string;
+    if (options?.clipBoardInput) {
+        pr = await readClipboard()
+    } else if (options?.inputFile) {
+        pr = readPromptFile()
+    } else {
+        if (args[0] !== undefined) {
+            pr = args[0]
+        }
+        else {
+            runtimeDataError("task", name, "provide a prompt or use input options")
+            throw new Error()
+        }
+    }
+    const params = { args: args, prompt: pr };
+    return await executeTask(name, params, options)
+}
+
+export {
+    executeTask,
+    executeTaskCmd
+};
+

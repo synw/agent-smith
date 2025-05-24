@@ -3,25 +3,11 @@ import { FeatureType } from "../../../interfaces.js";
 import { AgentTask } from "@agent-smith/jobs";
 import { createJsAction } from "../actions/read.js";
 
-async function executeAdaptaterCmd(
-    args: Array<string> | Record<string, any> = [], options: any = {}
+async function executeAdaptater(
+    name: string,
+    argsOrParams: Record<string, any> | Array<any>,
+    options: Record<string, any>
 ): Promise<any> {
-    //console.log("AD -* AARGS", args);
-    //console.log("AD -* OPTs", options);
-    /*const { conf, vars } = parseTaskVars(args, {});
-    console.log("AD -* CONF", conf);
-    console.log("AD -* VARS", vars);*/
-    const isWorkflow = !Array.isArray(args);
-    let name: string;
-    if (!isWorkflow) {
-        name = args.shift()!;
-    } else {
-        if (!args.name) {
-            throw new Error("provide an adaptater name param")
-        }
-        name = args.name;
-        delete args.name;
-    }
     const { found, path } = getFeatureSpec(name, "adaptater" as FeatureType);
     if (!found) {
         throw new Error(`adaptater ${name} not found`);
@@ -32,7 +18,7 @@ async function executeAdaptaterCmd(
     let res;
     try {
         //console.log("ADAPT RUN", { ...conf, ...vars });
-        res = await act.run(args, options);
+        res = await act.run(argsOrParams, options);
         //sconsole.log("ADAPT RES", res);
     } catch (e) {
         throw new Error(`adaptater ${name}: ${e}`)
@@ -46,5 +32,5 @@ async function executeAdaptaterCmd(
 }
 
 export {
-    executeAdaptaterCmd,
+    executeAdaptater,
 }

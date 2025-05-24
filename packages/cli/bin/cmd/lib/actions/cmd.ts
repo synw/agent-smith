@@ -8,41 +8,14 @@ import { pyShell } from "../../../state/state.js";
 import { createJsAction } from "./read.js";
 import { runtimeError } from "../../../utils/user_msgs.js";
 import { readClipboard } from "../../sys/clipboard.js";
-import { readPromptFile } from "../utils.js";
+import { processOutput, readPromptFile } from "../utils.js";
+import { parseCommandArgs } from "../options_parsers.js";
 
-async function executeActionCmd(
-    name: string, aargs: Array<string> | Record<string, any> = [], quiet = false
-): Promise<any> {
-    const args = aargs;
-    args.pop()
-    console.log("ACTION ARGS", args);
-    /*const isWorkflow = !Array.isArray(args);
-    //console.log("Action is workflow", isWorkflow);
-    let name: string;
-    if (!isWorkflow) {
-        name = args.shift()!;
-    } else {
-        if (!args.name) {
-            throw new Error("Provide an action name param")
-        }
-        name = args.name;
-        delete args.name;
-    }*/
+async function executeAction(name: string, payload: Record<string, any>, options: Record<string, any>, quiet = false) {
+    let act: AgentTask<FeatureType, any, any>;
     const { found, path, ext } = getFeatureSpec(name, "action" as FeatureType);
     if (!found) {
         throw new Error(`Action ${name} not found at ${path}`);
-    }
-    let act: AgentTask<FeatureType, any, any>;
-    /*if (isWorkflow) {
-        if (!["js"].includes(ext)) {
-            throw new Error(`Action ${name} param error: ${typeof args}, ${args}`)
-        }
-    }*/
-    let options: Record<string, any> = args.pop();
-    if (options?.clipBoardInput) {
-        args.push(await readClipboard())
-    } else if (options?.inputFile) {
-        args.push(readPromptFile())
     }
     //console.log("CREATE ACTION", name, ext, path);
     switch (ext) {
@@ -59,23 +32,32 @@ async function executeActionCmd(
         default:
             throw new Error(`Action ext ${ext} not implemented`)
     }
-    // options
-    /*console.log("AARGS2", args);
-    const input = await parseInputOptions(options);
-    if (input) {
-        args.push(input)
-    }*/
-    // run
-    //console.log("AOPT", options);
-    //console.log("AARGS3", args);
-    const res = await act.run(args, {});
+    const res = await act.run(payload, options);
     if (!quiet) {
         if (res) {
             console.log(res);
         }
     }
-    //await processOutput(res);
+    await processOutput(res);
     return res
+}
+
+async function executeActionCmd(
+    name: string, aargs: Array<any>, quiet = false
+): Promise<any> {
+    //console.log("AARGs", aargs)
+    const { args, options } = parseCommandArgs(aargs);
+    //console.log("CMDA", args)
+    const params = { args: args };
+    if (options?.clipBoardInput) {
+        params.args.push(await readClipboard())
+    } else if (options?.inputFile) {
+        params.args.push(readPromptFile())
+    }
+    if (options?.debug) {
+        console.log("Action", name, "params", params);
+    }
+    return await executeAction(name, params, options, quiet)
 }
 
 
@@ -83,25 +65,26 @@ function systemAction(path: string): AgentTask<FeatureType, Array<string>, any> 
     const action = useAgentTask<FeatureType, Array<string>, any>({
         id: "system_action",
         title: "",
-        run: async (args: Array<string> | Record<string, any>) => {
-            //console.log("SYS ARGS", args);
-            // convert args for tool calls
+        run: async (params: Record<string, any>) => {
+            //console.log("SYS ACTION PARAMS", params);
             let runArgs = new Array<string>();
-            if (!Array.isArray(args)) {
+            if (params?.args) {
+                runArgs = params.args
+            } else {
+                // convert args for tool calls
+                //if (!Array.isArray(args)) {
                 try {
                     // obviously a tool call
-                    runArgs = Object.values(args)
+                    runArgs = Object.values(params)
                 } catch (e) {
                     throw new Error(`wrong system action args: ${e}`)
                 }
-            } else {
-                runArgs = args
             }
             const actionSpec = readYmlFile(path);
             if (!actionSpec.found) {
                 runtimeError("System action yml file", path, "not found")
             }
-            console.log("Yml action", JSON.stringify(actionSpec.data, null, "  "));
+            //console.log("Yml action", JSON.stringify(actionSpec.data, null, "  "));
             //console.log("Args", args)
             if (!actionSpec.data?.args) {
                 actionSpec.data.args = []
@@ -120,13 +103,27 @@ function pythonAction(
     const action = useAgentTask<FeatureType, Array<string>, any>({
         id: "python_action",
         title: "",
-        run: async (args) => {
+        run: async (params: Record<string, any>) => {
+            //console.log("PY ACTION PARAMS", params);
+            let runArgs = new Array<string>();
+            if (params?.args) {
+                runArgs = params.args
+            } else {
+                // convert args for tool calls
+                //if (!Array.isArray(args)) {
+                try {
+                    // obviously a tool call
+                    runArgs = Object.values(params)
+                } catch (e) {
+                    throw new Error(`wrong python action args: ${e}`)
+                }
+            }
             //console.log("Py action", path);
             const { data, error } = await runPyScript(
                 pyShell,
                 "python3",
                 path,
-                args,
+                runArgs,
             )
             /*console.log("----------------");
             console.log("PYOUT", data);
@@ -152,4 +149,9 @@ function pythonAction(
     return action
 }
 
-export { executeActionCmd, systemAction, pythonAction };
+export {
+    executeAction,
+    executeActionCmd,
+    systemAction,
+    pythonAction,
+};
