@@ -83,7 +83,7 @@ async function _updateFeatures(args: Array<string> = [], options: any): Promise<
     }
 }
 
-async function updateConfCmd(args: Array<string> = [], options: any): Promise<any> {
+async function updateConfCmd(args: Array<string>): Promise<any> {
     initDb(isDebug.value, true);
     // try to find a conf path in db
     const { found, path } = readFilePath("conf");

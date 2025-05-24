@@ -12,7 +12,8 @@ function parseCommandArgs(args: Array<any>): {
     //discard the command (last arg)
     args.pop();
     res.options = args.pop();
-    res.args = args[0];
+    res.args = Array.isArray(args[0]) ? args[0] : [args];
+    console.log("PARSE ARGS RES", res.args);
     return res
 }
 

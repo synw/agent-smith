@@ -10,12 +10,13 @@ async function main() {
     const nargs = argv.length;
     if (nargs == 2) {
         runMode.value = "cli";
-    } else if (nargs >= 3) {
+    }
+    /*else if (nargs >= 3) {
         if (argv[2] == "conf") {
             await updateConfCmd(argv.slice(-1), {});
             return
         }
-    }
+    }*/
     //console.log("START")
     await initState();
     await initAgent();

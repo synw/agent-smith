@@ -5,19 +5,25 @@ import { DbModelDef } from "../../interfaces.js";
 import { updateModels as dbUpdateModels } from "../../db/write.js";
 import color from "ansi-colors";
 
-async function showModelsCmd(args: Array<string>, options: any) {
+async function showModelsCmd(args: Array<string>) {
+    //console.log("SMC", args);
     let models = readModels();
     models.sort((a, b) => a.name.localeCompare(b.name));
+    let foundModels = new Array<DbModelDef>();
     if (args.length > 0) {
         args.forEach((a) => {
-            models = models.filter((m) => m.shortname.includes(a) || m.name.includes(a));
+            const fm = models.filter((m) => m.shortname.includes(a) || m.name.includes(a));
+            //console.log(a, "=>", fm.map(m => m.shortname))
+            foundModels.push(...fm)
         });
+    } else {
+        foundModels = models;
     }
-    models.forEach((model) => {
+    foundModels.forEach((model) => {
         const ips = model.data.inferParams;
-        if (!ips?.max_tokens) {
+        /*if (!ips?.max_tokens) {
             throw new Error(`no max tokens in ${model.shortname}`)
-        }
+        }*/
         const mt = ips.max_tokens;
         delete ips.max_tokens;
         const vip = Object.keys(ips).length > 0 ? JSON.stringify(ips) : "";
