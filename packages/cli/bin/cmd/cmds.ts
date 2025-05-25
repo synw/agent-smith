@@ -3,103 +3,65 @@ import { toRaw } from "@vue/reactivity";
 import { Command } from "commander";
 import { brain } from "../agent.js";
 import { query } from "../cli.js";
-import { Cmd } from "../interfaces.js";
+import { readAliases, readFeatures } from "../db/read.js";
 import { chatInferenceParams } from "../state/chat.js";
-import { isChatMode, lastCmd, runMode } from "../state/state.js";
+import { isChatMode, runMode } from "../state/state.js";
 import { initCommandsFromAliases } from "./clicmds/aliases.js";
 import { initBaseCommands } from "./clicmds/base.js";
 import { initUserCmds } from "./clicmds/cmds.js";
-import { readFeatures } from "../db/read.js";
 
-let cliCmds: Record<string, Cmd> = {};
-
-async function chat() {
+async function chat(program: Command) {
     const data = { message: '>', default: "" };
+    console.log("CHAT")
     const prompt = await input(data);
+    console.log("CHAT INPUT", prompt)
     if (prompt == "/q") {
         isChatMode.value = false;
         if (runMode.value == "cmd") {
             process.exit(0)
         } else {
-            await query()
+            await query(program)
         }
     }
     //console.log("EX", brain.ex);
     await brain.ex.think(prompt, toRaw(chatInferenceParams));
     console.log();
-    await chat();
-}
-
-async function initCliCmds() {
-    //const _cmds = await initCmds();
-    //const _alias = initCommandsFromAliases();
-    //cliCmds = { ..._cmds, ..._alias }
-}
-
-async function runCmd(cmdName: string, args: Array<string> = [], options: any = {}) {
-    if (!(cmdName in cliCmds)) {
-        console.log(`Command ${cmdName} not found`);
-        return
-    }
-    const cmd = cliCmds[cmdName].cmd;
-    //console.log("Running cmd", cmds[cmdName]);
-    await cmd(args, options);
-    lastCmd.name = cmdName;
-    lastCmd.args = args;
+    await chat(program);
 }
 
 async function buildCmds(): Promise<Command> {
     const program = new Command();
     initBaseCommands(program);
-    initCommandsFromAliases(program);
+    const aliases = readAliases();
+    initCommandsFromAliases(program, aliases);
     const feats = readFeatures();
     const cmds = await initUserCmds(feats.cmd);
     cmds.forEach(c => {
         //console.log("Add cmd", c);
         program.addCommand(c)
     });
-    /*const excmds = await initCmds();
-    for (const [name, spec] of Object.entries({ ...cmds, ...excmds })) {
-        //console.log("N", name, "S", spec);
-        const cmd = program.command(name);
-        const _cmd = async (args: Array<string> = [], options: any = {}): Promise<any> => {
-            //console.log("CMD OPTS", options);
-            //console.log("BARGS", args);
-            const _args = await setOptions(args, options);
-            //console.log("FARGS", _args, options);
-            const res = await spec.cmd(_args, options);
-            //console.log("OUTPUT", res);
-            await processOutput(res);
-            return res
-        }
-        if ("args" in spec) {
-            cmd
-                .argument("<args...>", spec.args)
-                .description(spec.description)
-                .action(_cmd);
-        } else {
-            cmd
-                .argument("[args...]", "No arguments")
-                .description(spec.description)
-                .action(_cmd);
-        }
-        for (const [_name, _spec] of Object.entries(modes)) {
-            //if (name == "et") {
-            //console.log("Add option", _name);
-            cmd.option(_name, _spec.description)
-            //}
-        }
-    }*/
     return program
 }
 
 async function parseCmd() {
     const program = await buildCmds();
+    /*program.hook('preAction', (thisCommand, actionCommand) => {
+        const options = actionCommand.opts();
+        if (options?.chat === true) {
+            isChatMode.value = true
+        }
+        console.log("OPTIONS", options);
+    });*/
     await program.parseAsync();
-    //console.log("CHAT MODE", isChatMode.value);
+    console.log("CHAT MODE", isChatMode.value);
     if (isChatMode.value) {
-        await chat()
+        await chat(program)
     }
 }
 
-export { buildCmds, chat, initCliCmds, parseCmd, runCmd };
+export {
+    buildCmds,
+    chat,
+    parseCmd,
+};
+

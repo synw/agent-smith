@@ -1,4 +1,5 @@
 //import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec } from "../../../../../lmtask/dist/main.js";
+import color from "ansi-colors";
 import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec } from "@agent-smith/lmtask";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import ora from 'ora';
@@ -9,7 +10,7 @@ import { isChatMode, isQuiet, isShowTokens, isVerbose } from "../../../state/sta
 import { executeAction } from "../actions/cmd.js";
 import { parseCommandArgs, parseTaskConfigOptions } from "../options_parsers.js";
 import { runtimeDataError } from "../user_msgs.js";
-import { readPromptFile } from "../utils.js";
+import { formatStats, readPromptFile } from "../utils.js";
 import { executeWorkflow } from "../workflows/cmd.js";
 import { configureTaskModel, mergeInferParams } from "./conf.js";
 import { openTaskSpec } from "./utils.js";
@@ -172,7 +173,7 @@ async function executeTask(
     //let tcspinner: Ora;
     const onToolCall = (tc: Record<string, any>) => {
         //console.log("TC START");
-        console.log("⚒️ ", `Executing [${name}]`, tc.name, tc.arguments);
+        console.log("⚒️ ", color.bold(name), "=>", `${color.yellowBright(tc.name)}`, tc.arguments);
         //tcspinner = spinnerInit(tc.name);
         //tcspinner.start();
         //console.log("TC END START");
@@ -209,10 +210,10 @@ async function executeTask(
         if (brain.ex.name != ex.name) {
             brain.setDefaultExpert(ex);
         }
-        //brain.ex.template.pushToHistory({ user: pr, assistant: out.answer.text });
+        brain.ex.template.pushToHistory({ user: payload.prompt, assistant: out.answer.text });
     }
     if (options.debug || isVerbose.value) {
-        //console.log("\n", formatStats(out.answer.stats))
+        console.log("\n", formatStats(out.answer.stats))
     }
     //@ts-ignore
     return out

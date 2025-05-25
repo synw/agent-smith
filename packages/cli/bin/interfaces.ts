@@ -1,12 +1,6 @@
 import { BaseLmTask, ModelSpec } from "@agent-smith/lmtask";
 import { InferenceParams } from "@locallm/types";
 
-interface Cmd {
-    cmd: CmdExecutor;
-    description: string;
-    args?: string;
-}
-
 interface FeatureSpec {
     id?: number;
     name: string;
@@ -81,8 +75,6 @@ interface FinalLmTaskConfig {
     modelname?: string;
 }
 
-type CmdExecutor = (args: Array<string>, options: any) => Promise<any>;
-
 type InputMode = "manual" | "promptfile" | "clipboard";
 type OutputMode = "txt" | "clipboard";
 type RunMode = "cli" | "cmd";
@@ -101,8 +93,6 @@ type FeatureExtension = TaskExtension | CmdExtension | ActionExtension | Workflo
 type AliasType = "task" | "action" | "workflow";
 
 export {
-    Cmd,
-    CmdExecutor,
     InputMode,
     VerbosityMode,
     OutputMode,

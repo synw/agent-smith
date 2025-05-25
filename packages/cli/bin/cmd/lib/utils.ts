@@ -1,40 +1,10 @@
 //import { LmTask } from "../../../../lmtask/dist/interfaces.js";
 import { InferenceStats } from "@locallm/types";
 import { marked } from "../../agent.js";
-import { Cmd } from "../../interfaces.js";
 import { formatMode, initFilepaths, inputMode, outputMode, promptfilePath } from "../../state/state.js";
-import { modes } from "../clicmds/modes.js";
 import { readClipboard, writeToClipboard } from "../sys/clipboard.js";
 import { readFile } from "../sys/read.js";
-import { extractBetweenTags, splitThinking } from "../../utils/text.js";
-
-async function setOptions(
-    args: Array<string> = [], options: Record<string, any>,
-): Promise<Array<string>> {
-    //console.log("Args:", args);
-    //console.log("Opts", options);
-    /*if (runMode.value == "cli") {
-        return args
-    };*/
-    for (const k of Object.keys(options)) {
-        let opt: Cmd;
-        if (k.length == 1) {
-            opt = modes["-" + k.toLowerCase()];
-        } else {
-            opt = modes["--" + k.toLowerCase()];
-        }
-        //console.log("OPT", opt)
-        await opt.cmd([], undefined)
-    }
-    if (inputMode.value == "promptfile") {
-        const p = readPromptFile();
-        args.push(p)
-    } else if (inputMode.value == "clipboard") {
-        const p = await readClipboard();
-        args.push(p)
-    }
-    return args
-}
+import { splitThinking } from "../../utils/text.js";
 
 function readPromptFile(): string {
     initFilepaths();
@@ -98,12 +68,8 @@ function formatStats(stats: InferenceStats): string {
 
 export {
     formatStats,
-    //initTaskConf,
-    //initTaskParams,
-    //initTaskVars,
     parseInputOptions,
     processOutput,
     readPromptFile,
-    setOptions
 };
 

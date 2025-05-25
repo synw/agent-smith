@@ -11,7 +11,7 @@ import { LmTaskConf } from "@agent-smith/lmtask/dist/interfaces.js";
 import { extractToolDoc } from "./cmd/lib/tools.js";
 import { openTaskSpec } from "./cmd/lib/tasks/utils.js";
 import { extractBetweenTags, splitThinking } from "./utils/text.js";
-
+import { displayOptions, ioOptions, inferenceOptions, taskOptions, actionOptions, workflowOptions } from "./cmd/options.js";
 export {
     execute,
     run,
@@ -29,4 +29,10 @@ export {
     openTaskSpec,
     extractBetweenTags,
     splitThinking,
+    displayOptions,
+    ioOptions,
+    inferenceOptions,
+    taskOptions,
+    actionOptions,
+    workflowOptions,
 }

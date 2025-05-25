@@ -4,9 +4,12 @@ import { actionOptions, taskOptions, workflowOptions } from "../options.js";
 import { executeTaskCmd } from "../lib/tasks/cmd.js";
 import { executeActionCmd } from "../lib/actions/cmd.js";
 import { executeWorkflowCmd } from "../lib/workflows/cmd.js";
+import { AliasType } from "../../interfaces.js";
 
-function initCommandsFromAliases(program: Command): Command {
-    const aliases = readAliases();
+function initCommandsFromAliases(program: Command, aliases: {
+    name: string;
+    type: AliasType;
+}[]): Command {
     aliases.forEach((alias) => {
         switch (alias.type) {
             case "task":

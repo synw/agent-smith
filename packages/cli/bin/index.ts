@@ -1,10 +1,9 @@
 #!/usr/bin/env node
 import { argv } from 'process';
-import { query } from "./cli.js";
-import { initState, runMode } from './state/state.js';
 import { initAgent } from './agent.js';
-import { initCliCmds, parseCmd } from './cmd/cmds.js';
-import { updateConfCmd } from './cmd/clicmds/cmds.js';
+import { query } from "./cli.js";
+import { buildCmds, parseCmd } from './cmd/cmds.js';
+import { initState, runMode } from './state/state.js';
 
 async function main() {
     const nargs = argv.length;
@@ -22,8 +21,8 @@ async function main() {
     await initAgent();
     switch (runMode.value) {
         case "cli":
-            await initCliCmds();
-            await query()
+            const program = await buildCmds();
+            await query(program)
             break;
         default:
             await parseCmd();

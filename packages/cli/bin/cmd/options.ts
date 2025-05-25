@@ -1,6 +1,6 @@
 import { InvalidArgumentError, Option } from "commander";
 
-const baseOptions: Array<Option> = [
+const displayOptions: Array<Option> = [
     new Option("-v, --verbose", "use the verbose mode"),
     new Option("-d, --debug", "use the debug mode"),
 ];
@@ -9,12 +9,12 @@ const inferenceOptions: Array<Option> = [
     //new Option("-s, --stream", "use the stream mode"),
     new Option("-m, --model <name>", "the model name").argParser(parseString),
     new Option("-x, --ctx", "context window size").argParser(parseIntValue),
-    new Option("-t, --template <template>", "the template to use"),
+    new Option("-e, --template <template>", "the template to use"),
     new Option("-o, --max_tokens <number>", "the number of predictions to return").argParser(parseIntValue),
     new Option("-k, --top_k <number>", "limits the result set to the top K results").argParser(parseIntValue),
     new Option("-p, --top_p <number>", "filters results based on cumulative probability").argParser(parseFloatValue),
     new Option("-i, --min_p <number>", "the minimum probability for a token to be considered, relative to the probability of the most likely token").argParser(parseFloatValue),
-    new Option("-u, --temperature <number>", "adjusts randomness in sampling; higher values mean more randomness").argParser(parseFloatValue),
+    new Option("-t, --temperature <number>", "adjusts randomness in sampling; higher values mean more randomness").argParser(parseFloatValue),
     new Option("-r, --repeat_penalty <number>", "adjusts penalty for repeated tokens").argParser(parseFloatValue),
 ];
 
@@ -28,16 +28,16 @@ const ioOptions: Array<Option> = [
 ];
 
 const taskOptions: Array<Option> = [
-    ...baseOptions,
+    ...displayOptions,
     ...ioOptions,
     ...inferenceOptions,
     new Option("-a, --vars [variables_kv...]", "task variables"),
     new Option("--tokens", "toggle show tokens mode"),
-    new Option("-c, --chat-mode", "toggle chat mode for tasks"),
+    new Option("-c, --chat", "toggle chat mode for tasks"),
 ];
 
 const actionOptions: Array<Option> = [
-    ...baseOptions,
+    ...displayOptions,
     ...ioOptions,
 ];
 
@@ -65,7 +65,9 @@ function parseFloatValue(value: string): number {
 }
 
 export {
-    baseOptions,
+    displayOptions,
+    ioOptions,
+    inferenceOptions,
     taskOptions,
     actionOptions,
     workflowOptions,

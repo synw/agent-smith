@@ -5,7 +5,7 @@ import { parseCommandArgs } from "../options_parsers.js";
 import { executeTask } from "../tasks/cmd.js";
 import { readWorkflow } from "./read.js";
 
-async function executeWorkflow(name: string, params: Record<string, any> = [], options: any = {}): Promise<any> {
+async function executeWorkflow(name: string, params: Record<string, any>, options: Record<string, any>): Promise<any> {
     const { workflow, found } = await readWorkflow(name);
     if (!found) {
         throw new Error(`Workflow ${name} not found`)
