@@ -3,7 +3,7 @@ import { argv } from 'process';
 import { initAgent } from './agent.js';
 import { query } from "./cli.js";
 import { buildCmds, parseCmd } from './cmd/cmds.js';
-import { initState, runMode } from './state/state.js';
+import { initState, isChatMode, runMode } from './state/state.js';
 
 async function main() {
     const nargs = argv.length;
@@ -19,13 +19,19 @@ async function main() {
     //console.log("START")
     await initState();
     await initAgent();
+    const program = await buildCmds();
+    program.hook('preAction', (thisCommand, actionCommand) => {
+        const options = actionCommand.opts();
+        if (options?.chat === true) {
+            isChatMode.value = true
+        }
+    });
     switch (runMode.value) {
         case "cli":
-            const program = await buildCmds();
             await query(program)
             break;
         default:
-            await parseCmd();
+            await parseCmd(program);
             break;
     }
 }

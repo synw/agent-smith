@@ -6,12 +6,13 @@ import { writeToClipboard } from "./cmd/sys/clipboard.js";
 import { initAgent } from "./agent.js";
 import { initState, pluginDataDir } from "./state/state.js";
 import { usePerfTimer } from "./utils/perf.js";
-import { parseArgs } from "./utils/args.js";
+import { parseCommandArgs } from "./cmd/lib/options_parsers.js";
 import { LmTaskConf } from "@agent-smith/lmtask/dist/interfaces.js";
 import { extractToolDoc } from "./cmd/lib/tools.js";
 import { openTaskSpec } from "./cmd/lib/tasks/utils.js";
 import { extractBetweenTags, splitThinking } from "./utils/text.js";
 import { displayOptions, ioOptions, inferenceOptions, taskOptions, actionOptions, workflowOptions } from "./cmd/options.js";
+
 export {
     execute,
     run,
@@ -23,7 +24,7 @@ export {
     initState,
     pluginDataDir,
     usePerfTimer,
-    parseArgs,
+    parseCommandArgs,
     extractToolDoc,
     LmTaskConf,
     openTaskSpec,

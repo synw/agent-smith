@@ -12,9 +12,7 @@ import { initUserCmds } from "./clicmds/cmds.js";
 
 async function chat(program: Command) {
     const data = { message: '>', default: "" };
-    console.log("CHAT")
     const prompt = await input(data);
-    console.log("CHAT INPUT", prompt)
     if (prompt == "/q") {
         isChatMode.value = false;
         if (runMode.value == "cmd") {
@@ -43,17 +41,8 @@ async function buildCmds(): Promise<Command> {
     return program
 }
 
-async function parseCmd() {
-    const program = await buildCmds();
-    /*program.hook('preAction', (thisCommand, actionCommand) => {
-        const options = actionCommand.opts();
-        if (options?.chat === true) {
-            isChatMode.value = true
-        }
-        console.log("OPTIONS", options);
-    });*/
+async function parseCmd(program: Command) {
     await program.parseAsync();
-    console.log("CHAT MODE", isChatMode.value);
     if (isChatMode.value) {
         await chat(program)
     }
