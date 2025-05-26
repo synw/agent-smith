@@ -31,7 +31,6 @@ const taskOptions: Array<Option> = [
     ...displayOptions,
     ...ioOptions,
     ...inferenceOptions,
-    new Option("--kv, --vars [variables_kv...]", "task variables"),
     new Option("--tokens", "toggle show tokens mode"),
     new Option("-c, --chat", "toggle chat mode for tasks"),
 ];
