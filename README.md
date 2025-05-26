@@ -126,25 +126,25 @@ Sorry no: this library favours local first or private remote inference servers
 
 ### Terminal client
 
-Simple inference query (using the [inference](https://synw.github.io/agent-smith/terminal_client/plugins/inference) plugin):
+Simple inference query (using the [inference](https://synw.github.io/agent-smith/plugins/inference) plugin):
 
 ```bash
 lm q list the planets of the solar system
 ```
 
-Query a thinking model, use qwq (from the [models](https://synw.github.io/agent-smith/terminal_client/plugins/models) plugin)::
+Query a thinking model, use qwq (from the [models](https://synw.github.io/agent-smith/plugins/models) plugin)::
 
 ```bash
 lm think "solve this math problem: ..." m=qwq
 ```
 
-Compare images (using the [vision](https://synw.github.io/agent-smith/terminal_client/plugins/vision) plugin):
+Compare images (using the [vision](https://synw.github.io/agent-smith/plugins/vision) plugin):
 
 ```bash
 lm vision img1.jpg img2.jpg "Compare the images"
 ```
 
-Generate a commit message in a git repository (using the [git](https://synw.github.io/agent-smith/terminal_client/plugins/code/git) plugin):
+Generate a commit message in a git repository (using the [git](https://synw.github.io/agent-smith/plugins/code/git) plugin):
 
 ```bash
 lm commit
@@ -152,12 +152,7 @@ lm commit
 
 ## Terminal client plugins
 
-| Version | Name | Description | Doc |
-| --- | --- | --- | --- |
-| [![pub package](https://img.shields.io/npm/v/@agent-smith/feat-models)](https://www.npmjs.com/package/@agent-smith/feat-models) | [@agent-smith/feat-models](https://github.com/synw/agent-smith/tree/main/packages/features/models) | Models | [doc](https://synw.github.io/agent-smith/terminal_client/plugins/models)
-| [![pub package](https://img.shields.io/npm/v/@agent-smith/feat-inference)](https://www.npmjs.com/package/@agent-smith/feat-inference) | [@agent-smith/feat-inference](https://github.com/synw/agent-smith/tree/main/packages/features/inference) | Inference | [doc](https://synw.github.io/agent-smith/terminal_client/plugins/inference)
-| [![pub package](https://img.shields.io/npm/v/@agent-smith/feat-vision)](https://www.npmjs.com/package/@agent-smith/feat-vision) | [@agent-smith/feat-vision](https://github.com/synw/agent-smith/tree/main/packages/features/vision) | Vision | [doc](https://synw.github.io/agent-smith/terminal_client/plugins/vision)
-| [![pub package](https://img.shields.io/npm/v/@agent-smith/feat-git)](https://www.npmjs.com/package/@agent-smith/feat-git) | [@agent-smith/feat-git](https://github.com/synw/agent-smith/tree/main/packages/features/git) | Git | [doc](https://synw.github.io/agent-smith/terminal_client/plugins/code/git)
+Plugins for the terminal client are available: [terminal client plugins](https://github.com/synw/agent-smith-plugins)
 
 ## Nodejs example
 
