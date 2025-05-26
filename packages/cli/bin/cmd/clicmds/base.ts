@@ -2,12 +2,12 @@ import { Command } from "commander";
 import YAML from 'yaml';
 import { initAgent, taskBuilder } from "../../agent.js";
 import { dbPath, processConfPath } from "../../conf.js";
-import { readFeaturePaths, readFeatures, readFilePath } from "../../db/read.js";
+import { readFeaturePaths, readFeatures, readFeaturesType, readFilePath } from "../../db/read.js";
 import { cleanupFeaturePaths, updateAliases, updateDataDirPath, updateFeatures, updatePromptfilePath, upsertFilePath } from "../../db/write.js";
 import { FeatureType } from "../../interfaces.js";
 import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
 import { readPluginsPaths } from "../../state/plugins.js";
-import { dataDirPath, isDebug, promptfilePath, runMode } from "../../state/state.js";
+import { dataDirPath, promptfilePath, runMode } from "../../state/state.js";
 import { showModelsCmd, updateAllModels } from "../lib/models.js";
 import { parseCommandArgs } from "../lib/options_parsers.js";
 import { deleteFileIfExists } from "../sys/delete_file.js";
@@ -15,6 +15,7 @@ import { readTask } from "../sys/read_task.js";
 import { initDb } from "../../db/db.js";
 import { runtimeDataError } from "../../utils/user_msgs.js";
 import { runtimeInfo } from "../../utils/user_msgs.js";
+import { updateConfCmd } from "./update.js";
 
 function initBaseCommands(program: Command): Command {
     program.command("ping")
@@ -26,7 +27,7 @@ function initBaseCommands(program: Command): Command {
     program.command("tasks")
         .description("list all the tasks")
         .action(async (...args: Array<any>) => {
-            const ts = Object.keys(readFeatures().task).sort();
+            const ts = Object.keys(readFeaturesType("task")).sort();
             console.table(ts)
         });
     program.command("task <task>")
@@ -58,46 +59,6 @@ function initBaseCommands(program: Command): Command {
             await _resetDbCmd()
         });
     return program
-}
-
-async function updateConfCmd(args: Array<string>): Promise<any> {
-    initDb(isDebug.value, true);
-    // try to find a conf path in db
-    const { found, path } = readFilePath("conf");
-    const userProvidedConfPath = (args[0] != "conf") ? args[0] : null;
-    if (!found && !userProvidedConfPath) {
-        runtimeDataError("conf file path not found in db: please provide a conf path parameter to the command")
-    }
-
-    let confPath: string;
-    if (userProvidedConfPath) {
-        confPath = userProvidedConfPath;
-        const isu = upsertFilePath("conf", confPath);
-        if (isu) {
-            runtimeInfo("Config path", confPath, "updated")
-        }
-    } else {
-        confPath = path;
-    }
-    console.log("Using", confPath, "to update features");
-    const { paths, pf, dd } = await processConfPath(confPath);
-    if (pf.length > 0) {
-        updatePromptfilePath(pf);
-        promptfilePath.value = pf;
-    }
-    if (dd.length > 0) {
-        updateDataDirPath(dd);
-        dataDirPath.value = dd;
-    }
-    const feats = readFeaturesDirs(paths);
-    //console.log("CMD FEATS", feats);
-    updateFeatures(feats);
-    updateAliases(feats);
-    updateAllModels();
-    const deleted = cleanupFeaturePaths(paths);
-    for (const el of deleted) {
-        console.log("- [feature path]", el)
-    }
 }
 
 async function _resetDbCmd(): Promise<any> {

@@ -1,12 +1,13 @@
 //import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec } from "../../../../../lmtask/dist/main.js";
-import color from "ansi-colors";
 import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec } from "@agent-smith/lmtask";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
+import color from "ansi-colors";
 import ora from 'ora';
 import { brain, initAgent, taskBuilder } from "../../../agent.js";
 import { readClipboard } from "../../../cmd/sys/clipboard.js";
 import { readTool } from "../../../db/read.js";
-import { isChatMode, isQuiet, isShowTokens, isVerbose } from "../../../state/state.js";
+import { usePerfTimer } from "../../../main.js";
+import { isChatMode } from "../../../state/state.js";
 import { executeAction } from "../actions/cmd.js";
 import { parseCommandArgs, parseTaskConfigOptions } from "../options_parsers.js";
 import { runtimeDataError } from "../user_msgs.js";
@@ -24,7 +25,6 @@ async function executeTask(
         console.log("Task options:", options);
     }
     const taskFileSpec = openTaskSpec(name);
-    let vars: Record<string, any> = {};
     const conf = parseTaskConfigOptions(options);
     if (options.debug) {
         console.log("conf:", conf);
@@ -34,8 +34,20 @@ async function executeTask(
     if (options?.ctx) {
         model.ctx = options.ctx
     }
-    // tools
+    // vars
     const taskSpec = taskFileSpec as LmTask;
+    let vars: Record<string, any> = {};
+    taskSpec.variables?.optional?.forEach(k => {
+        if (k in options) {
+            vars[k] = options[k]
+        }
+    });
+    taskSpec.variables?.required?.forEach(k => {
+        if (k in options) {
+            vars[k] = options[k]
+        }
+    });
+    // tools
     //console.log("Task tools list:", taskSpec.toolsList);
     if (taskSpec.toolsList) {
         taskSpec.tools = []
@@ -53,7 +65,7 @@ async function executeTask(
                             const res = await executeAction(toolName, params, options, true);
                             return res
                         case "task":
-                            conf.quiet = !options.debug;
+                            conf.quiet = !options?.debug;
                             const tres = await executeTask(name, params, options, true);
                             //console.log("WFTRESP", tres.answer.text);
                             return tres.answer.text
@@ -98,7 +110,7 @@ async function executeTask(
     //let fullTxt = ""
     const printToken = (t: string) => {
         //console.log("DEFAULT processToken");
-        if (isShowTokens.value) {
+        if (options?.tokens === true) {
             let txt = t;
             txt = c ? t : `\x1b[100m${t}\x1b[0m`
             process.stdout.write(txt);
@@ -115,15 +127,25 @@ async function executeTask(
         }
     };
     let processToken = printToken;
-    if ((hasThink || hasTools) && !options.debug) {
+    if ((hasThink || hasTools) && !options?.debug) {
         let continueWrite = true;
         let skipNextEmptyLinesToken = false;
         const spinner = ora("Thinking ...");
-        //const timer = usePerfTimer();
+        //const timer = usePerfTimer();        
+        const ts = "Thinking";
+        const te = color.dim("tokens");
+        const formatTokenCount = (i: number) => {
+            return `${ts} ${color.bold(i.toString())} ${te}`
+        };
+        const perfTimer = usePerfTimer(false)
+        let i = 0;
         processToken = (t: string) => {
-            //if (i == 0) { timer.start() };
+            if (i == 0) { perfTimer.start() }
+            ++i;
+            spinner.text = formatTokenCount(i)
+            //if (i == ) { timer.start() };
             //console.log("THINK processToken");
-            if (isQuiet.value) {
+            if (!options?.verbose) {
                 if (hasThink) {
                     if (t == ex.template.tags.think?.start) {
                         //console.log("Start thinking token", thinkStart);
@@ -134,12 +156,9 @@ async function executeTask(
                         //console.log("End thinking token", thinkEnd);
                         continueWrite = true;
                         skipNextEmptyLinesToken = true;
-                        /*if (isVerbose.value || options.debug) {
-                            spinner.stopAndPersist({ text: "Thinking time: " + timer.time() });
-                        } else {
-                            spinner.stop()
-                        }*/
-                        spinner.stop()
+                        let msg = color.dim("Thinking:") + ` ${i} ${color.dim("tokens")}`;
+                        msg = msg + " " + color.dim(perfTimer.time())
+                        spinner.info(msg);
                         return
                     }
                 }
@@ -150,7 +169,7 @@ async function executeTask(
                     continueWrite = false;
                     return
                 } else if (t == ex.template.tags.toolCall?.end) {
-                    if (isVerbose.value) {
+                    if (options?.verbose === true) {
                         skipNextEmptyLinesToken = true;
                         continueWrite = true;
                     }
@@ -164,7 +183,9 @@ async function executeTask(
                         return
                     }
                 }
+                //if (!quiet) {
                 printToken(t);
+                //}
             }
             ++i;
         };
@@ -212,7 +233,7 @@ async function executeTask(
         }
         brain.ex.template.pushToHistory({ user: payload.prompt, assistant: out.answer.text });
     }
-    if (options.debug || isVerbose.value) {
+    if (options?.debug === true || options?.verbose === true) {
         console.log("\n", formatStats(out.answer.stats))
     }
     //@ts-ignore
@@ -225,9 +246,10 @@ async function executeTaskCmd(
 ): Promise<LmTaskOutput> {
     const { args, options } = parseCommandArgs(targs);
     let pr: string;
-    if (options?.clipBoardInput) {
+    //console.log("TOPT", options);
+    if (options?.clipboardInput === true) {
         pr = await readClipboard()
-    } else if (options?.inputFile) {
+    } else if (options?.inputFile === true) {
         pr = readPromptFile()
     } else {
         if (args[0] !== undefined) {

@@ -1,11 +1,17 @@
 import { BaseLmTask, ModelSpec } from "@agent-smith/lmtask";
 import { InferenceParams } from "@locallm/types";
 
+interface FeatureVariables {
+    required: Array<string>;
+    optional: Array<string>;
+}
+
 interface FeatureSpec {
     id?: number;
     name: string;
     path: string;
     ext: FeatureExtension;
+    variables?: FeatureVariables;
 }
 
 interface Features {

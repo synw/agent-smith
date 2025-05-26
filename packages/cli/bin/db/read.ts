@@ -22,26 +22,33 @@ function readPlugins(): Array<Record<string, string>> {
     return f
 }
 
-function _readFeaturesType(type: FeatureType): Record<string, string> {
-    const stmt = db.prepare(`SELECT name, path FROM ${type}`);
+function readFeaturesType(type: FeatureType): Record<string, FeatureSpec> {
+    //console.log(`SELECT name, path, ext, variables FROM ${type}`)
+    const stmt = db.prepare(`SELECT name, path, ext, variables FROM ${type}`);
     const data = stmt.all() as Array<Record<string, any>>;
-    let f: Record<string, string> = {};
+    const res: Record<string, FeatureSpec> = {};
     data.forEach((row) => {
-        f[row.name] = row.path
+        const vars = row?.variables ? JSON.parse(row.variables) as { required: Array<string>, optional: Array<string> } : undefined;
+        res[row.name] = {
+            name: row.name,
+            path: row.path,
+            ext: row.ext,
+            variables: vars,
+        }
     });
-    return f
+    return res
 }
 
-function readFeatures(): Record<FeatureType, Record<string, string>> {
-    const feats: Record<FeatureType, Record<string, string>> = {
+function readFeatures(): Record<FeatureType, Record<string, FeatureSpec>> {
+    const feats: Record<FeatureType, Record<string, FeatureSpec>> = {
         task: {}, action: {}, cmd: {}, workflow: {}, adaptater: {}, modelfile: {}
     };
-    feats.task = _readFeaturesType("task");
-    feats.action = _readFeaturesType("action");
-    feats.cmd = _readFeaturesType("cmd");
-    feats.workflow = _readFeaturesType("workflow");
-    feats.adaptater = _readFeaturesType("adaptater");
-    feats.modelfile = _readFeaturesType("modelfile");
+    feats.task = readFeaturesType("task");
+    feats.action = readFeaturesType("action");
+    feats.cmd = readFeaturesType("cmd");
+    feats.workflow = readFeaturesType("workflow");
+    feats.adaptater = readFeaturesType("adaptater");
+    feats.modelfile = readFeaturesType("modelfile");
     return feats
 }
 
@@ -156,4 +163,5 @@ export {
     readModels,
     readModelfiles,
     readModel,
+    readFeaturesType,
 }

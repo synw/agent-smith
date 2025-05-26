@@ -6,11 +6,12 @@ import { createDirectoryIfNotExists } from "../cmd/sys/dirs.js";
 const confDir = path.join(process.env.HOME ?? "~/", ".config/agent-smith/cli");
 const dbPath = path.join(confDir, "config.db");
 let db: Database;
+const debugDb = true;
 
-function initDb(isVerbose: boolean, execSchema = false) {
+function initDb(isVerbose: boolean, execSchema: boolean) {
     if (execSchema) {
         createDirectoryIfNotExists(confDir, true);
-        db = new DatabaseConstructor(dbPath, { fileMustExist: false });
+        db = new DatabaseConstructor(dbPath, { fileMustExist: false, verbose: debugDb ? console.log : undefined });
         schemas.forEach((s) => {
             db.exec(s);
             if (isVerbose) {

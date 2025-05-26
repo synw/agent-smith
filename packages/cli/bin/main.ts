@@ -1,7 +1,7 @@
 import { execute, run } from "./cmd/sys/execute.js";
-import { executeActionCmd } from "./cmd/lib/actions/cmd.js";
-import { executeTaskCmd } from "./cmd/lib/tasks/cmd.js";
-import { executeWorkflowCmd } from "./cmd/lib/workflows/cmd.js";
+import { executeTask } from "./cmd/lib/tasks/cmd.js";
+import { executeAction } from "./cmd/lib/actions/cmd.js";
+import { executeWorkflow } from "./cmd/lib/workflows/cmd.js";
 import { writeToClipboard } from "./cmd/sys/clipboard.js";
 import { initAgent } from "./agent.js";
 import { initState, pluginDataDir } from "./state/state.js";
@@ -16,9 +16,9 @@ import { displayOptions, ioOptions, inferenceOptions, taskOptions, actionOptions
 export {
     execute,
     run,
-    executeWorkflowCmd,
-    executeActionCmd,
-    executeTaskCmd,
+    executeTask,
+    executeAction,
+    executeWorkflow,
     writeToClipboard,
     initAgent,
     initState,

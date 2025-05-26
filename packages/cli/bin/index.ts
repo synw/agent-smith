@@ -4,23 +4,24 @@ import { initAgent } from './agent.js';
 import { query } from "./cli.js";
 import { buildCmds, parseCmd } from './cmd/cmds.js';
 import { initState, isChatMode, runMode } from './state/state.js';
+import { updateConfCmd } from './cmd/clicmds/update.js';
 
 async function main() {
     const nargs = argv.length;
     if (nargs == 2) {
         runMode.value = "cli";
     }
-    /*else if (nargs >= 3) {
+    else if (nargs >= 3) {
         if (argv[2] == "conf") {
-            await updateConfCmd(argv.slice(-1), {});
+            await updateConfCmd(argv.slice(-1));
             return
         }
-    }*/
-    //console.log("START")
+    }
     await initState();
     await initAgent();
+    //console.log("START")
     const program = await buildCmds();
-    program.hook('preAction', (thisCommand, actionCommand) => {
+    program.hook('preAction', async (thisCommand, actionCommand) => {
         const options = actionCommand.opts();
         if (options?.chat === true) {
             isChatMode.value = true

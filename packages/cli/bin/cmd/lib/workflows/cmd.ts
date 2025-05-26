@@ -1,4 +1,3 @@
-import { isDebug, isVerbose } from "../../../state/state.js";
 import { executeAction } from "../actions/cmd.js";
 import { executeAdaptater } from "../adaptaters/cmd.js";
 import { parseCommandArgs } from "../options_parsers.js";
@@ -10,22 +9,24 @@ async function executeWorkflow(name: string, params: Record<string, any>, option
     if (!found) {
         throw new Error(`Workflow ${name} not found`)
     }
+    const isDebug = options?.debug === true;
+    const isVerbose = options?.verbose === true;
     const stepNames = Object.keys(workflow);
-    if (isDebug.value || isVerbose.value) {
+    if (isDebug || isVerbose) {
         console.log("Running workflow", name, stepNames.length, "steps");
     }
     let i = 0;
     const finalTaskIndex = stepNames.length + 1;
     let taskRes: Record<string, any> = params;
     for (const [name, step] of Object.entries(workflow)) {
-        if (isDebug.value || isVerbose.value) {
+        if (isDebug || isVerbose) {
             console.log(`${i + 1}: ${step.type} ${name}`)
         }
         switch (step.type) {
             case "task":
                 try {
                     //console.log("EXECT", pval);
-                    const tr = await executeTask(name, taskRes, options);
+                    const tr = await executeTask(name, taskRes, options, true);
                     taskRes = tr;
                 } catch (e) {
                     throw new Error(`workflow task ${i + 1}: ${e}`)
@@ -77,7 +78,7 @@ async function executeWorkflow(name: string, params: Record<string, any>, option
         }
         //console.log("WF NODE RES", step.type, taskRes);
         params = taskRes;
-        /*if (isDebug.value) {
+        /*if (isDebug) {
             console.log("->", params);
         }*/
         //console.log("WFR", taskRes)

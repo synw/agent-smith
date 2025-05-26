@@ -64,6 +64,42 @@ function _parseToolDoc(rawTxt: string, name: string): ToolSpec {
     }
 }
 
+function _parseTaskVariables(data: Record<string, any>): { required: Array<string>, optional: Array<string> } {
+    const res = { required: new Array<string>(), optional: new Array<string>() };
+    if (data?.variables) {
+        if (data.variables?.required) {
+            res.required = data.variables.required
+        }
+        if (data.variables?.optional) {
+            res.optional = data.variables.optional
+        }
+    }
+    return res
+}
+
+function extractTaskToolDocAndVariables(
+    name: string, ext: FeatureExtension, dirPath: string
+): { toolDoc: string, variables: { required: Array<string>, optional: Array<string> } } {
+    const fp = dirPath + "/" + name + "." + ext;
+    const { data, found } = readYmlFile(fp);
+    const res = { variables: { required: new Array<string>(), optional: new Array<string>() }, toolDoc: "" };
+    // tools
+    let tspec: ToolSpec;
+    if (!found) {
+        throw new Error(`extractTaskToolDocAndVariables: file ${fp} not found`)
+    }
+    if (data.tool) {
+        data.tool.name = name;
+        tspec = data.tool as ToolSpec;
+        res.toolDoc = JSON.stringify(tspec, null, "  ");
+    }
+    // variables
+    const { required, optional } = _parseTaskVariables(data);
+    res.variables.required = required;
+    res.variables.optional = optional;
+    return res
+}
+
 function extractToolDoc(name: string, ext: FeatureExtension, dirPath: string): { found: boolean, toolDoc: string } {
     let spec: string;
     let found = false;
@@ -105,4 +141,5 @@ function extractToolDoc(name: string, ext: FeatureExtension, dirPath: string): {
 
 export {
     extractToolDoc,
+    extractTaskToolDocAndVariables,
 }

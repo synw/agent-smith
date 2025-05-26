@@ -19,18 +19,18 @@ const usePerfTimer = (startTimer = true) => {
         return humanizedTime
     }
 
-    const time = () => _end(false);
+    const time = () => _end(false).toString();
 
     const printTime = () => console.log(_end(false));
 
     const timeRaw = () => _end(true);
 
     const _formatDuration = (ms: number) => {
-        const seconds = Math.floor(ms / 1000);
-        const minutes = Math.floor(seconds / 60);
-        if (ms < 1000) return `${ms.toFixed(2)}ms`;
-        if (seconds < 60) return `${seconds.toFixed(2)}s`;
-        return `${minutes}m ${seconds % 60}s`;
+        const seconds = ms / 1000;
+        const minutes = seconds / 60;
+        if (ms < 1000) return `${ms.toFixed(2)} milliseconds`;
+        if (seconds < 60) return `${seconds.toFixed(1)} seconds`;
+        return `${minutes.toFixed(1)} minutes ${seconds % 60} seconds`;
     }
 
     return {

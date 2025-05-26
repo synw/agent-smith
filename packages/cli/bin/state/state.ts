@@ -13,11 +13,7 @@ const outputMode = ref<OutputMode>("txt");
 const runMode = ref<RunMode>("cmd");
 const formatMode = ref<FormatMode>("text");
 const isChatMode = ref(false);
-const verbosity = ref<VerbosityMode>("quiet");
-const isDebug = computed(() => verbosity.value == "debug");
-const isVerbose = computed(() => verbosity.value == "verbose");
-const isQuiet = computed(() => verbosity.value == "quiet");
-const isShowTokens = ref(false);
+//const verbosity = ref<VerbosityMode>("quiet");
 const promptfilePath = ref("");
 const dataDirPath = ref("");
 const isStateReady = ref(false);
@@ -46,7 +42,7 @@ async function initState() {
         return
     }
     //sconsole.log("INIT STATE");
-    initDb(isDebug.value);
+    initDb(false, false);
     initFilepaths();
     isStateReady.value = true;
     //console.log("State ready, available features:", readFeatures())
@@ -67,27 +63,23 @@ function pluginDataDir(pluginName: string): string {
     return pluginDatapath
 }
 
-function setVerbosity(mode: VerbosityMode) {
+/*function setVerbosity(mode: VerbosityMode) {
     verbosity.value = mode
-}
+}*/
 
 
 export {
     inputMode,
     outputMode,
     isChatMode,
-    isShowTokens,
     runMode,
     formatMode,
     lastCmd,
-    isDebug,
-    isVerbose,
-    isQuiet,
     promptfilePath,
     dataDirPath,
     pluginDataDir,
     initState,
     initFilepaths,
-    setVerbosity,
+    //setVerbosity,
     pyShell,
 }

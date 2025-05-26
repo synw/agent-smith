@@ -9,11 +9,11 @@ const inferenceOptions: Array<Option> = [
     //new Option("-s, --stream", "use the stream mode"),
     new Option("-m, --model <name>", "the model name").argParser(parseString),
     new Option("-x, --ctx", "context window size").argParser(parseIntValue),
-    new Option("-e, --template <template>", "the template to use"),
-    new Option("-o, --max_tokens <number>", "the number of predictions to return").argParser(parseIntValue),
+    new Option("--tpl, --template <template>", "the template to use"),
+    new Option("--mt, --max_tokens <number>", "the number of predictions to return").argParser(parseIntValue),
     new Option("-k, --top_k <number>", "limits the result set to the top K results").argParser(parseIntValue),
     new Option("-p, --top_p <number>", "filters results based on cumulative probability").argParser(parseFloatValue),
-    new Option("-i, --min_p <number>", "the minimum probability for a token to be considered, relative to the probability of the most likely token").argParser(parseFloatValue),
+    new Option("--mp, --min_p <number>", "the minimum probability for a token to be considered, relative to the probability of the most likely token").argParser(parseFloatValue),
     new Option("-t, --temperature <number>", "adjusts randomness in sampling; higher values mean more randomness").argParser(parseFloatValue),
     new Option("-r, --repeat_penalty <number>", "adjusts penalty for repeated tokens").argParser(parseFloatValue),
 ];
@@ -31,7 +31,7 @@ const taskOptions: Array<Option> = [
     ...displayOptions,
     ...ioOptions,
     ...inferenceOptions,
-    new Option("-a, --vars [variables_kv...]", "task variables"),
+    new Option("--kv, --vars [variables_kv...]", "task variables"),
     new Option("--tokens", "toggle show tokens mode"),
     new Option("-c, --chat", "toggle chat mode for tasks"),
 ];

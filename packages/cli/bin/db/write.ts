@@ -1,4 +1,4 @@
-import { extractToolDoc } from "../cmd/lib/tools.js";
+import { extractTaskToolDocAndVariables, extractToolDoc } from "../cmd/lib/tools.js";
 import { AliasType, FeatureSpec, FeatureType, Features, DbModelDef } from "../interfaces.js";
 import { db } from "./db.js";
 import { readModels } from "./read.js";
@@ -117,15 +117,32 @@ function upsertAndCleanFeatures(feats: Array<FeatureSpec>, type: FeatureType): A
     return newFeatures
 }
 
+function updateVariables(name: string, variableDoc: string) {
+    const stmt1 = db.prepare("SELECT id FROM task WHERE name = ?");
+    const result = stmt1.get(name) as Record<string, any>;
+    //console.log("UV res", result);
+    if (!result?.id) {
+        return;
+    }
+    const updateStmt = db.prepare("UPDATE task SET variables = ? WHERE id = ?");
+    updateStmt.run(variableDoc, result.id);
+    console.log("~", "[task variables] updated for", name);
+}
+
 function upsertTool(name: string, type: FeatureType, toolDoc: string) {
     const stmt1 = db.prepare("SELECT * FROM tool WHERE name = ?");
     const result = stmt1.get(name) as Record<string, any>;
     if (result?.id) {
-        return;
+        // Update the existing tool
+        const updateStmt = db.prepare("UPDATE tool SET spec = ?, type = ? WHERE id = ?");
+        updateStmt.run(toolDoc, type, result.id);
+        console.log("~", "[tool] updated from", type, ":", name);
+    } else {
+        // Insert a new tool
+        const stmt = db.prepare("INSERT INTO tool (name, spec, type) VALUES (?,?,?)");
+        stmt.run(name, toolDoc, type);
+        console.log("+", "[tool] added from", type, ":", name);
     }
-    const stmt = db.prepare("INSERT INTO tool (name, spec, type) VALUES (?,?,?)");
-    stmt.run(name, toolDoc, type);
-    console.log("+", "[tool] from", type, ":", name);
 }
 
 function updateModels(models: Array<DbModelDef>) {
@@ -164,24 +181,29 @@ function updateModels(models: Array<DbModelDef>) {
 
 function updateFeatures(feats: Features) {
     //console.log("FEATS", feats);
-    const newTasks = upsertAndCleanFeatures(feats.task, "task");
-    newTasks.forEach((feat) => {
-        const { found, toolDoc } = extractToolDoc(feat.name, feat.ext, feat.path);
+    upsertAndCleanFeatures(feats.task, "task");
+    feats.task.forEach((feat) => {
+        const { toolDoc, variables } = extractTaskToolDocAndVariables(feat.name, feat.ext, feat.path);
+        //const { found, toolDoc } = extractToolDoc(feat.name, feat.ext, feat.path);
         //console.log(`TASK ${feat.name} TOOL DOC`, toolDoc);
-        if (found) {
+        if (toolDoc.length > 0) {
             upsertTool(feat.name, "task", toolDoc)
         }
+        if (variables.required.length > 0 || variables.optional.length > 0) {
+            //console.log("UPDATE VARS", feat.name, ":", variables)
+            updateVariables(feat.name, JSON.stringify(variables, null, "  "))
+        }
     });
-    const newActions = upsertAndCleanFeatures(feats.action, "action");
-    newActions.forEach((feat) => {
+    upsertAndCleanFeatures(feats.action, "action");
+    feats.action.forEach((feat) => {
         const { found, toolDoc } = extractToolDoc(feat.name, feat.ext, feat.path);
         //console.log(`ACTION ${feat.name} TOOL DOC`, toolDoc);
         if (found) {
             upsertTool(feat.name, "action", toolDoc)
         }
     });
-    const newWorkflows = upsertAndCleanFeatures(feats.workflow, "workflow");
-    newWorkflows.forEach((feat) => {
+    upsertAndCleanFeatures(feats.workflow, "workflow");
+    feats.workflow.forEach((feat) => {
         const { found, toolDoc } = extractToolDoc(feat.name, feat.ext, feat.path);
         //console.log(`WORKFLOW ${feat.name} TOOL DOC`, toolDoc);
         if (found) {

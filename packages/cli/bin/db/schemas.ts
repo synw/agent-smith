@@ -19,6 +19,7 @@ const tasks = `CREATE TABLE IF NOT EXISTS task (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
     path TEXT NOT NULL,
+    variables TEXT,
     ext TEXT NOT NULL CHECK ( ext IN ('yml') )
 );`;
 
@@ -26,6 +27,7 @@ const workflow = `CREATE TABLE IF NOT EXISTS workflow (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
     path TEXT NOT NULL,
+    variables TEXT,
     ext TEXT NOT NULL CHECK ( ext IN ('yml') )
 );`;
 
@@ -33,6 +35,7 @@ const action = `CREATE TABLE IF NOT EXISTS action (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
     path TEXT NOT NULL,
+    variables TEXT,
     ext TEXT NOT NULL CHECK ( ext IN ('yml', 'js', 'py') )
 );`;
 
@@ -40,7 +43,16 @@ const adaptater = `CREATE TABLE IF NOT EXISTS adaptater (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
     path TEXT NOT NULL,
+    variables TEXT,
     ext TEXT NOT NULL CHECK ( ext IN ('yml', 'js', 'py') )
+);`;
+
+const cmd = `CREATE TABLE IF NOT EXISTS cmd (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL,
+    path TEXT NOT NULL,
+    variables TEXT,
+    ext TEXT NOT NULL CHECK ( ext IN ('js') )
 );`;
 
 const tool = `CREATE TABLE IF NOT EXISTS tool (
@@ -48,13 +60,6 @@ const tool = `CREATE TABLE IF NOT EXISTS tool (
     name TEXT UNIQUE NOT NULL,
     spec TEXT NOT NULL,
     type TEXT NOT NULL CHECK ( type IN ('task', 'action', 'workflow') )
-);`;
-
-const cmd = `CREATE TABLE IF NOT EXISTS cmd (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL,
-    path TEXT NOT NULL,
-    ext TEXT NOT NULL CHECK ( ext IN ('js') )
 );`;
 
 const alias = `CREATE TABLE IF NOT EXISTS aliases (
@@ -67,6 +72,7 @@ const modelfile = `CREATE TABLE IF NOT EXISTS modelfile (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
     path TEXT NOT NULL,
+    variables TEXT,
     ext TEXT NOT NULL CHECK ( ext IN ('yml') )
 );`;
 
