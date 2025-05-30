@@ -1,24 +1,28 @@
 //import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec } from "../../../../../lmtask/dist/main.js";
 import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec } from "@agent-smith/lmtask";
+import { LmExpert } from "@agent-smith/brain";
+import { input } from "@inquirer/prompts";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import color from "ansi-colors";
 import ora from 'ora';
 import { brain, initAgent, taskBuilder } from "../../../agent.js";
+import { query } from "../../../cli.js";
 import { readClipboard } from "../../../cmd/sys/clipboard.js";
 import { readTool } from "../../../db/read.js";
 import { usePerfTimer } from "../../../main.js";
-import { isChatMode } from "../../../state/state.js";
+import { isChatMode, runMode } from "../../../state/state.js";
+import { program } from "../../cmds.js";
 import { executeAction } from "../actions/cmd.js";
 import { parseCommandArgs, parseTaskConfigOptions } from "../options_parsers.js";
 import { runtimeDataError } from "../user_msgs.js";
 import { formatStats, readPromptFile } from "../utils.js";
 import { executeWorkflow } from "../workflows/cmd.js";
 import { configureTaskModel, mergeInferParams } from "./conf.js";
-import { openTaskSpec } from "./utils.js";
 import { McpServer } from "./mcp.js";
+import { openTaskSpec } from "./utils.js";
 
 async function executeTask(
-    name: string, payload: Record<string, any>, options: Record<string, any>, quiet = false
+    name: string, payload: Record<string, any>, options: Record<string, any>, quiet?: boolean, expert?: LmExpert
 ): Promise<LmTaskOutput> {
     await initAgent();
     if (options.debug) {
@@ -109,7 +113,7 @@ async function executeTask(
         //console.log("Task vars:", vars);
     }
     // expert
-    const ex = brain.getOrCreateExpertForModel(model.name, model.template);
+    const ex = expert ?? brain.getOrCreateExpertForModel(model.name, model.template);
     if (!ex) {
         throw new Error("No expert found for model " + model.name)
     }
@@ -250,10 +254,24 @@ async function executeTask(
     mcpServers.forEach(async (s) => await s.stop())
     // chat mode
     if (isChatMode.value) {
-        if (brain.ex.name != ex.name) {
+        /*if (brain.ex.name != ex.name) {
             brain.setDefaultExpert(ex);
+        }*/
+        //ex.template.pushToHistory({ user: payload.prompt, assistant: out.answer.text });
+        // loop
+        const data = { message: '>', default: "" };
+        const prompt = await input(data);
+        if (prompt == "/q") {
+            isChatMode.value = false;
+            if (runMode.value == "cmd") {
+                process.exit(0)
+            } else {
+                await query(program)
+            }
+        } else {
+            //console.log("HIST", ex.template.history.length)
+            await executeTask(name, { ...vars, prompt: prompt }, options, quiet, ex)
         }
-        brain.ex.template.pushToHistory({ user: payload.prompt, assistant: out.answer.text });
     }
     if (options?.debug === true || options?.verbose === true) {
         console.log("\n", formatStats(out.answer.stats))

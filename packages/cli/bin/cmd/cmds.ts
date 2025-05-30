@@ -10,6 +10,8 @@ import { initCommandsFromAliases } from "./clicmds/aliases.js";
 import { initBaseCommands } from "./clicmds/base.js";
 import { initUserCmds } from "./clicmds/cmds.js";
 
+const program = new Command();
+
 async function chat(program: Command) {
     const data = { message: '>', default: "" };
     const prompt = await input(data);
@@ -28,7 +30,6 @@ async function chat(program: Command) {
 }
 
 async function buildCmds(): Promise<Command> {
-    const program = new Command();
     initBaseCommands(program);
     const aliases = readAliases();
     const feats = readFeatures();
@@ -43,12 +44,13 @@ async function buildCmds(): Promise<Command> {
 
 async function parseCmd(program: Command) {
     await program.parseAsync();
-    if (isChatMode.value) {
+    /*if (isChatMode.value) {
         await chat(program)
-    }
+    }*/
 }
 
 export {
+    program,
     buildCmds,
     chat,
     parseCmd,
