@@ -64,6 +64,7 @@ interface LmTaskFileSpec extends BaseLmTask {
     ctx: number;
     model?: ModelSpec;
     modelpack?: ModelPack;
+    mcp?: McpServerSpec;
 }
 
 interface BaseLmTaskConfig {
@@ -79,6 +80,22 @@ interface LmTaskConfig extends BaseLmTaskConfig {
 interface FinalLmTaskConfig {
     model?: ModelSpec;
     modelname?: string;
+}
+
+interface McpServerSpec {
+    command: string;
+    arguments: string[];
+    tools: string[];
+}
+
+interface McpServerTool {
+    name: string;
+    description: string;
+    inputSchema: {
+        type: string;
+        properties: Record<string, { type: string; description: string }>;
+        required: string[];
+    };
 }
 
 type InputMode = "manual" | "promptfile" | "clipboard";
@@ -125,4 +142,6 @@ export {
     LmTaskFileSpec,
     LmTaskConfig,
     FinalLmTaskConfig,
+    McpServerSpec,
+    McpServerTool,
 }

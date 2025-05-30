@@ -15,6 +15,7 @@ import { formatStats, readPromptFile } from "../utils.js";
 import { executeWorkflow } from "../workflows/cmd.js";
 import { configureTaskModel, mergeInferParams } from "./conf.js";
 import { openTaskSpec } from "./utils.js";
+import { McpServer } from "./mcp.js";
 
 async function executeTask(
     name: string, payload: Record<string, any>, options: Record<string, any>, quiet = false
@@ -47,10 +48,24 @@ async function executeTask(
             vars[k] = options[k]
         }
     });
+    const mcpServers = new Array<McpServer>();
+    // mcp tools
+    if (taskFileSpec?.mcp) {
+        taskSpec.tools = []
+        for (const tool of Object.values(taskFileSpec.mcp)) {
+            const mcp = new McpServer(tool.command, tool.arguments, tool?.tools ?? null);
+            mcpServers.push(mcp);
+            await mcp.start();
+            const tools = await mcp.extractTools();
+            tools.forEach(t => taskSpec.tools?.push(t))
+        }
+    }
     // tools
     //console.log("Task tools list:", taskSpec.toolsList);
     if (taskSpec.toolsList) {
-        taskSpec.tools = []
+        if (!taskSpec?.tools) {
+            taskSpec.tools = []
+        }
         for (const toolName of taskSpec.toolsList) {
             const { found, tool, type } = readTool(toolName);
             if (!found) {
@@ -141,7 +156,6 @@ async function executeTask(
         let i = 0;
         processToken = (t: string) => {
             if (i == 0) { perfTimer.start() }
-            ++i;
             spinner.text = formatTokenCount(i)
             //if (i == ) { timer.start() };
             //console.log("THINK processToken");
@@ -161,6 +175,12 @@ async function executeTask(
                         spinner.info(msg);
                         return
                     }
+                }
+            } else {
+                if (t == ex.template.tags.think?.end) {
+                    let msg = color.dim("Thinking:") + ` ${i} ${color.dim("tokens")}`;
+                    msg = msg + " " + color.dim(perfTimer.time())
+                    console.log(msg)
                 }
             }
             if (hasTools) {
@@ -226,6 +246,8 @@ async function executeTask(
     catch (err) {
         throw new Error(`executing task: ${name} (${err})`);
     }
+    // close mcp connections
+    mcpServers.forEach(async (s) => await s.stop())
     // chat mode
     if (isChatMode.value) {
         if (brain.ex.name != ex.name) {
