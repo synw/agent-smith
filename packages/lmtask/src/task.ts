@@ -6,7 +6,6 @@ import { useTemplateForModel } from "@agent-smith/tfm";
 import { LmTask, LmTaskConf, LmTaskInput, LmTaskOutput, ModelSpec } from "./interfaces.js";
 import { InferenceParams, InferenceResult } from '@locallm/types';
 import { ToolTurn } from 'modprompt/dist/interfaces.js';
-import { extractBetweenTags } from "./utils.js";
 
 const tfm = useTemplateForModel();
 
@@ -110,7 +109,7 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                     const err = `The ${task.model.name} model is not loaded on server (currently ${this.expert.lm.model.name})`;
                     throw new Error(err)
                 }
-                const tpl = new PromptTemplate(task.model.template);
+                const tpl = conf?.expert ? conf.expert.template : new PromptTemplate(task.model.template);
                 const ip = task?.inferParams ? task.inferParams as Record<string, any> : {};
                 if (!ip?.stop) {
                     ip.stop = tpl?.stop ?? [];
