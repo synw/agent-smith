@@ -14,11 +14,11 @@ import { isChatMode, runMode } from "../../../state/state.js";
 import { program } from "../../cmds.js";
 import { executeAction } from "../actions/cmd.js";
 import { parseCommandArgs, parseTaskConfigOptions } from "../options_parsers.js";
-import { runtimeDataError } from "../user_msgs.js";
+import { runtimeDataError, runtimeWarning } from "../user_msgs.js";
 import { formatStats, readPromptFile } from "../utils.js";
 import { executeWorkflow } from "../workflows/cmd.js";
 import { configureTaskModel, mergeInferParams } from "./conf.js";
-import { McpServer } from "./mcp.js";
+import { McpServer } from "../mcp.js";
 import { openTaskSpec } from "./utils.js";
 
 async function executeTask(
@@ -274,7 +274,11 @@ async function executeTask(
         }
     }
     if (options?.debug === true || options?.verbose === true) {
-        console.log("\n", formatStats(out.answer.stats))
+        try {
+            console.log("\n", formatStats(out.answer.stats))
+        } catch (e) {
+            runtimeWarning("Error formating stats:", `${e}`)
+        }
     }
     //@ts-ignore
     return out

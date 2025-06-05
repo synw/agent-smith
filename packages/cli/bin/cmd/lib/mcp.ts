@@ -6,8 +6,9 @@ class McpServer {
     transport: StdioClientTransport;
     client: Client;
     authorizedTools: Array<string> | null = null;
+    tools: Record<string, LmTaskToolSpec> = {};
 
-    constructor(command: string, args: Array<string>, authorizedTools = new Array<string>) {
+    constructor(command: string, args: Array<string>, authorizedTools: Array<string> | null = null) {
         this.transport = new StdioClientTransport({
             command: command,
             args: args
@@ -29,7 +30,6 @@ class McpServer {
     async extractTools(): Promise<Array<LmTaskToolSpec>> {
         const toolSpecs = new Array<LmTaskToolSpec>();
         const serverToolsList = await this.client.listTools();
-        //await this.stop();
         for (const tool of serverToolsList.tools) {
             if (this.authorizedTools) {
                 if (!this.authorizedTools.includes(tool.name)) {
@@ -44,12 +44,12 @@ class McpServer {
                 }
             }
             const exec = async <O = Record<string, any>>(args: Record<string, any>): Promise<O> => {
-                //await this.start();
-                const res = await this.client.callTool({
+                const payload = {
                     name: tool.name,
                     arguments: args,
-                });
-                //this.stop();
+                };
+                //console.log("PAY", payload);
+                const res = await this.client.callTool(payload);
                 return res as O
             }
             const t: LmTaskToolSpec = {
@@ -58,6 +58,7 @@ class McpServer {
                 arguments: args,
                 execute: exec
             }
+            this.tools[tool.name] = t;
             toolSpecs.push(t)
         }
         return toolSpecs
