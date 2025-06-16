@@ -1,5 +1,5 @@
 import { Command } from "commander";
-import { actionOptions, taskOptions, workflowOptions } from "../options.js";
+import { allOptions } from "../options.js";
 import { executeTaskCmd } from "../lib/tasks/cmd.js";
 import { executeActionCmd } from "../lib/actions/cmd.js";
 import { executeWorkflowCmd } from "../lib/workflows/cmd.js";
@@ -19,7 +19,7 @@ function initCommandsFromAliases(program: Command, aliases: {
                     .action(async (...args: Array<any>) => {
                         await executeTaskCmd(alias.name, args);
                     });
-                taskOptions.forEach(o => tcmd.addOption(o));
+                allOptions.forEach(o => tcmd.addOption(o));
                 if (features.task[alias.name]?.variables) {
                     //console.log(alias.name, "VARS", features.task[alias.name]?.variables)
                     features.task[alias.name].variables?.optional.forEach(v => {
@@ -36,7 +36,7 @@ function initCommandsFromAliases(program: Command, aliases: {
                     .action(async (...args: Array<any>) => {
                         await executeActionCmd(alias.name, args)
                     });
-                actionOptions.forEach(o => acmd.addOption(o))
+                allOptions.forEach(o => acmd.addOption(o));
                 break;
             case "workflow":
                 const wcmd = program.command(`${alias.name} [args...]`)
@@ -44,7 +44,7 @@ function initCommandsFromAliases(program: Command, aliases: {
                     .action(async (...args: Array<any>) => {
                         executeWorkflowCmd(alias.name, args)
                     });
-                workflowOptions.forEach(o => wcmd.addOption(o));
+                allOptions.forEach(o => wcmd.addOption(o));
         }
     });
     return program

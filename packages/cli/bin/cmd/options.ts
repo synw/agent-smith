@@ -27,21 +27,12 @@ const ioOptions: Array<Option> = [
     new Option("--otxt, --text-output", "use text output (default)"),
 ];
 
-const taskOptions: Array<Option> = [
+const allOptions: Array<Option> = [
     ...displayOptions,
     ...ioOptions,
     ...inferenceOptions,
     new Option("--tokens", "toggle show tokens mode"),
     new Option("-c, --chat", "toggle chat mode for tasks"),
-];
-
-const actionOptions: Array<Option> = [
-    ...displayOptions,
-    ...ioOptions,
-];
-
-const workflowOptions: Array<Option> = [
-    ...taskOptions
 ];
 
 function parseString(value: string): string {
@@ -67,7 +58,5 @@ export {
     displayOptions,
     ioOptions,
     inferenceOptions,
-    taskOptions,
-    actionOptions,
-    workflowOptions,
+    allOptions,
 }

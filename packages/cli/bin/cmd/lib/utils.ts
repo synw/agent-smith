@@ -5,6 +5,7 @@ import { formatMode, initFilepaths, inputMode, outputMode, promptfilePath } from
 import { readClipboard, writeToClipboard } from "../sys/clipboard.js";
 import { readFile } from "../sys/read.js";
 import { splitThinking } from "../../utils/text.js";
+import { runtimeError } from "./user_msgs.js";
 
 function readPromptFile(): string {
     initFilepaths();
@@ -27,7 +28,11 @@ async function processOutput(res: any) {
             }
             hasTextData = true;
         } else {
-            data = JSON.stringify(res);
+            try {
+                data = JSON.stringify(res);
+            } catch (e) {
+                runtimeError("Unable to parse json result")
+            }
         }
     } else {
         data = res;

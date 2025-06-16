@@ -43,6 +43,8 @@ async function buildCmds(): Promise<Command> {
 }
 
 async function parseCmd(program: Command) {
+    program.name('Agent Smith terminal client');
+    program.description('Terminal agents toolkit');
     await program.parseAsync();
     /*if (isChatMode.value) {
         await chat(program)
