@@ -15,7 +15,7 @@ import { program } from "../../cmds.js";
 import { executeAction } from "../actions/cmd.js";
 import { parseCommandArgs, parseTaskConfigOptions } from "../options_parsers.js";
 import { runtimeDataError, runtimeWarning } from "../user_msgs.js";
-import { formatStats, readPromptFile } from "../utils.js";
+import { formatStats, processOutput, readPromptFile } from "../utils.js";
 import { executeWorkflow } from "../workflows/cmd.js";
 import { configureTaskModel, mergeInferParams } from "./conf.js";
 import { McpServer } from "../mcp.js";
@@ -30,7 +30,9 @@ async function executeTask(
         console.log("Task options:", options);
     }
     const taskFileSpec = openTaskSpec(name);
-    const conf = parseTaskConfigOptions(options);
+    // merge passed options from payload
+    const opts = payload?.inferParams ? { ...options, ...payload.inferParams } : options
+    const conf = parseTaskConfigOptions(opts);
     if (options.debug) {
         console.log("conf:", conf);
     }
@@ -251,7 +253,8 @@ async function executeTask(
         throw new Error(`executing task: ${name} (${err})`);
     }
     // close mcp connections
-    mcpServers.forEach(async (s) => await s.stop())
+    mcpServers.forEach(async (s) => await s.stop());
+    await processOutput(out);
     // chat mode
     if (isChatMode.value) {
         /*if (brain.ex.name != ex.name) {

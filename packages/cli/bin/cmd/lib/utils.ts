@@ -32,7 +32,6 @@ async function processOutput(res: any) {
     } else {
         data = res;
     }
-    //console.log("MODE", inputMode.value);
     //onsole.log("OUTPUT", typeof res, data);
     if (outputMode.value == "clipboard") {
         //console.log("Writing to kb", data)
@@ -46,17 +45,6 @@ async function processOutput(res: any) {
     }
 }
 
-async function parseInputOptions(options: any): Promise<string | null> {
-    let out: string | null = null;
-    if (options?.Ic == true || inputMode.value == "clipboard") {
-        //console.log("Input copy option");
-        out = await readClipboard()
-    } else if (options.Pf || inputMode.value == "promptfile") {
-        out = readPromptFile()
-    }
-    return out
-}
-
 function formatStats(stats: InferenceStats): string {
     const buf = new Array<string>();
     buf.push(`${stats.tokensPerSecond} tps`);
@@ -68,7 +56,6 @@ function formatStats(stats: InferenceStats): string {
 
 export {
     formatStats,
-    parseInputOptions,
     processOutput,
     readPromptFile,
 };

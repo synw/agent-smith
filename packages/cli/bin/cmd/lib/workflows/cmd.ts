@@ -25,7 +25,7 @@ async function executeWorkflow(name: string, params: Record<string, any>, option
         switch (step.type) {
             case "task":
                 try {
-                    //console.log("EXECT", pval);
+                    //console.log("EXECT", taskRes);
                     const tr = await executeTask(name, taskRes, options, true);
                     taskRes = tr;
                 } catch (e) {
@@ -37,7 +37,6 @@ async function executeWorkflow(name: string, params: Record<string, any>, option
                     //console.log("EXECA", p);
                     const ares = await executeAction(name, taskRes, options, true);
                     if (typeof ares == "string") {
-                        // if the adaptater returns a string convert it to array to pass to the next node
                         taskRes = { payload: ares }
                     } else {
                         taskRes = ares;
@@ -56,7 +55,7 @@ async function executeWorkflow(name: string, params: Record<string, any>, option
                     //console.log("AD OPTS IN", options);
                     const ares = await executeAdaptater(name, taskRes, options);
                     if (typeof ares == "string") {
-                        // if the adaptater returns a string convert it to array to pass to the next node
+                        // if the adaptater returns a string convert it to pass to the next node
                         taskRes = { payload: ares }
                     } else {
                         taskRes = ares;

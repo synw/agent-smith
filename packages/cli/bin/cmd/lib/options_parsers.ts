@@ -1,5 +1,6 @@
 import { InferenceParams } from "@locallm/types";
 import { LmTaskConfig } from "../../interfaces.js";
+import { inputMode } from "../../state/state.js";
 
 function parseCommandArgs(args: Array<any>): {
     args: Array<any>,
@@ -37,6 +38,9 @@ function parseTaskConfigOptions(options: Record<string, any>): LmTaskConfig {
     }
     if (options?.repeat_penalty !== undefined) {
         optionsInferParams.repeat_penalty = options.repeat_penalty
+    }
+    if (options?.images) {
+        optionsInferParams.images = options.images
     }
     if (options?.model !== undefined) {
         conf.modelname = options.model;
