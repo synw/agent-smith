@@ -12,7 +12,7 @@ import { extractToolDoc } from "./cmd/lib/tools.js";
 import { openTaskSpec } from "./cmd/lib/tasks/utils.js";
 import { extractBetweenTags, splitThinking } from "./utils/text.js";
 import { displayOptions, ioOptions, inferenceOptions, allOptions } from "./cmd/options.js";
-import { McpServer } from "./cmd/lib/mcp.js";
+import { McpClient } from "./cmd/lib/mcp.js";
 
 export {
     execute,
@@ -35,5 +35,5 @@ export {
     ioOptions,
     inferenceOptions,
     allOptions,
-    McpServer,
+    McpClient,
 }
