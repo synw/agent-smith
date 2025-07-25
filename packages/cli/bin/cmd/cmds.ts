@@ -30,6 +30,7 @@ async function chat(program: Command) {
 }
 
 async function buildCmds(): Promise<Command> {
+    //program.allowUnknownOption(true);
     initBaseCommands(program);
     const aliases = readAliases();
     const feats = readFeatures();

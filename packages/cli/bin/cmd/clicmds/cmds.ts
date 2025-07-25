@@ -6,6 +6,7 @@ async function initUserCmds(cmdFeats: Record<string, FeatureSpec>): Promise<Arra
     //console.log("CMDS", feats.cmds)
     const cmds = new Array<Command>();
     for (const feat of Object.values(cmdFeats)) {
+        //console.log("USERCMD", feat)
         const c = await readCmds(`${feat.path}`);
         cmds.push(...c)
     }

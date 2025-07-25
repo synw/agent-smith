@@ -19,10 +19,10 @@ async function main() {
     }
     await initState();
     await initAgent();
-    //console.log("START")
     const program = await buildCmds();
     program.hook('preAction', async (thisCommand, actionCommand) => {
         const options = actionCommand.opts();
+        //console.log("POPTS", options)
         //const v = options?.clipboardOutput !== undefined;
         if (options?.chat === true) {
             isChatMode.value = true

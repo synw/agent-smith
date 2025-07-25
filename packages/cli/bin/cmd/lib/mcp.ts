@@ -2,18 +2,33 @@ import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { LmTaskToolSpec } from "@agent-smith/lmtask/dist/interfaces.js";
 
-class McpServer {
+class McpClient {
+    name: string;
     transport: StdioClientTransport;
     client: Client;
     authorizedTools: Array<string> | null = null;
     tools: Record<string, LmTaskToolSpec> = {};
 
-    constructor(command: string, args: Array<string>, authorizedTools: Array<string> | null = null) {
+    constructor(servername: string, command: string, args: Array<string>, authorizedTools: Array<string> | null = null) {
+        this.name = servername;
+        const okargs = new Array<string>();
+        for (const arg of args) {
+            let _arg = arg;
+            if (arg.startsWith("Authorization:")) {
+                const k = `MCP_${servername.toUpperCase()}_AUTH`;
+                const v = process.env[k];
+                if (!v) {
+                    throw new Error(`Env variable ${k} not found for ${servername} mcp auth`)
+                }
+                _arg = arg.replace("$MCP_AUTH", v)
+            }
+            okargs.push(_arg)
+        }
         this.transport = new StdioClientTransport({
             command: command,
             args: args
         });
-        this.client = new Client({ name: "AgentSmith", version: "1.0.0" });
+        this.client = new Client({ name: "AgentSmith", version: "0.1.0" });
         if (authorizedTools) {
             this.authorizedTools = authorizedTools;
         }
@@ -66,5 +81,5 @@ class McpServer {
 }
 
 export {
-    McpServer,
+    McpClient,
 }

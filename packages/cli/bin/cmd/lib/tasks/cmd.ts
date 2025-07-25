@@ -18,7 +18,7 @@ import { runtimeDataError, runtimeWarning } from "../user_msgs.js";
 import { formatStats, processOutput, readPromptFile } from "../utils.js";
 import { executeWorkflow } from "../workflows/cmd.js";
 import { configureTaskModel, mergeInferParams } from "./conf.js";
-import { McpServer } from "../mcp.js";
+import { McpClient } from "../mcp.js";
 import { openTaskSpec } from "./utils.js";
 
 async function executeTask(
@@ -54,12 +54,13 @@ async function executeTask(
             vars[k] = options[k]
         }
     });
-    const mcpServers = new Array<McpServer>();
+    const mcpServers = new Array<McpClient>();
     // mcp tools
     if (taskFileSpec?.mcp) {
         taskSpec.tools = []
-        for (const tool of Object.values(taskFileSpec.mcp)) {
-            const mcp = new McpServer(tool.command, tool.arguments, tool?.tools ?? null);
+        for (const [servername, tool] of Object.entries(taskFileSpec.mcp)) {
+            //console.log("MCP server:", tool)
+            const mcp = new McpClient(servername, tool.command, tool.args, tool?.tools ?? null);
             mcpServers.push(mcp);
             await mcp.start();
             const tools = await mcp.extractTools();
