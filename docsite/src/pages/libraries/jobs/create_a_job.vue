@@ -70,7 +70,7 @@ import { useAgentJob, useAgentTask } from "@agent-smith/jobs";
 //import { useAgentJob } from "../../../../packages/jobs/src/job";
 //import { useAgentTask } from "../../../../packages/jobs/src/task";
 import { StaticCodeBlock } from "@docdundee/vue";
-import { jobs } from "../../agent/jobs/demo_job";
+import { jobs } from "../../../agent/jobs/demo_job";
 
 const job = jobs[0];
 
