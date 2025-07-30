@@ -7,12 +7,13 @@ import { initAgent } from "./agent.js";
 import { initState, pluginDataDir } from "./state/state.js";
 import { usePerfTimer } from "./utils/perf.js";
 import { parseCommandArgs } from "./cmd/lib/options_parsers.js";
-import { LmTaskConf } from "@agent-smith/lmtask/dist/interfaces.js";
 import { extractToolDoc } from "./cmd/lib/tools.js";
 import { openTaskSpec } from "./cmd/lib/tasks/utils.js";
 import { extractBetweenTags, splitThinking } from "./utils/text.js";
 import { displayOptions, ioOptions, inferenceOptions, allOptions } from "./cmd/options.js";
 import { McpClient } from "./cmd/lib/mcp.js";
+import { readTask } from "./cmd/lib/tasks/read.js";
+import { FeatureType } from "./interfaces.js";
 
 export {
     execute,
@@ -27,7 +28,6 @@ export {
     usePerfTimer,
     parseCommandArgs,
     extractToolDoc,
-    LmTaskConf,
     openTaskSpec,
     extractBetweenTags,
     splitThinking,
@@ -36,4 +36,7 @@ export {
     inferenceOptions,
     allOptions,
     McpClient,
+    readTask,
+    FeatureType,
+
 }

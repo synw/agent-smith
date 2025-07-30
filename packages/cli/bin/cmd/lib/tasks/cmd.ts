@@ -1,110 +1,26 @@
 //import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec } from "../../../../../lmtask/dist/main.js";
-import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec } from "@agent-smith/lmtask";
 import { LmExpert } from "@agent-smith/brain";
+import { LmTaskConf, LmTaskOutput } from "@agent-smith/lmtask";
 import { input } from "@inquirer/prompts";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import color from "ansi-colors";
 import ora from 'ora';
-import { brain, initAgent, taskBuilder } from "../../../agent.js";
+import { brain, initAgent } from "../../../agent.js";
 import { query } from "../../../cli.js";
 import { readClipboard } from "../../../cmd/sys/clipboard.js";
-import { readTool } from "../../../db/read.js";
 import { usePerfTimer } from "../../../main.js";
 import { isChatMode, runMode } from "../../../state/state.js";
 import { program } from "../../cmds.js";
-import { executeAction } from "../actions/cmd.js";
-import { parseCommandArgs, parseTaskConfigOptions } from "../options_parsers.js";
+import { parseCommandArgs } from "../options_parsers.js";
 import { runtimeDataError, runtimeWarning } from "../user_msgs.js";
 import { formatStats, processOutput, readPromptFile } from "../utils.js";
-import { executeWorkflow } from "../workflows/cmd.js";
-import { configureTaskModel, mergeInferParams } from "./conf.js";
-import { McpClient } from "../mcp.js";
-import { openTaskSpec } from "./utils.js";
+import { readTask } from "./read.js";
 
 async function executeTask(
     name: string, payload: Record<string, any>, options: Record<string, any>, quiet?: boolean, expert?: LmExpert
 ): Promise<LmTaskOutput> {
     await initAgent();
-    if (options.debug) {
-        console.log("Payload:", payload);
-        console.log("Task options:", options);
-    }
-    const taskFileSpec = openTaskSpec(name);
-    // merge passed options from payload
-    const opts = payload?.inferParams ? { ...options, ...payload.inferParams } : options
-    const conf = parseTaskConfigOptions(opts);
-    if (options.debug) {
-        console.log("conf:", conf);
-    }
-    conf.inferParams = mergeInferParams(conf.inferParams, taskFileSpec.inferParams ?? {});
-    const model = configureTaskModel(conf, taskFileSpec);
-    if (options?.ctx) {
-        model.ctx = options.ctx
-    }
-    // vars
-    const taskSpec = taskFileSpec as LmTask;
-    let vars: Record<string, any> = {};
-    taskSpec.variables?.optional?.forEach(k => {
-        if (k in options) {
-            vars[k] = options[k]
-        }
-    });
-    taskSpec.variables?.required?.forEach(k => {
-        if (k in options) {
-            vars[k] = options[k]
-        }
-    });
-    const mcpServers = new Array<McpClient>();
-    // mcp tools
-    if (taskFileSpec?.mcp) {
-        taskSpec.tools = []
-        for (const [servername, tool] of Object.entries(taskFileSpec.mcp)) {
-            //console.log("MCP server:", tool)
-            const mcp = new McpClient(servername, tool.command, tool.args, tool?.tools ?? null);
-            mcpServers.push(mcp);
-            await mcp.start();
-            const tools = await mcp.extractTools();
-            tools.forEach(t => taskSpec.tools?.push(t))
-        }
-    }
-    // tools
-    //console.log("Task tools list:", taskSpec.toolsList);
-    if (taskSpec.toolsList) {
-        if (!taskSpec?.tools) {
-            taskSpec.tools = []
-        }
-        for (const toolName of taskSpec.toolsList) {
-            const { found, tool, type } = readTool(toolName);
-            if (!found) {
-                throw new Error(`tool ${toolName} not found for task ${taskSpec.name}`);
-            }
-            //console.log("Tool found:", toolName, tool);
-            const lmTool: LmTaskToolSpec = {
-                ...tool,
-                execute: async (params) => {
-                    switch (type) {
-                        case "action":
-                            const res = await executeAction(toolName, params, options, true);
-                            return res
-                        case "task":
-                            conf.quiet = !options?.debug;
-                            const tres = await executeTask(name, params, options, true);
-                            //console.log("WFTRESP", tres.answer.text);
-                            return tres.answer.text
-                        case "workflow":
-                            const wres = await executeWorkflow(toolName, params, options);
-                            return wres
-                        default:
-                            throw new Error(`unknown tool execution function type: ${type} for ${toolName}`)
-                    }
-                }
-            }
-            taskSpec.tools.push(lmTool)
-        }
-        delete taskSpec.toolsList
-    };
-    //console.log("TASK SPEC:", JSON.stringify(taskSpec, null, "  "));
-    const task = taskBuilder.init(taskSpec);
+    const { task, model, conf, vars, mcpServers } = await readTask(name, payload, options);
     // check for grammars
     if (model?.inferParams?.tsGrammar) {
         //console.log("TSG");
