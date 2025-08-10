@@ -12,6 +12,16 @@ function readFeaturePaths(): Array<string> {
     return f
 }
 
+function readBackends(): Array<Record<string, string>> {
+    const stmt = db.prepare("SELECT name, type, uri, apiKey FROM backend");
+    const data = stmt.all() as Array<Record<string, any>>;
+    let f = new Array<Record<string, string>>();
+    data.forEach((row) => {
+        f.push({ name: row.name, type: row.type, uri: row.uri, apiKey: row.apiKey })
+    });
+    return f
+}
+
 function readPlugins(): Array<Record<string, string>> {
     const stmt = db.prepare("SELECT name, path FROM plugin");
     const data = stmt.all() as Array<Record<string, any>>;
@@ -164,4 +174,5 @@ export {
     readModelfiles,
     readModel,
     readFeaturesType,
+    readBackends,
 }

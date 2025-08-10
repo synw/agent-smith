@@ -37,7 +37,7 @@ async function buildCmds(): Promise<Command> {
     initCommandsFromAliases(program, aliases, feats);
     const cmds = await initUserCmds(feats.cmd);
     cmds.forEach(c => {
-        //console.log("Add cmd", c);
+        //console.log("Add cmd", c.name());
         program.addCommand(c)
     });
     return program

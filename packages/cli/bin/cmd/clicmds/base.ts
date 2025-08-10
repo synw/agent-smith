@@ -1,26 +1,24 @@
 import { Command } from "commander";
 import YAML from 'yaml';
 import { initAgent, taskBuilder } from "../../agent.js";
-import { dbPath, processConfPath } from "../../conf.js";
-import { readFeaturePaths, readFeatures, readFeaturesType, readFilePath } from "../../db/read.js";
-import { cleanupFeaturePaths, updateAliases, updateDataDirPath, updateFeatures, updatePromptfilePath, upsertFilePath } from "../../db/write.js";
+import { dbPath } from "../../conf.js";
+import { readFeaturePaths, readFeaturesType } from "../../db/read.js";
+import { cleanupFeaturePaths, updateAliases, updateFeatures } from "../../db/write.js";
 import { FeatureType } from "../../interfaces.js";
 import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
 import { readPluginsPaths } from "../../state/plugins.js";
-import { dataDirPath, promptfilePath, runMode } from "../../state/state.js";
-import { showModelsCmd, updateAllModels } from "../lib/models.js";
+import { runMode } from "../../state/state.js";
+import { showModelsCmd } from "../lib/models.js";
 import { parseCommandArgs } from "../lib/options_parsers.js";
 import { deleteFileIfExists } from "../sys/delete_file.js";
 import { readTask } from "../sys/read_task.js";
-import { initDb } from "../../db/db.js";
-import { runtimeDataError } from "../../utils/user_msgs.js";
-import { runtimeInfo } from "../../utils/user_msgs.js";
 import { updateConfCmd } from "./update.js";
+import { initRemoteBackends } from "../backends.js";
 
 function initBaseCommands(program: Command): Command {
     program.command("ping")
         .description("ping inference servers")
-        .action(async (...args: Array<any>) => { console.log("Found working inference server(s):", await initAgent()) });
+        .action(async (...args: Array<any>) => { console.log("Found working inference server(s):", await initAgent(initRemoteBackends())) });
     program.command("exit")
         .description("exit the cli")
         .action(() => process.exit(0));

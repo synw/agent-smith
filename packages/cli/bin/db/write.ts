@@ -1,5 +1,5 @@
 import { extractTaskToolDocAndVariables, extractToolDoc } from "../cmd/lib/tools.js";
-import { AliasType, FeatureSpec, FeatureType, Features, DbModelDef } from "../interfaces.js";
+import { AliasType, FeatureSpec, FeatureType, Features, DbModelDef, RemoteBackend } from "../interfaces.js";
 import { db } from "./db.js";
 import { readModels } from "./read.js";
 
@@ -16,6 +16,20 @@ function updateDataDirPath(dd: string) {
     const stmt = db.prepare("INSERT INTO filepath (name, path) VALUES (?, ?)");
     stmt.run("datadir", dd);
 }
+
+function upsertBackend(bdata: RemoteBackend): boolean {
+    const stmt1 = db.prepare("SELECT * FROM backend WHERE name = ?");
+    const result = stmt1.get(bdata.name) as Record<string, any>;
+    if (result?.id) {
+        const updateStmt = db.prepare("UPDATE backend SET type = ?, uri = ?, apiKey = ? WHERE name = ?");
+        updateStmt.run(bdata.type, bdata.uri, bdata?.apiKey ?? "NULL", bdata.name);
+        return true;
+    }
+    const stmt = db.prepare("INSERT INTO backend (name,type,uri,apiKey) VALUES (?,?,?,?)");
+    stmt.run(bdata.name, bdata.type, bdata.uri, bdata?.apiKey ?? "NULL");
+    return false;
+}
+
 
 function insertFeaturesPathIfNotExists(path: string): boolean {
     const stmt1 = db.prepare("SELECT * FROM featurespath WHERE path = ?");
@@ -236,6 +250,7 @@ function upsertFilePath(name: string, newPath: string): boolean {
 export {
     updatePromptfilePath,
     updateDataDirPath,
+    upsertBackend,
     insertFeaturesPathIfNotExists,
     insertPluginIfNotExists,
     updateFeatures,

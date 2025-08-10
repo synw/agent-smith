@@ -14,6 +14,7 @@ function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): Mod
     let isModelFromTaskFile = false;
     let model = {} as ModelSpec;
     let found = false;
+    //console.log("CONF", itConf);
     if (itConf?.templateName) {
         templateName = itConf.templateName
     }
@@ -64,26 +65,30 @@ function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): Mod
     // try to find the models from db models
     if (!found) {
         const m = readModel(modelName);
-        //console.log("DBM", m);
+        //console.log("FM", m.found, m)
+        //console.log("DBM", templateName, "/", m.modelData.template);
         if (m.found) {
             model = m.modelData as ModelSpec;
-            model.template = m.modelData.template;
+            model.template = templateName ?? m.modelData.template;
             found = true
         }
     }
     // fallback to use the model name directly
     if (!found) {
-        //console.log("Model name end param", modelName);
+        if (templateName && modelName) {
+            model = {name: modelName, template: templateName} as ModelSpec;
+        } else {
         // try to guess the template
         const gt = tfm.guess(modelName);
         if (gt == "none") {
-            throw new Error(`Unable to guess the template for ${modelName}: please provide a template name: m="modelname/templatename"`)
+            throw new Error(`Unable to guess the template for ${modelName}: please provide a template name: --tpl templatename`)
         }
         const m: ModelSpec = {
             name: modelName,
             template: gt
         };
         model = m;
+        }
     }
     model.inferParams = ip;
     // use default ctx if the model is not from defined in the task file

@@ -83,6 +83,14 @@ const model = `CREATE TABLE IF NOT EXISTS model (
     data TEXT NOT NULL
 );`;
 
+const backend = `CREATE TABLE IF NOT EXISTS backend (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL,
+    type TEXT NOT NULL CHECK ( type IN ('llamacpp', 'koboldcpp', 'ollama') ),
+    uri TEXT NOT NULL,
+    apiKey TEXT
+);`
+
 /*const override = `CREATE TABLE IF NOT EXISTS override (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     key TEXT UNIQUE NOT NULL,
@@ -102,6 +110,7 @@ const schemas = [
     model,
     modelfile,
     adaptater,
+    backend,
 ];
 
 export { schemas }

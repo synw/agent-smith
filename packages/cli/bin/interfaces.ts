@@ -1,4 +1,5 @@
 import { BaseLmTask, ModelSpec } from "@agent-smith/lmtask";
+//import { BaseLmTask, ModelSpec } from "../../lmtask/dist/main.js";
 import { InferenceParams } from "@locallm/types";
 
 interface FeatureVariables {
@@ -23,11 +24,19 @@ interface Features {
     modelfile: Array<{ name: string, path: string, ext: ModelFileExtension }>;
 }
 
+interface RemoteBackend {
+    name: string;
+    type: RemoteProviderType;
+    uri: string;
+    apiKey?: string;
+}
+
 interface ConfigFile {
     promptfile?: string;
     datadir?: string;
     features?: Array<string>;
     plugins?: Array<string>;
+    backends?: Array<RemoteBackend>;
 }
 
 interface Settings {
@@ -114,6 +123,7 @@ type CmdExtension = "js";
 type ModelFileExtension = "yml";
 type FeatureExtension = TaskExtension | CmdExtension | ActionExtension | WorkflowExtension | ModelFileExtension;
 type AliasType = "task" | "action" | "workflow";
+type RemoteProviderType = "llamacpp" | "koboldcpp" | "ollama";
 
 export {
     InputMode,
@@ -144,5 +154,6 @@ export {
     FinalLmTaskConfig,
     McpServerSpec,
     McpServerTool,
-
+    RemoteBackend,
+    RemoteProviderType,
 }

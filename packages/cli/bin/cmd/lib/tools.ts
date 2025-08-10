@@ -46,7 +46,7 @@ function _extractYamlToolDoc(filePath: string, name: string): { found: boolean, 
     if (!found) {
         return { found: false, tspec: {} as ToolSpec }
     }
-    if (!data.tool) {
+    if (!data?.tool) {
         return { found: false, tspec: {} as ToolSpec }
     }
     data.tool.name = name;
@@ -88,7 +88,7 @@ function extractTaskToolDocAndVariables(
     if (!found) {
         throw new Error(`extractTaskToolDocAndVariables: file ${fp} not found`)
     }
-    if (data.tool) {
+    if (data?.tool) {
         data.tool.name = name;
         tspec = data.tool as ToolSpec;
         res.toolDoc = JSON.stringify(tspec, null, "  ");

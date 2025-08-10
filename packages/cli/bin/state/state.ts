@@ -1,6 +1,6 @@
-import { computed, reactive, ref } from "@vue/reactivity";
+import { reactive, ref } from "@vue/reactivity";
 import { PythonShell } from 'python-shell';
-import { InputMode, RunMode, FormatMode, OutputMode, VerbosityMode } from "../interfaces.js";
+import { InputMode, RunMode, FormatMode, OutputMode } from "../interfaces.js";
 import { initDb } from "../db/db.js";
 import { readFilePaths } from "../db/read.js";
 import path from "path";
@@ -77,6 +77,7 @@ export {
     lastCmd,
     promptfilePath,
     dataDirPath,
+    isStateReady,
     pluginDataDir,
     initState,
     initFilepaths,

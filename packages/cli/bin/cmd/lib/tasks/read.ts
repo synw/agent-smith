@@ -1,4 +1,5 @@
-import { LmTask, LmTaskInput, LmTaskOutput, LmTaskToolSpec, ModelSpec } from "@agent-smith/lmtask";
+//import { LmTask, LmTaskInput, LmTaskOutput, LmTaskToolSpec, ModelSpec } from "@agent-smith/lmtask";
+import { LmTask, LmTaskInput, LmTaskOutput, LmTaskToolSpec, ModelSpec } from "../../../../../lmtask/dist/main.js"
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import { taskBuilder } from "../../../agent.js";
 import { readTool } from "../../../db/read.js";
@@ -21,7 +22,7 @@ async function readTask(
     vars: Record<string, any>;
     mcpServers: Array<McpClient>;
 }> {
-    if (options.debug) {
+    if (options?.debug) {
         console.log("Payload:", payload);
         console.log("Task options:", options);
     }
@@ -29,7 +30,7 @@ async function readTask(
     // merge passed options from payload
     const opts = payload?.inferParams ? { ...options, ...payload.inferParams } : options
     const conf = parseTaskConfigOptions(opts);
-    if (options.debug) {
+    if (options?.debug) {
         console.log("conf:", conf);
     }
     conf.inferParams = mergeInferParams(conf.inferParams, taskFileSpec.inferParams ?? {});
@@ -107,10 +108,10 @@ async function readTask(
         model.inferParams.grammar = serializeGrammar(await compile(model.inferParams.tsGrammar, "Grammar"));
         delete model.inferParams.tsGrammar;
     }
-    if (options.debug) {
+    /*if (options?.debug) {
         console.log("Task model:", model);
         //console.log("Task vars:", vars);
-    }
+    }*/
     return { task, model, conf, vars, mcpServers }
 }
 

@@ -1,7 +1,7 @@
 import path from "path";
 //import { default as fs } from "fs";
 import { readConf } from "./cmd/sys/read_conf.js";
-import { insertFeaturesPathIfNotExists, insertPluginIfNotExists } from "./db/write.js";
+import { upsertBackend, insertFeaturesPathIfNotExists, insertPluginIfNotExists } from "./db/write.js";
 import { buildPluginsPaths } from "./state/plugins.js";
 import { runtimeError } from "./cmd/lib/user_msgs.js";
 
@@ -23,8 +23,20 @@ async function processConfPath(confPath: string): Promise<{ paths: Array<string>
     if (!found) {
         runtimeError(`Config file ${confPath} not found`);
     }
-    //console.log(data)
+    console.log(data)
     const allPaths = new Array<string>();
+    // backends
+    if (data?.backends) {
+        for (const [name, bconf] of Object.entries(data.backends)) {
+            const bc = {
+                name: name,
+                type: bconf.type,
+                uri: bconf.uri,
+                apiKey: bconf?.apiKey,
+            };
+            upsertBackend(bc);
+        }
+    }
     // features and plugins from conf
     if (data?.features) {
         allPaths.push(...data.features);

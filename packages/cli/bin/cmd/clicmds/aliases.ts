@@ -12,6 +12,7 @@ function initCommandsFromAliases(program: Command, aliases: {
     features: Record<FeatureType, Record<string, FeatureSpec>>
 ): Command {
     aliases.forEach((alias) => {
+        //console.log("A", alias)
         switch (alias.type) {
             case "task":
                 const tcmd = program.command(`${alias.name} [prompt_and_vars...]`)
