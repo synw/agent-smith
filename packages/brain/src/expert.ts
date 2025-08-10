@@ -31,9 +31,11 @@ const useLmExpert = <P extends Record<string, any> = Record<string, any>>(spec: 
         if (backend.state.get().isUp) {
             isBackendUp = true
         }
+        //console.log("BM", backend.lm.model.name, model.name)
         if (backend.lm.model.name == model.name) {
             isModelLoaded = true
         }
+        //console.log("BC", backend, "/", isBackendUp, "/", isModelLoaded);
         if (["koboldcpp", "llamacpp"].includes(backend.lm.providerType)) {
             if (isBackendUp) {
                 if (isModelLoaded) {
@@ -59,6 +61,7 @@ const useLmExpert = <P extends Record<string, any> = Record<string, any>>(spec: 
             throw new Error(`Expert ${name} can not think because it is down: check the backend or probe it again`);
         }
         // auto load model if available
+        //console.log("BB", backend.name, backend.lm.serverUrl, backend.lm.model.name, "/", model.name);
         if (backend.lm.model.name != model.name) {
             if (backend.lm.providerType == "koboldcpp" || backend.lm.providerType == "llamacpp") {
                 throw new Error(`The model ${model.name} is not loaded in the ${backend.lm.name} backend`)
@@ -133,10 +136,16 @@ const useLmExpert = <P extends Record<string, any> = Record<string, any>>(spec: 
                 }
             }
         }
-        const respData = await backend.lm.infer(p, completionParams, _parseJson, parseJsonFunc);
+        let respData: InferenceResult;
+        try {
+            respData = await backend.lm.infer(p, completionParams, _parseJson, parseJsonFunc);
+            //console.log("RD", respData)
+        } catch (e) {
+            console.log(`Error in inference ${e}`)
+        }
         state.setKey("isStreaming", false);
         state.setKey("isThinking", false);
-        return respData
+        return respData!
     }
 
     const abortThinking = async () => {

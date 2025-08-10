@@ -15,6 +15,7 @@ const useLmBackend = (spec: LmBackendSpec): LmBackend => {
     const state = map({
         isUp: false,
     });
+    //console.log("BSPEC", spec);
     if (spec.localLm) {
         switch (spec.localLm) {
             case "koboldcpp":
@@ -79,7 +80,7 @@ const useLmBackend = (spec: LmBackendSpec): LmBackend => {
                 throw new Error(`Unknown provider type ${spec.localLm}`)
         }
     } else if (spec.serverUrl && spec.providerType) {
-        if (!["llama.cpp", "koboldcpp", "ollama"].includes(spec.providerType)) {
+        if (!["llamacpp", "koboldcpp", "ollama"].includes(spec.providerType)) {
             throw new Error(`Provider ${spec.providerType} is not supported`)
         }
         if (!spec.serverUrl) {
@@ -89,7 +90,12 @@ const useLmBackend = (spec: LmBackendSpec): LmBackend => {
             providerType: spec.providerType,
             serverUrl: spec.serverUrl,
             apiKey: spec.apiKey,
-            onToken: (t: string) => { stream.set(stream.get() + t) },
+            onToken: (t: string) => { 
+                stream.set(stream.get() + t);
+                if (onToken) {
+                    onToken(t)
+                }
+            },
             onStartEmit: onStartEmit,
         });
     } else {

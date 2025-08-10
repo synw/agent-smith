@@ -35,14 +35,17 @@ const useAgentBrain = <P extends Record<string, any> = Record<string, any>>(
     }
 
     const discover = async (isVerbose = false): Promise<boolean> => {
+        //console.log("Discover", _backends.map(n => { return `${n.name} / ${n.lm.serverUrl}`}))
         let isOn = false;
-        for (const bc of _backends) {
+        for (const bc of _backends) {            
             const isUp = await bc.probe(isVerbose);
             if (isUp) {
                 isOn = true;
             }
+            //console.log("Probe", bc.name, isUp);
         }
         state.setKey("isOn", isOn)
+        stream = _currentExpert.stream;
         return isOn
     }
 
@@ -114,7 +117,7 @@ const useAgentBrain = <P extends Record<string, any> = Record<string, any>>(
     const backendsForModelsInfo = async (): Promise<Record<string, string>> => {
         //console.log("Experts:", experts)
         for (const backend of _backends) {
-            //console.log("BS", backend.state.get().isUp);
+            //console.log("BS", backend.lm.name, backend.state.get().isUp);
             if (backend.state.get().isUp) {
                 if (backend.lm.providerType == "ollama" || backend.lm.providerType == "browser") {
                     await backend.lm.modelsInfo();
@@ -155,10 +158,11 @@ const useAgentBrain = <P extends Record<string, any> = Record<string, any>>(
         if (foundEx) {
             _ex = foundEx
         }
-        //console.log("Havebc", Object.keys(_backendsForModels).includes(modelName));
+        //console.log("Havebc" ,modelName,":", Object.keys(_backendsForModels).includes(modelName), _backendsForModels);
         if (Object.keys(_backendsForModels).includes(modelName)) {
             const bc = backend(_backendsForModels[modelName]);
-            if (["llamapcpp", "koboldcpp"].includes(bc.lm.providerType)) {
+            //console.log("BCP", bc.lm.providerType, ["llamapcpp", "koboldcpp"].includes(bc.lm.providerType));
+            if (["llamacpp", "koboldcpp"].includes(bc.lm.providerType)) {
                 _ex = useLmExpert<P>({
                     name: modelName,
                     model: bc.lm.model,
