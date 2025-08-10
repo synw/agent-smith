@@ -1,5 +1,6 @@
 import YAML from 'yaml';
 import { AgentBrain, LmExpert } from "@agent-smith/brain";
+//import { AgentBrain, LmExpert } from "../../brain/dist/main.js";
 import { AgentTask, AgentTaskSpec, useAgentTask } from "@agent-smith/jobs";
 import { PromptTemplate } from "modprompt";
 import { useTemplateForModel } from "@agent-smith/tfm";
@@ -156,6 +157,7 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                         ip[k] = v
                     }
                 }
+                //console.log("TIP", conf?.inferParams)
                 // shots
                 if (task?.shots) {
                     task.shots.forEach((s) => {
@@ -166,14 +168,14 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                 // check task variables
                 if (task?.variables) {
                     if (task.variables?.required) {
-                        for (const reqvar of task.variables.required) {
+                        for (const reqvar of Object.keys(task.variables.required)) {
                             if (!(reqvar in tvars)) {
                                 throw new Error(`The variable ${reqvar} is required to run this task`)
                             }
                         }
                     }
                     if (task.variables?.optional) {
-                        for (const optvar of task.variables.optional) {
+                        for (const optvar of Object.keys(task.variables.optional)) {
                             if (!(optvar in tvars)) {
                                 task.prompt = task.prompt.replaceAll(`{${optvar}}`, "");
                             }
@@ -212,7 +214,9 @@ class LmTaskBuilder<T = string, P extends Record<string, any> = Record<string, a
                     }
                 }
                 //console.log("TLV INFER", task.name);
-                //console.log("CONF", conf);
+                //console.log("TCONF", conf);
+               // console.log("TEX", this.expert.name);
+                //console.log("TBC", this.expert.backend.lm.serverUrl);
                 let answer = await this.expert.think(pr, { ...ip, stream: true }, { skipTemplate: true });
                 const { inferenceResult, template } = await this.processAnswer(
                     answer, tpl, task, conf ?? {}, prompt, { ...ip, stream: true }, 1

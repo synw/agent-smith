@@ -67,6 +67,11 @@ interface TemplateSpec {
   assistant?: string;
 }
 
+interface TaskVariable {
+  type: string;
+  description: string;
+}
+
 interface BaseLmTask {
   name: string;
   description: string;
@@ -75,7 +80,8 @@ interface BaseLmTask {
   inferParams?: InferenceParams;
   models?: Record<string, ModelSpec>;
   shots?: Array<HistoryTurn>;
-  variables?: { required?: Array<string>; optional?: Array<string> };
+  //variables?: { required?: Array<TaskVariable>; optional?: Array<TaskVariable> };
+  variables: { required?: Array<string>, optional?: Array<string> }
   tools?: Array<LmTaskToolSpec>;
   toolsList?: Array<string>;
 }
@@ -92,7 +98,7 @@ interface BaseLmTask {
  * @param {InferenceParams} [inferParams] - Optional inference parameters.
  * @param {Record<string, ModelSpec>} [models] - Optional additional models by name.
  * @param {Array<HistoryTurn>} [shots] - Optional dialogue examples for the task.
- * @param {{ required?: Array<string>, optional?: Array<string> }} [variables] - Task variables (required/optional).
+ * @param {{ required?: Array<TaskVariable>, optional?: Array<TaskVariable> }} [variables] - Task variables (required/optional).
  * @example
  * const task: LmTask = {
  *   name: "qa",
@@ -123,5 +129,6 @@ export {
   TemplateSpec,
   LmTaskConf,
   LmTaskToolSpec,
-  LmTaskOutput
+  LmTaskOutput,
+  TaskVariable,
 };
