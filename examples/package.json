@@ -6,19 +6,19 @@
   },
   "dependencies": {
     "@agent-smith/body": "^0.0.8",
-    "@agent-smith/brain": "^0.0.43",
+    "@agent-smith/brain": "^0.0.46",
     "@agent-smith/jobs": "^0.0.14",
-    "@agent-smith/lmtask": "^0.0.41",
+    "@agent-smith/lmtask": "^0.0.47",
     "@agent-smith/smem": "^0.0.5",
     "@agent-smith/tfm": "^0.1.2",
-    "@locallm/api": "^0.2.1",
+    "@locallm/api": "0.4.0",
     "@xenova/transformers": "^2.17.2",
-    "modprompt": "file:/home/ggg/dev/js/modprompt"
+    "modprompt": "0.11.9"
   },
   "devDependencies": {
-    "@locallm/types": "^0.1.9",
-    "@types/node": "^22.15.16",
+    "@locallm/types": "^0.4.0",
+    "@types/node": "^24.3.0",
     "ts-node": "^10.9.2",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   }
 }
