@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 import { Agent } from "../packages/agent/dist/main.js";
-import { Lm } from "../packages/agent/locallm/main.js";
+import { Lm } from "@locallm/api";
 
 let model;
 const serverUrl = "http://localhost:8080/v1";
 const apiKey = "";
 const system = "You are a helpful touristic assistant";
-const _prompt = `I am landing in Barcelona soon: I plan to reach my hotel and then go for outdoor sport. 
+const _prompt = `I am landing in Barcelona in one hour: I plan to reach my hotel and then go for outdoor sport. 
 How are the conditions in the city?`;
 //const _prompt = "What is the current weather in Barcelona?"
 

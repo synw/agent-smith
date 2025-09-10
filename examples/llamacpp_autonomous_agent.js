@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Agent } from "../packages/agent/dist/main.js";
-import { Lm } from "../packages/agent/locallm/main.js";
+import { Lm } from "@locallm/api";
 import { PromptTemplate } from "modprompt";
 
 let model; // qwen 3 4b
@@ -46,6 +46,13 @@ const get_current_traffic = {
 };
 
 async function main() {
+    /* this is a little help for Qwen 4b to format the tool calls correctly as the default
+    system prompt is not that clear about it*/
+    template.afterSystem(`\nExample of multiple tool calls:
+<tool_call>
+[{"name": "web_search", "arguments": {"query": "monuments of London"}}, {"name": "wikipedia_search", "arguments": {"location": "monuments of London"}}]
+</tool_call>
+`);
     const lm = new Lm({
         providerType: "llamacpp",
         serverUrl: serverUrl,

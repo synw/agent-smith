@@ -1,7 +1,7 @@
 import { LmBackend, useAgentBrain } from "@agent-smith/brain";
 //import { LmBackend, useAgentBrain } from "../../brain/dist/main.js";
-//import { LmTaskBuilder } from "@agent-smith/lmtask";
-import { LmTaskBuilder } from "../../lmtask/dist/task.js";
+import { LmTaskBuilder } from "@agent-smith/lmtask";
+//import { LmTaskBuilder } from "../../lmtask/dist/task.js";
 import { MarkedExtension, marked } from 'marked';
 import { markedTerminal } from "marked-terminal";
 import { FeatureType } from "./interfaces.js";
@@ -33,8 +33,8 @@ async function initAgent(backends: Array<LmBackend>): Promise<boolean> {
         await brain.discoverLocal(true);
         await brain.backendsForModelsInfo();
         //await initExperts();
-        /*console.log("Backends:", brain.backends.map(x => x.name + " " + x.lm.serverUrl));
-        console.log("Experts:", brain.experts.map(x => x.name));*/
+        console.log("Backends:", brain.backends.map(x => x.name + " " + x.lm.serverUrl));
+        //console.log("Experts:", brain.experts.map(x => x.name));
         //console.log("Bfm:", brain.backendsForModels);
     }
     const brainUp = brain.state.get().isOn;

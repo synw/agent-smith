@@ -1,7 +1,7 @@
 //import { useLmBackend } from "@agent-smith/brain";
 import { readBackends } from "../db/read.js";
 import { LmProviderType } from "@locallm/types";
-import { LmBackend, LmBackendSpec, useLmBackend } from "../../../brain/dist/main.js";
+import { LmBackend, LmBackendSpec, useLmBackend } from "@agent-smith/brain";
 
 function initRemoteBackends(): Array<LmBackend> {
     const rmb = readBackends();
