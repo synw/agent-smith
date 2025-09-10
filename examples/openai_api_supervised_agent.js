@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { Agent } from "../packages/agent/dist/main.js";
-import { Lm } from "../packages/agent/locallm/main.js";
+import { Lm } from "@locallm/api";
 import { createInterface } from 'readline/promises';
 import { stdin as input, stdout as output } from 'process';
 
