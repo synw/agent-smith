@@ -8,15 +8,15 @@
     "build": "rm -rf dist/* && tsc"
   },
   "dependencies": {
-    "@locallm/api": "0.4.1",
-    "modprompt": "0.11.9"
+    "@locallm/api": "^0.4.2",
+    "modprompt": "^0.12.0"
   },
   "devDependencies": {
-    "@locallm/types": "^0.4.1",
+    "@locallm/types": "^0.4.2",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-typescript": "^12.1.4",
-    "@types/node": "^24.3.0",
-    "rollup": "^4.50.0",
+    "@types/node": "^24.3.1",
+    "rollup": "^4.50.1",
     "ts-node": "^10.9.2",
     "tslib": "2.8.1",
     "typescript": "^5.9.2"
