@@ -1,0 +1,100 @@
+import { InferenceParams, InferenceResult, InferenceOptions } from "@locallm/types";
+import { PromptTemplate } from "modprompt";
+import { HistoryTurn, ToolCallSpec } from "@locallm/types";
+
+interface ModelSpec {
+    name: string;
+    template?: string;
+    ctx?: number;
+    system?: string;
+    afterSystem?: string;
+    assistant?: string;
+    inferParams?: InferenceParams;
+}
+
+/**
+ * Represents the input configuration for a language model task.
+ *
+ * @interface TaskInput
+ * @param {string} prompt - The user's input prompt for the task.
+ */
+interface TaskInput {
+    prompt: string;
+    [key: string]: any;
+}
+
+/**
+ * Configuration interface for a language model task.
+ *
+ * @interface TaskConf
+ * @param {ModelSpec} [model] - Optional model configuration.
+ * @param {ModelSpec} [modelname] - Optional model name for the task models list.
+ * @param {InferenceParams} [inferParams] - Optional inference parameters.
+ * @param {boolean} [debug] - Optional debug flag.
+ * @param {boolean} [quiet] - Optional quiet flag.
+ */
+interface TaskConf {
+    model?: ModelSpec;
+    modelname?: string;
+    inferParams?: InferenceParams;
+    options?: InferenceOptions;
+    debug?: boolean;
+    verbose?: boolean;
+    onToolCall?: (tc: ToolCallSpec) => void;
+    onToolCallEnd?: (tr: any) => void;
+}
+
+/**
+ * Represents a template specification for a language model task.
+ *
+ * @interface TemplateSpec
+ * @param {string} [system] - The system message for the template.
+ * @param {Array<string>} [stop] - Extra stop sequences for the template.
+ * @param {string} [assistant] - The assistant start message for the template.
+ * @example
+ * const template: TemplateSpec = {
+ *   system: "You are a helpful AI",
+ *   stop: ["\n", "</s>"],
+ * };
+ */
+interface TemplateSpec {
+    system?: string;
+    afterSystem?: string;
+    stop?: Array<string>;
+    assistant?: string;
+}
+
+interface TaskVariableDef {
+    type: string;
+    description: string;
+}
+
+interface TaskDef {
+    name: string;
+    description: string;
+    prompt: string;
+    template?: TemplateSpec;
+    inferParams?: InferenceParams;
+    model: ModelSpec;
+    models?: Record<string, ModelSpec>;
+    shots?: Array<HistoryTurn>;
+    variables?: { required?: Record<string, TaskVariableDef>; optional?: Record<string, TaskVariableDef> };
+    //tools?: Array<ToolSpec>;
+    toolsList?: Array<string>;
+}
+
+interface TaskOutput {
+    answer: InferenceResult;
+    errors: Record<string, string>;
+    template?: PromptTemplate;
+}
+
+export {
+    ModelSpec,
+    TaskInput,
+    TaskDef,
+    TemplateSpec,
+    TaskConf,
+    TaskOutput,
+    TaskVariableDef,
+};
