@@ -155,6 +155,7 @@ async function executeTask(
         //onToolCallEnd: onToolCallEnd,
         ...conf,
     }
+    console.log("RUN", task);
     let out: TaskOutput;
     try {
         out = await task.run({ prompt: payload.prompt, ...vars }, tconf);

@@ -77,7 +77,7 @@ async function _createWorkflowFromSpec(
             const jsa = await import(path);
             const act = createJsAction(jsa.action);
             const wf: WorkflowStep = {
-                type: "action",
+                type: "adaptater",
                 run: act,
             };
             steps[name] = wf;
@@ -94,7 +94,7 @@ async function _createWorkflowFromSpec(
             const agent = new Agent(backend.value!);
             const tsk = Task.fromYaml(agent, res.ymlTask);
             const wf: WorkflowStep = {
-                type: "action",
+                type: "task",
                 run: tsk.run as FeatureExecutor<any, any>,
             };
             steps[name] = wf;
