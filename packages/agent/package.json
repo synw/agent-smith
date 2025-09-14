@@ -1,8 +1,11 @@
 {
   "name": "@agent-smith/agent",
   "description": "Agent Smith: agent runtime",
-  "repository": "https://github.com/synw/agent-smith",
-  "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/synw/agent-smith.git"
+  },
+  "version": "0.0.2",
   "scripts": {
     "buildrl": "rm -rf dist/* && rollup -c",
     "build": "rm -rf dist/* && tsc"
@@ -15,7 +18,7 @@
     "@locallm/types": "^0.4.2",
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-typescript": "^12.1.4",
-    "@types/node": "^24.3.1",
+    "@types/node": "^24.4.0",
     "rollup": "^4.50.1",
     "ts-node": "^10.9.2",
     "tslib": "2.8.1",

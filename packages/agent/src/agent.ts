@@ -10,6 +10,7 @@ class Agent {
     constructor(lm: Lm) {
         this.lm = lm;
     }
+
     async run(
         prompt: string,
         params: InferenceParams,
@@ -25,7 +26,6 @@ class Agent {
                     template = template.addTool(t)
                 }
             });
-
         }
         if (this.lm.providerType == "openai") {
             return await this.runAgentNoTemplate(1, prompt, params, options)
@@ -95,18 +95,11 @@ class Agent {
         tpl: PromptTemplate,
     ): Promise<{ inferenceResult: InferenceResult, template: PromptTemplate }> {
         let res = await this.lm.infer(tpl.prompt(prompt), params, options);
-        const toolResponseStart = tpl.toolsDef?.response.split("{tools_response}")[0];
-        const toolCallStart = tpl.toolsDef?.response.split("{tool}")[0];
-        if (!toolCallStart || !toolResponseStart) {
-            throw new Error(`Tool definition malformed in template ${tpl.name}`)
-        }
-        //console.log("\nProcessing answer", res.text);
-        //const atxt = tpl?.tags?.think ? extractBetweenTags(res.text, tpl.tags.think.start, tpl.tags.think.end) : res.text;
         const { isToolCall, toolsCall, error } = tpl.processAnswer(res.text);
         if (error) {
             throw new Error(`error processing tool call answer:\n, ${error}`);
         }
-        console.log("\nProcessed answer", isToolCall, toolsCall, error);
+        //console.log("\nProcessed answer", isToolCall, toolsCall, error);
         //const toolsUsed: Record<string, ToolTurn> = {};
         const toolResults = new Array<ToolTurn>();
         if (isToolCall) {
@@ -169,6 +162,10 @@ class Agent {
             }
             return { inferenceResult: res, template: tpl }
         }
+    }
+
+    async abort() {
+        this.lm.abort()
     }
 }
 
