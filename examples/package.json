@@ -11,12 +11,12 @@
     "@agent-smith/lmtask": "^0.0.47",
     "@agent-smith/smem": "^0.0.5",
     "@agent-smith/tfm": "^0.1.2",
-    "@locallm/api": "file:/home/ggg/dev/js/locallm/packages/api",
+    "@locallm/api": "^0.4.2",
     "@xenova/transformers": "^2.17.2",
-    "modprompt": "file:/home/ggg/dev/js/modprompt"
+    "modprompt": "^0.12.0"
   },
   "devDependencies": {
-    "@locallm/types": "file:/home/ggg/dev/js/locallm/packages/types",
+    "@locallm/types": "^0.4.2",
     "@types/node": "^24.3.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.9.2"

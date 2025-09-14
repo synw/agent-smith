@@ -3,13 +3,13 @@ import { Agent } from "../packages/agent/dist/main.js";
 import { Lm } from "@locallm/api";
 import { PromptTemplate } from "modprompt";
 
-let model; // qwen 3 4b
-let template = new PromptTemplate("chatml-tools");
+let apiKey;
+let model; // Qwen 3 4b
+let template = new PromptTemplate("chatml-tools")
+    .afterSystem("\nYou are and autonomous agent: feel free to use your tools.");
 const serverUrl = "http://localhost:8080";
-const apiKey = "";
 const _prompt = `I am landing in Barcelona soon: I plan to reach my hotel and then go for outdoor sport. 
-How are the conditions in the city? Use your tools to gather information about weather and traffic.`;
-//const _prompt = "What is the current weather in Barcelona?"
+How are the conditions in the city?`;
 
 function run_get_current_weather(args) {
     console.log("Running the get_current_weather tool with args", args);
@@ -46,13 +46,6 @@ const get_current_traffic = {
 };
 
 async function main() {
-    /* this is a little help for Qwen 4b to format the tool calls correctly as the default
-    system prompt is not that clear about it*/
-    template.afterSystem(`\nExample of multiple tool calls:
-<tool_call>
-[{"name": "web_search", "arguments": {"query": "monuments of London"}}, {"name": "wikipedia_search", "arguments": {"location": "monuments of London"}}]
-</tool_call>
-`);
     const lm = new Lm({
         providerType: "llamacpp",
         serverUrl: serverUrl,
@@ -65,7 +58,7 @@ async function main() {
         {
             stream: true,
             model: model ?? "",
-            temperature: 0.5,
+            temperature: 0.6,
             top_k: 40,
             top_p: 0.95,
             min_p: 0,

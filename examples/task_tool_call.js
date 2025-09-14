@@ -2,6 +2,7 @@
 import { default as fs } from "fs";
 import { Task } from "../packages/task/dist/task.js";
 import { Lm } from "@locallm/api";
+import { Agent } from "../packages/agent/dist/agent.js";
 
 // Run an Llama.cpp server
 // llama-server -fa -m $1 --jinja --chat-template-file template.jinja -t 4 -c $2 --verbose-prompt
@@ -10,10 +11,11 @@ import { Lm } from "@locallm/api";
 
 const model = { name: "Qwen3-4B-Instruct-2507-UD-Q6_K_XL", ctx: 8192, template: "chatml-tools" };
 const lm = new Lm({
-    providerType: "koboldcpp",
-    serverUrl: "http://localhost:5001",
+    providerType: "llamacpp",
+    serverUrl: "http://localhost:8080",
     onToken: (t) => process.stdout.write(t),
 });
+const agent = new Agent(lm);
 
 const _prompt = `I am landing in Barcelona soon: I plan to reach my hotel and then go for outdoor sport. 
 How are the conditions in the city?`;
@@ -53,7 +55,7 @@ const trafficToolDef = {
 async function main() {
     const taskPath = "./tasks/toolsexample.yml";
     const ymlTaskDef = fs.readFileSync(taskPath, 'utf8');
-    const task = new Task(lm, ymlTaskDef).addTools([weatherToolDef, trafficToolDef]);
+    const task = Task.fromYaml(agent, ymlTaskDef).addTools([weatherToolDef, trafficToolDef]);
     console.log("Running task...", ymlTaskDef);
     // run the task    
     const conf = {
@@ -65,7 +67,7 @@ async function main() {
     console.log("\n\n----------- Template history:");
     console.log(answer.template.history);
     console.log("\n\n----------- Next turn prompt template:");
-    console.log(answer.template.prompt(""));
+    console.log(answer.template.render());
 }
 
 (async () => {
