@@ -1,21 +1,16 @@
-import { FeatureType } from "../../../interfaces.js";
-import { useAgentTask, AgentTask } from "@agent-smith/jobs";
+import { FeatureExecutor } from "../../../interfaces.js";
 
-function createJsAction(action: CallableFunction): AgentTask<FeatureType, any, any> {
-    const task = useAgentTask<FeatureType, any, any>({
-        id: "",
-        title: "",
-        run: async (args, options) => {
-            try {
-                const res = await action(args, options);
-                return res
-            }
-            catch (e) {
-                throw new Error(`executing action:${e}`);
-            }
+function createJsAction(action: CallableFunction): FeatureExecutor {
+    const run: FeatureExecutor = async (args, options) => {
+        try {
+            const res = await action(args, options);
+            return res
         }
-    });
-    return task
+        catch (e) {
+            throw new Error(`executing action:${e}`);
+        }
+    };
+    return run
 }
 
 export { createJsAction }

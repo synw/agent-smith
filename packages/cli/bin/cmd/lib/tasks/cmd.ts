@@ -1,13 +1,8 @@
-//import { LmTask, LmTaskConf, LmTaskOutput, LmTaskToolSpec } from "../../../../../lmtask/dist/main.js";
-//import { LmExpert } from "../../../../../brain/dist/main.js";
-import { LmTaskConf, LmTaskOutput } from "@agent-smith/lmtask";
-import { LmExpert } from "@agent-smith/brain";
-//import { LmTaskConf, LmTaskOutput } from "../../../../../lmtask/dist/main.js";
+import { Agent } from "@agent-smith/agent";
 import { input } from "@inquirer/prompts";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import color from "ansi-colors";
 import ora from 'ora';
-import { brain } from "../../../agent.js";
 import { query } from "../../../cli.js";
 import { readClipboard } from "../../../cmd/sys/clipboard.js";
 import { usePerfTimer } from "../../../main.js";
@@ -17,11 +12,14 @@ import { parseCommandArgs } from "../options_parsers.js";
 import { runtimeDataError, runtimeWarning } from "../user_msgs.js";
 import { formatStats, processOutput, readPromptFile } from "../utils.js";
 import { readTask } from "./read.js";
+import { TaskConf, TaskOutput } from "@agent-smith/task/dist/interfaces.js";
+import { backend } from "../../../state/backends.js";
 
 async function executeTask(
-    name: string, payload: Record<string, any>, options: Record<string, any>, quiet?: boolean, expert?: LmExpert
-): Promise<LmTaskOutput> {
-    const { task, model, conf, vars, mcpServers } = await readTask(name, payload, options);
+    name: string, payload: Record<string, any>, options: Record<string, any>, quiet?: boolean
+): Promise<TaskOutput> {
+    const agent = new Agent(backend.value!);
+    const { task, model, conf, vars, mcpServers } = await readTask(name, payload, options, agent);
     // check for grammars
     if (model?.inferParams?.tsGrammar) {
         //console.log("TSG");
@@ -32,18 +30,10 @@ async function executeTask(
         console.log("Task model:", model);
         //console.log("Task vars:", vars);
     }
-    // expert
-    //console.log("MT", model.template, "OT", options?.template);
-    const ex = expert ?? brain.getOrCreateExpertForModel(model.name, model.template);
-    if (!ex) {
-        throw new Error("No expert found for model " + model.name)
-    }
-    ex.checkStatus();
-    //ex.backend.setOnStartEmit(() => console.log("[START]"));
     let i = 0;
     let c = false;
-    const hasThink = ex.template?.tags?.think;
-    const hasTools = ex.template?.tags?.toolCall;
+    //const hasThink = ex.template?.tags?.think;
+    //const hasTools = ex.template?.tags?.toolCall;
     //console.log("EX TPL", ex.template);
     //console.log("ST", thinkStart);
     //console.log("ET", thinkEnd);
@@ -65,8 +55,10 @@ async function executeTask(
             //}
         }
     };
+    const hasTools = options?.tools;
+
     let processToken = printToken;
-    if ((hasThink || hasTools) && !options?.debug) {
+    if ((hasTools) && !options?.debug) {
         let continueWrite = true;
         let skipNextEmptyLinesToken = false;
         const spinner = ora("Thinking ...");
@@ -82,7 +74,7 @@ async function executeTask(
             if (i == 0) { perfTimer.start() }
             spinner.text = formatTokenCount(i)
             //if (i == ) { timer.start() };
-            if (!options?.verbose) {
+            /*if (!options?.verbose) {
                 if (hasThink) {
                     if (t == ex.template.tags.think?.start) {
                         //console.log("Start thinking token", thinkStart);
@@ -118,7 +110,7 @@ async function executeTask(
                     }
                     return
                 }
-            }
+            }*/
             if (continueWrite) {
                 if (skipNextEmptyLinesToken) {
                     if (t == "\n\n") {
@@ -145,24 +137,25 @@ async function executeTask(
     /*const onToolCallEnd = (tr: any) => {
         tcspinner.stop();
     }*/
-   //console.log("OOT", options?.onToken, "/", processToken);
+    //console.log("OOT", options?.onToken, "/", processToken);
     if (options?.onToken) {
-        ex.backend.setOnToken(options.onToken);
+        agent.lm.onToken = options.onToken;
     } else {
-        ex.backend.setOnToken(processToken);
+        agent.lm.onToken = processToken;
     }
     //console.log("BOT", ex.backend.lm.onToken);
+    if (!conf?.inferParams) {
+        conf.inferParams = {}
+    }
     conf.inferParams.stream = true;
-    const tconf: LmTaskConf = {
-        expert: ex,
+    const tconf: TaskConf = {
         model: model,
         debug: options?.debug ?? false,
         onToolCall: onToolCall,
         //onToolCallEnd: onToolCallEnd,
         ...conf,
     }
-    tconf.expert = ex;
-    let out: LmTaskOutput;
+    let out: TaskOutput;
     try {
         out = await task.run({ prompt: payload.prompt, ...vars }, tconf);
         if (!out.answer.text.endsWith("\n")) {
@@ -193,7 +186,7 @@ async function executeTask(
             }
         } else {
             //console.log("HIST", ex.template.history.length)
-            await executeTask(name, { ...vars, prompt: prompt }, options, quiet, ex)
+            await executeTask(name, { ...vars, prompt: prompt }, options, quiet)
         }
     }
     if (options?.debug === true || options?.verbose === true) {
@@ -210,7 +203,7 @@ async function executeTask(
 async function executeTaskCmd(
     name: string,
     targs: Array<any> = []
-): Promise<LmTaskOutput> {
+): Promise<TaskOutput> {
     const { args, options } = parseCommandArgs(targs);
     let pr: string;
     //console.log("TOPT", options);

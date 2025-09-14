@@ -1,17 +1,18 @@
-import YAML from 'yaml';
+import { Agent } from '@agent-smith/agent';
+import { Task } from '@agent-smith/task';
 import { default as fs } from "fs";
-import { AgentTask } from "@agent-smith/jobs";
-import { taskBuilder } from '../../../agent.js';
+import YAML from 'yaml';
+import { FeatureExecutor, FeatureType, WorkflowStep } from '../../../interfaces.js';
+import { backend } from '../../../state/backends.js';
 import { getFeatureSpec } from '../../../state/features.js';
-import { FeatureType } from '../../../interfaces.js';
 import { readTask } from "../../sys/read_task.js";
 import { pythonAction, systemAction } from '../actions/cmd.js';
 import { createJsAction } from '../actions/read.js';
 
 async function _createWorkflowFromSpec(
     spec: Record<string, any>
-): Promise<Record<string, AgentTask<FeatureType, any, any, Record<string, any>>>> {
-    const steps: Record<string, AgentTask<FeatureType, any, any, Record<string, any>>> = {};
+): Promise<Record<string, WorkflowStep>> {
+    const steps: Record<string, WorkflowStep> = {};
     //console.log("Create job. Feats:", spec);
     for (const step of spec.steps) {
         const type = Object.keys(step)[0];
@@ -33,25 +34,37 @@ async function _createWorkflowFromSpec(
             switch (ext) {
                 case "js":
                     const { action } = await import(path);
-                    const at = action as AgentTask<FeatureType, any, any>;
-                    at.type = "action";
-                    steps[name] = at;
+                    const at = action as FeatureExecutor<any, any>;
+                    const wf: WorkflowStep = {
+                        type: "action",
+                        run: at,
+                    };
+                    steps[name] = wf;
                     break;
                 case "mjs":
                     const mjsa = await import(path);
                     const act = createJsAction(mjsa.action);
-                    act.type = "action";
-                    steps[name] = act;
+                    const wf2: WorkflowStep = {
+                        type: "action",
+                        run: act,
+                    };
+                    steps[name] = wf2;
                     break
                 case "yml":
                     const _t1 = systemAction(path);
-                    _t1.type = "action";
-                    steps[name] = _t1;
+                    const wf3: WorkflowStep = {
+                        type: "action",
+                        run: _t1 as FeatureExecutor<any, any>,
+                    };
+                    steps[name] = wf3;
                     break
                 case "py":
                     const _t = pythonAction(path);
-                    _t.type = "action";
-                    steps[name] = _t;
+                    const wf4: WorkflowStep = {
+                        type: "action",
+                        run: _t as FeatureExecutor<any, any>,
+                    };
+                    steps[name] = wf4;
                     break
                 default:
                     throw new Error(`Unknown feature extension ${ext}`)
@@ -63,8 +76,11 @@ async function _createWorkflowFromSpec(
             }
             const jsa = await import(path);
             const act = createJsAction(jsa.action);
-            act.type = "adaptater";
-            steps[name] = act;
+            const wf: WorkflowStep = {
+                type: "action",
+                run: act,
+            };
+            steps[name] = wf;
         }
         else {
             const { found, path } = getFeatureSpec(name, "task" as FeatureType);
@@ -75,11 +91,13 @@ async function _createWorkflowFromSpec(
             if (!res.found) {
                 throw new Error(`Unable to read task ${name} ${path}`)
             }
-            const tsk = taskBuilder.fromYaml(res.ymlTask, "task");
-            /*if (t?.chain) {
-                tsk.properties = { "chain": true };
-            }*/
-            steps[name] = tsk as unknown as AgentTask<FeatureType, any, any, Record<string, any>>;
+            const agent = new Agent(backend.value!);
+            const tsk = Task.fromYaml(agent, res.ymlTask);
+            const wf: WorkflowStep = {
+                type: "action",
+                run: tsk.run as FeatureExecutor<any, any>,
+            };
+            steps[name] = wf;
         }
     }
     //console.log("WFNT", Object.keys(steps).length);
@@ -103,12 +121,12 @@ async function _readWorkflowFromDisk(name: string): Promise<{ found: boolean, da
 
 async function readWorkflow(
     name: string
-): Promise<{ found: boolean, workflow: Record<string, AgentTask<FeatureType, any, any, Record<string, any>>> }> {
+): Promise<{ found: boolean, workflow: Record<string, WorkflowStep> }> {
     const { found, ext } = getFeatureSpec(name, "workflow" as FeatureType);
     if (!found) {
         return { found: false, workflow: {} };
     }
-    let wf: Record<string, AgentTask<FeatureType, any, any, Record<string, any>>> = {};
+    let wf: Record<string, WorkflowStep> = {};
     switch (ext) {
         case "yml":
             const { data } = await _readWorkflowFromDisk(name);
@@ -131,6 +149,6 @@ async function readWorkflow(
 }
 
 export {
-    readWorkflow,
-}
+    readWorkflow
+};
 

@@ -1,5 +1,5 @@
-import { ToolSpec } from "modprompt";
-import { AliasType, FeatureExtension, FeatureSpec, FeatureType, DbModelDef, ToolType, ModelSpec } from "../interfaces.js";
+import { ToolSpec } from "@locallm/types";
+import { AliasType, FeatureExtension, FeatureSpec, FeatureType, DbModelDef, ToolType, InferenceBackend } from "../interfaces.js";
 import { db } from "./db.js";
 
 function readFeaturePaths(): Array<string> {
@@ -12,14 +12,14 @@ function readFeaturePaths(): Array<string> {
     return f
 }
 
-function readBackends(): Array<Record<string, string>> {
-    const stmt = db.prepare("SELECT name, type, uri, apiKey FROM backend");
+function readBackends(): Record<string, InferenceBackend> {
+    const stmt = db.prepare("SELECT name, type, url, apiKey, isdefault FROM backend");
     const data = stmt.all() as Array<Record<string, any>>;
-    let f = new Array<Record<string, string>>();
+    const bks: Record<string, InferenceBackend> = {};
     data.forEach((row) => {
-        f.push({ name: row.name, type: row.type, uri: row.uri, apiKey: row.apiKey })
+        bks[row.name] = { name: row.name, type: row.type, url: row.url, apiKey: row.apiKey, isDefault: row.isdefault };
     });
-    return f
+    return bks
 }
 
 function readPlugins(): Array<Record<string, string>> {

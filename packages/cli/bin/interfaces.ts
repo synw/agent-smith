@@ -1,6 +1,5 @@
-import { BaseLmTask, ModelSpec } from "@agent-smith/lmtask";
-//import { BaseLmTask, ModelSpec } from "../../lmtask/dist/main.js";
-import { InferenceParams } from "@locallm/types";
+import { TaskDef, ModelSpec } from "@agent-smith/task";
+import { InferenceParams, LmProviderType } from "@locallm/types";
 
 interface FeatureVariables {
     required: Array<string>;
@@ -24,11 +23,19 @@ interface Features {
     modelfile: Array<{ name: string, path: string, ext: ModelFileExtension }>;
 }
 
-interface RemoteBackend {
-    name: string;
-    type: RemoteProviderType;
-    uri: string;
+interface ConfInferenceBackend {
+    type: LmProviderType;
+    url: string;
     apiKey?: string;
+}
+
+interface InferenceBackend extends ConfInferenceBackend {
+    name: string;
+    isDefault?: boolean;
+}
+
+interface BackendEntries {
+    [key: string]: ConfInferenceBackend | string | Array<"llamacpp" | "koboldcpp" | "ollama">;
 }
 
 interface ConfigFile {
@@ -36,7 +43,7 @@ interface ConfigFile {
     datadir?: string;
     features?: Array<string>;
     plugins?: Array<string>;
-    backends?: Array<RemoteBackend>;
+    backends?: BackendEntries;
 }
 
 interface Settings {
@@ -69,9 +76,8 @@ interface ModelPack {
     recommended?: Array<string>;
 }
 
-interface LmTaskFileSpec extends BaseLmTask {
+interface LmTaskFileSpec extends TaskDef {
     ctx: number;
-    model?: ModelSpec;
     modelpack?: ModelPack;
     mcp?: McpServerSpec;
 }
@@ -89,6 +95,11 @@ interface LmTaskConfig extends BaseLmTaskConfig {
 interface FinalLmTaskConfig {
     model?: ModelSpec;
     modelname?: string;
+}
+
+interface WorkflowStep {
+    type: string;
+    run: FeatureExecutor;
 }
 
 interface McpServerSpec {
@@ -123,7 +134,8 @@ type CmdExtension = "js";
 type ModelFileExtension = "yml";
 type FeatureExtension = TaskExtension | CmdExtension | ActionExtension | WorkflowExtension | ModelFileExtension;
 type AliasType = "task" | "action" | "workflow";
-type RemoteProviderType = "llamacpp" | "koboldcpp" | "ollama";
+
+type FeatureExecutor<I = Record<string, any>, O = any> = (params: I, options: Record<string, any>) => Promise<O>;
 
 export {
     InputMode,
@@ -154,6 +166,8 @@ export {
     FinalLmTaskConfig,
     McpServerSpec,
     McpServerTool,
-    RemoteBackend,
-    RemoteProviderType,
+    InferenceBackend,
+    ConfInferenceBackend,
+    FeatureExecutor,
+    WorkflowStep,
 }

@@ -1,9 +1,10 @@
 import path from "path";
-//import { default as fs } from "fs";
 import { readConf } from "./cmd/sys/read_conf.js";
-import { upsertBackend, insertFeaturesPathIfNotExists, insertPluginIfNotExists } from "./db/write.js";
+import { upsertBackends, insertFeaturesPathIfNotExists, insertPluginIfNotExists } from "./db/write.js";
 import { buildPluginsPaths } from "./state/plugins.js";
 import { runtimeError } from "./cmd/lib/user_msgs.js";
+import { ConfInferenceBackend, InferenceBackend } from "./interfaces.js";
+import { localBackends } from "./const.js";
 
 // @ts-ignore
 const confDir = path.join(process.env.HOME, ".config/agent-smith/cli");
@@ -26,17 +27,52 @@ async function processConfPath(confPath: string): Promise<{ paths: Array<string>
     console.log(data)
     const allPaths = new Array<string>();
     // backends
+    const backends: Record<string, InferenceBackend> = {};
+    let defaultBackendName = "";
     if (data?.backends) {
-        for (const [name, bconf] of Object.entries(data.backends)) {
-            const bc = {
-                name: name,
-                type: bconf.type,
-                uri: bconf.uri,
-                apiKey: bconf?.apiKey,
-            };
-            upsertBackend(bc);
+        for (const [name, val] of Object.entries(data.backends)) {
+            switch (name) {
+                case "local":
+                    const bs = val as Array<string>;
+                    bs.forEach(b => {
+                        if (!["llamacpp", "koboldcpp", "ollama"].includes(b)) {
+                            throw new Error(`Unknow backend default value: ${b}`);
+                        }
+                        const lb = localBackends[b];
+                        backends[lb.name] = lb;
+                    })
+                    break;
+                case "default":
+                    const v1 = val as string;
+                    defaultBackendName = v1;
+                    break;
+                default:
+                    const v3 = val as ConfInferenceBackend;
+                    let apiKey: string | undefined = undefined;
+                    if (v3?.apiKey) {
+                        apiKey = v3.apiKey;
+                    }
+                    const ib: InferenceBackend = {
+                        name: name,
+                        type: v3.type,
+                        url: v3.url,
+                        isDefault: false,
+                    };
+                    if (apiKey) {
+                        ib.apiKey = apiKey
+                    }
+                    backends[name] = ib;
+                    break;
+            }
         }
     }
+    console.log("Default backend:", defaultBackendName);
+    console.dir(backends, { depth: 4 });
+    if (!Object.keys(backends).includes(defaultBackendName)) {
+        throw new Error(`Undeclared default backend: ${defaultBackendName}`)
+    }
+    backends[defaultBackendName].isDefault = true;
+    upsertBackends(Object.values(backends));
     // features and plugins from conf
     if (data?.features) {
         allPaths.push(...data.features);

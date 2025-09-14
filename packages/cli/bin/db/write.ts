@@ -1,5 +1,5 @@
 import { extractTaskToolDocAndVariables, extractToolDoc } from "../cmd/lib/tools.js";
-import { AliasType, FeatureSpec, FeatureType, Features, DbModelDef, RemoteBackend } from "../interfaces.js";
+import { AliasType, FeatureSpec, FeatureType, Features, DbModelDef, InferenceBackend } from "../interfaces.js";
 import { db } from "./db.js";
 import { readModels } from "./read.js";
 
@@ -17,19 +17,45 @@ function updateDataDirPath(dd: string) {
     stmt.run("datadir", dd);
 }
 
-function upsertBackend(bdata: RemoteBackend): boolean {
-    const stmt1 = db.prepare("SELECT * FROM backend WHERE name = ?");
-    const result = stmt1.get(bdata.name) as Record<string, any>;
-    if (result?.id) {
-        const updateStmt = db.prepare("UPDATE backend SET type = ?, uri = ?, apiKey = ? WHERE name = ?");
-        updateStmt.run(bdata.type, bdata.uri, bdata?.apiKey ?? "NULL", bdata.name);
-        return true;
-    }
-    const stmt = db.prepare("INSERT INTO backend (name,type,uri,apiKey) VALUES (?,?,?,?)");
-    stmt.run(bdata.name, bdata.type, bdata.uri, bdata?.apiKey ?? "NULL");
-    return false;
-}
+function upsertBackends(bdata: Array<InferenceBackend>): boolean {
+    let hasUpdates = false;
 
+    // Get all existing backend names
+    const existingStmt = db.prepare("SELECT name FROM backend");
+    const existingBackends = existingStmt.all() as Array<{ name: string }>;
+    const existingNames = new Set(existingBackends.map(b => b.name));
+
+    // Create a set of new backend names for comparison
+    const newNames = new Set(bdata.map(b => b.name));
+
+    // Delete backends that are not in the new list
+    const toDelete = Array.from(existingNames).filter(name => !newNames.has(name));
+    if (toDelete.length > 0) {
+        const deleteStmt = db.prepare("DELETE FROM backend WHERE name = ?");
+        for (const name of toDelete) {
+            deleteStmt.run(name);
+        }
+        hasUpdates = true;
+    }
+
+    // Upsert the new backends
+    for (const backend of bdata) {
+        const stmt1 = db.prepare("SELECT * FROM backend WHERE name = ?");
+        const result = stmt1.get(backend.name) as Record<string, any>;
+
+        if (result?.id) {
+            const updateStmt = db.prepare("UPDATE backend SET type = ?, url = ?, apiKey = ?, isdefault = ? WHERE name = ?");
+            updateStmt.run(backend.type, backend.url, backend?.apiKey ?? "NULL", backend.isDefault ? 1 : 0, backend.name);
+            hasUpdates = true;
+        } else {
+            const stmt = db.prepare("INSERT INTO backend (name,type,url,apiKey,isdefault) VALUES (?,?,?,?,?)");
+            stmt.run(backend.name, backend.type, backend.url, backend?.apiKey ?? "NULL", backend.isDefault ? 1 : 0);
+            hasUpdates = true;
+        }
+    }
+
+    return hasUpdates;
+}
 
 function insertFeaturesPathIfNotExists(path: string): boolean {
     const stmt1 = db.prepare("SELECT * FROM featurespath WHERE path = ?");
@@ -250,7 +276,7 @@ function upsertFilePath(name: string, newPath: string): boolean {
 export {
     updatePromptfilePath,
     updateDataDirPath,
-    upsertBackend,
+    upsertBackends,
     insertFeaturesPathIfNotExists,
     insertPluginIfNotExists,
     updateFeatures,

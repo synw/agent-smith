@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 import { argv } from 'process';
-import { initAgent } from './agent.js';
 import { query } from "./cli.js";
 import { buildCmds, parseCmd } from './cmd/cmds.js';
 import { formatMode, initState, inputMode, isChatMode, outputMode, runMode } from './state/state.js';
 import { updateConfCmd } from './cmd/clicmds/update.js';
-import { initRemoteBackends } from './cmd/backends.js';
+import { initBackends } from './state/backends.js';
 
 async function main() {
     const nargs = argv.length;
@@ -19,8 +18,7 @@ async function main() {
         }
     }
     await initState();
-    const rmbs = initRemoteBackends();
-    await initAgent(rmbs);
+    initBackends();
     const program = await buildCmds();
     program.hook('preAction', async (thisCommand, actionCommand) => {
         const options = actionCommand.opts();

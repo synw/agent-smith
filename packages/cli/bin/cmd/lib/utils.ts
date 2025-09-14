@@ -1,11 +1,13 @@
-//import { LmTask } from "../../../../lmtask/dist/interfaces.js";
 import { InferenceStats } from "@locallm/types";
-import { marked } from "../../agent.js";
-import { formatMode, initFilepaths, inputMode, outputMode, promptfilePath } from "../../state/state.js";
-import { readClipboard, writeToClipboard } from "../sys/clipboard.js";
+import { formatMode, initFilepaths, outputMode, promptfilePath } from "../../state/state.js";
+import { writeToClipboard } from "../sys/clipboard.js";
 import { readFile } from "../sys/read.js";
 import { splitThinking } from "../../utils/text.js";
 import { runtimeError } from "./user_msgs.js";
+import { MarkedExtension, marked } from 'marked';
+import { markedTerminal } from "marked-terminal";
+
+marked.use(markedTerminal() as MarkedExtension);
 
 function readPromptFile(): string {
     initFilepaths();

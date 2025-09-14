@@ -1,6 +1,5 @@
 import { Command } from "commander";
 import YAML from 'yaml';
-import { initAgent, taskBuilder } from "../../agent.js";
 import { dbPath } from "../../conf.js";
 import { readFeaturePaths, readFeaturesType } from "../../db/read.js";
 import { cleanupFeaturePaths, updateAliases, updateFeatures } from "../../db/write.js";
@@ -13,12 +12,12 @@ import { parseCommandArgs } from "../lib/options_parsers.js";
 import { deleteFileIfExists } from "../sys/delete_file.js";
 import { readTask } from "../sys/read_task.js";
 import { updateConfCmd } from "./update.js";
-import { initRemoteBackends } from "../backends.js";
+import { Task } from "@agent-smith/task/dist/task.js";
 
 function initBaseCommands(program: Command): Command {
-    program.command("ping")
+    /*program.command("ping")
         .description("ping inference servers")
-        .action(async (...args: Array<any>) => { console.log("Found working inference server(s):", await initAgent(initRemoteBackends())) });
+        .action(async (...args: Array<any>) => { console.log("Found working inference server(s):", await initAgent(initRemoteBackends())) });*/
     program.command("exit")
         .description("exit the cli")
         .action(() => process.exit(0));
@@ -97,8 +96,8 @@ async function _readTaskCmd(args: Array<string>): Promise<any> {
     if (!res.found) {
         throw new Error(`Task ${args[0]}, ${path} not found`)
     }
-    const ts = taskBuilder.readFromYaml(res.ymlTask);
-    console.log(YAML.stringify(ts))
+    //const ts = JSON.parse(res.ymlTask);
+    console.log(YAML.stringify(res.ymlTask))
     //console.log(JSON.stringify(ts, null, "  "));
 }
 

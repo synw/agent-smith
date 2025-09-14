@@ -86,8 +86,9 @@ const model = `CREATE TABLE IF NOT EXISTS model (
 const backend = `CREATE TABLE IF NOT EXISTS backend (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
-    type TEXT NOT NULL CHECK ( type IN ('llamacpp', 'koboldcpp', 'ollama') ),
-    uri TEXT NOT NULL,
+    type TEXT NOT NULL CHECK ( type IN ('llamacpp', 'koboldcpp', 'ollama', 'openai') ),
+    url TEXT NOT NULL,
+    isdefault INTEGER NOT NULL,
     apiKey TEXT
 );`
 

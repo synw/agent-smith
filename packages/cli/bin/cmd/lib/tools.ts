@@ -1,7 +1,7 @@
 import YAML from 'yaml';
 import * as fs from 'fs';
 import { FeatureExtension } from '../../interfaces.js';
-import { ToolSpec } from 'modprompt';
+import { ToolSpec } from '@locallm/types';
 import { readYmlFile } from '../sys/read_yml_file.js';
 
 function _extractToolDoc(filePath: string, startComment: string, endComment: string): { found: boolean, doc: string } {

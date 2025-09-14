@@ -1,6 +1,5 @@
 import { getFeatureSpec } from "../../../state/features.js";
-import { FeatureType } from "../../../interfaces.js";
-import { AgentTask } from "@agent-smith/jobs";
+import { FeatureExecutor, FeatureType } from "../../../interfaces.js";
 import { createJsAction } from "../actions/read.js";
 
 async function executeAdaptater(
@@ -12,13 +11,13 @@ async function executeAdaptater(
     if (!found) {
         throw new Error(`adaptater ${name} not found`);
     }
-    let act: AgentTask<FeatureType, Array<string> | Record<string, any>, any>;
+    let run: FeatureExecutor<Array<string> | Record<string, any>, any>;
     const jsa = await import(path);
-    act = createJsAction(jsa.action);
+    run = createJsAction(jsa.action);
     let res;
     try {
         //console.log("ADAPT RUN", { ...conf, ...vars });
-        res = await act.run(argsOrParams, options);
+        res = await run(argsOrParams, options);
         //sconsole.log("ADAPT RES", res);
     } catch (e) {
         throw new Error(`adaptater ${name}: ${e}`)

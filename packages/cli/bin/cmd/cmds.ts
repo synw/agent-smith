@@ -1,7 +1,6 @@
 import { input } from "@inquirer/prompts";
 import { toRaw } from "@vue/reactivity";
 import { Command } from "commander";
-import { brain } from "../agent.js";
 import { query } from "../cli.js";
 import { readAliases, readFeatures } from "../db/read.js";
 import { chatInferenceParams } from "../state/chat.js";
@@ -13,7 +12,7 @@ import { initUserCmds } from "./clicmds/cmds.js";
 const program = new Command();
 
 async function chat(program: Command) {
-    const data = { message: '>', default: "" };
+    /*const data = { message: '>', default: "" };
     const prompt = await input(data);
     if (prompt == "/q") {
         isChatMode.value = false;
@@ -26,7 +25,7 @@ async function chat(program: Command) {
     //console.log("EX", brain.ex);
     await brain.ex.think(prompt, toRaw(chatInferenceParams));
     console.log();
-    await chat(program);
+    await chat(program);*/
 }
 
 async function buildCmds(): Promise<Command> {
