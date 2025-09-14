@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 import { default as fs } from "fs";
-import { Task } from "../packages/task/dist/task.js";
+import { Task } from "@agent-smith/task";
 import { Lm } from "@locallm/api";
-import { Agent } from "../packages/agent/dist/agent.js";
+import { Agent } from "@agent-smith/agent";
 
 // Run an Llama.cpp server
 // llama-server -fa -m $1 --jinja --chat-template-file template.jinja -t 4 -c $2 --verbose-prompt
