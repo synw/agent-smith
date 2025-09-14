@@ -1,6 +1,5 @@
-import { InferenceParams, InferenceResult, InferenceOptions } from "@locallm/types";
+import { InferenceParams, InferenceResult, InferenceOptions, ToolSpec, HistoryTurn, ToolCallSpec } from "@locallm/types";
 import { PromptTemplate } from "modprompt";
-import { HistoryTurn, ToolCallSpec } from "@locallm/types";
 
 interface ModelSpec {
     name: string;
@@ -65,7 +64,7 @@ interface TemplateSpec {
 }
 
 interface TaskVariableDef {
-    type: string;
+    type: string | Array<string>; // array is for enums
     description: string;
 }
 
@@ -79,7 +78,7 @@ interface TaskDef {
     models?: Record<string, ModelSpec>;
     shots?: Array<HistoryTurn>;
     variables?: { required?: Record<string, TaskVariableDef>; optional?: Record<string, TaskVariableDef> };
-    //tools?: Array<ToolSpec>;
+    tools?: Array<ToolSpec>;
     toolsList?: Array<string>;
 }
 

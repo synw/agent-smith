@@ -11,10 +11,14 @@ class Task {
     def: TaskDef;
     agent: Agent;
 
-    constructor(agent: Agent, txt: string) {
-        const data = YAML.parse(txt);
+    constructor(agent: Agent, def: TaskDef) {
         this.agent = agent;
-        this.def = data as TaskDef;
+        this.def = def;
+    }
+
+    static fromYaml(agent: Agent, txt: string) {
+        const data = YAML.parse(txt);
+        return new Task(agent, data as TaskDef)
     }
 
     async run(

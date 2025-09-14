@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/task",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A toolkit to create human friendly agents: the language model tasks module",
   "repository": {
     "type": "git",
@@ -14,7 +14,7 @@
     "docs": "typedoc --entryPointStrategy expand"
   },
   "dependencies": {
-    "@agent-smith/agent": "0.0.1",
+    "@agent-smith/agent": "^0.0.2",
     "@agent-smith/tfm": "^0.1.2",
     "@locallm/api": "0.4.2",
     "modprompt": "^0.12.0",
@@ -25,7 +25,7 @@
     "@rollup/plugin-node-resolve": "^16.0.1",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.1.4",
-    "@types/node": "^24.3.1",
+    "@types/node": "^24.4.0",
     "markdown-it-replace-link": "^1.2.2",
     "restmix": "^0.5.0",
     "rollup": "^4.50.1",
