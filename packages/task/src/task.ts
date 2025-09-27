@@ -30,10 +30,14 @@ class Task {
             throw new Error("Please provide a prompt parameter");
         }
         let model = this.def.model;
+        let ctx = this.def.ctx;
         const useTemplates = this.agent.lm.providerType !== "openai";
         if (conf) {
             if (conf?.model) {
                 model = conf.model;
+                if (model?.ctx) {
+                    ctx = model.ctx;
+                }
             }
             if (conf?.modelname) {
                 let found = false;
@@ -42,18 +46,25 @@ class Task {
                         if (modelName == conf.modelname) {
                             found = true;
                             const m = _mod as ModelSpec;
+                            if (m?.ctx) {
+                                ctx = m.ctx
+                            }
                             model = m;
                             break;
                         }
                     }
                 }
                 if (!found) {
-                    throw new Error(`No model found for ${conf.modelname}. Available models:\n${params?.models}`)
+                    if (this.agent.lm.providerType == "ollama") {
+                        model = { name: conf.modelname }
+                    } else {
+                        throw new Error(`No model found for ${conf.modelname}. Available models:\n${params?.models}`)
+                    }
                 }
             }
         }
         if (this.agent.lm.providerType == "ollama") {
-            await this.agent.lm.loadModel(model.name, model.ctx);
+            await this.agent.lm.loadModel(model.name, ctx);
         }
         this.def = applyVariables(this.def, params);
         let tpl: PromptTemplate = new PromptTemplate("none");
@@ -79,16 +90,16 @@ class Task {
             options.tools = agentToolsList;
         }
         if (conf?.debug) {
-            console.log("-----------", model.name, "/", model.template, "-----------");
+            console.log("-----------", model.name, "- Template:", tpl.name, "- Ctx:", ctx, "-----------");
             console.log(finalPrompt);
             console.log("----------------------------------------------")
             console.log("Infer params:", this.def.inferParams);
             console.log("----------------------------------------------")
         }
-        if (!this.def.inferParams?.extra) {
-            this.def.inferParams["extra"] = {}
-        }
         if (this.agent.lm.providerType == "ollama") {
+            if (!this.def.inferParams?.extra) {
+                this.def.inferParams["extra"] = {}
+            }
             // tell Ollama to apply no template
             this.def.inferParams["extra"]["raw"] = true
         }

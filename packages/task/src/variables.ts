@@ -11,9 +11,10 @@ function applyVariables(taskDef: TaskDef, taskInput: TaskInput): TaskDef {
             }
         }
         if (taskDef.variables?.optional) {
-            for (const name of Object.keys(taskDef.variables.optional)) {
+            for (const name of Object.keys(taskDef.variables.optional)) {                
                 if (!(name in taskInput)) {
-                    taskDef.prompt = taskDef.prompt.replaceAll(`{${name}}`, "");
+                    const v = taskDef.variables.optional[name]?.default ?? "";
+                    taskDef.prompt = taskDef.prompt.replaceAll(`{${name}}`, v);
                 }
             }
         }

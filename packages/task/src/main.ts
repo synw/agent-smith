@@ -7,6 +7,8 @@ import {
     TaskConf,
     TaskOutput,
     TaskVariableDef,
+    TaskOptionalVariableDef,
+    TaskVariables,
 } from "./interfaces.js";
 
 export {
@@ -18,4 +20,6 @@ export {
     TaskConf,
     TaskOutput,
     TaskVariableDef,
+    TaskOptionalVariableDef,
+    TaskVariables,
 }

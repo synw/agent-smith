@@ -68,16 +68,26 @@ interface TaskVariableDef {
     description: string;
 }
 
+interface TaskOptionalVariableDef extends TaskVariableDef {
+    default?: any
+}
+
+interface TaskVariables {
+    required?: Record<string, TaskVariableDef>;
+    optional?: Record<string, TaskOptionalVariableDef>;
+}
+
 interface TaskDef {
     name: string;
-    description: string;
     prompt: string;
+    description: string;
+    model: ModelSpec;
+    ctx: number;
     template?: TemplateSpec;
     inferParams?: InferenceParams;
-    model: ModelSpec;
     models?: Record<string, ModelSpec>;
     shots?: Array<HistoryTurn>;
-    variables?: { required?: Record<string, TaskVariableDef>; optional?: Record<string, TaskVariableDef> };
+    variables?: TaskVariables;
     tools?: Array<ToolSpec>;
     toolsList?: Array<string>;
 }
@@ -96,4 +106,6 @@ export {
     TaskConf,
     TaskOutput,
     TaskVariableDef,
+    TaskOptionalVariableDef,
+    TaskVariables,
 };
