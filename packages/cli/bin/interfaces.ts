@@ -1,17 +1,12 @@
-import { TaskDef, ModelSpec } from "@agent-smith/task";
+import { TaskDef, ModelSpec, TaskVariables } from "@agent-smith/task";
 import { InferenceParams, LmProviderType } from "@locallm/types";
-
-interface FeatureVariables {
-    required: Array<string>;
-    optional: Array<string>;
-}
 
 interface FeatureSpec {
     id?: number;
     name: string;
     path: string;
     ext: FeatureExtension;
-    variables?: FeatureVariables;
+    variables?: TaskVariables;
 }
 
 interface Features {

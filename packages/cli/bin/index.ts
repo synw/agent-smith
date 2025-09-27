@@ -18,7 +18,7 @@ async function main() {
         }
     }
     await initState();
-    initBackends();
+    await initBackends();
     const program = await buildCmds();
     program.hook('preAction', async (thisCommand, actionCommand) => {
         const options = actionCommand.opts();

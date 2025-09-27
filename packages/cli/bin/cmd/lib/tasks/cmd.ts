@@ -2,7 +2,7 @@ import { Agent } from "@agent-smith/agent";
 import { input } from "@inquirer/prompts";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import color from "ansi-colors";
-import ora from 'ora';
+import ora, { Ora } from 'ora';
 import { query } from "../../../cli.js";
 import { readClipboard } from "../../../cmd/sys/clipboard.js";
 import { usePerfTimer } from "../../../main.js";
@@ -14,11 +14,15 @@ import { formatStats, processOutput, readPromptFile } from "../utils.js";
 import { readTask } from "./read.js";
 import { TaskConf, TaskOutput } from "@agent-smith/task/dist/interfaces.js";
 import { backend } from "../../../state/backends.js";
+import colors from "ansi-colors";
 
 async function executeTask(
     name: string, payload: Record<string, any>, options: Record<string, any>, quiet?: boolean
 ): Promise<TaskOutput> {
     const agent = new Agent(backend.value!);
+    if (options?.debug) {
+        console.log("Agent:", colors.bold(agent.lm.name), "( " + agent.lm.providerType + " backend type)");
+    }
     const { task, model, conf, vars, mcpServers } = await readTask(name, payload, options, agent);
     // check for grammars
     if (model?.inferParams?.tsGrammar) {
@@ -125,18 +129,18 @@ async function executeTask(
             ++i;
         };
     }
-    //const spinnerInit = (name: string) => ora(`Executing ${name} tool ...`);
-    //let tcspinner: Ora;
+    const spinnerInit = (name: string) => ora(`Executing ${name} tool ...`);
+    let tcspinner: Ora;
     const onToolCall = (tc: Record<string, any>) => {
         //console.log("TC START");
         console.log("⚒️ ", color.bold(name), "=>", `${color.yellowBright(tc.name)}`, tc.arguments);
-        //tcspinner = spinnerInit(tc.name);
-        //tcspinner.start();
+        tcspinner = spinnerInit(tc.name);
+        tcspinner.start();
         //console.log("TC END START");
     }
-    /*const onToolCallEnd = (tr: any) => {
+    const onToolCallEnd = (tr: any) => {
         tcspinner.stop();
-    }*/
+    }
     //console.log("OOT", options?.onToken, "/", processToken);
     if (options?.onToken) {
         agent.lm.onToken = options.onToken;
@@ -152,10 +156,10 @@ async function executeTask(
         model: model,
         debug: options?.debug ?? false,
         onToolCall: onToolCall,
-        //onToolCallEnd: onToolCallEnd,
+        onToolCallEnd: onToolCallEnd,
         ...conf,
     }
-    console.log("RUN", task);
+    //console.log("RUN", task);
     let out: TaskOutput;
     try {
         out = await task.run({ prompt: payload.prompt, ...vars }, tconf);
@@ -193,6 +197,9 @@ async function executeTask(
     if (options?.debug === true || options?.verbose === true) {
         try {
             console.log("\n", formatStats(out.answer.stats))
+            if (options?.debug === true) {
+                console.log(out.answer.stats)
+            }
         } catch (e) {
             runtimeWarning("Error formating stats:", `${e}`)
         }

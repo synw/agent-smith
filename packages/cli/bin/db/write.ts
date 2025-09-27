@@ -17,6 +17,13 @@ function updateDataDirPath(dd: string) {
     stmt.run("datadir", dd);
 }
 
+function setDefaultBackend(name: string) {
+    const updateStmt = db.prepare("UPDATE backend SET isdefault = 0 WHERE isdefault = 1");
+    updateStmt.run();
+    const nupdStmt = db.prepare("UPDATE backend SET isdefault = 1 WHERE name = ?")
+    nupdStmt.run(name)
+}
+
 function upsertBackends(bdata: Array<InferenceBackend>): boolean {
     let hasUpdates = false;
 
@@ -277,6 +284,7 @@ export {
     updatePromptfilePath,
     updateDataDirPath,
     upsertBackends,
+    setDefaultBackend,
     insertFeaturesPathIfNotExists,
     insertPluginIfNotExists,
     updateFeatures,

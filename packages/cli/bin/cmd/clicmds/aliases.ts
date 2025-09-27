@@ -22,13 +22,18 @@ function initCommandsFromAliases(program: Command, aliases: {
                     });
                 allOptions.forEach(o => tcmd.addOption(o));
                 if (features.task[alias.name]?.variables) {
-                    //console.log(alias.name, "VARS", features.task[alias.name]?.variables)
-                    features.task[alias.name].variables?.optional.forEach(v => {
-                        tcmd.option(`--${v} <value>`)
-                    });
-                    features.task[alias.name].variables?.required.forEach(v => {
-                        tcmd.requiredOption(`--${v} <value>`)
-                    });
+                    const rtv = features.task[alias.name].variables?.required;
+                    if (rtv) {
+                        for (const name of Object.keys(rtv)) {
+                            tcmd.option(`--${name} <value>`)
+                        }
+                    }
+                    const otv = features.task[alias.name].variables?.optional;
+                    if (otv) {
+                        for (const name of Object.keys(otv)) {
+                            tcmd.option(`--${name} <value>`)
+                        }
+                    }
                 }
                 break;
             case "action":

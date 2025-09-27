@@ -1,6 +1,7 @@
 import { ToolSpec } from "@locallm/types";
 import { AliasType, FeatureExtension, FeatureSpec, FeatureType, DbModelDef, ToolType, InferenceBackend } from "../interfaces.js";
 import { db } from "./db.js";
+import { TaskVariables } from "@agent-smith/task/dist/interfaces.js";
 
 function readFeaturePaths(): Array<string> {
     const stmt = db.prepare("SELECT path FROM featurespath");
@@ -17,7 +18,7 @@ function readBackends(): Record<string, InferenceBackend> {
     const data = stmt.all() as Array<Record<string, any>>;
     const bks: Record<string, InferenceBackend> = {};
     data.forEach((row) => {
-        bks[row.name] = { name: row.name, type: row.type, url: row.url, apiKey: row.apiKey, isDefault: row.isdefault };
+        bks[row.name] = { name: row.name, type: row.type, url: row.url, apiKey: row.apiKey, isDefault: row.isdefault === 1 };
     });
     return bks
 }
@@ -38,7 +39,7 @@ function readFeaturesType(type: FeatureType): Record<string, FeatureSpec> {
     const data = stmt.all() as Array<Record<string, any>>;
     const res: Record<string, FeatureSpec> = {};
     data.forEach((row) => {
-        const vars = row?.variables ? JSON.parse(row.variables) as { required: Array<string>, optional: Array<string> } : undefined;
+        const vars = row?.variables ? JSON.parse(row.variables) as TaskVariables : undefined;
         res[row.name] = {
             name: row.name,
             path: row.path,

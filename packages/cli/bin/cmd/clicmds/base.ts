@@ -13,6 +13,7 @@ import { deleteFileIfExists } from "../sys/delete_file.js";
 import { readTask } from "../sys/read_task.js";
 import { updateConfCmd } from "./update.js";
 import { Task } from "@agent-smith/task/dist/task.js";
+import { listBackends, setBackend } from "../../state/backends.js";
 
 function initBaseCommands(program: Command): Command {
     /*program.command("ping")
@@ -38,6 +39,17 @@ function initBaseCommands(program: Command): Command {
         .action(async (...args: Array<any>) => {
             const ca = parseCommandArgs(args);
             await showModelsCmd(ca.args)
+        });
+    program.command("backend <name>")
+        .description("set the default backend")
+        .action(async (...args: Array<any>) => {
+            const ca = parseCommandArgs(args);
+            await setBackend(ca.args[0])
+        });
+    program.command("backends")
+        .description("list the available backends")
+        .action(async (...args: Array<any>) => {
+            await listBackends()
         });
     program.command("update")
         .description("update the available features: run this after adding a new feature")
