@@ -5,6 +5,11 @@ import { useTemplateForModel } from "@agent-smith/tfm";
 const tfm = useTemplateForModel();
 
 function formatTaskTemplate(taskDef: TaskDef, templateName?: string): PromptTemplate {
+    //console.log("FTTaskdef", taskDef);
+    //console.log("FTTpl", templateName);
+    if (!taskDef?.model) {
+        throw new Error("Provide a model to run the task " + taskDef.name);
+    }
     if ((!taskDef.model?.template)) {
         const gt = tfm.guess(taskDef.model.name);
         if (gt == "none") {
