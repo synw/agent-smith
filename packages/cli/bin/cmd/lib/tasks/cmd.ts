@@ -15,6 +15,10 @@ import { readTask } from "./read.js";
 import { TaskConf, TaskOutput } from "@agent-smith/task/dist/interfaces.js";
 import { backend } from "../../../state/backends.js";
 import colors from "ansi-colors";
+import { useTemplateForModel } from "@agent-smith/tfm";
+import { PromptTemplate } from "modprompt";
+
+const tfm = useTemplateForModel();
 
 async function executeTask(
     name: string, payload: Record<string, any>, options: Record<string, any>, quiet?: boolean
@@ -34,9 +38,26 @@ async function executeTask(
         console.log("Task model:", model);
         //console.log("Task vars:", vars);
     }
-    let i = 0;
+    //let i = 0;
     let c = false;
-    //const hasThink = ex.template?.tags?.think;
+    const useTemplates = agent.lm.providerType !== "openai";
+    let hasThink = false;
+    let tpl: PromptTemplate | null = null;
+    //console.log("Use templates:", useTemplates);
+    if (useTemplates) {
+        if ((!task.def.model?.template)) {
+            const gt = tfm.guess(task.def.model.name);
+            if (gt == "none") {
+                throw new Error(`Unable to guess the template for ${task.def.model}: please provide a template in the taskDef definition`)
+            }
+            task.def.model.template = gt;
+        }
+        tpl = new PromptTemplate(task.def.model.template);
+        //console.log("TPL:", tpl.id);
+        hasThink = tpl.tags?.think ? true : false;
+        //console.log("HT", hasThink);
+    }
+
     //const hasTools = ex.template?.tags?.toolCall;
     //console.log("EX TPL", ex.template);
     //console.log("ST", thinkStart);
@@ -61,74 +82,75 @@ async function executeTask(
     };
     const hasTools = options?.tools;
 
-    let processToken = printToken;
-    if ((hasTools) && !options?.debug) {
-        let continueWrite = true;
-        let skipNextEmptyLinesToken = false;
-        const spinner = ora("Thinking ...");
-        //const timer = usePerfTimer();        
-        const ts = "Thinking";
-        const te = color.dim("tokens");
-        const formatTokenCount = (i: number) => {
-            return `${ts} ${color.bold(i.toString())} ${te}`
-        };
-        const perfTimer = usePerfTimer(false)
-        let i = 0;
-        processToken = (t: string) => {
-            if (i == 0) { perfTimer.start() }
-            spinner.text = formatTokenCount(i)
-            //if (i == ) { timer.start() };
-            /*if (!options?.verbose) {
-                if (hasThink) {
-                    if (t == ex.template.tags.think?.start) {
-                        //console.log("Start thinking token", thinkStart);
-                        spinner.start();
-                        continueWrite = false;
-                        return
-                    } else if (t == ex.template.tags.think?.end) {
-                        //console.log("End thinking token", thinkEnd);
-                        continueWrite = true;
-                        skipNextEmptyLinesToken = true;
-                        let msg = color.dim("Thinking:") + ` ${i} ${color.dim("tokens")}`;
-                        msg = msg + " " + color.dim(perfTimer.time())
-                        spinner.info(msg);
-                        return
-                    }
+    let continueWrite = true;
+    let skipNextEmptyLinesToken = false;
+    const spinner = ora("Thinking ...");
+    //const timer = usePerfTimer();        
+    const ts = "Thinking";
+    const te = color.dim("tokens");
+    const formatTokenCount = (i: number) => {
+        return `${ts} ${color.bold(i.toString())} ${te}`
+    };
+    const perfTimer = usePerfTimer(false)
+    let i = 0;
+    const processToken = (t: string) => {
+        //console.log("T", t);
+        if (i == 0) { perfTimer.start() }
+        spinner.text = formatTokenCount(i)
+        if (!options?.verbose && !options?.debug) {
+            //console.log("TTTTTT", hasThink && tpl);
+            if (hasThink && tpl) {
+                if (t == tpl.tags.think?.start) {
+                    //console.log("Start thinking token", thinkStart);
+                    spinner.start();
+                    continueWrite = false;
+                    return
+                } else if (t == tpl.tags.think?.end) {
+                    //console.log("End thinking token", thinkEnd);
+                    continueWrite = true;
+                    skipNextEmptyLinesToken = true;
+                    let msg = color.dim("Thinking:") + ` ${i} ${color.dim("tokens")}`;
+                    msg = msg + " " + color.dim(perfTimer.time())
+                    spinner.info(msg);
+                    return
                 }
-            } else {
-                if (t == ex.template.tags.think?.end) {
+            }
+        } else {
+            if (tpl) {
+                if (t == tpl.tags.think?.end) {
                     let msg = color.dim("Thinking:") + ` ${i} ${color.dim("tokens")}`;
                     msg = msg + " " + color.dim(perfTimer.time())
                     console.log(msg)
                 }
             }
-            if (hasTools) {
-                // check for tool call and silence the output
-                if (t == ex.template.tags.toolCall?.start) {
-                    continueWrite = false;
-                    return
-                } else if (t == ex.template.tags.toolCall?.end) {
-                    if (options?.verbose === true) {
-                        skipNextEmptyLinesToken = true;
-                        continueWrite = true;
-                    }
-                    return
+        }
+        if (hasTools && tpl) {
+            // check for tool call and silence the output
+            if (t == tpl.tags.toolCall?.start) {
+                continueWrite = false;
+                return
+            } else if (t == tpl.tags.toolCall?.end) {
+                if (options?.verbose === true) {
+                    skipNextEmptyLinesToken = true;
+                    continueWrite = true;
                 }
-            }*/
-            if (continueWrite) {
-                if (skipNextEmptyLinesToken) {
-                    if (t == "\n\n") {
-                        skipNextEmptyLinesToken = false
-                        return
-                    }
-                }
-                //if (!quiet) {
-                printToken(t);
-                //}
+                return
             }
-            ++i;
-        };
-    }
+        }
+        if (continueWrite) {
+            if (skipNextEmptyLinesToken) {
+                if (t == "\n\n") {
+                    skipNextEmptyLinesToken = false
+                    return
+                }
+            }
+            //if (!quiet) {
+            printToken(t);
+            //}
+        }
+        ++i;
+    };
+
     const spinnerInit = (name: string) => ora(`Executing ${name} tool ...`);
     let tcspinner: Ora;
     const onToolCall = (tc: Record<string, any>) => {
@@ -143,9 +165,9 @@ async function executeTask(
     }
     //console.log("OOT", options?.onToken, "/", processToken);
     if (options?.onToken) {
-        agent.lm.onToken = options.onToken;
+        task.agent.lm.onToken = options.onToken;
     } else {
-        agent.lm.onToken = processToken;
+        task.agent.lm.onToken = processToken;
     }
     //console.log("BOT", ex.backend.lm.onToken);
     if (!conf?.inferParams) {
@@ -162,6 +184,7 @@ async function executeTask(
     //console.log("RUN", task);
     let out: TaskOutput;
     try {
+        //console.log("EXECT", payload.prompt, "\nVARS:", vars, "\nOPTS", tconf)
         out = await task.run({ prompt: payload.prompt, ...vars }, tconf);
         if (!out.answer.text.endsWith("\n")) {
             console.log()

@@ -130,7 +130,7 @@ type ModelFileExtension = "yml";
 type FeatureExtension = TaskExtension | CmdExtension | ActionExtension | WorkflowExtension | ModelFileExtension;
 type AliasType = "task" | "action" | "workflow";
 
-type FeatureExecutor<I = Record<string, any>, O = any> = (params: I, options: Record<string, any>) => Promise<O>;
+type FeatureExecutor<I = any, O = any> = (params: I, options: Record<string, any>) => Promise<O>;
 
 export {
     InputMode,

@@ -31,7 +31,11 @@ async function executeAction(name: string, payload: Record<string, any>, options
         default:
             throw new Error(`Action ext ${ext} not implemented`)
     }
-    const res = await run(payload, options);
+    let _pl: any = payload;
+    if (payload?.args) {
+        _pl = payload.args;
+    }
+    const res = await run(_pl, options);
     if (!quiet) {
         if (res) {
             console.log(res);
@@ -61,10 +65,10 @@ async function executeActionCmd(
 
 
 function systemAction(path: string): FeatureExecutor<Array<string>, any> {
-    const run: FeatureExecutor<Array<string>, any> = async (params: Record<string, any>) => {
+    const run: FeatureExecutor<Array<string>, any> = async (params: Array<any>) => {
         //console.log("SYS ACTION PARAMS", params);
-        let runArgs = new Array<string>();
-        if (params?.args) {
+        let runArgs = params;
+        /*if (params?.args) {
             runArgs = params.args
         } else {
             // convert args for tool calls
@@ -75,7 +79,8 @@ function systemAction(path: string): FeatureExecutor<Array<string>, any> {
             } catch (e) {
                 throw new Error(`wrong system action args: ${e}`)
             }
-        }
+        }*/
+
         const actionSpec = readYmlFile(path);
         if (!actionSpec.found) {
             runtimeError("System action yml file", path, "not found")

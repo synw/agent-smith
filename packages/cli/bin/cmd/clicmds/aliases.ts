@@ -21,6 +21,7 @@ function initCommandsFromAliases(program: Command, aliases: {
                         await executeTaskCmd(alias.name, args);
                     });
                 allOptions.forEach(o => tcmd.addOption(o));
+                //console.log("TVARS", alias.name, features.task[alias.name]?.variables)
                 if (features.task[alias.name]?.variables) {
                     const rtv = features.task[alias.name].variables?.required;
                     if (rtv) {

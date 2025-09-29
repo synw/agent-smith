@@ -236,7 +236,7 @@ function updateFeatures(feats: Features) {
         if (toolDoc.length > 0) {
             upsertTool(feat.name, "task", toolDoc)
         }
-        if (variables.required.length > 0 || variables.optional.length > 0) {
+        if (Object.keys(variables.required).length > 0 || Object.keys(variables.optional).length > 0) {
             //console.log("UPDATE VARS", feat.name, ":", variables)
             updateVariables(feat.name, JSON.stringify(variables, null, "  "))
         }

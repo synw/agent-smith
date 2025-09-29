@@ -30,7 +30,7 @@ const usePerfTimer = (startTimer = true) => {
         const minutes = seconds / 60;
         if (ms < 1000) return `${ms.toFixed(2)} milliseconds`;
         if (seconds < 60) return `${seconds.toFixed(1)} seconds`;
-        return `${minutes.toFixed(1)} minutes ${seconds % 60} seconds`;
+        return `${minutes.toFixed()} minutes ${(seconds % 60).toFixed()} seconds`;
     }
 
     return {

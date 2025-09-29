@@ -3,6 +3,7 @@ import { executeAdaptater } from "../adaptaters/cmd.js";
 import { parseCommandArgs } from "../options_parsers.js";
 import { executeTask } from "../tasks/cmd.js";
 import { readWorkflow } from "./read.js";
+import colors from "ansi-colors";
 
 async function executeWorkflow(name: string, params: Record<string, any>, options: Record<string, any>): Promise<any> {
     const { workflow, found } = await readWorkflow(name);
@@ -16,16 +17,17 @@ async function executeWorkflow(name: string, params: Record<string, any>, option
         console.log("Running workflow", name, stepNames.length, "steps");
     }
     let i = 0;
-    const finalTaskIndex = stepNames.length + 1;
-    let taskRes: Record<string, any> = params;
+    const finalTaskIndex = stepNames.length - 1;
+    let taskRes: any = params;
+    //console.log("WPARAMS", params);
     for (const [name, step] of Object.entries(workflow)) {
         if (isDebug || isVerbose) {
-            console.log(`${i + 1}: ${step.type} ${name}`)
+            console.log(i + 1, name, colors.dim(step.type))
         }
         switch (step.type) {
             case "task":
                 try {
-                    //console.log("EXECT", taskRes);
+                    //console.log("EXECT", name, taskRes);
                     const tr = await executeTask(name, taskRes, options, true);
                     taskRes = tr;
                 } catch (e) {
@@ -37,12 +39,12 @@ async function executeWorkflow(name: string, params: Record<string, any>, option
                     //console.log("EXECA", p);
                     const ares = await executeAction(name, taskRes, options, true);
                     if (typeof ares == "string") {
-                        taskRes = { payload: ares }
+                        taskRes = { args: ares }
                     } else {
                         taskRes = ares;
                     }
+                    //console.log("LAST ACT", i, finalTaskIndex);
                     if (i == finalTaskIndex) {
-                        //console.log("LAST ACT", i, finalTaskIndex, p);
                         console.log(taskRes);
                     }
                 } catch (e) {
@@ -56,9 +58,13 @@ async function executeWorkflow(name: string, params: Record<string, any>, option
                     const ares = await executeAdaptater(name, taskRes, options);
                     if (typeof ares == "string") {
                         // if the adaptater returns a string convert it to pass to the next node
-                        taskRes = { payload: ares }
+                        taskRes = { args: ares }
                     } else {
                         taskRes = ares;
+                    }
+                    //console.log("LAST ACT", i, finalTaskIndex);
+                    if (i == finalTaskIndex) {
+                        console.log(taskRes);
                     }
                     //console.log("WF ADAPT RES", typeof ares, Array.isArray(ares) ? ares.length : "NA");
                 } catch (e) {
@@ -88,8 +94,7 @@ async function executeWorkflow(name: string, params: Record<string, any>, option
 
 async function executeWorkflowCmd(name: string, wargs: Array<any>): Promise<any> {
     const { args, options } = parseCommandArgs(wargs);
-    const params = { args: args };
-    return await executeWorkflow(name, params, options)
+    return await executeWorkflow(name, { args: args }, options)
 }
 
 export {
