@@ -8,38 +8,19 @@ An api to create local first human friendly agents in the browser or Nodejs
 <summary>:books: Read the <a href="https://synw.github.io/agent-smith">documentation</a></summary>
 
  - [Libraries](https://synw.github.io/agent-smith/libraries)
-     - [The body](https://synw.github.io/agent-smith/libraries/the_body)
-        - [Overview](https://synw.github.io/agent-smith/libraries/the_body/overview)
-        - [Install](https://synw.github.io/agent-smith/libraries/the_body/install)
-        - [Basic agent](https://synw.github.io/agent-smith/libraries/the_body/basic_agent)
-         - [Interactions](https://synw.github.io/agent-smith/libraries/the_body/interactions)
-            - [Talk](https://synw.github.io/agent-smith/libraries/the_body/interactions/talk)
-            - [Components](https://synw.github.io/agent-smith/libraries/the_body/interactions/components)
-            - [Confirm](https://synw.github.io/agent-smith/libraries/the_body/interactions/confirm)
-     - [The brain](https://synw.github.io/agent-smith/libraries/the_brain)
-        - [Overview](https://synw.github.io/agent-smith/libraries/the_brain/overview)
-        - [Install](https://synw.github.io/agent-smith/libraries/the_brain/install)
-        - [Backends](https://synw.github.io/agent-smith/libraries/the_brain/backends)
-        - [Experts](https://synw.github.io/agent-smith/libraries/the_brain/experts)
-        - [Brain](https://synw.github.io/agent-smith/libraries/the_brain/brain)
-        - [Grammars](https://synw.github.io/agent-smith/libraries/the_brain/grammars)
-        - [Browser](https://synw.github.io/agent-smith/libraries/the_brain/browser)
-         - [Templates](https://synw.github.io/agent-smith/libraries/the_brain/templates)
-            - [Basics](https://synw.github.io/agent-smith/libraries/the_brain/templates/basics)
-            - [History](https://synw.github.io/agent-smith/libraries/the_brain/templates/history)
-            - [Few shots](https://synw.github.io/agent-smith/libraries/the_brain/templates/few_shots)
-     - [Jobs](https://synw.github.io/agent-smith/libraries/jobs)
-        - [Get started](https://synw.github.io/agent-smith/libraries/jobs/get_started)
-        - [Create a job](https://synw.github.io/agent-smith/libraries/jobs/create_a_job)
-        - [Config](https://synw.github.io/agent-smith/libraries/jobs/config)
-        - [State management](https://synw.github.io/agent-smith/libraries/jobs/state_management)
-        - [Memory](https://synw.github.io/agent-smith/libraries/jobs/memory)
-     - [Lm task](https://synw.github.io/agent-smith/libraries/lm_task)
-        - [Get started](https://synw.github.io/agent-smith/libraries/lm_task/get_started)
-        - [Specification](https://synw.github.io/agent-smith/libraries/lm_task/specification)
-        - [Use tasks](https://synw.github.io/agent-smith/libraries/lm_task/use_tasks)
-        - [Variables](https://synw.github.io/agent-smith/libraries/lm_task/variables)
-        - [Templates](https://synw.github.io/agent-smith/libraries/lm_task/templates)
+     - [Agent](https://synw.github.io/agent-smith/libraries/agent)
+        - [Get started](https://synw.github.io/agent-smith/libraries/agent/get_started)
+        - [Tools](https://synw.github.io/agent-smith/libraries/agent/tools)
+        - [Templates](https://synw.github.io/agent-smith/libraries/agent/templates)
+        - [Supervision](https://synw.github.io/agent-smith/libraries/agent/supervision)
+     - [Task](https://synw.github.io/agent-smith/libraries/task)
+        - [Get started](https://synw.github.io/agent-smith/libraries/task/get_started)
+        - [Specification](https://synw.github.io/agent-smith/libraries/task/specification)
+        - [Use tasks](https://synw.github.io/agent-smith/libraries/task/use_tasks)
+        - [Models](https://synw.github.io/agent-smith/libraries/task/models)
+        - [Templates](https://synw.github.io/agent-smith/libraries/task/templates)
+        - [Variables](https://synw.github.io/agent-smith/libraries/task/variables)
+        - [Tools](https://synw.github.io/agent-smith/libraries/task/tools)
      - [Transient memory](https://synw.github.io/agent-smith/libraries/transient_memory)
         - [Get started](https://synw.github.io/agent-smith/libraries/transient_memory/get_started)
         - [Usage](https://synw.github.io/agent-smith/libraries/transient_memory/usage)
@@ -59,6 +40,7 @@ An api to create local first human friendly agents in the browser or Nodejs
     - [Workflows](https://synw.github.io/agent-smith/terminal_client/workflows)
     - [Commands](https://synw.github.io/agent-smith/terminal_client/commands)
     - [Tools call](https://synw.github.io/agent-smith/terminal_client/tools_call)
+    - [Mcp](https://synw.github.io/agent-smith/terminal_client/mcp)
  - [Plugins](https://synw.github.io/agent-smith/plugins)
     - [Overview](https://synw.github.io/agent-smith/plugins/overview)
     - [Models](https://synw.github.io/agent-smith/plugins/models)
@@ -94,7 +76,7 @@ An agent is a language model that can take decisions. It can:
 | Version | Name | Description | Nodejs | Browser |
 | --- | --- | --- | --- | --- |
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/cli)](https://www.npmjs.com/package/@agent-smith/cli) | [@agent-smith/cli](https://github.com/synw/agent-smith/tree/main/packages/cli) | Terminal client | :white_check_mark: | :x:
-| [![pub package](https://img.shields.io/npm/v/@agent-smith/agent)](https://www.npmjs.com/package/@agent-smith/agent) | [@agent-smith/agent](https://github.com/synw/agent-smith/tree/main/packages/agent) | Agent | :x: | :white_check_mark:
+| [![pub package](https://img.shields.io/npm/v/@agent-smith/agent)](https://www.npmjs.com/package/@agent-smith/agent) | [@agent-smith/agent](https://github.com/synw/agent-smith/tree/main/packages/agent) | Agent | :white_check_mark: | :white_check_mark:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/task)](https://www.npmjs.com/package/@agent-smith/task) | [@agent-smith/task](https://github.com/synw/agent-smith/tree/main/packages/task) | Task | :white_check_mark: | :white_check_mark:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/smem)](https://www.npmjs.com/package/@agent-smith/smem) | [@agent-smith/smem](https://github.com/synw/agent-smith/tree/main/packages/smem) | Semantic memory | :white_check_mark: | :x:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/tfm)](https://www.npmjs.com/package/@agent-smith/tfm) | [@agent-smith/tfm](https://github.com/synw/agent-smith/tree/main/packages/tfm) | Templates for models | :white_check_mark: | :white_check_mark:
