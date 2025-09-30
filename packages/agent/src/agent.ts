@@ -15,25 +15,40 @@ class Agent {
         prompt: string,
         params: InferenceParams,
         options: InferenceOptions = {},
-        template?: PromptTemplate,
+        template?: PromptTemplate | string,
     ): Promise<InferenceResult> {
-        // update tools
-        this.tools = {};
-        if (options?.tools) {
-            options.tools.forEach(t => {
-                this.tools[t.name] = t;
-                if (template) {
-                    template = template.addTool(t)
-                }
-            });
+        let tpl: PromptTemplate;
+        if (options?.debug) {
+            console.log("Agent inference params:", params);
+            console.log("Agent options:", options);
+            console.log("Agent template:", template);
+            console.log("Prompt:", prompt);
         }
         if (this.lm.providerType == "openai") {
             return await this.runAgentNoTemplate(1, prompt, params, options)
         } else {
             if (!template) {
-                throw new Error(`A template is required for provider ${this.lm.provider.name}`)
+                if (params?.template) {
+                    tpl = new PromptTemplate(params.template);
+                } else {
+                    throw new Error(`A template is required for provider ${this.lm.provider.name}`)
+                }
+            } else {
+                if (typeof template == "string") {
+                    tpl = new PromptTemplate(template);
+                } else {
+                    tpl = template
+                }
             }
-            return (await this.runAgentWithTemplate(1, prompt, params, options, template)).inferenceResult;
+            // update tools
+            this.tools = {};
+            if (options?.tools) {
+                options.tools.forEach(t => {
+                    this.tools[t.name] = t;
+                    tpl = tpl.addTool(t)
+                });
+            }
+            return (await this.runAgentWithTemplate(1, prompt, params, options, tpl)).inferenceResult;
         }
     }
 
@@ -94,6 +109,13 @@ class Agent {
         options: InferenceOptions = {},
         tpl: PromptTemplate,
     ): Promise<{ inferenceResult: InferenceResult, template: PromptTemplate }> {
+        console.log("Provider:", this.lm.provider);
+        if (this.lm.providerType == "ollama") {
+            if (!params?.model) {
+                throw new Error("A model inference parameters is required for provider Ollama")
+            }
+            await this.lm.loadModel(params.model.name, params.model.ctx);
+        }
         let res = await this.lm.infer(tpl.prompt(prompt), params, options);
         const { isToolCall, toolsCall, error } = tpl.processAnswer(res.text);
         if (error) {
