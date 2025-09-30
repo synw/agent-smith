@@ -10,8 +10,8 @@
     "watch": "tsc --noCheck -p . -w"
   },
   "dependencies": {
-    "@agent-smith/agent": "^0.0.2",
-    "@agent-smith/task": "file:/home/ggg/dev/js/agent-smith/packages/task",
+    "@agent-smith/agent": "^0.0.3",
+    "@agent-smith/task": "^0.0.3",
     "@agent-smith/tfm": "^0.1.2",
     "@inquirer/prompts": "^7.8.5",
     "@intrinsicai/gbnfgen": "0.12.0",

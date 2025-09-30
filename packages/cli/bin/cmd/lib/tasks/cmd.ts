@@ -1,22 +1,21 @@
 import { Agent } from "@agent-smith/agent";
+import { TaskConf, TaskOutput } from "@agent-smith/task";
+import { useTemplateForModel } from "@agent-smith/tfm";
 import { input } from "@inquirer/prompts";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
-import color from "ansi-colors";
+import { default as color, default as colors } from "ansi-colors";
+import { PromptTemplate } from "modprompt";
 import ora, { Ora } from 'ora';
 import { query } from "../../../cli.js";
 import { readClipboard } from "../../../cmd/sys/clipboard.js";
 import { usePerfTimer } from "../../../main.js";
+import { backend } from "../../../state/backends.js";
 import { isChatMode, runMode } from "../../../state/state.js";
 import { program } from "../../cmds.js";
 import { parseCommandArgs } from "../options_parsers.js";
 import { runtimeDataError, runtimeWarning } from "../user_msgs.js";
 import { formatStats, processOutput, readPromptFile } from "../utils.js";
 import { readTask } from "./read.js";
-import { TaskConf, TaskOutput } from "@agent-smith/task/dist/interfaces.js";
-import { backend } from "../../../state/backends.js";
-import colors from "ansi-colors";
-import { useTemplateForModel } from "@agent-smith/tfm";
-import { PromptTemplate } from "modprompt";
 
 const tfm = useTemplateForModel();
 
