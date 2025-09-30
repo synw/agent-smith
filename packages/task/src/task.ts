@@ -1,7 +1,7 @@
 import { InferenceOptions, InferenceResult, ToolSpec } from '@locallm/types';
 import { PromptTemplate } from 'modprompt';
 import YAML from 'yaml';
-import { Agent } from "../../agent/dist/agent.js";
+import { Agent } from "@agent-smith/agent";
 import { formatInferParams } from './inferparams.js';
 import { ModelSpec, TaskConf, TaskDef, TaskInput, TaskOutput } from "./interfaces.js";
 import { formatTaskTemplate } from './templates.js';
