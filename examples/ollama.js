@@ -1,53 +1,38 @@
 #!/usr/bin/env node
-//import { useLmBackend, useLmExpert } from "@agent-smith/brain";
-import { useLmBackend } from "../packages/brain/dist/backend.js";
-import { useLmExpert } from "../packages/brain/dist/expert.js";
+import { Lm } from "@locallm/api";
+import { Agent } from "../packages/agent/dist/main.js";
 
-// run a local Ollama instance before running this example
-
-const model = "qwen3:4b";
-const ctx = 8192;
-const templateName = "chatml";
-const prompt = "Give me a short list of the planets names in the solar system";
-
-const backend = useLmBackend({
-    name: "ollama",
-    localLm: "ollama",
-    onToken: (t) => process.stdout.write(t),
-});
-
-const ex = useLmExpert({
-    name: "default",
-    backend: backend,
-    template: templateName,
-    model: { name: model, ctx: ctx },
-});
+const _prompt = "Give me a short list of the planets names in the solar system";
+const model = {
+    name: "qwen3:4b-instruct",
+    ctx: 4096,
+    template: "chatml",
+};
 
 async function main() {
-    // check if the backend is up
-    await ex.backend.probe();
-    // check expert status: unavailable, available (the model is not loaded), ready
-    ex.checkStatus();
-    const status = ex.state.get().status;
-    if (status == "ready") {
-        console.log("Ok, the agent's brain is on, let's make him think\n")
-    } else if (status == "available") {
-        console.warn(`Loading model ...`);
-        // load the model in Ollama
-        await ex.loadModel()
-    } else {
-        console.warn(`Unfortunatly the agent's brain is ${status}: please check the inference server`);
-        return
-    }
-    // let's think
-    const params = { temperature: 0.2, min_p: 0.05 };
-    const res = await ex.think(
-        prompt,
-        params,
+    const lm = new Lm({
+        providerType: "llamacpp",
+        serverUrl: "http://localhost:11434",
+        onToken: (t) => process.stdout.write(t),
+    });
+    const agent = new Agent(lm);
+    await agent.run(_prompt,
+        //inference params
+        {
+            stream: true,
+            model: model,
+            temperature: 0.6,
+            top_k: 40,
+            top_p: 0.95,
+            min_p: 0,
+            max_tokens: 2048,
+        },
+        // query options
+        {
+            verbose: true,
+        },
+        template,
     );
-    console.log("\n\nDone");
-    console.log(res.stats);
-
 }
 
 (async () => {

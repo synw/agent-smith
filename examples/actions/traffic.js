@@ -5,6 +5,7 @@ description: Get the current road traffic conditions
 arguments:
     city:
         description: The city or location, e.g. San Francisco, CA
+        required: true
 */
 
 async function action(args) {
