@@ -109,7 +109,7 @@ class Agent {
         options: InferenceOptions = {},
         tpl: PromptTemplate,
     ): Promise<{ inferenceResult: InferenceResult, template: PromptTemplate }> {
-        console.log("Provider:", this.lm.provider);
+        //console.log("Provider:", this.lm.provider);
         if (this.lm.providerType == "ollama") {
             if (!params?.model) {
                 throw new Error("A model inference parameters is required for provider Ollama")
