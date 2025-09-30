@@ -82,26 +82,22 @@ Check the :computer: [examples](examples)
 
 ## What is an agent?
 
-An agent is an anthropomorphic representation of a bot. It can:
+An agent is a language model that can take decisions. It can:
 
 - **Think**: use language model servers to perform inference queries
-- **Interact**: perform interactions with the user and get input and feedback
-- **Work**: manage long running jobs with multiple tasks, use custom terminal commands
-- **Remember**: use transient or semantic memory to store data
+- **Work**: manage long running workflows with multiple tasks, using tools
+- **Remember**: use semantic memory to store data
+- **Interact**: perform interactions with the user
 
 ## Packages
 
 | Version | Name | Description | Nodejs | Browser |
 | --- | --- | --- | --- | --- |
-| [![pub package](https://img.shields.io/npm/v/@agent-smith/body)](https://www.npmjs.com/package/@agent-smith/body) | [@agent-smith/body](https://github.com/synw/agent-smith/tree/main/packages/body) | The body | :x: | :white_check_mark:
-| [![pub package](https://img.shields.io/npm/v/@agent-smith/brain)](https://www.npmjs.com/package/@agent-smith/brain) | [@agent-smith/brain](https://github.com/synw/agent-smith/tree/main/packages/brain) | The brain | :white_check_mark: | :white_check_mark:
-| [![pub package](https://img.shields.io/npm/v/@agent-smith/jobs)](https://www.npmjs.com/package/@agent-smith/jobs) | [@agent-smith/jobs](https://github.com/synw/agent-smith/tree/main/packages/jobs) | Jobs | :white_check_mark: | :white_check_mark:
-| [![pub package](https://img.shields.io/npm/v/@agent-smith/tmem)](https://www.npmjs.com/package/@agent-smith/tmem) | [@agent-smith/tmem](https://github.com/synw/agent-smith/tree/main/packages/tmem) | Transient memory | :x: | :white_check_mark:
-| [![pub package](https://img.shields.io/npm/v/@agent-smith/tmem-jobs)](https://www.npmjs.com/package/@agent-smith/tmem-jobs) | [@agent-smith/tmem-jobs](https://github.com/synw/agent-smith/tree/main/packages/tmem-jobs) | Jobs transient memory | :x: | :white_check_mark:
+| [![pub package](https://img.shields.io/npm/v/@agent-smith/cli)](https://www.npmjs.com/package/@agent-smith/cli) | [@agent-smith/cli](https://github.com/synw/agent-smith/tree/main/packages/cli) | Terminal client | :white_check_mark: | :x:
+| [![pub package](https://img.shields.io/npm/v/@agent-smith/agent)](https://www.npmjs.com/package/@agent-smith/agent) | [@agent-smith/agent](https://github.com/synw/agent-smith/tree/main/packages/agent) | Agent | :x: | :white_check_mark:
+| [![pub package](https://img.shields.io/npm/v/@agent-smith/task)](https://www.npmjs.com/package/@agent-smith/task) | [@agent-smith/task](https://github.com/synw/agent-smith/tree/main/packages/task) | Task | :white_check_mark: | :white_check_mark:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/smem)](https://www.npmjs.com/package/@agent-smith/smem) | [@agent-smith/smem](https://github.com/synw/agent-smith/tree/main/packages/smem) | Semantic memory | :white_check_mark: | :x:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/tfm)](https://www.npmjs.com/package/@agent-smith/tfm) | [@agent-smith/tfm](https://github.com/synw/agent-smith/tree/main/packages/tfm) | Templates for models | :white_check_mark: | :white_check_mark:
-| [![pub package](https://img.shields.io/npm/v/@agent-smith/lmtask)](https://www.npmjs.com/package/@agent-smith/lmtask) | [@agent-smith/lmtask](https://github.com/synw/agent-smith/tree/main/packages/lmtask) | Yaml model task | :white_check_mark: | :white_check_mark:
-| [![pub package](https://img.shields.io/npm/v/@agent-smith/cli)](https://www.npmjs.com/package/@agent-smith/cli) | [@agent-smith/cli](https://github.com/synw/agent-smith/tree/main/packages/cli) | Terminal client | :white_check_mark: | :x:
 
 ## Philosophy
 
@@ -109,18 +105,14 @@ An agent is an anthropomorphic representation of a bot. It can:
 - **Declarative**: focus on the business logic by expressing features simply
 - **Explicit**: keep it simple and under user control: no hidden magic
 
-## FAQ
+## Requirements
 
-- *What local or remote inference servers can I use?*
+Supported inference servers:
 
-Actually it works with [Llama.cpp](https://github.com/ggerganov/llama.cpp/tree/master/examples/server),
-[Koboldcpp](https://github.com/LostRuins/koboldcpp) and [Ollama](https://github.com/ollama/ollama).
-
-It also works [in the browser](https://synw.github.io/agent-smith/the_brain/browser) using gpu only inference and small models
-
-- *Can I use this with OpenAI or other big apis?*
-
-Sorry no: this library favours local first or private remote inference servers
+- [Llama.cpp](https://github.com/ggerganov/llama.cpp)
+- [Koboldcpp](https://github.com/LostRuins/koboldcpp)
+- [Ollama](https://github.com/ollama/ollama)
+- Any server that supports an Openai compatible api
 
 ## Example
 
@@ -154,35 +146,83 @@ lm commit
 
 Plugins for the terminal client are available: [terminal client plugins](https://github.com/synw/agent-smith-plugins)
 
-## Nodejs example
+## Nodejs example: using an agent with local tools
 
-```ts
-const backend = useLmBackend({
-    name: "koboldcpp",
-    localLm: "koboldcpp",
-    onToken: (t) => process.stdout.write(t),
-});
+```js
+import { Agent } from "@agent-smith/agent";
+import { Lm } from "@locallm/api";
 
-const ex = useLmExpert({
-    name: "koboldcpp",
-    backend: backend,
-    template: templateName,
-    model: { name: modelName, ctx: 2048 },
-});
-const brain = useAgentBrain([expert]);
+let model;
+const serverUrl = "http://localhost:8080/v1"; // Local Llama.cpp
+const apiKey = "";
+const system = "You are a helpful touristic assistant";
+const _prompt = `I am landing in Barcelona in one hour: I plan to reach my hotel and then go for outdoor sport. 
+How are the conditions in the city?`;
 
-console.log("Auto discovering brain backend ...");
-await brain.init();
-brain.ex.checkStatus();
-if (brain.ex.state.get().status != "ready") {
-        throw new Error("The expert's backend is not ready")
-    }
-// run an inference query
-const _prompt = "list the planets of the solar sytem";
-await brain.think(_prompt, { 
-   temperature: 0.2, 
-   min_p: 0.05 
-});
+function run_get_current_weather(args) {
+    console.log("Running the get_current_weather tool with args", args);
+    return '{ "temp": 20.5, "weather": "rain" }'
+}
+
+function run_get_current_traffic(args) {
+    console.log("Running the get_current_traffic tool with args", args);
+    return '{ "trafic": "normal" }'
+}
+
+const get_current_weather = {
+    "name": "get_current_weather",
+    "description": "Get the current weather",
+    "arguments": {
+        "location": {
+            "description": "The city and state, e.g. San Francisco, CA",
+            "required": true
+        }
+    },
+    execute: run_get_current_weather
+};
+
+const get_current_traffic = {
+    "name": "get_current_traffic",
+    "description": "Get the current road traffic conditions",
+    "arguments": {
+        "location": {
+            "description": "The city and state, e.g. San Francisco, CA",
+            "required": true
+        }
+    },
+    execute: run_get_current_traffic
+};
+
+async function main() {
+    const lm = new Lm({
+        providerType: "openai",
+        serverUrl: serverUrl,
+        apiKey: apiKey,
+        onToken: (t) => process.stdout.write(t),
+    });
+    const agent = new Agent(lm);
+    await agent.run(_prompt,
+        //inference params
+        {
+            model: model ?? "",
+            temperature: 0.5,
+            top_k: 40,
+            top_p: 0.95,
+            min_p: 0,
+            max_tokens: 4096,
+        },
+        // query options
+        {
+            debug: false,
+            verbose: true,
+            system: system,
+            tools: [get_current_weather, get_current_traffic]
+        });
+}
+
+(async () => {
+    await main();
+})();
 ```
 
 ## Server api example
@@ -210,7 +250,6 @@ await api.executeTask(
 
 The cli is powered by:
 
-- [Nanostores](https://github.com/nanostores/nanostores) for the state management and reactive variables
 - [Locallm](https://github.com/synw/locallm) for the inference api servers management
 - [Modprompt](https://github.com/synw/modprompt) for the prompt templates management
 
