@@ -81,6 +81,8 @@ An agent is a language model that can take decisions. It can:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/smem)](https://www.npmjs.com/package/@agent-smith/smem) | [@agent-smith/smem](https://github.com/synw/agent-smith/tree/main/packages/smem) | Semantic memory | :white_check_mark: | :x:
 | [![pub package](https://img.shields.io/npm/v/@agent-smith/tfm)](https://www.npmjs.com/package/@agent-smith/tfm) | [@agent-smith/tfm](https://github.com/synw/agent-smith/tree/main/packages/tfm) | Templates for models | :white_check_mark: | :white_check_mark:
 
+[Terminal client plugins](https://github.com/synw/agent-smith-plugins)
+
 ## Philosophy
 
 - **Composable**: the packages have limited responsibilities and can work together
