@@ -3,6 +3,8 @@ import { PromptTemplate } from "modprompt/dist/cls";
 import { TaskConf } from "./interfaces";
 
 function formatInferParams(ip: InferenceParams, conf: TaskConf, tpl?: PromptTemplate): InferenceParams {
+    //console.log("TIP", ip);
+    //console.log("TC", conf);
     if (!ip?.stop) {
         ip.stop = [];
     }
@@ -15,6 +17,9 @@ function formatInferParams(ip: InferenceParams, conf: TaskConf, tpl?: PromptTemp
         for (const [k, v] of Object.entries(conf.inferParams)) {
             _ip[k] = v
         }
+    }
+    if (conf?.model) {
+        _ip.model = conf.model
     }
     return _ip as InferenceParams;
 }

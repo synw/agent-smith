@@ -55,14 +55,16 @@ class Task {
                     }
                 }
                 if (!found) {
-                    if (this.agent.lm.providerType == "ollama") {
+                    if (["ollama", "llamacpp"].includes(this.agent.lm.providerType)) {
                         model = { name: conf.modelname }
                     } else {
                         throw new Error(`No model found for ${conf.modelname}. Available models:\n${params?.models}`)
                     }
                 }
+
             }
         }
+        //console.log("CONF", conf)
         if (this.agent.lm.providerType == "ollama") {
             await this.agent.lm.loadModel(model.name, ctx);
         }
@@ -86,8 +88,15 @@ class Task {
             this.def.inferParams = formatInferParams(this.def.inferParams ?? {}, conf ?? {});
             finalPrompt = this.def.prompt.replace("{prompt}", params.prompt);
         }
+        // model
+        if (model) {
+            this.def.inferParams.model = model;
+        }
         if (agentToolsList.length > 0) {
             options.tools = agentToolsList;
+        }
+        if (conf?.debug) {
+            options.debug = true
         }
         if (conf?.debug) {
             console.log("-----------", model.name, "- Template:", tpl.name, "- Ctx:", ctx, "-----------");
@@ -95,6 +104,7 @@ class Task {
             console.log("----------------------------------------------")
             console.log("Infer params:", this.def.inferParams);
             console.log("----------------------------------------------")
+            //options.debug = true
         }
         if (this.agent.lm.providerType == "ollama") {
             if (!this.def.inferParams?.extra) {

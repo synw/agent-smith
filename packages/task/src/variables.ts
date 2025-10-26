@@ -1,6 +1,7 @@
 import { TaskDef, TaskInput } from "./interfaces.js";
 
 function applyVariables(taskDef: TaskDef, taskInput: TaskInput): TaskDef {
+    //console.log("\n--------TD", typeof taskDef, Object.keys(taskDef))
     // check taskDef variables
     if (taskDef?.variables) {
         if (taskDef.variables?.required) {
@@ -11,7 +12,7 @@ function applyVariables(taskDef: TaskDef, taskInput: TaskInput): TaskDef {
             }
         }
         if (taskDef.variables?.optional) {
-            for (const name of Object.keys(taskDef.variables.optional)) {                
+            for (const name of Object.keys(taskDef.variables.optional)) {
                 if (!(name in taskInput)) {
                     const v = taskDef.variables.optional[name]?.default ?? "";
                     taskDef.prompt = taskDef.prompt.replaceAll(`{${name}}`, v);
