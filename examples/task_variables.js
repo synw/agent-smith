@@ -19,12 +19,12 @@ const agent = new Agent(lm);
 async function main() {
     const taskPath = "./tasks/variables.yml";
     const ymlTaskDef = fs.readFileSync(taskPath, 'utf8');
-    const task = new Task(agent, ymlTaskDef);
-    console.log("Running task...", ymlTaskDef);
+    const task = Task.fromYaml(agent, ymlTaskDef);
+    //console.log("Running task...", task);
     // run the task    
     const conf = {
         debug: true,
-        modelname: "gemma3",
+        modelname: "qwen1.7b",
         inferParams: { stream: true },
     };
     const answer = await task.run({
@@ -33,7 +33,7 @@ async function main() {
         role: "marketing director",
         instructions: "Answer with a markdown bullet points list"
     }, conf);
-    console.log(answer);
+    console.log(answer.text);
 }
 
 (async () => {

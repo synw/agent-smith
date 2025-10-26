@@ -3,9 +3,8 @@ import { Agent } from "../packages/agent/dist/main.js";
 import { Lm } from "@locallm/api";
 import { PromptTemplate } from "modprompt";
 
-let apiKey;
-let model; // Qwen 3 4b
-let template = new PromptTemplate("chatml-tools")
+const model = "qwen4b"; // if using llama-swap
+const template = new PromptTemplate("chatml-tools")
     .afterSystem("\nYou are and autonomous agent: feel free to use your tools.");
 const serverUrl = "http://localhost:8080";
 const _prompt = `I am landing in Barcelona soon: I plan to reach my hotel and then go for outdoor sport. 
@@ -49,7 +48,6 @@ async function main() {
     const lm = new Lm({
         providerType: "llamacpp",
         serverUrl: serverUrl,
-        apiKey: apiKey,
         onToken: (t) => process.stdout.write(t),
     });
     const agent = new Agent(lm);
@@ -57,7 +55,7 @@ async function main() {
         //inference params
         {
             stream: true,
-            model: model ?? "",
+            model: { name: model },
             temperature: 0.6,
             top_k: 40,
             top_p: 0.95,
