@@ -13,7 +13,7 @@ function formatTaskTemplate(taskDef: TaskDef, templateName?: string): PromptTemp
     if ((!taskDef.model?.template)) {
         const gt = tfm.guess(taskDef.model.name);
         if (gt == "none") {
-            throw new Error(`Unable to guess the template for ${taskDef.model}: please provide a template in the taskDef definition`)
+            throw new Error(`Unable to guess the template for ${taskDef.model}: please provide a template name in the task definition`)
         }
         taskDef.model.template = gt;
     }
@@ -27,6 +27,10 @@ function formatTaskTemplate(taskDef: TaskDef, templateName?: string): PromptTemp
         }
         if (taskDef.template?.assistant) {
             tpl.afterAssistant(" " + taskDef.template.assistant)
+        }
+        if (taskDef.template?.stop) {
+            const tps = tpl?.stop ?? [];
+            tpl.stop = [...tps, ...taskDef.template.stop]
         }
 
     }
