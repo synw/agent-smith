@@ -39,17 +39,22 @@ async function readTask(
     // vars
     const taskSpec = taskFileSpec as TaskDef;
     let vars: Record<string, any> = {};
-    if (taskSpec.variables?.optional) {
+    if (taskSpec?.variables?.optional) {
         for (const k of Object.keys(taskSpec.variables.optional)) {
             if (k in options) {
                 vars[k] = options[k]
+            } else if (k in payload) {
+                vars[k] = payload[k]
             }
         }
     }
-    if (taskSpec.variables?.required) {
+    if (taskSpec?.variables?.required) {
         for (const k of Object.keys(taskSpec.variables.required)) {
+            //console.log("TASK V required:", Object.keys(taskSpec.variables.required), "/", k in options, "/", k in payload);
             if (k in options) {
                 vars[k] = options[k]
+            } else if (k in payload) {
+                vars[k] = payload[k]
             }
         }
     }

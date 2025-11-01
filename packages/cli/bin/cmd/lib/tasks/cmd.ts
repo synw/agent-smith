@@ -35,7 +35,7 @@ async function executeTask(
     }
     if (options?.debug) {
         console.log("Task model:", model);
-        //console.log("Task vars:", vars);
+        console.log("Task vars:", vars);
     }
     //let i = 0;
     let c = false;
@@ -175,7 +175,7 @@ async function executeTask(
     conf.inferParams.stream = true;
     const tconf: TaskConf = {
         model: model,
-        debug: options?.debug ?? false,
+        //debug: options?.debug ?? false,
         onToolCall: onToolCall,
         onToolCallEnd: onToolCallEnd,
         ...conf,

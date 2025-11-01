@@ -27,9 +27,9 @@ async function executeWorkflow(name: string, params: Record<string, any>, option
         switch (step.type) {
             case "task":
                 try {
-                    //console.log("EXECT", name, taskRes);
+                    //console.log("WF res:", name, taskRes);
                     const tr = await executeTask(name, taskRes, options, true);
-                    taskRes = tr;
+                    taskRes = { ...tr, ...params };
                 } catch (e) {
                     throw new Error(`workflow task ${i + 1}: ${e}`)
                 }
