@@ -21,10 +21,17 @@ class Agent {
         if (options?.debug) {
             console.log("Agent inference params:", params);
             console.log("Agent options:", options);
-            console.log("Agent template:", template);
-            console.log("Prompt:", prompt);
+            //console.log("Agent template:", template);
+            //console.log("Prompt:", prompt);
         }
         if (this.lm.providerType == "openai") {
+            // update tools
+            this.tools = {};
+            if (options?.tools) {
+                options.tools.forEach(t => {
+                    this.tools[t.name] = t;
+                });
+            }
             return await this.runAgentNoTemplate(1, prompt, params, options)
         } else {
             if (!template) {
@@ -58,9 +65,15 @@ class Agent {
         params: InferenceParams,
         options: InferenceOptions = {},
     ) {
+        /*/console.log("(AGENT) RUN NO TEMPLATE params:", JSON.stringify(params,null,2));
+        console.log("(AGENT) RUN NO TEMPLATE options:", JSON.stringify(options,null,2));
+        console.log("(AGENT) RUN NO TEMPLATE provider:", this.lm.providerType);*/
         const res = await this.lm.infer(prompt, params, options);
+        //console.log("(AGENT) RUN RES:");
+        //console.dir(res, {depth: 8})
         this.history.push({ user: prompt });
         let _res = res;
+        //console.log("RES", res);
         if (res?.toolCalls) {
             const toolsResults = new Array<ToolTurn>();
             const toolNames = Object.keys(this.tools);
@@ -73,6 +86,7 @@ class Agent {
                 if (tool?.canRun) {
                     canRun = await tool.canRun(tool);
                 }
+                //console.log(tool.name, "can run:", canRun)
                 if (canRun) {
                     const toolCallResult = await tool.execute(tc.arguments);
                     if (options?.debug || options?.verbose) {
@@ -95,6 +109,8 @@ class Agent {
                 options.verbose = true;
             }
             options.history = this.history;
+            //console.log("HISTORY:");
+            console.dir(options.history, {depth: 8});
             _res = await this.runAgentNoTemplate(nit, " ", params, options);
         } else {
             this.history.push({ assistant: res.text });
@@ -109,14 +125,18 @@ class Agent {
         options: InferenceOptions = {},
         tpl: PromptTemplate,
     ): Promise<{ inferenceResult: InferenceResult, template: PromptTemplate }> {
-        //console.log("Provider:", this.lm.provider);
         if (this.lm.providerType == "ollama") {
             if (!params?.model) {
                 throw new Error("A model inference parameters is required for provider Ollama")
             }
             await this.lm.loadModel(params.model.name, params.model.ctx);
         }
+        //console.log("Agent params:", params);
         let res = await this.lm.infer(tpl.prompt(prompt), params, options);
+        if (typeof params?.model == "string") {
+            params.model = { name: params.model }
+        }
+        //console.log("Agent params AFTER CALL:", params);
         const { isToolCall, toolsCall, error } = tpl.processAnswer(res.text);
         if (error) {
             throw new Error(`error processing tool call answer:\n, ${error}`);
