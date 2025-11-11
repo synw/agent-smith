@@ -24,7 +24,7 @@ class Task {
     async run(
         params: TaskInput, conf?: TaskConf
     ): Promise<TaskOutput> {
-        //console.log("P", params);
+        //console.log("TASK CONF", conf);
         //console.log("TOOLS", this.agent.tools);
         if (!params?.prompt) {
             throw new Error("Please provide a prompt parameter");
@@ -55,10 +55,10 @@ class Task {
                     }
                 }
                 if (!found) {
-                    if (["ollama", "llamacpp"].includes(this.agent.lm.providerType)) {
+                    if (["ollama", "llamacpp", "openai"].includes(this.agent.lm.providerType)) {
                         model = { name: conf.modelname }
                     } else {
-                        throw new Error(`No model found for ${conf.modelname}. Available models:\n${params?.models}`)
+                        throw new Error(`Provider type ${this.agent.lm.providerType}: no model found for ${conf.modelname}. Available models:\n${params?.models}`)
                     }
                 }
 
@@ -96,15 +96,12 @@ class Task {
             options.tools = agentToolsList;
         }
         if (conf?.debug) {
-            options.debug = true
-        }
-        if (conf?.debug) {
             console.log("-----------", model.name, "- Template:", tpl.name, "- Ctx:", ctx, "-----------");
             console.log(finalPrompt);
             console.log("----------------------------------------------")
             console.log("Infer params:", this.def.inferParams);
             console.log("----------------------------------------------")
-            //options.debug = true
+            options.debug = true
         }
         if (this.agent.lm.providerType == "ollama") {
             if (!this.def.inferParams?.extra) {
@@ -121,6 +118,8 @@ class Task {
             if (this.def?.shots) {
                 options.history = this.def.shots;
             }
+            //console.log("RUN AGENT (TASK) params:", this.def.inferParams);
+            //console.log("RUN AGENT (TASK) options:", options);
             answer = await this.agent.run(finalPrompt, this.def.inferParams, options);
         } else {
             answer = await this.agent.run(finalPrompt, this.def.inferParams, options, tpl);
