@@ -1,6 +1,6 @@
-import { InferenceParams } from "@locallm/types";
+import type { InferenceParams } from "@locallm/types";
 import { useTemplateForModel } from "@agent-smith/tfm";
-import { LmTaskConfig, LmTaskFileSpec, ModelSpec } from "../../../interfaces.js";
+import type { LmTaskConfig, LmTaskFileSpec, ModelSpec } from "../../../interfaces.js";
 import { readModel } from "../../../db/read.js";
 
 const tfm = useTemplateForModel();
@@ -76,26 +76,26 @@ function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): Mod
     // fallback to use the model name directly
     if (!found) {
         if (templateName && modelName) {
-            model = {name: modelName, template: templateName} as ModelSpec;
+            model = { name: modelName, template: templateName } as ModelSpec;
         } else {
-        // try to guess the template
-        const gt = tfm.guess(modelName);
-        if (gt == "none") {
-            throw new Error(`Unable to guess the template for ${modelName}: please provide a template name: --tpl templatename`)
-        }
-        const m: ModelSpec = {
-            name: modelName,
-            template: gt
-        };
-        model = m;
+            // try to guess the template
+            const gt = tfm.guess(modelName);
+            if (gt == "none") {
+                throw new Error(`Unable to guess the template for ${modelName}: please provide a template name: --tpl templatename`)
+            }
+            const m: ModelSpec = {
+                name: modelName,
+                template: gt
+            };
+            model = m;
         }
     }
-    model.inferParams = ip;
+    //model.inferParams = ip;
     // use default ctx if the model is not from defined in the task file
     if (!model?.ctx || !isModelFromTaskFile) {
         model.ctx = taskSpec.ctx
     }
-    model.inferParams = ip;
+    //model.inferParams = ip;
     if (templateName.length > 0) {
         model.template = templateName;
     }

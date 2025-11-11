@@ -84,7 +84,6 @@ async function executeTask(
     let continueWrite = true;
     let skipNextEmptyLinesToken = false;
     const spinner = ora("Thinking ...");
-    //const timer = usePerfTimer();        
     const ts = "Thinking";
     const te = color.dim("tokens");
     const formatTokenCount = (i: number) => {
@@ -182,16 +181,14 @@ async function executeTask(
     }
     //console.log("RUN", task);
     let out: TaskOutput;
-    try {
-        //console.log("EXECT", payload.prompt, "\nVARS:", vars, "\nOPTS", tconf)
-        out = await task.run({ prompt: payload.prompt, ...vars }, tconf);
-        if (!out.answer.text.endsWith("\n")) {
-            console.log()
-        }
+
+    //console.log("CLI EXEC TASK", payload.prompt, "\nVARS:", vars, "\nOPTS", tconf)
+    out = await task.run({ prompt: payload.prompt, ...vars }, tconf);
+    //console.log("END TASK")
+    if (!out.answer.text.endsWith("\n")) {
+        console.log()
     }
-    catch (err) {
-        throw new Error(`executing task: ${name} (${err})`);
-    }
+
     // close mcp connections
     mcpServers.forEach(async (s) => await s.stop());
     await processOutput(out);
