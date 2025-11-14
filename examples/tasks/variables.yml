@@ -10,15 +10,8 @@ template:
         You are impersonating characters for helping to write a book. Always act as the requested character.
 ctx: 4096
 model:
-    name: Qwen3-1.7B-UD-Q6_K_XL
+    name: qwen4b
     template: chatml
-models:
-    qwen4b:
-        name: Qwen3-4B-Instruct-2507-UD-Q6_K_XL
-        template: chatml
-    gemma3:
-        name: gemma-3-4b-it-qat-UD-Q6_K_XL
-        template: gemma
 inferParams:
     top_k: 0.95
     top_p: 40
