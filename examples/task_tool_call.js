@@ -1,32 +1,35 @@
 #!/usr/bin/env node
 import { default as fs } from "fs";
-import { Task } from "@agent-smith/task";
+import { Task } from "../packages/task/dist/main.js";
 import { Lm } from "@locallm/api";
-import { Agent } from "@agent-smith/agent";
+import { Agent } from "../packages/agent/dist/main.js";
 
 // Run an Llama.cpp server
 // llama-server -fa -m $1 --jinja --chat-template-file template.jinja -t 4 -c $2 --verbose-prompt
 // template.jinja content:
 // {{- messages[0].content -}}
 
-const model = { name: "Qwen3-4B-Instruct-2507-UD-Q6_K_XL", ctx: 8192, template: "chatml-tools" };
+//const model = { name: "qwen4b", ctx: 8192, template: "chatml-tools" };
 const lm = new Lm({
     providerType: "llamacpp",
     serverUrl: "http://localhost:8080",
     onToken: (t) => process.stdout.write(t),
 });
 const agent = new Agent(lm);
+const model = "qwen4b";
 
 const _prompt = `I am landing in Barcelona soon: I plan to reach my hotel and then go for outdoor sport. 
 How are the conditions in the city?`;
 //const _prompt = "What is the current weather in Barcelona?"
 
-function get_current_weather(args) {
+function get_current_weather(args)
+{
     console.log("Running the get_current_weather tool with args", args);
     return { "temp": 20.5, "weather": "rain" }
 }
 
-function get_current_traffic(args) {
+function get_current_traffic(args)
+{
     console.log("Running the get_current_traffic tool with args", args);
     return { "trafic": "normal" }
 }
@@ -52,15 +55,16 @@ const trafficToolDef = {
     "execute": get_current_traffic,
 };
 
-async function main() {
+async function main()
+{
     const taskPath = "./tasks/toolsexample.yml";
     const ymlTaskDef = fs.readFileSync(taskPath, 'utf8');
     const task = Task.fromYaml(agent, ymlTaskDef).addTools([weatherToolDef, trafficToolDef]);
     console.log("Running task...", ymlTaskDef);
     // run the task    
     const conf = {
-        model: model,
         debug: true,
+        modelname: model,
         inferParams: { stream: true },
     };
     const answer = await task.run({ prompt: _prompt }, conf);
@@ -70,6 +74,7 @@ async function main() {
     console.log(answer.template.render());
 }
 
-(async () => {
+(async () =>
+{
     await main();
 })();

@@ -16,7 +16,8 @@ const lm = new Lm({
 });
 const agent = new Agent(lm);
 
-async function main() {
+async function main()
+{
     const taskPath = "./tasks/variables.yml";
     const ymlTaskDef = fs.readFileSync(taskPath, 'utf8');
     const task = Task.fromYaml(agent, ymlTaskDef);
@@ -24,8 +25,8 @@ async function main() {
     // run the task    
     const conf = {
         debug: true,
-        modelname: "qwen1.7b",
-        inferParams: { stream: true },
+        modelname: "qwen4b",
+        inferParams: { stream: true, temperature: 0.8 },
     };
     const answer = await task.run({
         prompt: "What are your favourite activities?",
@@ -36,6 +37,7 @@ async function main() {
     console.log(answer.text);
 }
 
-(async () => {
+(async () =>
+{
     await main();
 })();

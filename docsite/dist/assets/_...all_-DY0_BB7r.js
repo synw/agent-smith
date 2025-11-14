@@ -1,0 +1,1 @@
+import{d as n,g as s,o as l,u as e,l as o,n as t,H as r,_ as u}from"./index-CeGrbltC.js";const h=n({__name:"[...all]",setup(p){return(a,i)=>(l(),s(e(u),{hljs:e(r),nav:e(t),url:a.$route.path,"on-open":a.$router.push,"base-title":e(o)},null,8,["hljs","nav","url","on-open","base-title"]))}});export{h as default};

@@ -4,6 +4,13 @@ import { Lm } from "@locallm/api";
 import { createInterface } from 'readline/promises';
 import { stdin as input, stdout as output } from 'process';
 
+const serverUrl = "http://localhost:8080/v1"; // Local Llama.cpp
+const apiKey = "";
+const model = "qwen4b-t";
+const system = "You are a helpful touristic assistant";
+const _prompt = `I am landing in Barcelona in one hour: I plan to reach my hotel and then go for outdoor sport. 
+How are the conditions in the city?`;
+
 const rl = createInterface({
     input,
     output
@@ -18,14 +25,6 @@ async function canExecuteTool(tool) {
     const msg = `Execute tool ${tool.name} with arguments ${Object.keys(tool.arguments).join(", ")}`;
     return await askUser(msg + ' (y/n): ');
 }
-
-let model;
-const serverUrl = "http://localhost:8080/v1";
-const apiKey = "";
-const system = "You are a helpful touristic assistant";
-const _prompt = `I am landing in Barcelona soon: I plan to reach my hotel and then go for outdoor sport. 
-How are the conditions in the city?`;
-//const _prompt = "What is the current weather in Barcelona?"
 
 function run_get_current_weather(args) {
     console.log("Running the get_current_weather tool with args", args);
@@ -47,7 +46,7 @@ const get_current_weather = {
         }
     },
     execute: run_get_current_weather,
-    canRun: canExecuteTool,
+    canRun: canExecuteTool
 };
 
 const get_current_traffic = {
@@ -60,7 +59,7 @@ const get_current_traffic = {
         }
     },
     execute: run_get_current_traffic,
-    canRun: canExecuteTool,
+    //canRun: canExecuteTool
 };
 
 async function main() {
@@ -74,12 +73,12 @@ async function main() {
     await agent.run(_prompt,
         //inference params
         {
-            model: model ?? "",
             temperature: 0.5,
             top_k: 40,
             top_p: 0.95,
             min_p: 0,
             max_tokens: 4096,
+            model: { name: model }
         },
         // query options
         {

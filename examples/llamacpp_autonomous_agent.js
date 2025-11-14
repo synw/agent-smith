@@ -64,8 +64,8 @@ async function main() {
         },
         // query options
         {
-            debug: true,
-            //verbose: true,
+            //debug: true,
+            verbose: true,
             tools: [get_current_traffic, get_current_weather]
         },
         template,
