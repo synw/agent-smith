@@ -14,7 +14,7 @@ const useTemplateForModel = (): TemplateForModel => {
             case _model.includes("deepseek"):
                 return "deepseek3";
             case _model.includes("mistral") || _model.includes("mixtral"):
-                return "mistral";
+                return "mistral-system";
             case _model.includes("codestral"):
                 return "codestral";
             case _model.includes("phi2"):
@@ -35,6 +35,16 @@ const useTemplateForModel = (): TemplateForModel => {
                 return "nemotron";
             case _model.includes("exaone"):
                 return "exaone";
+            case _model.includes("ling"):
+                return "ling";
+            case _model.includes("lfm"):
+                return "lfm";
+            case _model.includes("minimax"):
+                return "minimax";
+            case _model.includes("glm"):
+                return "glm";
+            case (_model.includes("gpt") && _model.includes("oss")):
+                return "gptoss";
             default:
                 return "none";
         }
