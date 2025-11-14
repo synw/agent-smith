@@ -15,7 +15,6 @@ Add the plugin and it's dependency to your `config.yml` file and run the `conf`Â
 ```yml
 plugins:
   - "@agent-smith/feat-vision"
-  - "@agent-smith/feat-models"
 ```
 
 ```bash
