@@ -8,20 +8,13 @@ export {}
 /* prettier-ignore */
 declare module 'vue' {
   export interface GlobalComponents {
-    AgentConf: typeof import('./src/components/agentconf/AgentConf.vue')['default']
-    BrowserModel: typeof import('./src/components/agentconf/BrowserModel.vue')['default']
-    CppModels: typeof import('./src/components/agentconf/CppModels.vue')['default']
-    CtxPicker: typeof import('./src/components/agentconf/CtxPicker.vue')['default']
     DefaultSidebar: typeof import('./src/components/sidebars/DefaultSidebar.vue')['default']
-    'IEosIcons:bubbleLoading': typeof import('~icons/eos-icons/bubble-loading')['default']
     'IEva:arrowBackOutline': typeof import('~icons/eva/arrow-back-outline')['default']
     'IFaBrands:github': typeof import('~icons/fa-brands/github')['default']
     'IFaSolid:moon': typeof import('~icons/fa-solid/moon')['default']
     'IFaSolid:sun': typeof import('~icons/fa-solid/sun')['default']
-    OllamaModels: typeof import('./src/components/agentconf/OllamaModels.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
-    TemplatePicker: typeof import('./src/components/agentconf/TemplatePicker.vue')['default']
     TheHeader: typeof import('./src/components/TheHeader.vue')['default']
     TheSidebar: typeof import('./src/components/TheSidebar.vue')['default']
   }
