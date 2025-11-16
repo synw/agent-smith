@@ -1,6 +1,7 @@
 import { Lm } from "@locallm/api";
 import { InferenceParams, ToolSpec, HistoryTurn, InferenceOptions, InferenceResult, ToolTurn } from "@locallm/types";
 import { PromptTemplate } from 'modprompt';
+import { splitThinking } from "./utils.js";
 
 class Agent {
     lm: Lm;
@@ -16,7 +17,7 @@ class Agent {
         params: InferenceParams,
         options: InferenceOptions = {},
         template?: PromptTemplate | string,
-    ): Promise<InferenceResult> {
+    ): Promise<{ result: InferenceResult, template: PromptTemplate }> {
         let tpl: PromptTemplate;
         if (options?.debug) {
             console.log("Agent inference params:", params);
@@ -32,7 +33,8 @@ class Agent {
                     this.tools[t.name] = t;
                 });
             }
-            return await this.runAgentNoTemplate(1, prompt, params, options)
+            const res = await this.runAgentNoTemplate(1, prompt, params, options)
+            return { result: res, template: new PromptTemplate("none") }
         } else {
             if (!template) {
                 if (params?.template) {
@@ -55,7 +57,7 @@ class Agent {
                     tpl = tpl.addTool(t)
                 });
             }
-            return (await this.runAgentWithTemplate(1, prompt, params, options, tpl)).inferenceResult;
+            return (await this.runAgentWithTemplate(1, prompt, params, options, tpl));
         }
     }
 
@@ -110,7 +112,7 @@ class Agent {
             }
             options.history = this.history;
             //console.log("HISTORY:");
-            console.dir(options.history, {depth: 8});
+            //console.dir(options.history, {depth: 8});
             _res = await this.runAgentNoTemplate(nit, " ", params, options);
         } else {
             this.history.push({ assistant: res.text });
@@ -124,7 +126,7 @@ class Agent {
         params: InferenceParams,
         options: InferenceOptions = {},
         tpl: PromptTemplate,
-    ): Promise<{ inferenceResult: InferenceResult, template: PromptTemplate }> {
+    ): Promise<{ result: InferenceResult, template: PromptTemplate }> {
         if (this.lm.providerType == "ollama") {
             if (!params?.model) {
                 throw new Error("A model inference parameters is required for provider Ollama")
@@ -192,17 +194,31 @@ class Agent {
             }
             return await this.runAgentWithTemplate(it + 1, prompt, params, options, tpl)
         } else {
+            let thinking = "";
+            let final = res.text;
+            if (tpl?.tags?.think) {
+                const { think, finalAnswer } = splitThinking(res.text, tpl.tags.think.start, tpl.tags.think.end);
+                thinking = think;
+                final = finalAnswer;
+            }
             if (it == 1) {
+                if (thinking.length > 0) {
+                    tpl.pushToHistory({ think: thinking })
+                }
                 tpl.pushToHistory({
                     user: prompt.replace("{prompt}", prompt),
-                    assistant: res.text,
+                    assistant: final,
                 });
             } else {
+                if (thinking.length > 0) {
+                    tpl.pushToHistory({ think: thinking })
+                }
                 tpl.pushToHistory({
-                    assistant: res.text,
+                    assistant: final,
                 });
             }
-            return { inferenceResult: res, template: tpl }
+            this.history = tpl.history;
+            return { result: res, template: tpl }
         }
     }
 
