@@ -17,7 +17,7 @@ class Agent {
         params: InferenceParams,
         options: InferenceOptions = {},
         template?: PromptTemplate | string,
-    ): Promise<{ result: InferenceResult, template: PromptTemplate }> {
+    ): Promise<InferenceResult> {
         let tpl: PromptTemplate;
         if (options?.debug) {
             console.log("Agent inference params:", params);
@@ -34,7 +34,7 @@ class Agent {
                 });
             }
             const res = await this.runAgentNoTemplate(1, prompt, params, options)
-            return { result: res, template: new PromptTemplate("none") }
+            return res
         } else {
             if (!template) {
                 if (params?.template) {
@@ -57,7 +57,9 @@ class Agent {
                     tpl = tpl.addTool(t)
                 });
             }
-            return (await this.runAgentWithTemplate(1, prompt, params, options, tpl));
+            const res = await this.runAgentWithTemplate(1, prompt, params, options, tpl);
+            //console.log("AGENT: RES NO TPL:", res);
+            return res
         }
     }
 
@@ -126,7 +128,7 @@ class Agent {
         params: InferenceParams,
         options: InferenceOptions = {},
         tpl: PromptTemplate,
-    ): Promise<{ result: InferenceResult, template: PromptTemplate }> {
+    ): Promise<InferenceResult> {
         if (this.lm.providerType == "ollama") {
             if (!params?.model) {
                 throw new Error("A model inference parameters is required for provider Ollama")
@@ -218,7 +220,7 @@ class Agent {
                 });
             }
             this.history = tpl.history;
-            return { result: res, template: tpl }
+            return res
         }
     }
 
