@@ -21,7 +21,7 @@ function parseCommandArgs(args: Array<any>): {
 }
 
 function parseTaskConfigOptions(options: Record<string, any>): LmTaskConfig {
-    const conf: LmTaskConfig = { inferParams: {}, modelname: "", templateName: "" };
+    const conf: LmTaskConfig = { inferParams: {}, templateName: "" };
     const optionsInferParams: InferenceParams = {};
     if (options?.temperature) {
         optionsInferParams.temperature = options.temperature
@@ -45,7 +45,10 @@ function parseTaskConfigOptions(options: Record<string, any>): LmTaskConfig {
         optionsInferParams.images = options.images
     }
     if (options?.model !== undefined) {
-        conf.modelname = options.model;
+        if (!conf?.model) {
+            conf.model = { name: "" }
+        }
+        conf.model.name = options.model;
     }
     if (options?.template !== undefined) {
         conf.templateName = options.template

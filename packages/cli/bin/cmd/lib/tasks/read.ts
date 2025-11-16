@@ -30,6 +30,7 @@ async function readTask(
     const conf = parseTaskConfigOptions(opts);
     if (options?.debug) {
         console.log("conf:", conf);
+        conf.debug = true;
     }
     conf.inferParams = mergeInferParams(conf.inferParams, taskFileSpec.inferParams ?? {});
     const model = configureTaskModel(conf, taskFileSpec);

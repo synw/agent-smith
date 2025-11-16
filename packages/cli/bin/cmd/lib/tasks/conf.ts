@@ -8,39 +8,27 @@ const tfm = useTemplateForModel();
 function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): ModelSpec {
     //console.log("IT CONF", itConf);
     //console.log("TASK SPEC", taskSpec);
-    let modelName: string = "";
-    let templateName: string = "";
+    //let modelName: string = "";
+    //let templateName: string = "";
     let ip = itConf.inferParams;
     let isModelFromTaskFile = false;
-    let model = {} as ModelSpec;
-    let found = false;
+    let model = { template: "", name: "" } as ModelSpec;
+    let foundModel = false;
+    let foundTemplate = false;
     //console.log("CONF", itConf);
     if (itConf?.templateName) {
-        templateName = itConf.templateName
+        model.template = itConf.templateName;
+        foundTemplate = true;
+    } else if (taskSpec?.model?.template) {
+        model.template = taskSpec.model.template;
+        foundTemplate = true;
     }
-    if (!itConf?.modelname) {
-        if (taskSpec?.model?.name) {
-            model = taskSpec.model!;
-            isModelFromTaskFile = true;
-            found = true;
-        } else {
-            if (!taskSpec?.modelpack?.default) {
-                throw new Error(`provide a default model or a use a modelpack in the ${taskSpec.name} task yaml file`)
-            }
-            modelName = taskSpec.modelpack.default;
-        }
-    } else {
-        modelName = itConf.modelname
-    }
-    if (!found) {
-        if (modelName.length == 0) {
-            throw new Error("no model name defined")
-        }
-        // try to find the model from the task's models
-        if (taskSpec?.models) {
+    if (itConf?.model?.name) {
+        if (taskSpec?.models && Object.keys(taskSpec.models).includes(itConf.model.name)) {
+            // try to find the model from the task's models
             for (const [k, v] of Object.entries(taskSpec.models)) {
                 //console.log("TSM", modelName, "/", k);
-                if (modelName == k) {
+                if (k == itConf.model.name) {
                     model = v;
                     if (v?.inferParams) {
                         const tip = v.inferParams as Record<string, any>;
@@ -56,14 +44,17 @@ function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): Mod
                         model.assistant = v.assistant;
                     }
                     isModelFromTaskFile = true;
-                    found = true;
+                    foundModel = true;
                     break
                 }
             }
         }
+    } else {
+        model = taskSpec.model;
+        foundModel = true;
     }
     // try to find the models from db models
-    if (!found) {
+    /*if (!found) {
         const m = readModel(modelName);
         //console.log("FM", m.found, m)
         //console.log("DBM", templateName, "/", m.modelData.template);
@@ -72,23 +63,22 @@ function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): Mod
             model.template = templateName ?? m.modelData.template;
             found = true
         }
-    }
+    }*/
     // fallback to use the model name directly
-    if (!found) {
-        if (templateName && modelName) {
-            model = { name: modelName, template: templateName } as ModelSpec;
-        } else {
-            // try to guess the template
-            const gt = tfm.guess(modelName);
-            if (gt == "none") {
-                throw new Error(`Unable to guess the template for ${modelName}: please provide a template name: --tpl templatename`)
-            }
-            const m: ModelSpec = {
-                name: modelName,
-                template: gt
-            };
-            model = m;
+    if (!foundModel) {
+        throw new Error(`No model found in task`)
+    }
+    if (!foundTemplate) {
+        // try to guess the template
+        const gt = tfm.guess(model.name);
+        if (gt == "none") {
+            throw new Error(`Unable to guess the template for ${model.name}: please provide a template name: --tpl templatename`)
         }
+        model.template = gt;
+        foundTemplate = true;
+    }
+    if (!model?.template) {
+        throw new Error(`No template found`)
     }
     //model.inferParams = ip;
     // use default ctx if the model is not from defined in the task file
@@ -96,9 +86,6 @@ function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): Mod
         model.ctx = taskSpec.ctx
     }
     //model.inferParams = ip;
-    if (templateName.length > 0) {
-        model.template = templateName;
-    }
     return model
 }
 

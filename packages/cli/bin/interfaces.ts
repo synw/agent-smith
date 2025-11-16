@@ -80,10 +80,11 @@ interface LmTaskFileSpec extends TaskDef {
 interface BaseLmTaskConfig {
     templateName: string;
     inferParams: InferenceParams;
+    debug?: boolean;
 }
 
 interface LmTaskConfig extends BaseLmTaskConfig {
-    modelname?: string;
+    model?: ModelSpec;
     quiet?: boolean;
 }
 

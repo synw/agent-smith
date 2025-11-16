@@ -27,6 +27,7 @@ async function executeTask(
         console.log("Agent:", colors.bold(agent.lm.name), "( " + agent.lm.providerType + " backend type)");
     }
     const { task, model, conf, vars, mcpServers } = await readTask(name, payload, options, agent);
+    //console.log("TASK MODEL", model);
     // check for grammars
     if (model?.inferParams?.tsGrammar) {
         //console.log("TSG");
@@ -184,7 +185,7 @@ async function executeTask(
 
     //console.log("CLI EXEC TASK", payload.prompt, "\nVARS:", vars, "\nOPTS", tconf)
     out = await task.run({ prompt: payload.prompt, ...vars }, tconf);
-    //console.log("END TASK")
+    //console.log("END TASK", out);
     if (!out.answer.text.endsWith("\n")) {
         console.log()
     }
@@ -209,7 +210,6 @@ async function executeTask(
                 await query(program)
             }
         } else {
-            //console.log("HIST", ex.template.history.length)
             await executeTask(name, { ...vars, prompt: prompt }, options, quiet)
         }
     }
@@ -223,7 +223,7 @@ async function executeTask(
             runtimeWarning("Error formating stats:", `${e}`)
         }
     }
-    //@ts-ignore
+    //console.log("TASK OUT", out);
     return out
 }
 

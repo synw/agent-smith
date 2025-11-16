@@ -39,9 +39,9 @@ async function executeWorkflow(name: string, params: Record<string, any>, option
                     //console.log("EXECA", p);
                     const ares = await executeAction(name, taskRes, options, true);
                     if (typeof ares == "string") {
-                        taskRes = { args: ares }
+                        taskRes = { args: ares, ...params }
                     } else {
-                        taskRes = ares;
+                        taskRes = { ...ares, ...params };
                     }
                     //console.log("LAST ACT", i, finalTaskIndex);
                     if (i == finalTaskIndex) {
@@ -57,10 +57,9 @@ async function executeWorkflow(name: string, params: Record<string, any>, option
                     //console.log("AD OPTS IN", options);
                     const ares = await executeAdaptater(name, taskRes, options);
                     if (typeof ares == "string") {
-                        // if the adaptater returns a string convert it to pass to the next node
-                        taskRes = { args: ares }
+                        taskRes = { args: ares, ...params }
                     } else {
-                        taskRes = ares;
+                        taskRes = { ...ares, ...params };
                     }
                     //console.log("LAST ACT", i, finalTaskIndex);
                     if (i == finalTaskIndex) {
