@@ -25,8 +25,7 @@ async function main()
     // run the task    
     const conf = {
         debug: true,
-        modelname: "qwen4b",
-        inferParams: { stream: true, temperature: 0.8 },
+        inferParams: { stream: true, temperature: 0.8, model: { name: "qwen4b" } },
     };
     const answer = await task.run({
         prompt: "What are your favourite activities?",

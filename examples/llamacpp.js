@@ -4,20 +4,21 @@ import { Agent } from "../packages/agent/dist/main.js";
 
 const _prompt = "Give me a short list of the planets names in the solar system";
 const model = {
-    name: "qwen3:4b-instruct",
-    ctx: 4096,
-    template: "chatml",
+    //name: "qwen4b-thinking",
+    name: "oss20b"
 };
+//const _template = "chatml"
+const _template = "gptoss";
 
 async function main()
 {
     const lm = new Lm({
-        providerType: "ollama",
-        serverUrl: "http://localhost:11434",
+        providerType: "llamacpp",
+        serverUrl: "http://localhost:8080",
         onToken: (t) => process.stdout.write(t),
     });
     const agent = new Agent(lm);
-    await agent.run(_prompt,
+    const { result, template } = await agent.run(_prompt,
         //inference params
         {
             stream: true,
@@ -32,8 +33,11 @@ async function main()
         {
             verbose: true,
         },
-        template,
+        // manual prompt template
+        _template
     );
+    console.dir(result, { depth: 6 });
+    console.dir(template.history, { depth: 6 });
 }
 
 (async () =>

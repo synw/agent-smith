@@ -64,8 +64,7 @@ async function main()
     // run the task    
     const conf = {
         debug: true,
-        modelname: model,
-        inferParams: { stream: true },
+        inferParams: { stream: true, model: { name: model } },
     };
     const answer = await task.run({ prompt: _prompt }, conf);
     console.log("\n\n----------- Template history:");
