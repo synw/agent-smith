@@ -27,14 +27,12 @@ interface TaskInput {
  *
  * @interface TaskConf
  * @param {ModelSpec} [model] - Optional model configuration.
- * @param {ModelSpec} [modelname] - Optional model name for the task models list.
  * @param {InferenceParams} [inferParams] - Optional inference parameters.
  * @param {boolean} [debug] - Optional debug flag.
  * @param {boolean} [quiet] - Optional quiet flag.
  */
 interface TaskConf {
     model?: ModelSpec;
-    modelname?: string;
     inferParams?: InferenceParams;
     options?: InferenceOptions;
     debug?: boolean;

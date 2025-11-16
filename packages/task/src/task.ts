@@ -3,7 +3,7 @@ import { PromptTemplate } from 'modprompt';
 import YAML from 'yaml';
 import { Agent } from "@agent-smith/agent";
 import { formatInferParams } from './inferparams.js';
-import { ModelSpec, TaskConf, TaskDef, TaskInput, TaskOutput } from "./interfaces.js";
+import { TaskConf, TaskDef, TaskInput, TaskOutput } from "./interfaces.js";
 import { formatTaskTemplate } from './templates.js';
 import { applyVariables } from './variables.js';
 
@@ -39,30 +39,9 @@ class Task {
                     ctx = model.ctx;
                 }
             }
-            if (conf?.modelname) {
-                let found = false;
-                if (this.def?.models) {
-                    for (const [modelName, _mod] of Object.entries(this.def.models)) {
-                        if (modelName == conf.modelname) {
-                            found = true;
-                            const m = _mod as ModelSpec;
-                            if (m?.ctx) {
-                                ctx = m.ctx
-                            }
-                            model = m;
-                            break;
-                        }
-                    }
-                }
-                if (!found) {
-                    if (["ollama", "llamacpp", "openai"].includes(this.agent.lm.providerType)) {
-                        model = { name: conf.modelname }
-                    } else {
-                        throw new Error(`Provider type ${this.agent.lm.providerType}: no model found for ${conf.modelname}. Available models:\n${params?.models}`)
-                    }
-                }
-
-            }
+            /*else {
+                throw new Error("No model found in task")
+            }*/
         }
         //console.log("CONF", conf)
         if (this.agent.lm.providerType == "ollama") {
@@ -122,9 +101,13 @@ class Task {
             //console.log("RUN AGENT (TASK) options:", options);
             answer = await this.agent.run(finalPrompt, this.def.inferParams, options);
         } else {
+            //console.log("RUN AGENT (TASK) params:", this.def.inferParams);
+            //console.log("RUN AGENT (TASK) options:", options);
             answer = await this.agent.run(finalPrompt, this.def.inferParams, options, tpl);
+            //console.log("RAW ANSWER", answer);
         }
-        return { answer: answer, errors: {}, template: useTemplates ? tpl : undefined }
+        //console.log("TASK: ANSWER FINAL:", { answer: answer.result, errors: {}, template: answer.template })
+        return { answer, errors: {} }
     }
 
     addTools(tools: Array<ToolSpec>): Task {
