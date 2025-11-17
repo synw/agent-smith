@@ -1,9 +1,16 @@
 import type { InferenceParams } from "@locallm/types";
 import { useTemplateForModel } from "@agent-smith/tfm";
 import type { LmTaskConfig, LmTaskFileSpec, ModelSpec } from "../../../interfaces.js";
-import { readModel } from "../../../db/read.js";
 
 const tfm = useTemplateForModel();
+
+function guessTemplate(modelname: string): string {
+    const gt = tfm.guess(modelname);
+    if (gt == "none") {
+        throw new Error(`Unable to guess the template for ${modelname}: please provide a template name: --tpl templatename`)
+    }
+    return gt
+}
 
 function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): ModelSpec {
     //console.log("IT CONF", itConf);
@@ -19,8 +26,19 @@ function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): Mod
     if (itConf?.templateName) {
         model.template = itConf.templateName;
         foundTemplate = true;
+    }
+    if (itConf?.model?.name) {
+        if (itConf?.model?.name != taskSpec.model.name) {
+            const gt = guessTemplate(itConf.model.name);
+            model.template = gt;
+            foundTemplate = true;
+        }
     } else if (taskSpec?.model?.template) {
         model.template = taskSpec.model.template;
+        foundTemplate = true;
+    } else {
+        const gt = guessTemplate(taskSpec.model.name);
+        model.template = gt;
         foundTemplate = true;
     }
     if (itConf?.model?.name) {
@@ -48,6 +66,9 @@ function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): Mod
                     break
                 }
             }
+        } else {
+            model.name = itConf.model.name;
+            foundModel = true;
         }
     } else {
         model = taskSpec.model;

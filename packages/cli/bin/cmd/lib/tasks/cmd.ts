@@ -45,14 +45,14 @@ async function executeTask(
     let tpl: PromptTemplate | null = null;
     //console.log("Use templates:", useTemplates);
     if (useTemplates) {
-        if ((!task.def.model?.template)) {
+        /*if ((!task.def.model?.template)) {
             const gt = tfm.guess(task.def.model.name);
             if (gt == "none") {
                 throw new Error(`Unable to guess the template for ${task.def.model}: please provide a template in the taskDef definition`)
             }
             task.def.model.template = gt;
-        }
-        tpl = new PromptTemplate(task.def.model.template);
+        }*/
+        tpl = new PromptTemplate(model.template ?? "none");
         //console.log("TPL:", tpl.id);
         hasThink = tpl.tags?.think ? true : false;
         //console.log("HT", hasThink);
@@ -173,6 +173,9 @@ async function executeTask(
         conf.inferParams = {}
     }
     conf.inferParams.stream = true;
+    if (conf?.model) {
+        delete conf.model
+    }
     const tconf: TaskConf = {
         model: model,
         //debug: options?.debug ?? false,
@@ -180,6 +183,8 @@ async function executeTask(
         onToolCallEnd: onToolCallEnd,
         ...conf,
     }
+    //console.log("CONF", conf);
+    //console.log("TCONF", tconf);
     //console.log("RUN", task);
     let out: TaskOutput;
 
