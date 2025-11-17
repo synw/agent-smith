@@ -1,30 +1,36 @@
-import path from "path";
 import { readConf } from "./cmd/sys/read_conf.js";
 import { upsertBackends, insertFeaturesPathIfNotExists, insertPluginIfNotExists } from "./db/write.js";
 import { buildPluginsPaths } from "./state/plugins.js";
 import { runtimeError } from "./cmd/lib/user_msgs.js";
 import { ConfInferenceBackend, InferenceBackend } from "./interfaces.js";
 import { localBackends } from "./const.js";
+import { homedir } from 'os';
+import { join } from 'path';
 
-// @ts-ignore
-const confDir = path.join(process.env.HOME, ".config/agent-smith/cli");
-const dbPath = path.join(confDir, "config.db");
-
-/*function createConfDirIfNotExists(): boolean {
-    //console.log(confDir, fs.existsSync(confDir));
-    if (!fs.existsSync(confDir)) {
-        fs.mkdirSync(confDir, { recursive: true });
-        return false
+function getConfigPath(appName: string, filename: string): { confDir: string, dbPath: string } {
+    let confDir: string;
+    let dbPath: string;
+    if (process.platform === 'win32') {
+        confDir = join(process.env.APPDATA!, appName)
+        dbPath = join(process.env.APPDATA!, appName, filename);
+    } else if (process.platform === 'darwin') {
+        confDir = join(homedir(), 'Library', 'Application Support', appName);
+        dbPath = join(homedir(), 'Library', 'Application Support', appName, filename);
+    } else { // Linux, BSD, etc.
+        confDir = join(homedir(), '.config', appName);
+        dbPath = join(homedir(), '.config', appName, filename);
     }
-    return true
-}*/
+    return { confDir: confDir, dbPath: dbPath }
+}
+
+const { confDir, dbPath } = getConfigPath("agent-smith", "config.db");
 
 async function processConfPath(confPath: string): Promise<{ paths: Array<string>, pf: string, dd: string }> {
     const { found, data } = readConf(confPath);
     if (!found) {
         runtimeError(`Config file ${confPath} not found`);
     }
-    console.log(data)
+    //console.log(data)
     const allPaths = new Array<string>();
     // backends
     const backends: Record<string, InferenceBackend> = {};
@@ -67,7 +73,7 @@ async function processConfPath(confPath: string): Promise<{ paths: Array<string>
         }
     }
     console.log("Default backend:", defaultBackendName);
-    console.dir(backends, { depth: 4 });
+    //console.dir(backends, { depth: 4 });
     if (!Object.keys(backends).includes(defaultBackendName)) {
         throw new Error(`Undeclared default backend: ${defaultBackendName}`)
     }
