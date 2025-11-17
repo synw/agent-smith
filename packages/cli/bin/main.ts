@@ -3,7 +3,7 @@ import { executeTask } from "./cmd/lib/tasks/cmd.js";
 import { executeAction } from "./cmd/lib/actions/cmd.js";
 import { executeWorkflow } from "./cmd/lib/workflows/cmd.js";
 import { writeToClipboard } from "./cmd/sys/clipboard.js";
-import { initState, pluginDataDir } from "./state/state.js";
+import { initState, pluginDataDir, init } from "./state/state.js";
 import { usePerfTimer } from "./utils/perf.js";
 import { parseCommandArgs } from "./cmd/lib/options_parsers.js";
 import { extractToolDoc } from "./cmd/lib/tools.js";
@@ -22,6 +22,7 @@ export {
     executeWorkflow,
     writeToClipboard,
     initState,
+    init,
     pluginDataDir,
     usePerfTimer,
     parseCommandArgs,

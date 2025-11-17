@@ -1,6 +1,5 @@
 import { Agent } from "@agent-smith/agent";
 import { TaskConf, TaskOutput } from "@agent-smith/task";
-import { useTemplateForModel } from "@agent-smith/tfm";
 import { input } from "@inquirer/prompts";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import { default as color, default as colors } from "ansi-colors";
@@ -16,8 +15,6 @@ import { parseCommandArgs } from "../options_parsers.js";
 import { runtimeDataError, runtimeWarning } from "../user_msgs.js";
 import { formatStats, processOutput, readPromptFile } from "../utils.js";
 import { readTask } from "./read.js";
-
-const tfm = useTemplateForModel();
 
 async function executeTask(
     name: string, payload: Record<string, any>, options: Record<string, any>, quiet?: boolean
@@ -45,13 +42,6 @@ async function executeTask(
     let tpl: PromptTemplate | null = null;
     //console.log("Use templates:", useTemplates);
     if (useTemplates) {
-        /*if ((!task.def.model?.template)) {
-            const gt = tfm.guess(task.def.model.name);
-            if (gt == "none") {
-                throw new Error(`Unable to guess the template for ${task.def.model}: please provide a template in the taskDef definition`)
-            }
-            task.def.model.template = gt;
-        }*/
         tpl = new PromptTemplate(model.template ?? "none");
         //console.log("TPL:", tpl.id);
         hasThink = tpl.tags?.think ? true : false;

@@ -5,6 +5,7 @@ import { initDb } from "../db/db.js";
 import { readFilePaths } from "../db/read.js";
 import path from "path";
 import { createDirectoryIfNotExists } from "../cmd/sys/dirs.js";
+import { initBackends } from "./backends.js";
 
 let pyShell: PythonShell;
 
@@ -35,6 +36,11 @@ function initFilepaths() {
                 dataDirPath.value = fp.path
         }
     }
+}
+
+async function init() {
+    await initState();
+    await initBackends();
 }
 
 async function initState() {
@@ -81,6 +87,7 @@ export {
     pluginDataDir,
     initState,
     initFilepaths,
+    init,
     //setVerbosity,
     pyShell,
 }
