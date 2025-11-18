@@ -1,4 +1,5 @@
 import { spawn } from "child_process";
+import { platform } from "os";
 
 async function execute(
     command: string,
@@ -15,7 +16,8 @@ async function execute(
 ): Promise<string> {
     let buffer = new Array<string>();
     //console.log("Cmd args:", args)
-    const child = spawn(command, args, { shell: false });
+    const useShell = platform() === 'win32';
+    const child = spawn(command, args, { shell: useShell });
     child.stdout.setEncoding('utf8');
     child.stdout.on('data', (data: any) => {
         buffer.push(data);
@@ -50,7 +52,8 @@ function run(
             onFinished: (): void => { },
         },
 ): () => boolean {
-    var child = spawn(command, args);
+    const useShell = platform() === 'win32';
+    var child = spawn(command, args, { shell: useShell });
     child.stdout.setEncoding('utf8');
     child.stdout.on('data', (data: any) => onStdout(data));
     child.stderr.setEncoding('utf8');

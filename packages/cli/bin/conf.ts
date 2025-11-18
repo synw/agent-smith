@@ -6,6 +6,7 @@ import { ConfInferenceBackend, InferenceBackend } from "./interfaces.js";
 import { localBackends } from "./const.js";
 import { homedir } from 'os';
 import { join } from 'path';
+import { createDirectoryIfNotExists } from "./cmd/sys/dirs.js";
 
 function getConfigPath(appName: string, filename: string): { confDir: string, dbPath: string } {
     let confDir: string;
@@ -26,6 +27,7 @@ function getConfigPath(appName: string, filename: string): { confDir: string, db
 const { confDir, dbPath } = getConfigPath("agent-smith", "config.db");
 
 async function processConfPath(confPath: string): Promise<{ paths: Array<string>, pf: string, dd: string }> {
+    createDirectoryIfNotExists(confDir);
     const { found, data } = readConf(confPath);
     if (!found) {
         runtimeError(`Config file ${confPath} not found`);
