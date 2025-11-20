@@ -71,6 +71,9 @@ function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): Mod
             foundModel = true;
         }
     } else {
+        if (!taskSpec?.model) {
+            throw new Error(`No model found: either specify a model in the task or use the -m flag`)
+        }
         model = taskSpec.model;
         foundModel = true;
     }

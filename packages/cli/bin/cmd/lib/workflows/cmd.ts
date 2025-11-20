@@ -5,7 +5,7 @@ import { executeTask } from "../tasks/cmd.js";
 import { readWorkflow } from "./read.js";
 import colors from "ansi-colors";
 
-async function executeWorkflow(name: string, params: Record<string, any>, options: Record<string, any>): Promise<any> {
+async function executeWorkflow(name: string, args: any, options: Record<string, any> = {}): Promise<any> {
     const { workflow, found } = await readWorkflow(name);
     if (!found) {
         throw new Error(`Workflow ${name} not found`)
@@ -18,8 +18,8 @@ async function executeWorkflow(name: string, params: Record<string, any>, option
     }
     let i = 0;
     const finalTaskIndex = stepNames.length - 1;
-    let taskRes: any = params;
-    //console.log("WPARAMS", params);
+    let taskRes: Record<string, any> = { cmdArgs: args };
+    //console.log("WPARAMS", taskRes);
     for (const [name, step] of Object.entries(workflow)) {
         if (isDebug || isVerbose) {
             console.log(i + 1, name, colors.dim(step.type))
@@ -27,21 +27,25 @@ async function executeWorkflow(name: string, params: Record<string, any>, option
         switch (step.type) {
             case "task":
                 try {
-                    //console.log("WF res:", name, taskRes);
+                    //console.log("WF BEFORE TASK res:", name, taskRes);
                     const tr = await executeTask(name, taskRes, options, true);
-                    taskRes = { ...tr, ...params };
+                    //console.log("WF AFTER TASK RES", tr);
+                    taskRes = { ...tr, ...taskRes };
+                    //console.log("WF TASK NEXT ARGS", taskRes);
                 } catch (e) {
                     throw new Error(`workflow task ${i + 1}: ${e}`)
                 }
                 break;
             case "action":
                 try {
-                    //console.log("EXECA", p);
+                    //console.log("EXEC ACTION ARGS", taskRes);
                     const ares = await executeAction(name, taskRes, options, true);
-                    if (typeof ares == "string") {
-                        taskRes = { args: ares, ...params }
+                    //console.log("WF ACTION RES", typeof ares, ares);
+                    if (typeof ares == "string" || Array.isArray(ares)) {
+                        taskRes.args = ares;
+                        //console.log("ARRAY ACTION RES", taskRes)
                     } else {
-                        taskRes = { ...ares, ...params };
+                        taskRes = { ...ares, ...taskRes };
                     }
                     //console.log("LAST ACT", i, finalTaskIndex);
                     if (i == finalTaskIndex) {
@@ -53,14 +57,17 @@ async function executeWorkflow(name: string, params: Record<string, any>, option
                 break;
             case "adaptater":
                 try {
-                    //console.log("AD ARGS IN", p);
+                    //console.log("WF AD ARGS IN", taskRes);
                     //console.log("AD OPTS IN", options);
-                    const ares = await executeAdaptater(name, taskRes, options);
-                    if (typeof ares == "string") {
-                        taskRes = { args: ares, ...params }
+                    const adres = await executeAdaptater(name, taskRes, options);
+                    //console.log("WF AD RES", typeof adres, adres);
+                    if (typeof adres == "string" || Array.isArray(adres)) {
+                        taskRes.args = adres;
+                        //console.log("WF AD IT RES", taskRes);
                     } else {
-                        taskRes = { ...ares, ...params };
+                        taskRes = { ...adres, ...taskRes };
                     }
+                    //console.log("WF AD FINAL RES", taskRes);
                     //console.log("LAST ACT", i, finalTaskIndex);
                     if (i == finalTaskIndex) {
                         console.log(taskRes);
@@ -81,7 +88,6 @@ async function executeWorkflow(name: string, params: Record<string, any>, option
                 throw new Error(`unknown task type ${step.type} in workflow ${name}`)
         }
         //console.log("WF NODE RES", step.type, taskRes);
-        params = taskRes;
         /*if (isDebug) {
             console.log("->", params);
         }*/
@@ -92,8 +98,11 @@ async function executeWorkflow(name: string, params: Record<string, any>, option
 }
 
 async function executeWorkflowCmd(name: string, wargs: Array<any>): Promise<any> {
+    //console.log("WF INITIAL ARGS", typeof wargs, wargs.slice(0, -1));
     const { args, options } = parseCommandArgs(wargs);
-    return await executeWorkflow(name, { args: args }, options)
+    //console.log("WF ARGS", typeof args, args);
+    //console.log("WF OPTS", options);
+    return await executeWorkflow(name, args, options)
 }
 
 export {

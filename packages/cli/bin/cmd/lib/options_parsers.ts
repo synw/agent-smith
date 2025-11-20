@@ -1,16 +1,15 @@
 import { InferenceParams } from "@locallm/types";
 import { LmTaskConfig } from "../../interfaces.js";
-import { inputMode } from "../../state/state.js";
 
 function parseCommandArgs(args: Array<any>): {
-    args: Array<any>,
+    args: Array<string>,
     options: Record<string, any>,
 } {
     //discard the command (last arg)
     args.pop();
     //console.log("Raw command args:", args);
     const res = {
-        args: new Array<any>(),
+        args: new Array<string>(),
         options: {} as Record<string, any>,
     }
     res.options = args.pop();

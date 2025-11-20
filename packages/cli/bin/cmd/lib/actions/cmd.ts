@@ -10,7 +10,7 @@ import { readClipboard } from "../../sys/clipboard.js";
 import { processOutput, readPromptFile } from "../utils.js";
 import { parseCommandArgs } from "../options_parsers.js";
 
-async function executeAction(name: string, payload: Record<string, any>, options: Record<string, any>, quiet = false) {
+async function executeAction(name: string, payload: any, options: Record<string, any>, quiet = false) {
     let run: FeatureExecutor<any, any>;
     const { found, path, ext } = getFeatureSpec(name, "action" as FeatureType);
     if (!found) {
@@ -31,11 +31,7 @@ async function executeAction(name: string, payload: Record<string, any>, options
         default:
             throw new Error(`Action ext ${ext} not implemented`)
     }
-    let _pl: any = payload;
-    if (payload?.args) {
-        _pl = payload.args;
-    }
-    const res = await run(_pl, options);
+    const res = await run(payload, options);
     if (!quiet) {
         if (res) {
             console.log(res);
@@ -51,11 +47,11 @@ async function executeActionCmd(
     //console.log("AARGs", aargs)
     const { args, options } = parseCommandArgs(aargs);
     //console.log("CMDA", args)
-    const params = { args: args };
+    const params = args;
     if (options?.clipBoardInput) {
-        params.args.push(await readClipboard())
+        params.push(await readClipboard())
     } else if (options?.inputFile) {
-        params.args.push(readPromptFile())
+        params.push(readPromptFile())
     }
     if (options?.debug) {
         console.log("Action", name, "params", params);
@@ -65,22 +61,24 @@ async function executeActionCmd(
 
 
 function systemAction(path: string): FeatureExecutor<Array<string>, any> {
-    const run: FeatureExecutor<Array<string>, any> = async (params: Array<any>) => {
+    const run: FeatureExecutor = async (params: any) => {
         //console.log("SYS ACTION PARAMS", params);
-        let runArgs = params;
-        /*if (params?.args) {
-            runArgs = params.args
-        } else {
-            // convert args for tool calls
-            //if (!Array.isArray(args)) {
+        let runArgs = new Array<string>();
+        // convert args for tool calls
+        if (!Array.isArray(params)) {
             try {
                 // obviously a tool call
-                runArgs = Object.values(params)
+                if (typeof params == "string") {
+                    runArgs.push(params)
+                } else {
+                    runArgs = Object.values(params)
+                }
             } catch (e) {
-                throw new Error(`wrong system action args: ${e}`)
+                throw new Error(`wrong python action args: ${e}`)
             }
-        }*/
-
+        } else {
+            runArgs = params
+        }
         const actionSpec = readYmlFile(path);
         if (!actionSpec.found) {
             runtimeError("System action yml file", path, "not found")
@@ -100,20 +98,22 @@ function systemAction(path: string): FeatureExecutor<Array<string>, any> {
 function pythonAction(
     path: string
 ): FeatureExecutor<Array<string>> {
-    const run: FeatureExecutor<Array<string>> = async (params: Record<string, any>) => {
+    const run: FeatureExecutor = async (params: any) => {
         //console.log("PY ACTION PARAMS", params);
         let runArgs = new Array<string>();
-        if (params?.args) {
-            runArgs = params.args
-        } else {
-            // convert args for tool calls
-            //if (!Array.isArray(args)) {
+        if (!Array.isArray(params)) {
             try {
                 // obviously a tool call
-                runArgs = Object.values(params)
+                if (typeof params == "string") {
+                    runArgs.push(params)
+                } else {
+                    runArgs = Object.values(params)
+                }
             } catch (e) {
                 throw new Error(`wrong python action args: ${e}`)
             }
+        } else {
+            runArgs = params
         }
         //console.log("Py action", path);
         const { data, error } = await runPyScript(

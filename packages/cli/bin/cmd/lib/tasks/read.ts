@@ -21,6 +21,7 @@ async function readTask(
     mcpServers: Array<McpClient>;
 }> {
     if (options?.debug) {
+        console.log("Task", name);
         console.log("Payload:", payload);
         console.log("Task options:", options);
     }
@@ -96,7 +97,7 @@ async function readTask(
                             //console.log("WFTRESP", tres.answer.text);
                             return tres.answer.text
                         case "workflow":
-                            const wres = await executeWorkflow(toolName, params as Record<string, any>, options);
+                            const wres = await executeWorkflow(toolName, params, options);
                             return wres
                         default:
                             throw new Error(`unknown tool execution function type: ${type} for ${toolName}`)

@@ -7,9 +7,9 @@ async function executeAdaptater(
     params: any,
     options: Record<string, any>
 ): Promise<any> {
-    if (params?.args) {
+    /*if (params?.args) {
         params = params.args;
-    }
+    }*/
     const { found, path } = getFeatureSpec(name, "adaptater" as FeatureType);
     if (!found) {
         throw new Error(`adaptater ${name} not found`);
@@ -19,9 +19,9 @@ async function executeAdaptater(
     run = createJsAction(jsa.action);
     let res;
     try {
-        //console.log("ADAPT RUN", { ...conf, ...vars });
+        //console.log("ADAPT RUN PARAMS", params);
         res = await run(params, options);
-        //sconsole.log("ADAPT RES", res);
+        //console.log("ADAPT RES", res);
     } catch (e) {
         throw new Error(`adaptater ${name}: ${e}`)
     }

@@ -20,6 +20,9 @@ async function executeTask(
     name: string, payload: Record<string, any>, options: Record<string, any>, quiet?: boolean
 ): Promise<TaskOutput> {
     const agent = new Agent(backend.value!);
+    //console.log("EXEC TASK");
+    //console.log("TN", name);
+    //console.log("AGENT", agent);
     if (options?.debug) {
         console.log("Agent:", colors.bold(agent.lm.name), "( " + agent.lm.providerType + " backend type)");
     }
