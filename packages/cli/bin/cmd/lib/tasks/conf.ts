@@ -92,7 +92,7 @@ function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): Mod
     if (!foundModel) {
         throw new Error(`No model found in task`)
     }
-    if (!foundTemplate) {
+    /*if (!foundTemplate) {
         // try to guess the template
         const gt = tfm.guess(model.name);
         if (gt == "none") {
@@ -103,7 +103,7 @@ function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): Mod
     }
     if (!model?.template) {
         throw new Error(`No template found`)
-    }
+    }*/
     //model.inferParams = ip;
     // use default ctx if the model is not from defined in the task file
     if (!model?.ctx || !isModelFromTaskFile) {
