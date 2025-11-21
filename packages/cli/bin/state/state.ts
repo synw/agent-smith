@@ -5,7 +5,9 @@ import { initDb } from "../db/db.js";
 import { readFilePaths } from "../db/read.js";
 import path from "path";
 import { createDirectoryIfNotExists } from "../cmd/sys/dirs.js";
-import { initBackends } from "./backends.js";
+import { backend, initBackends } from "./backends.js";
+import { Agent } from "@agent-smith/agent";
+import { runtimeDataError } from "../utils/user_msgs.js";
 
 let pyShell: PythonShell;
 
@@ -18,6 +20,7 @@ const isChatMode = ref(false);
 const promptfilePath = ref("");
 const dataDirPath = ref("");
 const isStateReady = ref(false);
+let agent: Agent;
 
 const lastCmd = reactive<{ name: string, args: Array<string> }>({
     name: "",
@@ -41,6 +44,12 @@ function initFilepaths() {
 async function init() {
     await initState();
     await initBackends();
+    if (!backend.value) {
+        runtimeDataError("No backend found, can not initialize agent")
+        return
+    }
+    agent = new Agent(backend.value);
+    //console.log("Agent", agent);
 }
 
 async function initState() {
@@ -90,4 +99,5 @@ export {
     init,
     //setVerbosity,
     pyShell,
+    agent,
 }

@@ -1,6 +1,7 @@
 import { getFeatureSpec } from "../../../state/features.js";
 import { FeatureExecutor, FeatureType } from "../../../interfaces.js";
 import { createJsAction } from "../actions/read.js";
+import { pathToFileURL } from 'url';
 
 async function executeAdaptater(
     name: string,
@@ -15,7 +16,8 @@ async function executeAdaptater(
         throw new Error(`adaptater ${name} not found`);
     }
     let run: FeatureExecutor<any, any>;
-    const jsa = await import(path);
+    const url = pathToFileURL(path).href;
+    const jsa = await import(url);
     run = createJsAction(jsa.action);
     let res;
     try {

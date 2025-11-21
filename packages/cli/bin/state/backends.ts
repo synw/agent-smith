@@ -35,7 +35,6 @@ async function initBackends(isVerbose = false) {
 
         if (isBackendUp.value && backend.value.providerType == "ollama") {
             await backend.value.modelsInfo();
-            //console.log("Ollama models:", backend.value.models);
         }
     }
 }

@@ -9,6 +9,7 @@ import { runtimeError } from "../../../utils/user_msgs.js";
 import { readClipboard } from "../../sys/clipboard.js";
 import { processOutput, readPromptFile } from "../utils.js";
 import { parseCommandArgs } from "../options_parsers.js";
+import { pathToFileURL } from 'url';
 
 async function executeAction(name: string, payload: any, options: Record<string, any>, quiet = false) {
     let run: FeatureExecutor<any, any>;
@@ -19,7 +20,8 @@ async function executeAction(name: string, payload: any, options: Record<string,
     //console.log("CREATE ACTION", name, ext, path);
     switch (ext) {
         case "js":
-            const mjsa = await import(path);
+            const url = pathToFileURL(path).href;
+            const mjsa = await import(url);
             run = createJsAction(mjsa.action);
             break;
         case "yml":

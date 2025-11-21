@@ -4,15 +4,17 @@ import { Command } from "commander";
 import { query } from "../cli.js";
 import { readAliases, readFeatures } from "../db/read.js";
 import { chatInferenceParams } from "../state/chat.js";
-import { isChatMode, runMode } from "../state/state.js";
+import { agent, isChatMode, runMode } from "../state/state.js";
 import { initCommandsFromAliases } from "./clicmds/aliases.js";
 import { initBaseCommands } from "./clicmds/base.js";
 import { initUserCmds } from "./clicmds/cmds.js";
+import { Agent } from "@agent-smith/agent/dist/agent.js";
+import { backend } from "../state/backends.js";
 
 const program = new Command();
 
 async function chat(program: Command) {
-    /*const data = { message: '>', default: "" };
+    const data = { message: '>', default: "" };
     const prompt = await input(data);
     if (prompt == "/q") {
         isChatMode.value = false;
@@ -23,9 +25,9 @@ async function chat(program: Command) {
         }
     }
     //console.log("EX", brain.ex);
-    await brain.ex.think(prompt, toRaw(chatInferenceParams));
+    await agent.lm.infer(prompt, toRaw(chatInferenceParams))
     console.log();
-    await chat(program);*/
+    await chat(program);
 }
 
 async function buildCmds(): Promise<Command> {

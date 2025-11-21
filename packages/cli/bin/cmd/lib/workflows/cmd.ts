@@ -39,7 +39,8 @@ async function executeWorkflow(name: string, args: any, options: Record<string, 
             case "action":
                 try {
                     //console.log("EXEC ACTION ARGS", taskRes);
-                    const ares = await executeAction(name, taskRes, options, true);
+                    const actArgs = i == 0 ? taskRes.cmdArgs : taskRes;
+                    const ares = await executeAction(name, actArgs, options, true);
                     //console.log("WF ACTION RES", typeof ares, ares);
                     if (typeof ares == "string" || Array.isArray(ares)) {
                         taskRes.args = ares;
@@ -59,7 +60,8 @@ async function executeWorkflow(name: string, args: any, options: Record<string, 
                 try {
                     //console.log("WF AD ARGS IN", taskRes);
                     //console.log("AD OPTS IN", options);
-                    const adres = await executeAdaptater(name, taskRes, options);
+                    const actArgs = i == 0 ? taskRes.cmdArgs : taskRes;
+                    const adres = await executeAdaptater(name, actArgs, options);
                     //console.log("WF AD RES", typeof adres, adres);
                     if (typeof adres == "string" || Array.isArray(adres)) {
                         taskRes.args = adres;

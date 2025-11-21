@@ -8,6 +8,7 @@ import { getFeatureSpec } from '../../../state/features.js';
 import { readTask } from "../../sys/read_task.js";
 import { pythonAction, systemAction } from '../actions/cmd.js';
 import { createJsAction } from '../actions/read.js';
+import { pathToFileURL } from 'url';
 
 async function _createWorkflowFromSpec(
     spec: Record<string, any>
@@ -33,7 +34,8 @@ async function _createWorkflowFromSpec(
             }
             switch (ext) {
                 case "js":
-                    const { action } = await import(path);
+                    const url = pathToFileURL(path).href;
+                    const { action } = await import(url);
                     const at = action as FeatureExecutor<any, any>;
                     const wf: WorkflowStep = {
                         type: "action",
@@ -42,7 +44,8 @@ async function _createWorkflowFromSpec(
                     steps[name] = wf;
                     break;
                 case "mjs":
-                    const mjsa = await import(path);
+                    const url2 = pathToFileURL(path).href;
+                    const mjsa = await import(url2);
                     const act = createJsAction(mjsa.action);
                     const wf2: WorkflowStep = {
                         type: "action",
@@ -74,7 +77,8 @@ async function _createWorkflowFromSpec(
             if (!found) {
                 throw new Error(`Adaptater ${name} not found`)
             }
-            const jsa = await import(path);
+            const url = pathToFileURL(path).href;
+            const jsa = await import(url);
             const act = createJsAction(jsa.action);
             const wf: WorkflowStep = {
                 type: "adaptater",

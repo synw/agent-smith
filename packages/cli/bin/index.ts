@@ -2,9 +2,8 @@
 import { argv } from 'process';
 import { query } from "./cli.js";
 import { buildCmds, parseCmd } from './cmd/cmds.js';
-import { formatMode, initState, inputMode, isChatMode, outputMode, runMode } from './state/state.js';
+import { formatMode, init, inputMode, isChatMode, outputMode, runMode } from './state/state.js';
 import { updateConfCmd } from './cmd/clicmds/update.js';
-import { initBackends } from './state/backends.js';
 
 async function main() {
     const nargs = argv.length;
@@ -17,8 +16,7 @@ async function main() {
             return
         }
     }
-    await initState();
-    await initBackends();
+    await init();
     const program = await buildCmds();
     program.hook('preAction', async (thisCommand, actionCommand) => {
         const options = actionCommand.opts();

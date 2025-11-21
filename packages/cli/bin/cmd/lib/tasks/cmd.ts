@@ -8,8 +8,7 @@ import ora, { Ora } from 'ora';
 import { query } from "../../../cli.js";
 import { readClipboard } from "../../../cmd/sys/clipboard.js";
 import { usePerfTimer } from "../../../main.js";
-import { backend } from "../../../state/backends.js";
-import { isChatMode, runMode } from "../../../state/state.js";
+import { isChatMode, runMode, agent } from "../../../state/state.js";
 import { program } from "../../cmds.js";
 import { parseCommandArgs } from "../options_parsers.js";
 import { runtimeDataError, runtimeWarning } from "../user_msgs.js";
@@ -19,7 +18,6 @@ import { readTask } from "./read.js";
 async function executeTask(
     name: string, payload: Record<string, any>, options: Record<string, any>, quiet?: boolean
 ): Promise<TaskOutput> {
-    const agent = new Agent(backend.value!);
     //console.log("EXEC TASK");
     //console.log("TN", name);
     //console.log("AGENT", agent);
