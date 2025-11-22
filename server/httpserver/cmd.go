@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"slices"
 	"sync"
 
 	"github.com/labstack/echo/v4"
@@ -17,7 +18,7 @@ func ExecuteCmdHandler(c echo.Context) error {
 	if err := c.Bind(&m); err != nil {
 		return err
 	}
-	cmd, ok := m["cmd"]
+	cmd, ok := m["cmd"].(string)
 	if !ok {
 		msg := "Provide a 'cmd' string parameter"
 		return echo.NewHTTPError(http.StatusBadRequest, msg)
@@ -25,11 +26,16 @@ func ExecuteCmdHandler(c echo.Context) error {
 	apiKey := c.Get("apiKey")
 	authorizedCmds := state.Conf.Groups[types.GroupApiKey(apiKey.(string))]
 	isCmdAuthorized := false
-	if apiKey == state.Conf.CmdApiKey {
-		isCmdAuthorized = true
-	} else {
-		for _, authCmd := range authorizedCmds {
-			if cmd == authCmd {
+	isCmdUnauthorized := false
+	unauthorizedCmds := []string{"conf", "reset"}
+	if slices.Contains(unauthorizedCmds, cmd) {
+		isCmdUnauthorized = true
+	}
+	if !isCmdUnauthorized {
+		if apiKey == state.Conf.CmdApiKey {
+			isCmdAuthorized = true
+		} else {
+			if slices.Contains(authorizedCmds, cmd) {
 				isCmdAuthorized = true
 			}
 		}
@@ -52,7 +58,7 @@ func ExecuteCmdHandler(c echo.Context) error {
 		defer wg.Done()
 		rawParams := params.([]interface{})
 		params := lm.InterfaceToStringArray(rawParams)
-		lm.RunCmd(cmd.(string), params, c, ch, errCh, c.Request().Context())
+		lm.RunCmd(cmd, params, c, ch, errCh, c.Request().Context())
 	}()
 
 	select {
