@@ -47,7 +47,7 @@ An api to create local first human friendly agents in the browser or Nodejs
         - [Git](https://synw.github.io/agent-smith/plugins/code/git)
  - [Server](https://synw.github.io/agent-smith/server)
     - [Get started](https://synw.github.io/agent-smith/server/get_started)
-    - [Endpoints](https://synw.github.io/agent-smith/server/endpoints)
+    - [Api](https://synw.github.io/agent-smith/server/api)
 
 </details>
 
