@@ -13,10 +13,16 @@ func main() {
 	quiet := flag.Bool("q", false, "disable the verbose output")
 	debug := flag.Bool("debug", false, "debug mode")
 	genconf := flag.Bool("conf", false, "generate a config file")
+	genkey := flag.Bool("key", false, "generate a random api key")
 	flag.Parse()
 	if *genconf {
 		conf.Create()
 		fmt.Println("File server.config.json created")
+		return
+	}
+	if *genkey {
+		key := conf.GenerateRandomKey()
+		fmt.Println(key)
 		return
 	}
 	if *debug {

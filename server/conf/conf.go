@@ -60,7 +60,7 @@ func Create() {
 		fmt.Println("Config file already exists. Skipping creation.")
 		return
 	}
-	key := generateRandomKey()
+	key := GenerateRandomKey()
 	data := map[string]interface{}{
 		"origins": []string{"http://localhost:5173", "http://localhost:5143", "http://localhost:4321"},
 		"api_key": key,
@@ -69,7 +69,7 @@ func Create() {
 	os.WriteFile("server.config.yaml", yamlString, 0600)
 }
 
-func generateRandomKey() string {
+func GenerateRandomKey() string {
 	bytes := make([]byte, 32)
 	if _, err := rand.Read(bytes); err != nil {
 		panic(err.Error())
