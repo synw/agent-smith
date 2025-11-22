@@ -7,10 +7,7 @@ toolchain go1.23.5
 require (
 	github.com/labstack/echo/v4 v4.13.3
 	github.com/labstack/gommon v0.4.2
-	github.com/ollama/ollama v0.5.7
-	github.com/sashabaranov/go-openai v1.36.1
 	github.com/spf13/viper v1.19.0
-	github.com/synw/gomodprompt v0.0.0-20250131113839-5dc8f58eefe3
 	gopkg.in/yaml.v3 v3.0.1
 )
 

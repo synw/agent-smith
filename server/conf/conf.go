@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/synw/agent-smith/server/types"
@@ -16,43 +17,32 @@ func InitConf() types.Conf {
 	viper.SetConfigName("server.config")
 	viper.AddConfigPath(".")
 	viper.SetDefault("origins", []string{"localhost"})
-	viper.SetDefault("cmd_api_key", "")
-	viper.SetDefault("models", map[string]string{})
-	viper.SetDefault("features", []string{})
-	viper.SetDefault("oai_api", map[string]string{})
+	viper.SetDefault("api_key", "")
 	err := viper.ReadInConfig() // Find and read the config file
 	if err != nil {             // Handle errors reading the config file
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 	or := viper.GetStringSlice("origins")
-	ak := viper.GetString("api_key")
-	cmdak := viper.GetString("cmd_api_key")
-	models := viper.GetStringMapString("models")
-	oai_api := viper.GetStringMapString("oai_api")
-	ft := viper.GetStringSlice("features")
+	cmdak := viper.GetString("api_key")
+	if cmdak == "" {
+		log.Fatal("api_key is required in config")
+	}
 	return types.Conf{
-		Origins:      or,
-		ApiKey:       ak,
-		CmdApiKey:    cmdak,
-		Features:     ft,
-		Models:       models,
-		OaiApiParams: oai_api,
+		Origins:   or,
+		CmdApiKey: cmdak,
 	}
 }
 
 // Create : create a config file
-func Create(isDefault bool) {
+func Create() {
 	// Check if the file already exists
 	if _, err := os.Stat("server.config.yaml"); err == nil {
 		fmt.Println("Config file already exists. Skipping creation.")
 		return
 	}
-	key := "7aea109636aefb984b13f9b6927cd174425a1e05ab5f2e3935ddfeb183099465"
-	if !isDefault {
-		key = generateRandomKey()
-	}
+	key := generateRandomKey()
 	data := map[string]interface{}{
-		"origins": []string{"http://localhost:5173", "http://localhost:5143"},
+		"origins": []string{"http://localhost:5173", "http://localhost:5143", "http://localhost:4321"},
 		"api_key": key,
 	}
 	yamlString, _ := yaml.Marshal(data)

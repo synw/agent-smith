@@ -8,7 +8,7 @@ import (
 	"github.com/labstack/gommon/log"
 )
 
-func RunServer(origins []string, apiKey string, cmdApîKey string) {
+func RunServer(origins []string, cmdApîKey string) {
 	e := echo.New()
 
 	// logger
@@ -26,17 +26,6 @@ func RunServer(origins []string, apiKey string, cmdApîKey string) {
 		AllowMethods:     []string{http.MethodGet, http.MethodOptions, http.MethodPost},
 		AllowCredentials: true,
 	}))
-
-	tasks := e.Group("/task")
-	tasks.Use(middleware.KeyAuth(func(key string, c echo.Context) (bool, error) {
-		if (key == apiKey) || (key == cmdApîKey) {
-			//c.Set("apiKey", key)
-			return true, nil
-		}
-		return false, nil
-	}))
-	//tasks.GET("/abort", AbortHandler)
-	tasks.POST("/execute", ExecuteTaskHandler)
 
 	cmds := e.Group("/cmd")
 	cmds.Use(middleware.KeyAuth(func(key string, c echo.Context) (bool, error) {
