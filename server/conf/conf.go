@@ -4,7 +4,6 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
-	"log"
 	"os"
 
 	"github.com/synw/agent-smith/server/types"
@@ -17,19 +16,40 @@ func InitConf() types.Conf {
 	viper.SetConfigName("server.config")
 	viper.AddConfigPath(".")
 	viper.SetDefault("origins", []string{"localhost"})
-	viper.SetDefault("api_key", "")
+	viper.SetDefault("groups", []string{})
+	viper.SetDefault("api_key", nil)
 	err := viper.ReadInConfig() // Find and read the config file
 	if err != nil {             // Handle errors reading the config file
 		panic(fmt.Errorf("fatal error config file: %w", err))
 	}
 	or := viper.GetStringSlice("origins")
 	cmdak := viper.GetString("api_key")
-	if cmdak == "" {
-		log.Fatal("api_key is required in config")
+	apiKeyIsValid := cmdak != ""
+	// Read groups from config
+	groups := make(map[types.GroupApiKey]types.AuthorizedCmds)
+	groupsData := viper.GetStringMap("groups")
+	apiKeys := []types.GroupApiKey{}
+	for key, value := range groupsData {
+		if cmdSlice, ok := value.([]interface{}); ok {
+			authorizedCmds := make([]string, len(cmdSlice))
+			for i, cmd := range cmdSlice {
+				if cmdStr, ok := cmd.(string); ok {
+					authorizedCmds[i] = cmdStr
+				}
+			}
+			groups[types.GroupApiKey(key)] = authorizedCmds
+			apiKeys = append(apiKeys, types.GroupApiKey(key))
+		}
 	}
+
 	return types.Conf{
-		Origins:   or,
-		CmdApiKey: cmdak,
+		Origins: or,
+		CmdApiKey: types.ValidApiKey{
+			Key:     cmdak,
+			IsValid: apiKeyIsValid,
+		},
+		Groups:  groups,
+		ApiKeys: apiKeys,
 	}
 }
 

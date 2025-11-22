@@ -2,13 +2,16 @@ package httpserver
 
 import (
 	"net/http"
+	"slices"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/labstack/gommon/log"
+	"github.com/synw/agent-smith/server/state"
+	"github.com/synw/agent-smith/server/types"
 )
 
-func RunServer(origins []string, cmdApîKey string) {
+func RunServer() {
 	e := echo.New()
 
 	// logger
@@ -21,7 +24,7 @@ func RunServer(origins []string, cmdApîKey string) {
 
 	//cors
 	e.Use(middleware.CORSWithConfig(middleware.CORSConfig{
-		AllowOrigins:     origins,
+		AllowOrigins:     state.Conf.Origins,
 		AllowHeaders:     []string{echo.HeaderOrigin, echo.HeaderContentType, echo.HeaderAuthorization},
 		AllowMethods:     []string{http.MethodGet, http.MethodOptions, http.MethodPost},
 		AllowCredentials: true,
@@ -29,8 +32,14 @@ func RunServer(origins []string, cmdApîKey string) {
 
 	cmds := e.Group("/cmd")
 	cmds.Use(middleware.KeyAuth(func(key string, c echo.Context) (bool, error) {
-		if key == cmdApîKey {
-			//c.Set("apiKey", key)
+		if state.Conf.CmdApiKey.IsValid {
+			if key == state.Conf.CmdApiKey.Key {
+				c.Set("apiKey", key)
+				return true, nil
+			}
+		}
+		if slices.Contains(state.Conf.ApiKeys, types.GroupApiKey(key)) {
+			c.Set("apiKey", key)
 			return true, nil
 		}
 		return false, nil

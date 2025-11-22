@@ -22,11 +22,25 @@ func ExecuteCmdHandler(c echo.Context) error {
 		msg := "Provide a 'cmd' string parameter"
 		return echo.NewHTTPError(http.StatusBadRequest, msg)
 	}
+	apiKey := c.Get("apiKey")
+	authorizedCmds := state.Conf.Groups[types.GroupApiKey(apiKey.(string))]
+	isCmdAuthorized := false
+	if apiKey == state.Conf.CmdApiKey {
+		isCmdAuthorized = true
+	} else {
+		for _, authCmd := range authorizedCmds {
+			if cmd == authCmd {
+				isCmdAuthorized = true
+			}
+		}
+	}
+	if !isCmdAuthorized {
+		return c.NoContent(http.StatusUnauthorized)
+	}
 	params, ok := m["params"]
 	if !ok {
 		params = []string{}
 	}
-
 	c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	c.Response().WriteHeader(http.StatusOK)
 	ch := make(chan types.StreamedMessage)

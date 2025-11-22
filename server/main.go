@@ -27,10 +27,10 @@ func main() {
 		state.IsVerbose = *quiet
 	}
 	state.IsVerbose = !*quiet
-	config := conf.InitConf()
+	state.Conf = conf.InitConf()
 	//fmt.Println("Conf", config)
 	if state.IsVerbose {
-		fmt.Println("Starting the http server with allowed origins", config.Origins)
+		fmt.Println("Starting the http server with allowed origins", state.Conf.Origins)
 	}
-	httpserver.RunServer(config.Origins, config.CmdApiKey)
+	httpserver.RunServer()
 }

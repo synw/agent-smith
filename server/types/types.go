@@ -2,11 +2,18 @@ package types
 
 type Conf struct {
 	Origins   []string
-	CmdApiKey string
-	Groups    map[GroupName]AuthorizedCmds
+	CmdApiKey ValidApiKey
+	Groups    map[GroupApiKey]AuthorizedCmds
+	ApiKeys   []GroupApiKey
 }
 
-type GroupName string
+type ValidApiKey struct {
+	Key     string
+	IsValid bool
+}
+
+type ApiKeys []string
+type GroupApiKey string
 type AuthorizedCmds []string
 
 type MsgType string
