@@ -13,7 +13,10 @@ yarn-error.log
 package-lock.json
 examples/data
 coverage
-server
+/server/server
+/server/server.exe
+/server/build
+/server/server.config.yaml
 server.config.yaml
 .aider*
 .continue
