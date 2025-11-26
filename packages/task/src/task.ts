@@ -27,7 +27,7 @@ class Task {
         //console.log("TASK CONF", conf);
         //console.log("TOOLS", this.agent.tools);
         if (!params?.prompt) {
-            throw new Error("Please provide a prompt parameter");
+            throw new Error(`Task ${this.def.name}: no prompt parameter provided. Parameters: ${params}`);
         }
         let model = this.def.model;
         let ctx = this.def.ctx;
