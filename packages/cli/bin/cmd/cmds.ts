@@ -8,8 +8,6 @@ import { agent, isChatMode, runMode } from "../state/state.js";
 import { initCommandsFromAliases } from "./clicmds/aliases.js";
 import { initBaseCommands } from "./clicmds/base.js";
 import { initUserCmds } from "./clicmds/cmds.js";
-import { Agent } from "@agent-smith/agent/dist/agent.js";
-import { backend } from "../state/backends.js";
 
 const program = new Command();
 

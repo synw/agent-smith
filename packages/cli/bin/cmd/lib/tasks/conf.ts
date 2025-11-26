@@ -22,24 +22,25 @@ function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): Mod
     let model = { template: "", name: "" } as ModelSpec;
     let foundModel = false;
     let foundTemplate = false;
-    //console.log("CONF", itConf);
     if (itConf?.templateName) {
         model.template = itConf.templateName;
         foundTemplate = true;
     }
-    if (itConf?.model?.name) {
-        if (itConf?.model?.name != taskSpec.model.name) {
-            const gt = guessTemplate(itConf.model.name);
+    if (!foundTemplate) {
+        if (itConf?.model?.name) {
+            if (itConf?.model?.name != taskSpec.model.name) {
+                const gt = guessTemplate(itConf.model.name);
+                model.template = gt;
+                foundTemplate = true;
+            }
+        } else if (taskSpec?.model?.template) {
+            model.template = taskSpec.model.template;
+            foundTemplate = true;
+        } else {
+            const gt = guessTemplate(taskSpec.model.name);
             model.template = gt;
             foundTemplate = true;
         }
-    } else if (taskSpec?.model?.template) {
-        model.template = taskSpec.model.template;
-        foundTemplate = true;
-    } else {
-        const gt = guessTemplate(taskSpec.model.name);
-        model.template = gt;
-        foundTemplate = true;
     }
     if (itConf?.model?.name) {
         if (taskSpec?.models && Object.keys(taskSpec.models).includes(itConf.model.name)) {

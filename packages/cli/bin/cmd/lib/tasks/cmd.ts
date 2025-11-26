@@ -11,9 +11,10 @@ import { usePerfTimer } from "../../../main.js";
 import { isChatMode, runMode, agent } from "../../../state/state.js";
 import { program } from "../../cmds.js";
 import { parseCommandArgs } from "../options_parsers.js";
-import { runtimeDataError, runtimeWarning } from "../user_msgs.js";
+import { runtimeDataError, runtimeError, runtimeWarning } from "../user_msgs.js";
 import { formatStats, processOutput, readPromptFile } from "../utils.js";
 import { readTask } from "./read.js";
+import { InferenceResult } from "@locallm/types/dist/inference.js";
 
 async function executeTask(
     name: string, payload: Record<string, any>, options: Record<string, any>, quiet?: boolean
@@ -180,7 +181,29 @@ async function executeTask(
     let out: TaskOutput;
 
     //console.log("CLI EXEC TASK", payload.prompt, "\nVARS:", vars, "\nOPTS", tconf)
-    out = await task.run({ prompt: payload.prompt, ...vars }, tconf);
+    try {
+        out = await task.run({ prompt: payload.prompt, ...vars }, tconf);
+    } catch (e) {
+        const errMsg = `${e}`;
+        if (errMsg.includes("502 Bad Gateway")) {
+            runtimeError("The server answered with a 502 Bad Gateway error. It might be down or misconfigured. Check your inference server.")
+            if (options?.debug) {
+                throw new Error(errMsg)
+            }
+            //@ts-ignore
+            return
+        } else if (errMsg.includes("404 Not Found")) {
+            runtimeError("The server answered with a 404 Not Found error. That usually mean that the model you are requesting does not exist on the server.")
+            //@ts-ignore
+            return
+        } else if (errMsg.includes("fetch failed")) {
+            runtimeError("The server is not responding. Check if your inference backend is running.")
+            //@ts-ignore
+            return
+        } else {
+            throw new Error(errMsg)
+        }
+    }
     //console.log("END TASK", out);
     if (!out.answer.text.endsWith("\n")) {
         console.log()

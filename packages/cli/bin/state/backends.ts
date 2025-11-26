@@ -65,8 +65,8 @@ const probeBackend = async (lm: Lm, isVerbose: boolean): Promise<boolean> => {
     switch (lm.providerType) {
         case "llamacpp":
             try {
-                const info = await lm.info();
                 if (isVerbose) {
+                    const info = await lm.modelInfo();
                     console.log(`Provider ${lm.name} up`, info);
                 }
                 isUp = true;
@@ -78,9 +78,9 @@ const probeBackend = async (lm: Lm, isVerbose: boolean): Promise<boolean> => {
             break;
         case "koboldcpp":
             try {
-                const info = await lm.info();
                 if (lm.model.name.length > 0) {
                     if (isVerbose) {
+                        const info = await lm.modelInfo();
                         console.log(`Provider ${lm.name} up`, info)
                     }
                     isUp = true;
