@@ -9,21 +9,32 @@ const backend = ref<Lm>();
 const backends = reactive<Record<string, Lm>>({});
 const isBackendUp = ref(false);
 
-async function initBackends(isVerbose = false) {
+async function initBackends() {
     const rmb = readBackends();
     //console.log("Backends:", rmb)
     let defaultBackendName: string | null = null;
     for (const bk of Object.values(rmb)) {
         //console.log("BK", bk.name);
+        let name = bk.name;
+        let apiKey = "";
+        if (bk?.apiKey) {
+            if (bk.apiKey == "$OPENROUTER_API_KEY") {
+                const apk = process.env.OPENROUTER_API_KEY;
+                if (apk === undefined) {
+                    runtimeDataError("No $OPENROUTER_API_KEY environment variable found, required for ", name)
+                    return
+                }
+                apiKey = apk
+            } else {
+                apiKey = bk.apiKey
+            }
+        };
         const lm = new Lm({
             providerType: bk.type,
             serverUrl: bk.url,
+            apiKey: apiKey.length > 0 ? apiKey : undefined,
         });
-        lm.name = bk.name;
-        if (bk?.apiKey) {
-            lm.apiKey = bk.apiKey
-        };
-        backends[bk.name] = lm;
+        backends[name] = lm;
         if (bk.isDefault) {
             defaultBackendName = bk.name
         }
@@ -31,11 +42,11 @@ async function initBackends(isVerbose = false) {
     if (defaultBackendName !== null) {
         backend.value = backends[defaultBackendName];
         //console.log("Setting default backend", defaultBackendName, "/", backend.value.name)
-        isBackendUp.value = await probeBackend(backend.value, isVerbose);
+        /*isBackendUp.value = await probeBackend(backend.value, isVerbose);
 
         if (isBackendUp.value && backend.value.providerType == "ollama") {
             await backend.value.modelsInfo();
-        }
+        }*/
     }
 }
 
