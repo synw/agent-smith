@@ -80,7 +80,7 @@ class Task {
             console.log("----------------------------------------------")
             console.log("Infer params:", this.def.inferParams);
             console.log("----------------------------------------------")
-            options.debug = true
+            //options.debug = true
         }
         if (this.agent.lm.providerType == "ollama") {
             if (!this.def.inferParams?.extra) {
@@ -90,6 +90,10 @@ class Task {
             this.def.inferParams["extra"]["raw"] = true
         }
         let answer: InferenceResult;
+        if (options?.debug) {
+            // cut debug here. TODO: debug log levels
+            options.debug = false
+        }
         if (!useTemplates) {
             if (this.def.template?.system) {
                 options.system = this.def.template.system;
