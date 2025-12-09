@@ -1,5 +1,5 @@
-import { TaskDef, ModelSpec, TaskVariables } from "@agent-smith/task";
-import { InferenceParams, LmProviderType } from "@locallm/types";
+import type { TaskDef, ModelSpec, TaskVariables } from "@agent-smith/task";
+import type { InferenceParams, LmProviderType } from "@locallm/types";
 
 interface FeatureSpec {
     id?: number;
@@ -73,7 +73,6 @@ interface ModelPack {
 
 interface LmTaskFileSpec extends TaskDef {
     ctx: number;
-    modelpack?: ModelPack;
     mcp?: McpServerSpec;
 }
 

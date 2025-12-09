@@ -1,4 +1,3 @@
-import { Agent } from "@agent-smith/agent";
 import { TaskConf, TaskOutput } from "@agent-smith/task";
 import { input } from "@inquirer/prompts";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
@@ -14,7 +13,7 @@ import { parseCommandArgs } from "../options_parsers.js";
 import { runtimeDataError, runtimeError, runtimeWarning } from "../user_msgs.js";
 import { formatStats, processOutput, readPromptFile } from "../utils.js";
 import { readTask } from "./read.js";
-import { InferenceResult } from "@locallm/types/dist/inference.js";
+import { backend, backends, listBackends } from "../../../state/backends.js";
 
 async function executeTask(
     name: string, payload: Record<string, any>, options: Record<string, any>, quiet?: boolean
@@ -22,7 +21,15 @@ async function executeTask(
     //console.log("EXEC TASK");
     //console.log("TN", name);
     //console.log("AGENT", agent);
-    if (options?.debug) {
+    if (options?.backend) {
+        if (options.backend in backends) {
+            agent.lm = backends[options.backend]
+        } else {
+            const bks = await listBackends(false);
+            runtimeDataError(`The backend ${options.backend} is not registered in config. Available backends:\n`, bks)
+        }
+    }
+    if (options?.debug || options?.backend) {
         console.log("Agent:", colors.bold(agent.lm.name), "( " + agent.lm.providerType + " backend type)");
     }
     const { task, model, conf, vars, mcpServers } = await readTask(name, payload, options, agent);
@@ -32,10 +39,6 @@ async function executeTask(
         //console.log("TSG");
         model.inferParams.grammar = serializeGrammar(await compile(model.inferParams.tsGrammar, "Grammar"));
         delete model.inferParams.tsGrammar;
-    }
-    if (options?.debug) {
-        console.log("Task model:", model);
-        console.log("Task vars:", vars);
     }
     //let i = 0;
     let c = false;
@@ -49,7 +52,10 @@ async function executeTask(
         hasThink = tpl.tags?.think ? true : false;
         //console.log("HT", hasThink);
     }
-
+    if (options?.debug) {
+        console.log("Task model:", model);
+        console.log("Task vars:", vars);
+    }
     //const hasTools = ex.template?.tags?.toolCall;
     //console.log("EX TPL", ex.template);
     //console.log("ST", thinkStart);
@@ -241,6 +247,10 @@ async function executeTask(
         } catch (e) {
             runtimeWarning("Error formating stats:", `${e}`)
         }
+    }
+    if (options?.backend) {
+        // set back the default backend
+        agent.lm = backend.value!;
     }
     //console.log("TASK OUT", out);
     return out

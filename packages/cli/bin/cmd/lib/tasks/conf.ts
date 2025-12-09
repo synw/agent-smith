@@ -28,11 +28,9 @@ function configureTaskModel(itConf: LmTaskConfig, taskSpec: LmTaskFileSpec): Mod
     }
     if (!foundTemplate) {
         if (itConf?.model?.name) {
-            if (itConf?.model?.name != taskSpec.model.name) {
-                const gt = guessTemplate(itConf.model.name);
-                model.template = gt;
-                foundTemplate = true;
-            }
+            const gt = guessTemplate(itConf.model.name);
+            model.template = gt;
+            foundTemplate = true;
         } else if (taskSpec?.model?.template) {
             model.template = taskSpec.model.template;
             foundTemplate = true;

@@ -1,12 +1,12 @@
 import { Lm } from "@locallm/api";
-import { reactive, ref } from "@vue/reactivity";
+import { ref } from "@vue/reactivity";
 import colors from "ansi-colors";
 import { readBackends } from "../db/read.js";
 import { setDefaultBackend } from "../db/write.js";
 import { runtimeDataError } from "../utils/user_msgs.js";
 
 const backend = ref<Lm>();
-const backends = reactive<Record<string, Lm>>({});
+const backends: Record<string, Lm> = {};
 const isBackendUp = ref(false);
 
 async function initBackends() {
@@ -61,14 +61,20 @@ async function setBackend(name: string, isVerbose = false) {
     isBackendUp.value = await probeBackend(backend.value, isVerbose);
 }
 
-async function listBackends() {
+async function listBackends(printResult = true): Promise<string> {
     //console.log("DEFB", backend.value?.name);
+    const allBk = new Array<string>();
     for (const [name, lm] of Object.entries(backends)) {
         const bcn = name == backend.value?.name ? colors.bold(name) : name;
         //const isUp = await probeBackend(lm, false);
         const buf = new Array<string>("-", bcn, colors.dim("(" + lm.providerType + ") " + lm.serverUrl), /*isUp ? "🟢" : ""*/);
-        console.log(buf.join(" "))
+        const str = buf.join(" ");
+        if (printResult) {
+            console.log(str)
+        }
+        allBk.push(str)
     }
+    return allBk.join(" ");
 }
 
 const probeBackend = async (lm: Lm, isVerbose: boolean): Promise<boolean> => {

@@ -16,6 +16,7 @@ const inferenceOptions: Array<Option> = [
     new Option("--mp, --min_p <number>", "the minimum probability for a token to be considered, relative to the probability of the most likely token").argParser(parseFloatValue),
     new Option("-t, --temperature <number>", "adjusts randomness in sampling; higher values mean more randomness").argParser(parseFloatValue),
     new Option("-r, --repeat_penalty <number>", "adjusts penalty for repeated tokens").argParser(parseFloatValue),
+    new Option("-b, --backend <name>", "use a given backend. It must be registered in config").argParser(parseString),
 ];
 
 const ioOptions: Array<Option> = [

@@ -12,7 +12,6 @@ import { parseCommandArgs } from "../lib/options_parsers.js";
 import { deleteFileIfExists } from "../sys/delete_file.js";
 import { readTask } from "../sys/read_task.js";
 import { updateConfCmd } from "./update.js";
-import { Task } from "@agent-smith/task/dist/task.js";
 import { listBackends, setBackend } from "../../state/backends.js";
 
 function initBaseCommands(program: Command): Command {
