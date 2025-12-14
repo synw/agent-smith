@@ -1,5 +1,5 @@
-import { InferenceParams, InferenceResult, InferenceOptions, ToolSpec, HistoryTurn, ToolCallSpec } from "@locallm/types";
-import { PromptTemplate } from "modprompt";
+import type { InferenceParams, InferenceResult, InferenceOptions, ToolSpec, HistoryTurn, ToolCallSpec } from "@locallm/types";
+import type { PromptTemplate } from "modprompt";
 
 interface ModelSpec {
     name: string;
@@ -92,8 +92,7 @@ interface TaskDef {
 
 interface TaskOutput {
     answer: InferenceResult;
-    errors: Record<string, string>;
-    template?: PromptTemplate;
+    template: PromptTemplate;
 }
 
 export {

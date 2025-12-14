@@ -108,10 +108,11 @@ class Task {
             //console.log("RUN AGENT (TASK) params:", this.def.inferParams);
             //console.log("RUN AGENT (TASK) options:", options);
             answer = await this.agent.run(finalPrompt, this.def.inferParams, options, tpl);
+            tpl.history = this.agent.history;
             //console.log("RAW ANSWER", answer);
         }
         //console.log("TASK: ANSWER FINAL:", { answer: answer.result, errors: {}, template: answer.template })
-        return { answer, errors: {} }
+        return { answer, template: tpl }
     }
 
     addTools(tools: Array<ToolSpec>): Task {
