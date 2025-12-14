@@ -204,20 +204,20 @@ class Agent {
                 final = finalAnswer;
             }
             if (it == 1) {
+                const turn: HistoryTurn = {};
                 if (thinking.length > 0) {
-                    tpl.pushToHistory({ think: thinking })
+                    turn.think = thinking
                 }
-                tpl.pushToHistory({
-                    user: prompt.replace("{prompt}", prompt),
-                    assistant: final,
-                });
+                turn.user = prompt.replace("{prompt}", prompt);
+                turn.assistant = final;
+                tpl.pushToHistory(turn)
             } else {
+                const turn: HistoryTurn = {};
                 if (thinking.length > 0) {
-                    tpl.pushToHistory({ think: thinking })
+                    turn.think = thinking
                 }
-                tpl.pushToHistory({
-                    assistant: final,
-                });
+                turn.assistant = final;
+                tpl.pushToHistory(turn)
             }
             this.history = tpl.history;
             return res
