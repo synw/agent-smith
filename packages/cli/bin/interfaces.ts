@@ -15,7 +15,6 @@ interface Features {
     action: Array<{ name: string, path: string, ext: ActionExtension }>;
     workflow: Array<{ name: string, path: string, ext: WorkflowExtension }>;
     adaptater: Array<{ name: string, path: string, ext: AdaptaterExtension }>;
-    modelfile: Array<{ name: string, path: string, ext: ModelFileExtension }>;
 }
 
 interface ConfInferenceBackend {
@@ -126,8 +125,7 @@ type TaskExtension = "yml";
 type AdaptaterExtension = "js";
 type WorkflowExtension = "yml";
 type CmdExtension = "js";
-type ModelFileExtension = "yml";
-type FeatureExtension = TaskExtension | CmdExtension | ActionExtension | WorkflowExtension | ModelFileExtension;
+type FeatureExtension = TaskExtension | CmdExtension | ActionExtension | WorkflowExtension;
 type AliasType = "task" | "action" | "workflow";
 
 type FeatureExecutor<I = any, O = any> = (params: I, options: Record<string, any>) => Promise<O>;
@@ -144,7 +142,6 @@ export {
     WorkflowExtension,
     AdaptaterExtension,
     CmdExtension,
-    ModelFileExtension,
     FeatureSpec,
     Features,
     ConfigFile,

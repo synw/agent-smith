@@ -172,7 +172,7 @@ function updateVariables(name: string, variableDoc: string) {
     }
     const updateStmt = db.prepare("UPDATE task SET variables = ? WHERE id = ?");
     updateStmt.run(variableDoc, result.id);
-    console.log("~", "[task variables] updated for", name);
+    //console.log("~", "[task variables] updated for", name);
 }
 
 function upsertTool(name: string, type: FeatureType, toolDoc: string) {
@@ -182,12 +182,12 @@ function upsertTool(name: string, type: FeatureType, toolDoc: string) {
         // Update the existing tool
         const updateStmt = db.prepare("UPDATE tool SET spec = ?, type = ? WHERE id = ?");
         updateStmt.run(toolDoc, type, result.id);
-        console.log("~", "[tool] updated from", type, ":", name);
+        //console.log("~", "[tool] updated from", type, ":", name);
     } else {
         // Insert a new tool
         const stmt = db.prepare("INSERT INTO tool (name, spec, type) VALUES (?,?,?)");
         stmt.run(name, toolDoc, type);
-        console.log("+", "[tool] added from", type, ":", name);
+        //console.log("+", "[tool] added from", type, ":", name);
     }
 }
 
@@ -224,7 +224,6 @@ function updateFeatures(feats: Features) {
     });
     upsertAndCleanFeatures(feats.adaptater, "adaptater");
     upsertAndCleanFeatures(feats.cmd, "cmd");
-    upsertAndCleanFeatures(feats.modelfile, "modelfile");
 }
 
 function upsertFilePath(name: string, newPath: string): boolean {
