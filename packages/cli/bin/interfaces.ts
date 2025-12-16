@@ -118,7 +118,7 @@ type RunMode = "cli" | "cmd";
 type FormatMode = "text" | "markdown";
 type VerbosityMode = "quiet" | "verbose" | "debug";
 
-type FeatureType = "task" | "action" | "cmd" | "workflow" | "adaptater" | "modelfile";
+type FeatureType = "task" | "action" | "cmd" | "workflow" | "adaptater";
 type ToolType = "task" | "action" | "cmd" | "workflow";
 type ActionExtension = "js" | "mjs" | "py" | "yml";
 type TaskExtension = "yml";

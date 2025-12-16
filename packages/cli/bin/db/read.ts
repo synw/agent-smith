@@ -52,14 +52,13 @@ function readFeaturesType(type: FeatureType): Record<string, FeatureSpec> {
 
 function readFeatures(): Record<FeatureType, Record<string, FeatureSpec>> {
     const feats: Record<FeatureType, Record<string, FeatureSpec>> = {
-        task: {}, action: {}, cmd: {}, workflow: {}, adaptater: {}, modelfile: {}
+        task: {}, action: {}, cmd: {}, workflow: {}, adaptater: {}
     };
     feats.task = readFeaturesType("task");
     feats.action = readFeaturesType("action");
     feats.cmd = readFeaturesType("cmd");
     feats.workflow = readFeaturesType("workflow");
     feats.adaptater = readFeaturesType("adaptater");
-    feats.modelfile = readFeaturesType("modelfile");
     return feats
 }
 
