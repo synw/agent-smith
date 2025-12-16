@@ -68,21 +68,6 @@ const alias = `CREATE TABLE IF NOT EXISTS aliases (
     type TEXT NOT NULL CHECK ( type IN ('task', 'action', 'workflow') )
 );`;
 
-const modelfile = `CREATE TABLE IF NOT EXISTS modelfile (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL,
-    path TEXT NOT NULL,
-    variables TEXT,
-    ext TEXT NOT NULL CHECK ( ext IN ('yml') )
-);`;
-
-const model = `CREATE TABLE IF NOT EXISTS model (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    shortname TEXT UNIQUE NOT NULL,
-    data TEXT NOT NULL
-);`;
-
 const backend = `CREATE TABLE IF NOT EXISTS backend (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
@@ -108,8 +93,6 @@ const schemas = [
     cmd,
     plugin,
     alias,
-    model,
-    modelfile,
     adaptater,
     backend,
 ];

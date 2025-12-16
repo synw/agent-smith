@@ -13,6 +13,7 @@ import { pathToFileURL } from 'url';
 
 async function executeAction(name: string, payload: any, options: Record<string, any>, quiet = false) {
     let run: FeatureExecutor<any, any>;
+    //console.log("GET ACTION", name, payload);
     const { found, path, ext } = getFeatureSpec(name, "action" as FeatureType);
     if (!found) {
         throw new Error(`Action ${name} not found at ${path}`);
@@ -21,8 +22,10 @@ async function executeAction(name: string, payload: any, options: Record<string,
     switch (ext) {
         case "js":
             const url = pathToFileURL(path).href;
+            //console.log("CR JSA", url);
             const mjsa = await import(url);
             run = createJsAction(mjsa.action);
+            //console.log("END CR JSA")
             break;
         case "yml":
             run = systemAction(path);
@@ -33,6 +36,7 @@ async function executeAction(name: string, payload: any, options: Record<string,
         default:
             throw new Error(`Action ext ${ext} not implemented`)
     }
+    //console.log("RUN", payload);
     const res = await run(payload, options);
     if (!quiet) {
         if (res) {

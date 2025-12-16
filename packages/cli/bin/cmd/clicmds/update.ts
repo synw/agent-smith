@@ -4,7 +4,6 @@ import { readFilePath } from "../../db/read.js";
 import { cleanupFeaturePaths, updateAliases, updateDataDirPath, updateFeatures, updatePromptfilePath, upsertFilePath } from "../../db/write.js";
 import { readFeaturesDirs } from "../../state/features.js";
 import { dataDirPath, promptfilePath } from "../../state/state.js";
-import { updateAllModels } from '../lib/models.js';
 import { runtimeDataError, runtimeInfo } from '../lib/user_msgs.js';
 
 async function updateConfCmd(args: Array<string>): Promise<any> {
@@ -40,7 +39,6 @@ async function updateConfCmd(args: Array<string>): Promise<any> {
     //console.log("CMD FEATS", feats);
     updateFeatures(feats);
     updateAliases(feats);
-    updateAllModels();
     const deleted = cleanupFeaturePaths(paths);
     for (const el of deleted) {
         console.log("- [feature path]", el)

@@ -125,43 +125,6 @@ function readFilePath(name: string): { found: boolean, path: string } {
     return { found: false, path: "" }
 }
 
-function readModelfiles(): Array<Record<string, string>> {
-    const stmt = db.prepare("SELECT name, path, ext FROM modelfile");
-    const data = stmt.all() as Array<Record<string, string>>;
-    let f = new Array<Record<string, string>>();
-    data.forEach((row) => {
-        f.push(row)
-    });
-    return f
-}
-
-function readModels(): Array<DbModelDef> {
-    const stmt = db.prepare("SELECT name, shortname, data FROM model");
-    const data = stmt.all() as Array<Record<string, any>>;
-    let f = new Array<DbModelDef>();
-    data.forEach((row) => {
-        const ips = JSON.parse(row.data);
-        const mod: DbModelDef = {
-            name: row.name,
-            shortname: row.shortname,
-            data: ips,
-        }
-        f.push(mod)
-    });
-    return f
-}
-
-function readModel(shortname: string): { found: boolean, modelData: Record<string, any> } {
-    const q = `SELECT id, data FROM model WHERE shortname='${shortname}'`;
-    const stmt = db.prepare(q);
-    const result = stmt.get() as Record<string, string>;
-    if (result?.id) {
-        const data = JSON.parse(result.data);
-        return { found: true, modelData: data }
-    }
-    return { found: false, modelData: {} }
-}
-
 export {
     readFeatures,
     readFeaturePaths,
@@ -171,9 +134,6 @@ export {
     readFilePath,
     readFilePaths,
     readTool,
-    readModels,
-    readModelfiles,
-    readModel,
     readFeaturesType,
     readBackends,
 }

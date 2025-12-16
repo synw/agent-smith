@@ -1,7 +1,6 @@
 import { extractTaskToolDocAndVariables, extractToolDoc } from "../cmd/lib/tools.js";
 import { AliasType, FeatureSpec, FeatureType, Features, DbModelDef, InferenceBackend } from "../interfaces.js";
 import { db } from "./db.js";
-import { readModels } from "./read.js";
 
 function updatePromptfilePath(pf: string) {
     const deleteStmt = db.prepare("DELETE FROM filepath WHERE name = ?");
@@ -192,40 +191,6 @@ function upsertTool(name: string, type: FeatureType, toolDoc: string) {
     }
 }
 
-function updateModels(models: Array<DbModelDef>) {
-    const allDbModels = readModels();
-    //console.log("ADB", allDbModels.length);
-    const existingModelShortNames = allDbModels.map(row => row.shortname) as Array<string>;
-    const newModelShortNames = models.filter(m => !existingModelShortNames.includes(m.shortname)).map(m => m.shortname);
-    //console.log("Existing models", existingModelShortNames, existingModelShortNames.length);
-    //console.log("New models", newModelShortNames);
-    // Identify models to delete
-    const mm = models.map(m => m.shortname);
-    const modelsToDelete = existingModelShortNames.filter(name => !mm.includes(name));
-    //console.log("Models to delete", modelsToDelete);
-    db.transaction(() => {
-        // Insert or update models
-        for (const model of models) {
-            if (!existingModelShortNames.includes(model.shortname)) {
-                // Insert the new model
-                const insertStmt = db.prepare("INSERT INTO model (name, shortname, data) VALUES (?, ?, ?)");
-                insertStmt.run(model.name, model.shortname, JSON.stringify(model.data));
-                console.log("+", "[model]", model.name);
-            } else {
-                // Update the existing model
-                const updateStmt = db.prepare("UPDATE model SET name = ?, data = ? WHERE shortname = ?");
-                updateStmt.run(model.name, JSON.stringify(model.data), model.shortname);
-            }
-        }
-        // Delete models that are not in the new list
-        for (const name of modelsToDelete) {
-            const deleteStmt = db.prepare("DELETE FROM model WHERE shortname = ?");
-            deleteStmt.run(name);
-            console.log("-", "[model]", name);
-        }
-    })();
-}
-
 function updateFeatures(feats: Features) {
     //console.log("FEATS", feats);
     upsertAndCleanFeatures(feats.task, "task");
@@ -290,6 +255,5 @@ export {
     updateFeatures,
     updateAliases,
     cleanupFeaturePaths,
-    updateModels,
     upsertFilePath,
 }

@@ -7,7 +7,6 @@ import { FeatureType } from "../../interfaces.js";
 import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
 import { readPluginsPaths } from "../../state/plugins.js";
 import { runMode } from "../../state/state.js";
-import { showModelsCmd } from "../lib/models.js";
 import { parseCommandArgs } from "../lib/options_parsers.js";
 import { deleteFileIfExists } from "../sys/delete_file.js";
 import { readTask } from "../sys/read_task.js";
@@ -32,12 +31,6 @@ function initBaseCommands(program: Command): Command {
         .action(async (...args: Array<any>) => {
             const ca = parseCommandArgs(args);
             await _readTaskCmd(ca.args)
-        });
-    program.command("models [filters...]")
-        .description("list the available models")
-        .action(async (...args: Array<any>) => {
-            const ca = parseCommandArgs(args);
-            await showModelsCmd(ca.args)
         });
     program.command("backend <name>")
         .description("set the default backend")

@@ -8,7 +8,7 @@ function createJsAction(action: CallableFunction): FeatureExecutor {
             return res
         }
         catch (e) {
-            throw new Error(`executing action:${e}`);
+            throw new Error(`executing action:${e}. Args: ${args}`);
         }
     };
     return run
