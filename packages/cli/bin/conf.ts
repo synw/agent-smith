@@ -1,5 +1,5 @@
 import { readConf } from "./cmd/sys/read_conf.js";
-import { upsertBackends, insertFeaturesPathIfNotExists, insertPluginIfNotExists } from "./db/write.js";
+import { upsertBackends, insertFeaturesPathIfNotExists, insertPluginIfNotExists, upsertTaskSettings, deleteTaskSettings } from "./db/write.js";
 import { buildPluginsPaths } from "./state/plugins.js";
 import { runtimeError } from "./cmd/lib/user_msgs.js";
 import { ConfInferenceBackend, InferenceBackend } from "./interfaces.js";
@@ -7,6 +7,7 @@ import { localBackends } from "./const.js";
 import { homedir } from 'os';
 import { join } from 'path';
 import { createDirectoryIfNotExists } from "./cmd/sys/dirs.js";
+import { initTaskSettings, tasksSettings } from "./state/tasks.js";
 
 function getConfigPath(appName: string, filename: string): { confDir: string, dbPath: string } {
     let confDir: string;
@@ -98,6 +99,16 @@ async function processConfPath(confPath: string): Promise<{ paths: Array<string>
             allPaths.push(_pl.path);
             insertPluginIfNotExists(_pl.name, _pl.path);
         });
+    }
+    if (data?.tasks) {
+        initTaskSettings();
+        const okTasks = new Array<string>();
+        for (const [name, settings] of Object.entries(data.tasks)) {
+            upsertTaskSettings(name, settings);
+            okTasks.push(name);
+        }
+        const toDel = Object.keys(tasksSettings).filter(t => !okTasks.includes(t));
+        deleteTaskSettings(toDel);
     }
     let pf = "";
     if (data?.promptfile) {

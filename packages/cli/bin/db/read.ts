@@ -1,5 +1,5 @@
 import { ToolSpec } from "@locallm/types";
-import { AliasType, FeatureExtension, FeatureSpec, FeatureType, DbModelDef, ToolType, InferenceBackend } from "../interfaces.js";
+import { AliasType, FeatureExtension, FeatureSpec, FeatureType, DbModelDef, ToolType, InferenceBackend, TaskSettings } from "../interfaces.js";
 import { db } from "./db.js";
 import { TaskVariables } from "@agent-smith/task/dist/interfaces.js";
 
@@ -124,6 +124,22 @@ function readFilePath(name: string): { found: boolean, path: string } {
     return { found: false, path: "" }
 }
 
+function readTaskSettings(): Array<Record<string, any>> {
+    const stmt1 = db.prepare("SELECT * FROM tasksettings ORDER BY name");
+    const data = stmt1.all() as Array<Record<string, any>>;
+    return data
+}
+
+function readTaskSetting(name: string): { found: boolean, settings: Record<string, string> } {
+    const q = "SELECT * FROM tasksettings WHERE name= ?";
+    const stmt = db.prepare(q);
+    const result = stmt.get(name) as Record<string, string>;
+    if (result?.id) {
+        return { found: true, settings: result }
+    }
+    return { found: false, settings: {} }
+}
+
 export {
     readFeatures,
     readFeaturePaths,
@@ -135,4 +151,6 @@ export {
     readTool,
     readFeaturesType,
     readBackends,
+    readTaskSettings,
+    readTaskSetting,
 }

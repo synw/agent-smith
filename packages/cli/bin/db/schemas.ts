@@ -77,11 +77,20 @@ const backend = `CREATE TABLE IF NOT EXISTS backend (
     apiKey TEXT
 );`
 
-/*const override = `CREATE TABLE IF NOT EXISTS override (
+const tasksSettings = `CREATE TABLE IF NOT EXISTS tasksettings (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    key TEXT UNIQUE NOT NULL,
-    value TEXT NOT NULL
-);`;*/
+    name TEXT UNIQUE NOT NULL,
+    model TEXT,
+    template TEXT,
+    ctx INTEGER,
+    maxtokens INTEGER
+    topk INTEGER,
+    topp REAL,
+    minp REAL,
+    temperature REAL,
+    repeat REAL,
+    backend TEXT
+);`;
 
 const schemas = [
     filepath,
@@ -95,6 +104,7 @@ const schemas = [
     alias,
     adaptater,
     backend,
+    tasksSettings,
 ];
 
 export { schemas }

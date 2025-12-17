@@ -1,5 +1,5 @@
 import { extractTaskToolDocAndVariables, extractToolDoc } from "../cmd/lib/tools.js";
-import { AliasType, FeatureSpec, FeatureType, Features, DbModelDef, InferenceBackend } from "../interfaces.js";
+import { AliasType, FeatureSpec, FeatureType, Features, DbModelDef, InferenceBackend, TaskSettings } from "../interfaces.js";
 import { db } from "./db.js";
 
 function updatePromptfilePath(pf: string) {
@@ -244,6 +244,122 @@ function upsertFilePath(name: string, newPath: string): boolean {
     }
 }
 
+function upsertTaskSettings(taskName: string, settings: TaskSettings): boolean {
+    const selectStmt = db.prepare("SELECT * FROM tasksettings WHERE name = ?");
+    const result = selectStmt.get(taskName) as Record<string, any>;
+    if (result?.id) {
+        const qparams = new Array<string>();
+        const qvalues = new Array<string | number>();
+        if (settings?.model) {
+            qparams.push("model = ?");
+            qvalues.push(settings.model)
+        }
+        if (settings?.template) {
+            qparams.push("template = ?");
+            qvalues.push(settings.template)
+        }
+        if (settings?.ctx) {
+            qparams.push("ctx = ?");
+            qvalues.push(settings.ctx)
+        }
+        if (settings?.max_tokens) {
+            qparams.push("maxtokens = ?");
+            qvalues.push(settings.max_tokens)
+        }
+        if (settings?.top_k) {
+            qparams.push("topk = ?");
+            qvalues.push(settings.top_k)
+        }
+        if (settings?.top_p) {
+            qparams.push("topp = ?");
+            qvalues.push(settings.top_p)
+        }
+        if (settings?.min_p) {
+            qparams.push("minp = ?");
+            qvalues.push(settings.min_p)
+        }
+        if (settings?.temperature) {
+            qparams.push("temperature = ?");
+            qvalues.push(settings.temperature)
+        }
+        if (settings?.repeat_penalty) {
+            qparams.push("repeat = ?");
+            qvalues.push(settings.repeat_penalty)
+        }
+        if (settings?.backend) {
+            qparams.push("backend = ?");
+            qvalues.push(settings.backend)
+        }
+        const q = `UPDATE tasksettings SET ${qparams.join(", ")} WHERE name = ?`;
+        const stmt = db.prepare(q);
+        const updateResult = stmt.run(...qvalues, taskName);
+        return updateResult.changes > 0;
+    } else {
+        const qnames = new Array<string>();
+        const qvalues = new Array<string | number>();
+        if (settings?.model) {
+            qnames.push("model");
+            qvalues.push(settings.model)
+        }
+        if (settings?.template) {
+            qnames.push("template");
+            qvalues.push(settings.template)
+        }
+        if (settings?.ctx) {
+            qnames.push("ctx");
+            qvalues.push(settings.ctx)
+        }
+        if (settings?.max_tokens) {
+            qnames.push("maxtokens");
+            qvalues.push(settings.max_tokens)
+        }
+        if (settings?.top_k) {
+            qnames.push("topk");
+            qvalues.push(settings.top_k)
+        }
+        if (settings?.top_p) {
+            qnames.push("topp");
+            qvalues.push(settings.top_p)
+        }
+        if (settings?.min_p) {
+            qnames.push("minp");
+            qvalues.push(settings.min_p)
+        }
+        if (settings?.temperature) {
+            qnames.push("temperature");
+            qvalues.push(settings.temperature)
+        }
+        if (settings?.repeat_penalty) {
+            qnames.push("repeat");
+            qvalues.push(settings.repeat_penalty)
+        }
+        if (settings?.backend) {
+            qnames.push("backend");
+            qvalues.push(settings.backend)
+        }
+        const nq = new Array<string>("?");
+        qnames.forEach(n => nq.push("?"));
+        const q = `INSERT INTO tasksettings (name, ${qnames.join(", ")}) VALUES (${nq.join(", ")})`;
+        console.log(q);
+        //console.log("VALs", qvalues);
+        const insertStmt = db.prepare(q);
+        insertStmt.run(taskName, ...qvalues);
+        return true;
+    }
+}
+
+function deleteTaskSettings(settings: Array<string>) {
+    settings.forEach(s => {
+        const deleteStmt = db.prepare("DELETE FROM tasksettings WHERE name = ?");
+        deleteStmt.run(s);
+    })
+}
+
+function deleteTaskSetting(name: string) {
+    const deleteStmt = db.prepare("DELETE FROM tasksettings WHERE name = ?");
+    deleteStmt.run(name);
+}
+
 export {
     updatePromptfilePath,
     updateDataDirPath,
@@ -255,4 +371,7 @@ export {
     updateAliases,
     cleanupFeaturePaths,
     upsertFilePath,
+    upsertTaskSettings,
+    deleteTaskSettings,
+    deleteTaskSetting,
 }

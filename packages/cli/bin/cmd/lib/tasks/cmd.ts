@@ -14,6 +14,8 @@ import { runtimeDataError, runtimeError, runtimeWarning } from "../user_msgs.js"
 import { formatStats, processOutput, readPromptFile } from "../utils.js";
 import { readTask } from "./read.js";
 import { backend, backends, listBackends } from "../../../state/backends.js";
+import { isTaskSettingsInitialized, initTaskSettings, tasksSettings } from "../../../state/tasks.js";
+import { TaskSettings } from "../../../interfaces.js";
 
 async function executeTask(
     name: string, payload: Record<string, any>, options: Record<string, any>, quiet?: boolean
@@ -21,6 +23,14 @@ async function executeTask(
     //console.log("EXEC TASK");
     //console.log("TN", name);
     //console.log("AGENT", agent);
+    if (!isTaskSettingsInitialized.value) {
+        initTaskSettings()
+    }
+    const hasSettings = Object.keys(tasksSettings).includes(name);
+    let settings: TaskSettings = {};
+    if (hasSettings) {
+        settings = tasksSettings[name]
+    }
     if (options?.backend) {
         if (options.backend in backends) {
             agent.lm = backends[options.backend]
@@ -28,11 +38,45 @@ async function executeTask(
             const bks = await listBackends(false);
             runtimeDataError(`The backend ${options.backend} is not registered in config. Available backends:\n`, bks)
         }
+    } else if (settings?.backend) {
+        agent.lm = backends[settings.backend]
     }
     if (options?.debug || options?.backend) {
         console.log("Agent:", colors.bold(agent.lm.name), "( " + agent.lm.providerType + " backend type)");
     }
     const { task, model, conf, vars, mcpServers } = await readTask(name, payload, options, agent);
+    if (hasSettings) {
+        if (!model?.inferParams) {
+            model.inferParams = {};
+        }
+        if (settings?.model && !conf?.model?.name) {
+            model.name = settings.model;
+        }
+        if (settings?.template && !conf?.model?.template) {
+            model.template = settings.template;
+        }
+        if (settings?.ctx && !conf?.model?.ctx) {
+            model.ctx = settings.ctx;
+        }
+        if (settings?.max_tokens && !conf?.inferParams?.max_tokens) {
+            model.inferParams.max_tokens = settings.max_tokens;
+        }
+        if (settings?.top_k && !conf?.inferParams?.top_k) {
+            model.inferParams.top_k = settings.top_k;
+        }
+        if (settings?.top_p && !conf?.inferParams?.top_p) {
+            model.inferParams.top_p = settings.top_p;
+        }
+        if (settings?.min_p && !conf?.inferParams?.min_p) {
+            model.inferParams.min_p = settings.min_p;
+        }
+        if (settings?.temperature && !conf?.inferParams?.temperature) {
+            model.inferParams.temperature = settings.temperature;
+        }
+        if (settings?.repeat_penalty && !conf?.inferParams?.repeat_penalty) {
+            model.inferParams.repeat_penalty = settings.repeat_penalty;
+        }
+    }
     //console.log("TASK MODEL", model);
     // check for grammars
     if (model?.inferParams?.tsGrammar) {
