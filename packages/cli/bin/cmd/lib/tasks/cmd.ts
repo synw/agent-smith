@@ -16,11 +16,12 @@ import { readTask } from "./read.js";
 import { backend, backends, listBackends } from "../../../state/backends.js";
 import { isTaskSettingsInitialized, initTaskSettings, tasksSettings } from "../../../state/tasks.js";
 import { TaskSettings } from "../../../interfaces.js";
+import { getTaskPrompt } from "./utils.js";
 
 async function executeTask(
     name: string, payload: Record<string, any>, options: Record<string, any>, quiet?: boolean
 ): Promise<TaskOutput> {
-    //console.log("EXEC TASK");
+    //console.log("EXEC TASK", payload, options);
     //console.log("TN", name);
     //console.log("AGENT", agent);
     if (!isTaskSettingsInitialized.value) {
@@ -304,7 +305,7 @@ async function executeTaskCmd(
     name: string,
     targs: Array<any> = []
 ): Promise<TaskOutput> {
-    const { args, options } = parseCommandArgs(targs);
+    /*const { args, options } = parseCommandArgs(targs);
     let pr: string;
     //console.log("TOPT", options);
     if (options?.clipboardInput === true) {
@@ -319,9 +320,10 @@ async function executeTaskCmd(
             runtimeDataError("task", name, "provide a prompt or use input options")
             throw new Error()
         }
-    }
-    const params = { args: args, prompt: pr };
-    return await executeTask(name, params, options)
+    }*/
+    const ca = parseCommandArgs(targs);
+    const prompt = await getTaskPrompt(name, ca.args, ca.options);
+    return await executeTask(name, { prompt: prompt }, ca.options)
 }
 
 export {

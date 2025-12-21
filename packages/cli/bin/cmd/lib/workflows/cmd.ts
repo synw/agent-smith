@@ -1,25 +1,28 @@
+import { WorkflowStep } from "../../../interfaces.js";
 import { executeAction } from "../actions/cmd.js";
 import { executeAdaptater } from "../adaptaters/cmd.js";
 import { parseCommandArgs } from "../options_parsers.js";
 import { executeTask } from "../tasks/cmd.js";
+import { getTaskPrompt } from "../tasks/utils.js";
 import { readWorkflow } from "./read.js";
 import colors from "ansi-colors";
 
-async function executeWorkflow(name: string, args: any, options: Record<string, any> = {}): Promise<any> {
-    const { workflow, found } = await readWorkflow(name);
+async function executeWorkflow(wname: string, args: any, options: Record<string, any> = {}): Promise<any> {
+    const { workflow, found } = await readWorkflow(wname);
     if (!found) {
-        throw new Error(`Workflow ${name} not found`)
+        throw new Error(`Workflow ${wname} not found`)
     }
     const isDebug = options?.debug === true;
     const isVerbose = options?.verbose === true;
     const stepNames = Object.keys(workflow);
     if (isDebug || isVerbose) {
-        console.log("Running workflow", name, stepNames.length, "steps");
+        console.log("Running workflow", wname, stepNames.length, "steps");
     }
     let i = 0;
     const finalTaskIndex = stepNames.length - 1;
     let taskRes: Record<string, any> = { cmdArgs: args };
     //console.log("WPARAMS", taskRes);
+    let prevStepType: "task" | "adaptater" | "action" | null = null;
     for (const [name, step] of Object.entries(workflow)) {
         if (isDebug || isVerbose) {
             console.log(i + 1, name, colors.dim(step.type))
@@ -28,7 +31,27 @@ async function executeWorkflow(name: string, args: any, options: Record<string, 
             case "task":
                 try {
                     //console.log("WF BEFORE TASK res:", name, taskRes);
-                    const tr = await executeTask(name, taskRes, options, true);
+
+                    let pr: string | null = null;
+                    if (i == 0) {
+                        pr = await getTaskPrompt(name, taskRes.cmdArgs, options);
+                    } else {
+
+                        if (prevStepType) {
+                            if (prevStepType == "task") {
+                                pr = taskRes.answer.text;
+                            }
+                        }
+                        if (!pr) {
+                            if (taskRes?.prompt) {
+                                pr = taskRes.prompt;
+                            }
+                        }
+                    }
+                    if (!pr) {
+                        throw new Error(`Workflow ${wname} step ${i + 1}: provide a prompt for the task ${name}`)
+                    }
+                    const tr = await executeTask(name, { prompt: pr }, options, true);
                     //console.log("WF AFTER TASK RES", tr);
                     taskRes = { ...tr, ...taskRes };
                     //console.log("WF TASK NEXT ARGS", taskRes);
@@ -89,6 +112,7 @@ async function executeWorkflow(name: string, args: any, options: Record<string, 
             default:
                 throw new Error(`unknown task type ${step.type} in workflow ${name}`)
         }
+        prevStepType = step.type;
         //console.log("WF NODE RES", step.type, taskRes);
         /*if (isDebug) {
             console.log("->", params);

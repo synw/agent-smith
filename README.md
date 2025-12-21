@@ -101,12 +101,6 @@ Simple inference query (using the [inference](https://synw.github.io/agent-smith
 lm q list the planets of the solar system
 ```
 
-Query a thinking model, use qwq (from the [models](https://synw.github.io/agent-smith/plugins/models) plugin)::
-
-```bash
-lm think "solve this math problem: ..." m=qwq
-```
-
 Compare images (using the [vision](https://synw.github.io/agent-smith/plugins/vision) plugin):
 
 ```bash
