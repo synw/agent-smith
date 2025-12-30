@@ -1,9 +1,9 @@
 import { input } from "@inquirer/prompts";
-import { toRaw } from "@vue/reactivity";
+import { InferenceOptions } from "@locallm/types/dist/inference.js";
 import { Command } from "commander";
 import { query } from "../cli.js";
 import { readAliases, readFeatures } from "../db/read.js";
-import { chatInferenceParams } from "../state/chat.js";
+import { chatInferenceParams, chatTemplate } from "../state/chat.js";
 import { agent, isChatMode, runMode } from "../state/state.js";
 import { initCommandsFromAliases } from "./clicmds/aliases.js";
 import { initBaseCommands } from "./clicmds/base.js";
@@ -11,7 +11,8 @@ import { initUserCmds } from "./clicmds/cmds.js";
 
 const program = new Command();
 
-async function chat(program: Command) {
+async function chat(program: Command, options: InferenceOptions) {
+    //console.log("CHAT IP", inferParams);
     const data = { message: '>', default: "" };
     const prompt = await input(data);
     if (prompt == "/q") {
@@ -22,10 +23,12 @@ async function chat(program: Command) {
             await query(program)
         }
     }
-    //console.log("EX", brain.ex);
-    await agent.lm.infer(prompt, toRaw(chatInferenceParams))
+    //console.log("CHAT HIST", agent.history);
+    options.history = undefined;
+    //console.log("RUN W PROMPT", prompt);
+    await agent.run(prompt, chatInferenceParams, options, chatTemplate ? chatTemplate : undefined);
     console.log();
-    await chat(program);
+    await chat(program, options);
 }
 
 async function buildCmds(): Promise<Command> {
@@ -52,9 +55,8 @@ async function parseCmd(program: Command) {
 }
 
 export {
-    program,
     buildCmds,
     chat,
-    parseCmd,
+    parseCmd, program
 };
 

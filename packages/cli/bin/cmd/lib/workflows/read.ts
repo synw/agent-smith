@@ -12,21 +12,17 @@ import { pathToFileURL } from 'url';
 
 async function _createWorkflowFromSpec(
     spec: Record<string, any>
-): Promise<Record<string, WorkflowStep>> {
-    const steps: Record<string, WorkflowStep> = {};
-    //console.log("Create job. Feats:", spec);
+): Promise<Array<WorkflowStep>> {
+    const steps: Array<WorkflowStep> = [];
+    //console.log("Create WF. Steps:", spec);
+    let i = 1;
     for (const step of spec.steps) {
         const type = Object.keys(step)[0];
         const sval = step[type];
-        let name: string;
-        if (typeof sval == "string") {
-            name = sval
-        } else {
-            name = step[type].name;
-        }
+        const name = sval;
         //console.log("WF", type, name);
         //const params = step?.params;
-        //console.log("TASK SPEC", t);
+        //console.log("TASK SPEC", t);        
         if (type == "action") {
             const { found, path, ext } = getFeatureSpec(name, "action" as FeatureType);
             if (!found) {
@@ -38,36 +34,40 @@ async function _createWorkflowFromSpec(
                     const { action } = await import(url);
                     const at = action as FeatureExecutor<any, any>;
                     const wf: WorkflowStep = {
+                        name: name,
                         type: "action",
                         run: at,
                     };
-                    steps[name] = wf;
+                    steps.push(wf);
                     break;
                 case "mjs":
                     const url2 = pathToFileURL(path).href;
                     const mjsa = await import(url2);
                     const act = createJsAction(mjsa.action);
                     const wf2: WorkflowStep = {
+                        name: name,
                         type: "action",
                         run: act,
                     };
-                    steps[name] = wf2;
+                    steps.push(wf2);
                     break
                 case "yml":
                     const _t1 = systemAction(path);
                     const wf3: WorkflowStep = {
+                        name: name,
                         type: "action",
                         run: _t1 as FeatureExecutor<any, any>,
                     };
-                    steps[name] = wf3;
+                    steps.push(wf3);
                     break
                 case "py":
                     const _t = pythonAction(path);
                     const wf4: WorkflowStep = {
+                        name: name,
                         type: "action",
                         run: _t as FeatureExecutor<any, any>,
                     };
-                    steps[name] = wf4;
+                    steps.push(wf4);
                     break
                 default:
                     throw new Error(`Unknown feature extension ${ext}`)
@@ -81,10 +81,11 @@ async function _createWorkflowFromSpec(
             const jsa = await import(url);
             const act = createJsAction(jsa.action);
             const wf: WorkflowStep = {
+                name: name,
                 type: "adaptater",
                 run: act,
             };
-            steps[name] = wf;
+            steps.push(wf);
         }
         else {
             const { found, path } = getFeatureSpec(name, "task" as FeatureType);
@@ -98,13 +99,15 @@ async function _createWorkflowFromSpec(
             const agent = new Agent(backend.value!);
             const tsk = Task.fromYaml(agent, res.ymlTask);
             const wf: WorkflowStep = {
+                name: name,
                 type: "task",
                 run: tsk.run as FeatureExecutor<any, any>,
             };
-            steps[name] = wf;
+            steps.push(wf);
         }
+        ++i
     }
-    //console.log("WFNT", Object.keys(steps).length);
+    //console.log("STEPS", Object.keys(steps).length, steps);
     return steps
 }
 
@@ -125,12 +128,12 @@ async function _readWorkflowFromDisk(name: string): Promise<{ found: boolean, da
 
 async function readWorkflow(
     name: string
-): Promise<{ found: boolean, workflow: Record<string, WorkflowStep> }> {
+): Promise<{ found: boolean, workflow: Array<WorkflowStep> }> {
     const { found, ext } = getFeatureSpec(name, "workflow" as FeatureType);
     if (!found) {
-        return { found: false, workflow: {} };
+        return { found: false, workflow: [] };
     }
-    let wf: Record<string, WorkflowStep> = {};
+    let wf = new Array<WorkflowStep>();
     switch (ext) {
         case "yml":
             const { data } = await _readWorkflowFromDisk(name);
@@ -139,7 +142,7 @@ async function readWorkflow(
                 const workflow = await _createWorkflowFromSpec(data);
                 //console.log("WF END", found, workflow);
                 if (!found) {
-                    return { found: false, workflow: {} }
+                    return { found: false, workflow: [] }
                 }
                 wf = workflow;
             } catch (e) {

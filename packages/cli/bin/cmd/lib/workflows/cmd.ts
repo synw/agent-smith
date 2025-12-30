@@ -23,9 +23,9 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
     let taskRes: Record<string, any> = { cmdArgs: args };
     //console.log("WPARAMS", taskRes);
     let prevStepType: "task" | "adaptater" | "action" | null = null;
-    for (const [name, step] of Object.entries(workflow)) {
+    for (const step of workflow) {
         if (isDebug || isVerbose) {
-            console.log(i + 1, name, colors.dim(step.type))
+            console.log(i + 1, step.name, colors.dim(step.type))
         }
         switch (step.type) {
             case "task":
@@ -34,9 +34,8 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
 
                     let pr: string | null = null;
                     if (i == 0) {
-                        pr = await getTaskPrompt(name, taskRes.cmdArgs, options);
+                        pr = await getTaskPrompt(step.name, taskRes.cmdArgs, options);
                     } else {
-
                         if (prevStepType) {
                             if (prevStepType == "task") {
                                 pr = taskRes.answer.text;
@@ -49,9 +48,9 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
                         }
                     }
                     if (!pr) {
-                        throw new Error(`Workflow ${wname} step ${i + 1}: provide a prompt for the task ${name}`)
+                        throw new Error(`Workflow ${wname} step ${i + 1}: provide a prompt for the task ${step.name}`)
                     }
-                    const tr = await executeTask(name, { prompt: pr }, options, true);
+                    const tr = await executeTask(step.name, { prompt: pr }, options, true);
                     //console.log("WF AFTER TASK RES", tr);
                     taskRes = { ...tr, ...taskRes };
                     //console.log("WF TASK NEXT ARGS", taskRes);
@@ -63,7 +62,7 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
                 try {
                     //console.log("EXEC ACTION ARGS", taskRes);
                     const actArgs = i == 0 ? taskRes.cmdArgs : taskRes;
-                    const ares = await executeAction(name, actArgs, options, true);
+                    const ares = await executeAction(step.name, actArgs, options, true);
                     //console.log("WF ACTION RES", typeof ares, ares);
                     if (typeof ares == "string" || Array.isArray(ares)) {
                         taskRes.args = ares;
@@ -84,7 +83,7 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
                     //console.log("WF AD ARGS IN", taskRes);
                     //console.log("AD OPTS IN", options);
                     const actArgs = i == 0 ? taskRes.cmdArgs : taskRes;
-                    const adres = await executeAdaptater(name, actArgs, options);
+                    const adres = await executeAdaptater(step.name, actArgs, options);
                     //console.log("WF AD RES", typeof adres, adres);
                     if (typeof adres == "string" || Array.isArray(adres)) {
                         taskRes.args = adres;

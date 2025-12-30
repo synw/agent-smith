@@ -340,7 +340,7 @@ function upsertTaskSettings(taskName: string, settings: TaskSettings): boolean {
         const nq = new Array<string>("?");
         qnames.forEach(n => nq.push("?"));
         const q = `INSERT INTO tasksettings (name, ${qnames.join(", ")}) VALUES (${nq.join(", ")})`;
-        console.log(q);
+        //console.log(q);
         //console.log("VALs", qvalues);
         const insertStmt = db.prepare(q);
         insertStmt.run(taskName, ...qvalues);

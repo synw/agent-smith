@@ -1,22 +1,21 @@
 import { TaskConf, TaskOutput } from "@agent-smith/task";
-import { input } from "@inquirer/prompts";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import { default as color, default as colors } from "ansi-colors";
 import { PromptTemplate } from "modprompt";
 import ora, { Ora } from 'ora';
-import { query } from "../../../cli.js";
-import { readClipboard } from "../../../cmd/sys/clipboard.js";
+import { TaskSettings } from "../../../interfaces.js";
 import { usePerfTimer } from "../../../main.js";
-import { isChatMode, runMode, agent } from "../../../state/state.js";
-import { program } from "../../cmds.js";
+import { backend, backends, listBackends } from "../../../state/backends.js";
+import { chatInferenceParams, chatTemplate, setChatInferenceParams, setChatTemplate } from "../../../state/chat.js";
+import { agent, isChatMode } from "../../../state/state.js";
+import { initTaskSettings, isTaskSettingsInitialized, tasksSettings } from "../../../state/tasks.js";
+import { chat, program } from "../../cmds.js";
 import { parseCommandArgs } from "../options_parsers.js";
 import { runtimeDataError, runtimeError, runtimeWarning } from "../user_msgs.js";
-import { formatStats, processOutput, readPromptFile } from "../utils.js";
+import { formatStats, processOutput } from "../utils.js";
 import { readTask } from "./read.js";
-import { backend, backends, listBackends } from "../../../state/backends.js";
-import { isTaskSettingsInitialized, initTaskSettings, tasksSettings } from "../../../state/tasks.js";
-import { TaskSettings } from "../../../interfaces.js";
 import { getTaskPrompt } from "./utils.js";
+import { InferenceParams } from "@locallm/types/dist/inference.js";
 
 async function executeTask(
     name: string, payload: Record<string, any>, options: Record<string, any>, quiet?: boolean
@@ -46,6 +45,7 @@ async function executeTask(
         console.log("Agent:", colors.bold(agent.lm.name), "( " + agent.lm.providerType + " backend type)");
     }
     const { task, model, conf, vars, mcpServers } = await readTask(name, payload, options, agent);
+    //console.log("TASKCONF IP", conf.inferParams);
     if (hasSettings) {
         if (!model?.inferParams) {
             model.inferParams = {};
@@ -211,7 +211,6 @@ async function executeTask(
     } else {
         task.agent.lm.onToken = processToken;
     }
-    //console.log("BOT", ex.backend.lm.onToken);
     if (!conf?.inferParams) {
         conf.inferParams = {}
     }
@@ -226,6 +225,8 @@ async function executeTask(
         onToolCallEnd: onToolCallEnd,
         ...conf,
     }
+    const initialInferParams: InferenceParams = Object.assign({}, conf.inferParams);
+    initialInferParams.model = tconf.model;
     //console.log("CONF", conf);
     //console.log("TCONF", tconf);
     //console.log("RUN", task);
@@ -259,29 +260,17 @@ async function executeTask(
     if (!out.answer.text.endsWith("\n")) {
         console.log()
     }
-
     // close mcp connections
     mcpServers.forEach(async (s) => await s.stop());
     await processOutput(out);
     // chat mode
+    //console.log("CLI CONF IP", initialInferParams);
     if (isChatMode.value) {
-        /*if (brain.ex.name != ex.name) {
-            brain.setDefaultExpert(ex);
-        }*/
-        //ex.template.pushToHistory({ user: payload.prompt, assistant: out.answer.text });
-        // loop
-        const data = { message: '>', default: "" };
-        const prompt = await input(data);
-        if (prompt == "/q") {
-            isChatMode.value = false;
-            if (runMode.value == "cmd") {
-                process.exit(0)
-            } else {
-                await query(program)
-            }
-        } else {
-            await executeTask(name, { ...vars, prompt: prompt }, options, quiet)
+        if (tpl) {
+            setChatTemplate(tpl);
         }
+        setChatInferenceParams(initialInferParams);
+        await chat(program, options);
     }
     if (options?.debug === true || options?.verbose === true) {
         try {

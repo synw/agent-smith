@@ -110,6 +110,7 @@ async function readTask(
     };
     //console.log("TASK SPEC:", JSON.stringify(taskSpec, null, "  "));
     const task = new Task(agent, taskSpec);
+    task.addTools(taskSpec.tools);
     // check for grammars
     if (model?.inferParams?.tsGrammar) {
         //console.log("TSG");
