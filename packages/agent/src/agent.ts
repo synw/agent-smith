@@ -23,7 +23,11 @@ class Agent {
             console.log("Agent inference params:", params);
             console.log("Agent options:", options);
             //console.log("Agent template:", template);
-            //console.log("Prompt:", prompt);
+            //console.log("Agent prompt:", prompt);
+        }
+        if (options?.history) {
+            this.history = options.history;
+            options.history = undefined;
         }
         if (this.lm.providerType == "openai") {
             // update tools
@@ -69,9 +73,11 @@ class Agent {
         params: InferenceParams,
         options: InferenceOptions = {},
     ) {
+        //console.log("AGENT PROMPT NO TPL", prompt);
         /*/console.log("(AGENT) RUN NO TEMPLATE params:", JSON.stringify(params,null,2));
         console.log("(AGENT) RUN NO TEMPLATE options:", JSON.stringify(options,null,2));
         console.log("(AGENT) RUN NO TEMPLATE provider:", this.lm.providerType);*/
+        options.history = this.history;
         const res = await this.lm.infer(prompt, params, options);
         //console.log("(AGENT) RUN RES:");
         //console.dir(res, {depth: 8})
@@ -112,7 +118,6 @@ class Agent {
                 options.debug = false;
                 options.verbose = true;
             }
-            options.history = this.history;
             //console.log("HISTORY:");
             //console.dir(options.history, {depth: 8});
             _res = await this.runAgentNoTemplate(nit, " ", params, options);
@@ -135,12 +140,17 @@ class Agent {
             }
             await this.lm.loadModel(params.model.name, params.model.ctx);
         }
-        //console.log("Agent params:", params);
-        let res = await this.lm.infer(tpl.prompt(prompt), params, options);
+        tpl.history = this.history;
+        //console.log("TPL", tpl);
+        //console.log("TPL HIST", tpl.history);
+        //console.log("Agent no template raw prompt:", prompt);
+        const pr = tpl.prompt(prompt);
+        //console.log("Agent no template tpl prompt:", pr);
+        //console.log("Agent no template tpl render:", tpl.render());
+        let res = await this.lm.infer(pr, params, options);
         if (typeof params?.model == "string") {
             params.model = { name: params.model }
         }
-        //console.log("Agent params AFTER CALL:", params);
         const { isToolCall, toolsCall, error } = tpl.processAnswer(res.text);
         if (error) {
             throw new Error(`error processing tool call answer:\n, ${error}`);
@@ -183,13 +193,14 @@ class Agent {
                 });
             }
             if (it == 1) {
-                tpl.pushToHistory({
-                    user: prompt.replace("{prompt}", prompt),
+                //console.log("PROMPT HIST", prompt);
+                this.history.push({
+                    user: prompt,
                     assistant: res.text,
                     tools: toolResults,
                 });
             } else {
-                tpl.pushToHistory({
+                this.history.push({
                     assistant: res.text,
                     tools: toolResults,
                 });
@@ -210,16 +221,15 @@ class Agent {
                 }
                 turn.user = prompt.replace("{prompt}", prompt);
                 turn.assistant = final;
-                tpl.pushToHistory(turn)
+                this.history.push(turn)
             } else {
                 const turn: HistoryTurn = {};
                 if (thinking.length > 0) {
                     turn.think = thinking
                 }
                 turn.assistant = final;
-                tpl.pushToHistory(turn)
+                this.history.push(turn)
             }
-            this.history = tpl.history;
             return res
         }
     }
