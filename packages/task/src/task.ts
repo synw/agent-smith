@@ -55,14 +55,14 @@ class Task {
         if (useTemplates) {
             tpl = formatTaskTemplate(this.def, model?.template ? model.template : undefined);
             this.def.inferParams = formatInferParams(this.def.inferParams ?? {}, conf ?? {}, tpl);
-            tpl.replacePrompt(this.def.prompt);
+            //tpl.replacePrompt(this.def.prompt);
             if (agentToolsList.length > 0) {
                 if (!tpl?.toolsDef) {
                     throw new Error(`The template ${tpl.name} does not have tools and the task ${this.def.name} specifies some`)
                 }
                 agentToolsList.forEach((t) => tpl.addTool(t));
             };
-            finalPrompt = tpl.prompt(params.prompt);
+            finalPrompt = params.prompt;
         } else {
             this.def.inferParams = formatInferParams(this.def.inferParams ?? {}, conf ?? {});
             finalPrompt = this.def.prompt.replace("{prompt}", params.prompt);
@@ -76,7 +76,7 @@ class Task {
         }
         if (conf?.debug) {
             console.log("-----------", model.name, "- Template:", tpl.name, "- Ctx:", ctx, "-----------");
-            console.log(finalPrompt);
+            console.log(useTemplates ? tpl.prompt(finalPrompt) : finalPrompt);
             console.log("----------------------------------------------")
             console.log("Infer params:", this.def.inferParams);
             console.log("----------------------------------------------")
@@ -110,6 +110,7 @@ class Task {
             answer = await this.agent.run(finalPrompt, this.def.inferParams, options, tpl);
             tpl.history = this.agent.history;
             //console.log("RAW ANSWER", answer);
+            //console.log("\nHISTORY", this.agent.history);
         }
         //console.log("TASK: ANSWER FINAL:", { answer: answer.result, errors: {}, template: answer.template })
         return { answer, template: tpl }
