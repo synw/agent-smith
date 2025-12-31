@@ -10,6 +10,9 @@ class McpClient {
     tools: Record<string, ToolSpec> = {};
 
     constructor(servername: string, command: string, args: Array<string>, authorizedTools: Array<string> | null = null) {
+        //console.log("MCP servername", servername);
+        //console.log("MCP command", command);
+        //console.log("MCP ARGS", typeof args, args);
         this.name = servername;
         const okargs = new Array<string>();
         for (const arg of args) {

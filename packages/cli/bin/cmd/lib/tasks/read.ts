@@ -67,8 +67,8 @@ async function readTask(
     // mcp tools
     if (taskFileSpec?.mcp) {
         for (const [servername, tool] of Object.entries(taskFileSpec.mcp)) {
-            //console.log("MCP server:", tool)
-            const mcp = new McpClient(servername, tool.command, tool.args, tool?.tools ?? null);
+            //console.log("MCP TOOL:", tool)
+            const mcp = new McpClient(servername, tool.command, tool.arguments, tool?.tools ?? null);
             mcpServers.push(mcp);
             await mcp.start();
             const tools = await mcp.extractTools();
