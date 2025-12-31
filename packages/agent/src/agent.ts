@@ -74,14 +74,16 @@ class Agent {
         options: InferenceOptions = {},
     ) {
         //console.log("AGENT PROMPT NO TPL", prompt);
-        /*/console.log("(AGENT) RUN NO TEMPLATE params:", JSON.stringify(params,null,2));
-        console.log("(AGENT) RUN NO TEMPLATE options:", JSON.stringify(options,null,2));
-        console.log("(AGENT) RUN NO TEMPLATE provider:", this.lm.providerType);*/
+        //console.log("(AGENT) RUN NO TEMPLATE params:", JSON.stringify(params, null, 2));
+        //console.log("(AGENT) RUN NO TEMPLATE options:", JSON.stringify(options, null, 2));
+        //console.log("(AGENT) RUN NO TEMPLATE provider:", this.lm.providerType);
         options.history = this.history;
         const res = await this.lm.infer(prompt, params, options);
         //console.log("(AGENT) RUN RES:");
         //console.dir(res, {depth: 8})
-        this.history.push({ user: prompt });
+        if (it == 1) {
+            this.history.push({ user: prompt });
+        }
         let _res = res;
         //console.log("RES", res);
         if (res?.toolCalls) {
@@ -98,11 +100,17 @@ class Agent {
                 }
                 //console.log(tool.name, "can run:", canRun)
                 if (canRun) {
+                    if (options?.onToolCall) {
+                        options.onToolCall(tc);
+                    }
                     const toolCallResult = await tool.execute(tc.arguments);
                     if (options?.debug || options?.verbose) {
                         console.log("[x] Executed tool", tool.name + ":", toolCallResult);
                     }
-                    toolsResults.push({ call: tc, response: toolCallResult });
+                    toolsResults.push({ call: tc, response: JSON.stringify(toolCallResult) });
+                    if (options?.onToolCallEnd) {
+                        options.onToolCallEnd(toolCallResult);
+                    }
                 } else {
                     if (options?.debug || options?.verbose) {
                         console.log("[-] Tool", tool.name, "execution refused");
@@ -114,13 +122,13 @@ class Agent {
                 options.tools = Object.values(this.tools);
             }
             const nit = it + 1;
-            if (nit > 1 && options?.debug) {
+            /*if (nit > 1 && options?.debug) {
                 options.debug = false;
                 options.verbose = true;
-            }
+            }*/
             //console.log("HISTORY:");
             //console.dir(options.history, {depth: 8});
-            _res = await this.runAgentNoTemplate(nit, " ", params, options);
+            _res = await this.runAgentNoTemplate(nit, "", params, options);
         } else {
             this.history.push({ assistant: res.text });
         }
@@ -144,6 +152,7 @@ class Agent {
         //console.log("TPL", tpl);
         //console.log("TPL HIST", tpl.history);
         //console.log("Agent no template raw prompt:", prompt);
+        //console.log("Agent no template options", options);
         const pr = tpl.prompt(prompt);
         //console.log("Agent no template tpl prompt:", pr);
         //console.log("Agent no template tpl render:", tpl.render());
@@ -179,18 +188,38 @@ class Agent {
                     );
                     throw new Error(buf.join("\n"));
                 }
-                // execute tool
-                if (options?.debug === true) {
-                    console.log("\n* Calling tool", tool.name + ":", toolCall.arguments);
+                let canRun = true;
+                if (tool?.canRun) {
+                    canRun = await tool.canRun(tool);
                 }
-                const toolResp = await tool.execute(toolCall.arguments);
-                if (options?.debug || options?.verbose) {
-                    console.log("[x] Executed tool", tool.name + ":", toolResp);
+                if (!canRun) {
+                    if (options?.debug || options?.verbose) {
+                        console.log("[-] Tool", tool.name, "execution refused");
+                    }
+                    toolResults.push({
+                        call: toolCall,
+                        response: "tool execution denied"
+                    });
+                } else {
+                    if (options?.onToolCall) {
+                        options.onToolCall(toolCall);
+                    }
+                    // execute tool                
+                    if (options?.debug === true) {
+                        console.log("\n=> Calling tool", tool.name + ":", toolCall.arguments);
+                    }
+                    const toolResp = await tool.execute(toolCall.arguments);
+                    if (options?.debug) {
+                        console.log("[x] Executed tool", tool.name + ":", toolResp);
+                    }
+                    toolResults.push({
+                        call: toolCall,
+                        response: toolResp
+                    });
+                    if (options?.onToolCallEnd) {
+                        options.onToolCallEnd(toolResp);
+                    }
                 }
-                toolResults.push({
-                    call: toolCall,
-                    response: toolResp
-                });
             }
             if (it == 1) {
                 //console.log("PROMPT HIST", prompt);
