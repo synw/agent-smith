@@ -49,8 +49,13 @@ class Task {
         }
         this.def = applyVariables(this.def, params);
         let tpl: PromptTemplate = new PromptTemplate("none");
-        let finalPrompt: string;
         const options: InferenceOptions = {};
+        if (conf?.onToolCall) {
+            options.onToolCall = conf.onToolCall
+        }
+        if (conf?.onToolCallEnd) {
+            options.onToolCallEnd = conf.onToolCallEnd
+        }
         const agentToolsList = Object.values(this.agent.tools);
         if (useTemplates) {
             tpl = formatTaskTemplate(this.def, model?.template ? model.template : undefined);
@@ -62,11 +67,14 @@ class Task {
                 }
                 agentToolsList.forEach((t) => tpl.addTool(t));
             };
-            finalPrompt = params.prompt;
+            //finalPrompt = params.prompt;
         } else {
             this.def.inferParams = formatInferParams(this.def.inferParams ?? {}, conf ?? {});
-            finalPrompt = this.def.prompt.replace("{prompt}", params.prompt);
         }
+        //console.log("DEF", this.def);
+        //console.log("P", params.prompt);
+        const finalPrompt = this.def.prompt.replace("{prompt}", params.prompt);
+        //console.log("FP", finalPrompt);
         // model
         if (model) {
             this.def.inferParams.model = model;
