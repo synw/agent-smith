@@ -123,8 +123,13 @@ async function executeTask(
             //}
         }
     };
-    const hasTools = options?.tools;
-
+    let hasTools = false;
+    if (task.def?.tools) {
+        if (task.def.tools.length > 0) {
+            hasTools = true
+        }
+    }
+    //console.log("HAS TOOLS", hasTools);
     let continueWrite = true;
     let skipNextEmptyLinesToken = false;
     const spinner = ora("Thinking ...");
@@ -172,10 +177,10 @@ async function executeTask(
                 continueWrite = false;
                 return
             } else if (t == tpl.tags.toolCall?.end) {
-                if (options?.verbose === true) {
-                    skipNextEmptyLinesToken = true;
-                    continueWrite = true;
-                }
+                //if (options?.verbose === true) {
+                skipNextEmptyLinesToken = true;
+                continueWrite = true;
+                // }
                 return
             }
         }
@@ -203,6 +208,9 @@ async function executeTask(
         //console.log("TC END START");
     }
     const onToolCallEnd = (tr: any) => {
+        /*if (options?.verbose || options?.debug) {
+            console.log(tr)
+        }*/
         tcspinner.stop();
     }
     //console.log("OOT", options?.onToken, "/", processToken);
@@ -268,6 +276,21 @@ async function executeTask(
     if (isChatMode.value) {
         if (tpl) {
             setChatTemplate(tpl);
+        }
+        if (task.def.tools) {
+            options.tools = task.def.tools
+        }
+        if (task.def.shots) {
+            options.history = task.def.shots
+        }
+        if (task.def.template?.system) {
+            options.system = task.def.template.system
+        }
+        /*if (task.def.template?.afterSystem) {
+            options.system = (tpl?.system ?? "") + task.def.template.afterSystem
+        }*/
+        if (task.def.template?.assistant) {
+            options.assistant = task.def.template.assistant
         }
         setChatInferenceParams(initialInferParams);
         await chat(program, options);

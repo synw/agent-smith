@@ -24,7 +24,7 @@ async function chat(program: Command, options: InferenceOptions) {
         }
     }
     //console.log("CHAT HIST", agent.history);
-    options.history = undefined;
+    //options.history = undefined;
     //console.log("RUN W PROMPT", prompt);
     await agent.run(prompt, chatInferenceParams, options, chatTemplate ? chatTemplate : undefined);
     console.log();
