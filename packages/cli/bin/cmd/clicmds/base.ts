@@ -1,9 +1,8 @@
 import { Command, Option } from "commander";
-import { readFeaturesType } from "../../db/read.js";
 import { listBackends, setBackend } from "../../state/backends.js";
 import { parseCommandArgs } from "../lib/options_parsers.js";
 import { processTaskCmd, processTasksCmd, resetDbCmd, updateFeaturesCmd } from "./cmds.js";
-import { updateConfCmd } from "./update.js";
+import { updateConfCmd } from "./updateconf.js";
 import { inferenceOptions } from "../options.js";
 
 function initBaseCommands(program: Command): Command {

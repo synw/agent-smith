@@ -8,6 +8,7 @@ import { createDirectoryIfNotExists } from "../cmd/sys/dirs.js";
 import { backend, initBackends } from "./backends.js";
 import { Agent } from "@agent-smith/agent";
 import { runtimeDataError } from "../utils/user_msgs.js";
+//import { usePerfTimer } from "../main.js";
 
 let pyShell: PythonShell;
 
@@ -42,13 +43,18 @@ function initFilepaths() {
 }
 
 async function init() {
+    //const perf = usePerfTimer();
     await initState();
+    //perf.measure("initState");
     await initBackends();
+    //perf.measure("initBackends");
     if (!backend.value) {
         runtimeDataError("No backend found, can not initialize agent")
         return
     }
     agent = new Agent(backend.value);
+    //perf.measure("create agent");
+    //perf.final("init")
     //console.log("Agent", agent);
 }
 

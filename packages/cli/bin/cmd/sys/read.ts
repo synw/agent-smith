@@ -1,4 +1,6 @@
 import { default as fs } from "fs";
+import { access, constants } from 'fs/promises';
+import { resolve } from 'path';
 
 function readFile(fp: string): string {
     try {
@@ -8,6 +10,16 @@ function readFile(fp: string): string {
     }
 }
 
+async function checkIfFileExists(filePath: string): Promise<boolean> {
+    try {
+        await access(resolve(filePath), constants.F_OK);
+        return true;
+    } catch {
+        return false;
+    }
+}
+
 export {
     readFile,
+    checkIfFileExists,
 }

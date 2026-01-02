@@ -3,9 +3,11 @@ import { argv } from 'process';
 import { query } from "./cli.js";
 import { buildCmds, parseCmd } from './cmd/cmds.js';
 import { formatMode, init, inputMode, isChatMode, outputMode, runMode } from './state/state.js';
-import { updateConfCmd } from './cmd/clicmds/update.js';
+import { updateConfCmd } from './cmd/clicmds/updateconf.js';
+//import { usePerfTimer } from './main.js';
 
 async function main() {
+    //const perf = usePerfTimer();
     const nargs = argv.length;
     if (nargs == 2) {
         runMode.value = "cli";
@@ -16,8 +18,12 @@ async function main() {
             return
         }
     }
+    //perf.measure("base");
     await init();
+    //perf.measure("init");
     const program = await buildCmds();
+    //perf.measure("buildCmds");
+    //perf.final("index start");
     program.hook('preAction', async (thisCommand, actionCommand) => {
         const options = actionCommand.opts();
         //console.log("POPTS", options)

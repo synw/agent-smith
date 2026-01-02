@@ -92,6 +92,12 @@ const tasksSettings = `CREATE TABLE IF NOT EXISTS tasksettings (
     backend TEXT
 );`;
 
+/*const fragment = `CREATE TABLE IF NOT EXISTS fragment (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL,
+    content TEXT NOT NULL
+);`;*/
+
 const schemas = [
     filepath,
     featurespath,
@@ -105,6 +111,7 @@ const schemas = [
     adaptater,
     backend,
     tasksSettings,
+    //fragment,
 ];
 
 export { schemas }

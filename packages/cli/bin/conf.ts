@@ -26,6 +26,8 @@ function getConfigPath(appName: string, filename: string): { confDir: string, db
 }
 
 const { confDir, dbPath } = getConfigPath("agent-smith", "config.db");
+//const cacheFilePath = join(confDir, "usercmds.ts");
+const cacheFilePath = join(import.meta.dirname, "state/auto/usercmds.js");
 
 async function processConfPath(confPath: string): Promise<{ paths: Array<string>, pf: string, dd: string }> {
     createDirectoryIfNotExists(confDir);
@@ -124,5 +126,6 @@ async function processConfPath(confPath: string): Promise<{ paths: Array<string>
 export {
     confDir,
     dbPath,
+    cacheFilePath,
     processConfPath,
 }

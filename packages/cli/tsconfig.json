@@ -28,7 +28,8 @@
     }
   },
   "include": [
-    "bin/**/*.ts"
+    "bin/**/*.ts",
+    "bin/**/*.js"
   ],
   "exclude": [
     "node_modules",
