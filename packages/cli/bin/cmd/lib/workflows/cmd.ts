@@ -50,7 +50,7 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
                     if (!pr) {
                         throw new Error(`Workflow ${wname} step ${i + 1}: provide a prompt for the task ${step.name}`)
                     }
-                    const tr = await executeTask(step.name, { prompt: pr }, options, true);
+                    const tr = await executeTask(step.name, { prompt: pr }, options);
                     //console.log("WF AFTER TASK RES", tr);
                     taskRes = { ...tr, ...taskRes };
                     //console.log("WF TASK NEXT ARGS", taskRes);

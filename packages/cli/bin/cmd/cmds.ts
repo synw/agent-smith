@@ -13,7 +13,7 @@ import { initUserCmds } from "./clicmds/cmds.js";
 const program = new Command();
 
 async function chat(program: Command, options: InferenceOptions) {
-    //console.log("CHAT IP", inferParams);
+    //console.log("CHAT OPTS", options);
     const data = { message: '>', default: "" };
     const prompt = await input(data);
     if (prompt == "/q") {

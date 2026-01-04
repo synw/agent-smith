@@ -1,15 +1,22 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
 import { ToolSpec } from "@locallm/types/dist/tools";
+import { confirmToolUsage } from "./tools.js";
 
 class McpClient {
     name: string;
     transport: StdioClientTransport;
     client: Client;
     authorizedTools: Array<string> | null = null;
+    askUserTools: Array<string> | null = null;
     tools: Record<string, ToolSpec> = {};
 
-    constructor(servername: string, command: string, args: Array<string>, authorizedTools: Array<string> | null = null) {
+    constructor(
+        servername: string,
+        command: string,
+        args: Array<string>,
+        authorizedTools: Array<string> | null = null,
+        askUserTools: Array<string> | null = null) {
         //console.log("MCP servername", servername);
         //console.log("MCP command", command);
         //console.log("MCP ARGS", typeof args, args);
@@ -34,6 +41,9 @@ class McpClient {
         this.client = new Client({ name: "AgentSmith", version: "0.1.0" });
         if (authorizedTools) {
             this.authorizedTools = authorizedTools;
+        }
+        if (askUserTools) {
+            this.askUserTools = askUserTools;
         }
     }
 
@@ -75,6 +85,11 @@ class McpClient {
                 description: tool.description ?? "",
                 arguments: args,
                 execute: exec
+            }
+            if (this.askUserTools) {
+                if (this.askUserTools.includes(tool.name)) {
+                    t.canRun = confirmToolUsage;
+                }
             }
             this.tools[tool.name] = t;
             toolSpecs.push(t)

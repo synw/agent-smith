@@ -18,7 +18,7 @@ import { getTaskPrompt } from "./utils.js";
 import { InferenceParams } from "@locallm/types/dist/inference.js";
 
 async function executeTask(
-    name: string, payload: Record<string, any>, options: Record<string, any>, quiet?: boolean
+    name: string, payload: Record<string, any>, options: Record<string, any>
 ): Promise<TaskOutput> {
     //console.log("EXEC TASK", payload, options);
     //console.log("TN", name);
@@ -198,7 +198,7 @@ async function executeTask(
         ++i;
     };
 
-    const spinnerInit = (name: string) => ora(`Executing ${name} tool ...`);
+    const spinnerInit = (name: string) => ora(`Executing ${name} tool ...\n`);
     let tcspinner: Ora;
     const onToolCall = (tc: Record<string, any>) => {
         //console.log("TC START");
@@ -273,7 +273,7 @@ async function executeTask(
     await processOutput(out);
     // chat mode
     //console.log("CLI CONF IP", initialInferParams);
-    if (isChatMode.value) {
+    if (!options?.isToolCall && isChatMode.value) {
         if (tpl) {
             setChatTemplate(tpl);
         }

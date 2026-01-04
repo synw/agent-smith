@@ -1,8 +1,19 @@
 import YAML from 'yaml';
 import * as fs from 'fs';
 import { FeatureExtension } from '../../interfaces.js';
-import { ToolSpec } from '@locallm/types';
+import { ToolSpec, type ToolCallSpec } from '@locallm/types';
 import { readYmlFile } from '../sys/read_yml_file.js';
+import { confirm } from '@inquirer/prompts';
+
+async function confirmToolUsage(toolCall: ToolCallSpec) {
+    let args: string;
+    if (toolCall?.arguments) {
+        args = `with arguments ${JSON.stringify(toolCall.arguments)}`
+    } else {
+        args = "with no arguments"
+    }
+    return await confirm({ message: `Execute tool ${toolCall.name} ${args}?` });
+}
 
 function _extractToolDoc(filePath: string, startComment: string, endComment: string): { found: boolean, doc: string } {
     try {
@@ -142,4 +153,5 @@ function extractToolDoc(name: string, ext: FeatureExtension, dirPath: string): {
 export {
     extractToolDoc,
     extractTaskToolDocAndVariables,
+    confirmToolUsage,
 }
