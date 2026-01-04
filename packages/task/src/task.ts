@@ -24,10 +24,11 @@ class Task {
     async run(
         params: TaskInput, conf?: TaskConf
     ): Promise<TaskOutput> {
+        //console.log("TASK DEF", this.def);
         //console.log("TASK CONF", conf);
         //console.log("TOOLS", this.agent.tools);
         if (!params?.prompt) {
-            throw new Error(`Task ${this.def.name}: no prompt parameter provided. Parameters: ${params}`);
+            throw new Error(`Task ${this.def.name}: no prompt parameter provided. Parameters: ${JSON.stringify(params, null, 2)}`);
         }
         let model = this.def.model;
         let ctx = this.def.ctx;
@@ -56,16 +57,27 @@ class Task {
         if (conf?.onToolCallEnd) {
             options.onToolCallEnd = conf.onToolCallEnd
         }
-        const agentToolsList = Object.values(this.agent.tools);
+        let hasTools = false;
+        // add task tools to the agent
+        if (this.def?.tools) {
+            if (this.def?.tools.length > 0) {
+                hasTools = true;
+                this.def.tools.forEach(
+                    t => {
+                        this.agent.tools[t.name] = t;
+                    }
+                );
+            }
+        }
         if (useTemplates) {
             tpl = formatTaskTemplate(this.def, model?.template ? model.template : undefined);
             this.def.inferParams = formatInferParams(this.def.inferParams ?? {}, conf ?? {}, tpl);
             //tpl.replacePrompt(this.def.prompt);
-            if (agentToolsList.length > 0) {
+            if (hasTools) {
                 if (!tpl?.toolsDef) {
                     throw new Error(`The template ${tpl.name} does not have tools and the task ${this.def.name} specifies some`)
                 }
-                agentToolsList.forEach((t) => tpl.addTool(t));
+                this.def.tools?.forEach((t) => tpl.addTool(t));
             };
             //finalPrompt = params.prompt;
         } else {
@@ -79,8 +91,8 @@ class Task {
         if (model) {
             this.def.inferParams.model = model;
         }
-        if (agentToolsList.length > 0) {
-            options.tools = agentToolsList;
+        if (hasTools) {
+            options.tools = this.def.tools;
         }
         if (conf?.debug) {
             console.log("-----------", model.name, "- Template:", tpl.name, "- Ctx:", ctx, "-----------");
@@ -102,6 +114,10 @@ class Task {
             // cut debug here. TODO: debug log levels
             options.debug = false
         }
+        const isRoutingAgent = this.def.description.includes("routing agent");
+        if (isRoutingAgent) {
+            options.isToolsRouter = true
+        }
         if (!useTemplates) {
             if (this.def.template?.system) {
                 options.system = this.def.template.system;
@@ -120,13 +136,16 @@ class Task {
             //console.log("RAW ANSWER", answer);
             //console.log("\nHISTORY", this.agent.history);
         }
+        // remove task tools from the agent
+        if (hasTools) {
+            this.def.tools?.forEach(
+                t => {
+                    delete this.agent.tools[t.name];
+                }
+            );
+        }
         //console.log("TASK: ANSWER FINAL:", { answer: answer.result, errors: {}, template: answer.template })
         return { answer, template: tpl }
-    }
-
-    addTools(tools: Array<ToolSpec>): Task {
-        tools.forEach(t => this.agent.tools[t.name] = t);
-        return this
     }
 }
 

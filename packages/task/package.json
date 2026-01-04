@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/task",
-  "version": "0.1.9",
+  "version": "0.2.0",
   "description": "A toolkit to create human friendly agents: the language model tasks module",
   "repository": {
     "type": "git",
@@ -22,7 +22,7 @@
   "devDependencies": {
     "@locallm/api": "^0.7.3",
     "openai": "6.15.0",
-    "@locallm/types": "^0.6.5",
+    "@locallm/types": "^0.6.7",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^0.4.4",
     "@rollup/plugin-typescript": "^12.3.0",
