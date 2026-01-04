@@ -5,7 +5,7 @@
     "type": "git",
     "url": "git+https://github.com/synw/agent-smith.git"
   },
-  "version": "0.1.8",
+  "version": "0.2.0",
   "scripts": {
     "buildrl": "rm -rf dist/* && rollup -c",
     "build": "rm -rf dist/* && tsc"
@@ -16,7 +16,7 @@
     "restmix": "^0.6.1"
   },
   "devDependencies": {
-    "@locallm/types": "^0.6.5",
+    "@locallm/types": "^0.6.7",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-typescript": "^12.3.0",
     "@types/node": "^25.0.3",

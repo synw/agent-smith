@@ -96,7 +96,7 @@ class Agent {
                 const tool = this.tools[tc.name];
                 let canRun = true;
                 if (tool?.canRun) {
-                    canRun = await tool.canRun(tool);
+                    canRun = await tool.canRun(tc);
                 }
                 //console.log(tool.name, "can run:", canRun)
                 if (canRun) {
@@ -121,13 +121,22 @@ class Agent {
             if (options?.tools) {
                 options.tools = Object.values(this.tools);
             }
+            if (options?.isToolsRouter) {
+                const fres: InferenceResult = {
+                    text: JSON.stringify(toolsResults.map(tr => tr.response)),
+                    stats: res.stats,
+                    serverStats: res.serverStats,
+                    toolCalls: res.toolCalls,
+                }
+                return fres
+            }
             const nit = it + 1;
             /*if (nit > 1 && options?.debug) {
                 options.debug = false;
                 options.verbose = true;
             }*/
             //console.log("HISTORY:");
-            //console.dir(options.history, {depth: 8});
+            //console.dir(options.history, {depth: 8});            
             _res = await this.runAgentNoTemplate(nit, "", params, options);
         } else {
             this.history.push({ assistant: res.text });
@@ -190,7 +199,7 @@ class Agent {
                 }
                 let canRun = true;
                 if (tool?.canRun) {
-                    canRun = await tool.canRun(tool);
+                    canRun = await tool.canRun(toolCall);
                 }
                 if (!canRun) {
                     if (options?.debug || options?.verbose) {
@@ -233,6 +242,15 @@ class Agent {
                     assistant: res.text,
                     tools: toolResults,
                 });
+            }
+            if (options?.isToolsRouter) {
+                const fres: InferenceResult = {
+                    text: JSON.stringify(toolResults.map(tr => tr.response)),
+                    stats: res.stats,
+                    serverStats: res.serverStats,
+                    toolCalls: res.toolCalls,
+                }
+                return fres
             }
             return await this.runAgentWithTemplate(it + 1, prompt, params, options, tpl)
         } else {
