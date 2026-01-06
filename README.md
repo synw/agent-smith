@@ -227,3 +227,5 @@ The cli is powered by:
 The server is powered by:
 
 - [Echo](https://github.com/labstack/echo)
+
+![Agent Smith](docsite/public/img/job.jpg)
