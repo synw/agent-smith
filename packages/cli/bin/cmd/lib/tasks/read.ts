@@ -1,5 +1,7 @@
+import path from "path";
 import { Agent } from "@agent-smith/agent";
-import { ModelSpec, Task, TaskConf, TaskDef } from "@agent-smith/task";
+import { ModelSpec, TaskConf, TaskDef } from "@agent-smith/task";
+import { NodeTask } from "@agent-smith/nodetask";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import { ToolSpec } from "@locallm/types";
 import { readTool } from "../../../db/read.js";
@@ -11,24 +13,27 @@ import { executeTask } from "./cmd.js";
 import { configureTaskModel, mergeInferParams } from "./conf.js";
 import { openTaskSpec } from "./utils.js";
 import { confirmToolUsage } from "../tools.js";
+import type { LmTaskConfig } from "../../../interfaces.js";
 
 async function readTask(
     name: string, payload: Record<string, any>, options: Record<string, any>, agent: Agent
 ): Promise<{
-    task: Task;
+    task: NodeTask;
     model: ModelSpec;
-    conf: TaskConf;
+    conf: LmTaskConfig;
     vars: Record<string, any>;
     mcpServers: Array<McpClient>;
+    taskDir: string;
 }> {
     if (options?.debug) {
         console.log("Task", name);
         console.log("Payload:", payload);
         console.log("Task options:", options);
     }
-    const taskFileSpec = openTaskSpec(name);
+    const { taskFileSpec, taskPath } = openTaskSpec(name);
+    const taskDir = path.dirname(taskPath);
     // merge passed options from payload
-    const opts = payload?.inferParams ? { ...options, ...payload.inferParams } : options
+    const opts = payload?.inferParams ? { ...options, ...payload.inferParams } : options;
     const conf = parseTaskConfigOptions(opts);
     if (options?.debug) {
         console.log("Task conf:", conf);
@@ -140,7 +145,7 @@ async function readTask(
         delete taskSpec.toolsList
     };
     //console.log("TASK SPEC:", JSON.stringify(taskSpec, null, "  "));
-    const task = new Task(agent, taskSpec);
+    const task = new NodeTask(agent, taskSpec);
     //task.addTools(taskSpec.tools);
     //console.log("TASK TOOLS", task.agent.tools);
     // check for grammars
@@ -153,7 +158,7 @@ async function readTask(
         console.log("Task model:", model);
         //console.log("Task vars:", vars);
     }*/
-    return { task, model, conf, vars, mcpServers }
+    return { task, model, conf, vars, mcpServers, taskDir }
 }
 
 export {

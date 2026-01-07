@@ -71,7 +71,7 @@ function _parseToolDoc(rawTxt: string, name: string): ToolSpec {
         //console.log("PARSE TOOL DOC", res);
         return res as ToolSpec
     } catch (e) {
-        throw new Error(`Error parsing tool ${name}: data:\n${rawTxt}\n`)
+        throw new Error(`Error parsing tool ${name}: ${e} \nData:\n${rawTxt}\n`)
     }
 }
 

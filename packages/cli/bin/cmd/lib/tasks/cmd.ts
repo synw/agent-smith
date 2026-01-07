@@ -1,12 +1,13 @@
 import { TaskConf, TaskOutput } from "@agent-smith/task";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
+import { InferenceParams } from "@locallm/types/dist/inference.js";
 import { default as color, default as colors } from "ansi-colors";
 import { PromptTemplate } from "modprompt";
 import ora, { Ora } from 'ora';
 import { TaskSettings } from "../../../interfaces.js";
 import { usePerfTimer } from "../../../main.js";
 import { backend, backends, listBackends } from "../../../state/backends.js";
-import { chatInferenceParams, chatTemplate, setChatInferenceParams, setChatTemplate } from "../../../state/chat.js";
+import { setChatInferenceParams, setChatTemplate } from "../../../state/chat.js";
 import { agent, isChatMode } from "../../../state/state.js";
 import { initTaskSettings, isTaskSettingsInitialized, tasksSettings } from "../../../state/tasks.js";
 import { chat, program } from "../../cmds.js";
@@ -15,7 +16,6 @@ import { runtimeDataError, runtimeError, runtimeWarning } from "../user_msgs.js"
 import { formatStats, processOutput } from "../utils.js";
 import { readTask } from "./read.js";
 import { getTaskPrompt } from "./utils.js";
-import { InferenceParams } from "@locallm/types/dist/inference.js";
 
 async function executeTask(
     name: string, payload: Record<string, any>, options: Record<string, any>
@@ -44,7 +44,7 @@ async function executeTask(
     if (options?.debug || options?.backend) {
         console.log("Agent:", colors.bold(agent.lm.name), "( " + agent.lm.providerType + " backend type)");
     }
-    const { task, model, conf, vars, mcpServers } = await readTask(name, payload, options, agent);
+    const { task, model, conf, vars, mcpServers, taskDir } = await readTask(name, payload, options, agent);
     //console.log("TASKCONF IP", conf.inferParams);
     if (hasSettings) {
         if (!model?.inferParams) {
@@ -227,6 +227,7 @@ async function executeTask(
         delete conf.model
     }
     const tconf: TaskConf = {
+        baseDir: taskDir,
         model: model,
         //debug: options?.debug ?? false,
         onToolCall: onToolCall,

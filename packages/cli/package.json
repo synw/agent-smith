@@ -2,7 +2,7 @@
   "name": "@agent-smith/cli",
   "description": "Agent Smith: terminal client for language model agents",
   "repository": "https://github.com/synw/agent-smith",
-  "version": "0.0.101",
+  "version": "0.0.102",
   "scripts": {
     "buildrl": "rm -rf dist/* && rollup -c",
     "build": "rm -rf dist/* && tsc",
@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "@agent-smith/agent": "^0.2.0",
-    "@agent-smith/task": "^0.2.0",
+    "@agent-smith/task": "^0.2.1",
+    "@agent-smith/nodetask": "^0.1.0",
     "@agent-smith/tfm": "^0.2.0",
     "@inquirer/prompts": "^8.1.0",
     "@intrinsicai/gbnfgen": "0.12.0",

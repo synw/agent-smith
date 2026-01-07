@@ -1,13 +1,12 @@
 import YAML from 'yaml';
-import { readTask } from "../../../cmd/sys/read_task.js";
-import { getFeatureSpec } from "../../../state/features.js";
-import { FeatureType, LmTaskFileSpec } from "../../../interfaces.js";
-import { parseCommandArgs } from '../options_parsers.js';
 import { readClipboard } from '../../../cmd/sys/clipboard.js';
-import { readPromptFile } from '../utils.js';
+import { readTask } from "../../../cmd/sys/read_task.js";
+import { FeatureType, LmTaskFileSpec } from "../../../interfaces.js";
+import { getFeatureSpec } from "../../../state/features.js";
 import { runtimeDataError } from '../user_msgs.js';
+import { readPromptFile } from '../utils.js';
 
-function openTaskSpec(name: string) {
+function openTaskSpec(name: string): { taskFileSpec: LmTaskFileSpec, taskPath: string } {
     const { found, path } = getFeatureSpec(name, "task" as FeatureType);
     if (!found) {
         throw new Error(`Task ${name} not found`);
@@ -18,7 +17,7 @@ function openTaskSpec(name: string) {
     }
     const taskFileSpec = YAML.parse(res.ymlTask);
     taskFileSpec.name = name;
-    return taskFileSpec as LmTaskFileSpec
+    return { taskFileSpec: taskFileSpec as LmTaskFileSpec, taskPath: path }
 }
 
 async function getTaskPrompt(
@@ -46,6 +45,5 @@ async function getTaskPrompt(
 }
 
 export {
-    openTaskSpec,
-    getTaskPrompt,
-}
+    getTaskPrompt, openTaskSpec
+};
