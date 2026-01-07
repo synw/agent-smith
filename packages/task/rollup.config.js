@@ -8,13 +8,9 @@ export default {
   input: 'src/main.ts',
   output: [
     {
-      file: 'dist/main.js',
-      format: 'esm'
-    },
-    {
       file: 'dist/api.min.js',
       format: 'iife',
-      name: '$agentbrain',
+      name: '$agenttask',
       plugins: [terser()]
     }],
   plugins: [

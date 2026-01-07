@@ -37,6 +37,7 @@ interface TaskConf {
     options?: InferenceOptions;
     debug?: boolean;
     verbose?: boolean;
+    baseDir?: string;
     onToolCall?: (tc: ToolCallSpec) => void;
     onToolCallEnd?: (tr: any) => void;
 }
