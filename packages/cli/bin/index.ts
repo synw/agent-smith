@@ -4,6 +4,7 @@ import { query } from "./cli.js";
 import { buildCmds, parseCmd } from './cmd/cmds.js';
 import { formatMode, init, inputMode, isChatMode, outputMode, runMode } from './state/state.js';
 import { updateConfCmd } from './cmd/clicmds/updateconf.js';
+import { resetDbCmd } from './cmd/clicmds/cmds.js';
 //import { usePerfTimer } from './main.js';
 
 async function main() {
@@ -15,6 +16,9 @@ async function main() {
     else if (nargs >= 3) {
         if (argv[2] == "conf") {
             await updateConfCmd(argv.slice(-1));
+            return
+        } else if (argv[2] == "reset") {
+            await resetDbCmd()
             return
         }
     }

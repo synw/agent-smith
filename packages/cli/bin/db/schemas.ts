@@ -23,6 +23,14 @@ const tasks = `CREATE TABLE IF NOT EXISTS task (
     ext TEXT NOT NULL CHECK ( ext IN ('yml') )
 );`;
 
+const agents = `CREATE TABLE IF NOT EXISTS agent (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT UNIQUE NOT NULL,
+    path TEXT NOT NULL,
+    variables TEXT,
+    ext TEXT NOT NULL CHECK ( ext IN ('yml') )
+);`;
+
 const workflow = `CREATE TABLE IF NOT EXISTS workflow (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
@@ -59,13 +67,13 @@ const tool = `CREATE TABLE IF NOT EXISTS tool (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
     spec TEXT NOT NULL,
-    type TEXT NOT NULL CHECK ( type IN ('task', 'action', 'workflow') )
+    type TEXT NOT NULL CHECK ( type IN ('agent', 'task', 'action', 'workflow') )
 );`;
 
 const alias = `CREATE TABLE IF NOT EXISTS aliases (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     name TEXT UNIQUE NOT NULL,
-    type TEXT NOT NULL CHECK ( type IN ('task', 'action', 'workflow') )
+    type TEXT NOT NULL CHECK ( type IN ('agent', 'task', 'action', 'workflow') )
 );`;
 
 const backend = `CREATE TABLE IF NOT EXISTS backend (
@@ -92,12 +100,6 @@ const tasksSettings = `CREATE TABLE IF NOT EXISTS tasksettings (
     backend TEXT
 );`;
 
-/*const fragment = `CREATE TABLE IF NOT EXISTS fragment (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT UNIQUE NOT NULL,
-    content TEXT NOT NULL
-);`;*/
-
 const schemas = [
     filepath,
     featurespath,
@@ -111,7 +113,7 @@ const schemas = [
     adaptater,
     backend,
     tasksSettings,
-    //fragment,
+    agents,
 ];
 
 export { schemas }

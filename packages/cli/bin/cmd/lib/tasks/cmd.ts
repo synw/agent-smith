@@ -1,9 +1,9 @@
 import { TaskConf, TaskOutput } from "@agent-smith/task";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
-import { InferenceParams } from "@locallm/types/dist/inference.js";
+import { InferenceParams } from "@locallm/types";
 import { default as color, default as colors } from "ansi-colors";
 import { PromptTemplate } from "modprompt";
-import ora, { Ora } from 'ora';
+import ora from 'ora';
 import { TaskSettings } from "../../../interfaces.js";
 import { usePerfTimer } from "../../../main.js";
 import { backend, backends, listBackends } from "../../../state/backends.js";
@@ -13,7 +13,7 @@ import { initTaskSettings, isTaskSettingsInitialized, tasksSettings } from "../.
 import { chat, program } from "../../cmds.js";
 import { parseCommandArgs } from "../options_parsers.js";
 import { runtimeDataError, runtimeError, runtimeWarning } from "../user_msgs.js";
-import { formatStats, processOutput } from "../utils.js";
+import { processOutput } from "../utils.js";
 import { readTask } from "./read.js";
 import { getTaskPrompt } from "./utils.js";
 
@@ -106,12 +106,12 @@ async function executeTask(
     //console.log("ST", thinkStart);
     //console.log("ET", thinkEnd);
     //let fullTxt = ""
+    let emittedTokens = 0;
     const printToken = (t: string) => {
         if (options?.tokens === true) {
             let txt = t;
             txt = c ? t : `\x1b[100m${t}\x1b[0m`
             process.stdout.write(txt);
-            ++i;
             c = !c
         } else {
             /*if (formatMode.value == "markdown") {
@@ -122,6 +122,7 @@ async function executeTask(
             process.stdout.write(t);
             //}
         }
+        ++emittedTokens;
     };
     let hasTools = false;
     if (task.def?.tools) {
@@ -138,12 +139,11 @@ async function executeTask(
     const formatTokenCount = (i: number) => {
         return `${ts} ${color.bold(i.toString())} ${te}`
     };
-    const perfTimer = usePerfTimer(false)
-    let i = 0;
+    const perfTimer = usePerfTimer(false);
     const processToken = (t: string) => {
         //console.log("T", t);
-        if (i == 0) { perfTimer.start() }
-        spinner.text = formatTokenCount(i)
+        if (emittedTokens == 0) { perfTimer.start() }
+        spinner.text = formatTokenCount(emittedTokens)
         if (!options?.verbose && !options?.debug) {
             //console.log("TTTTTT", hasThink && tpl);
             if (hasThink && tpl) {
@@ -156,7 +156,7 @@ async function executeTask(
                     //console.log("End thinking token", thinkEnd);
                     continueWrite = true;
                     skipNextEmptyLinesToken = true;
-                    let msg = color.dim("Thinking:") + ` ${i} ${color.dim("tokens")}`;
+                    let msg = color.dim("Thinking:") + ` ${emittedTokens} ${color.dim("tokens")}`;
                     msg = msg + " " + color.dim(perfTimer.time())
                     spinner.info(msg);
                     return
@@ -165,7 +165,7 @@ async function executeTask(
         } else {
             if (tpl) {
                 if (t == tpl.tags.think?.end) {
-                    let msg = color.dim("Thinking:") + ` ${i} ${color.dim("tokens")}`;
+                    let msg = color.dim("Thinking:") + ` ${emittedTokens} ${color.dim("tokens")}`;
                     msg = msg + " " + color.dim(perfTimer.time())
                     console.log(msg)
                 }
@@ -195,23 +195,26 @@ async function executeTask(
             printToken(t);
             //}
         }
-        ++i;
+        ++emittedTokens;
     };
 
-    const spinnerInit = (name: string) => ora(`Executing ${name} tool ...\n`);
-    let tcspinner: Ora;
+    //const spinnerInit = (name: string) => ora(`Executing the ${name} tool ...\n`);
+    //let tcspinner: Ora;
     const onToolCall = (tc: Record<string, any>) => {
         //console.log("TC START");
         console.log("⚒️ ", color.bold(name), "=>", `${color.yellowBright(tc.name)}`, tc.arguments);
-        tcspinner = spinnerInit(tc.name);
-        tcspinner.start();
-        //console.log("TC END START");
+        /*if (options?.verbose) {
+            tcspinner = spinnerInit(tc.name);
+            tcspinner.start();
+        }*/
     }
     const onToolCallEnd = (tr: any) => {
-        /*if (options?.verbose || options?.debug) {
+        if (options?.debug) {
             console.log(tr)
+        }
+        /*if (options?.verbose) {
+            tcspinner.stop();
         }*/
-        tcspinner.stop();
     }
     //console.log("OOT", options?.onToken, "/", processToken);
     if (options?.onToken) {
@@ -298,7 +301,8 @@ async function executeTask(
     }
     if (options?.debug === true || options?.verbose === true) {
         try {
-            console.log("\n", formatStats(out.answer.stats))
+            console.log(emittedTokens.toString(), color.dim("tokens"), out.answer.stats.tokensPerSecond, color.dim("tps"));
+            //console.log("\n", formatStats(out.answer.stats))
             if (options?.debug === true) {
                 console.log(out.answer.stats)
             }
@@ -318,22 +322,6 @@ async function executeTaskCmd(
     name: string,
     targs: Array<any> = []
 ): Promise<TaskOutput> {
-    /*const { args, options } = parseCommandArgs(targs);
-    let pr: string;
-    //console.log("TOPT", options);
-    if (options?.clipboardInput === true) {
-        pr = await readClipboard()
-    } else if (options?.inputFile === true) {
-        pr = readPromptFile()
-    } else {
-        if (args[0] !== undefined) {
-            pr = args[0]
-        }
-        else {
-            runtimeDataError("task", name, "provide a prompt or use input options")
-            throw new Error()
-        }
-    }*/
     const ca = parseCommandArgs(targs);
     const prompt = await getTaskPrompt(name, ca.args, ca.options);
     return await executeTask(name, { prompt: prompt }, ca.options)

@@ -52,17 +52,7 @@ async function processOutput(res: any) {
     }
 }
 
-function formatStats(stats: InferenceStats): string {
-    const buf = new Array<string>();
-    buf.push(`${stats.tokensPerSecond} tps`);
-    buf.push(`- ${stats.totalTimeSeconds}s`);
-    buf.push(`(${stats.ingestionTimeSeconds}s ingestion /`);
-    buf.push(`${stats.inferenceTimeSeconds}s inference)`);
-    return buf.join(" ")
-}
-
 export {
-    formatStats,
     processOutput,
     readPromptFile,
 };

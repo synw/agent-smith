@@ -10,10 +10,12 @@ function readFeaturesDirs(featuresPaths: Array<string>): Features {
         cmd: [],
         workflow: [],
         adaptater: [],
+        agent: [],
     };
     featuresPaths.forEach((dir: string) => {
         //console.log("Reading feats in", dir);
         const _f = readFeaturesDir(dir);
+        _f.agent.forEach((item) => feats.agent.push(item));
         _f.task.forEach((item) => feats.task.push(item));
         _f.action.forEach((item) => feats.action.push(item));
         _f.cmd.forEach((item) => feats.cmd.push(item));

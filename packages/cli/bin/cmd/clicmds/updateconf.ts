@@ -37,7 +37,6 @@ async function updateConfCmd(args: Array<string>): Promise<any> {
         dataDirPath.value = dd;
     }
     const feats = readFeaturesDirs(paths);
-    //console.log("CMD FEATS", feats);
     updateFeatures(feats);
     updateAliases(feats);
     const deleted = cleanupFeaturePaths(paths);

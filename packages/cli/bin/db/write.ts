@@ -114,6 +114,9 @@ function updateAliases(feats: Features) {
     const deleteStmt = db.prepare("DELETE FROM aliases");
     deleteStmt.run();
     let existingAliases = new Array<string>();
+    feats.agent.forEach((feat) => {
+        existingAliases = _updateAlias(existingAliases, feat.name, "agent")
+    });
     feats.task.forEach((feat) => {
         existingAliases = _updateAlias(existingAliases, feat.name, "task")
     });
@@ -193,6 +196,19 @@ function upsertTool(name: string, type: FeatureType, toolDoc: string) {
 
 function updateFeatures(feats: Features) {
     //console.log("FEATS", feats);
+    upsertAndCleanFeatures(feats.agent, "agent");
+    feats.agent.forEach((feat) => {
+        const { toolDoc, variables } = extractTaskToolDocAndVariables(feat.name, feat.ext, feat.path);
+        //const { found, toolDoc } = extractToolDoc(feat.name, feat.ext, feat.path);
+        //console.log(`TASK ${feat.name} TOOL DOC`, toolDoc);
+        if (toolDoc.length > 0) {
+            upsertTool(feat.name, "agent", toolDoc)
+        }
+        if (Object.keys(variables.required).length > 0 || Object.keys(variables.optional).length > 0) {
+            //console.log("UPDATE VARS", feat.name, ":", variables)
+            updateVariables(feat.name, JSON.stringify(variables, null, "  "))
+        }
+    });
     upsertAndCleanFeatures(feats.task, "task");
     feats.task.forEach((feat) => {
         const { toolDoc, variables } = extractTaskToolDocAndVariables(feat.name, feat.ext, feat.path);

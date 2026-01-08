@@ -87,7 +87,7 @@ async function _createWorkflowFromSpec(
             };
             steps.push(wf);
         }
-        else {
+        else if (type == "task") {
             const { found, path } = getFeatureSpec(name, "task" as FeatureType);
             if (!found) {
                 throw new Error(`Task ${name} not found`)
@@ -101,6 +101,24 @@ async function _createWorkflowFromSpec(
             const wf: WorkflowStep = {
                 name: name,
                 type: "task",
+                run: tsk.run as FeatureExecutor<any, any>,
+            };
+            steps.push(wf);
+        }
+        else if (type == "agent") {
+            const { found, path } = getFeatureSpec(name, "agent" as FeatureType);
+            if (!found) {
+                throw new Error(`Agent ${name} not found`)
+            }
+            const res = readTask(path);
+            if (!res.found) {
+                throw new Error(`Unable to read agent ${name} ${path}`)
+            }
+            const agent = new Agent(backend.value!);
+            const tsk = Task.fromYaml(agent, res.ymlTask);
+            const wf: WorkflowStep = {
+                name: name,
+                type: "agent",
                 run: tsk.run as FeatureExecutor<any, any>,
             };
             steps.push(wf);

@@ -52,8 +52,9 @@ function readFeaturesType(type: FeatureType): Record<string, FeatureSpec> {
 
 function readFeatures(): Record<FeatureType, Record<string, FeatureSpec>> {
     const feats: Record<FeatureType, Record<string, FeatureSpec>> = {
-        task: {}, action: {}, cmd: {}, workflow: {}, adaptater: {}
+        task: {}, action: {}, cmd: {}, workflow: {}, adaptater: {}, agent: {}
     };
+    feats.agent = readFeaturesType("agent");
     feats.task = readFeaturesType("task");
     feats.action = readFeaturesType("action");
     feats.cmd = readFeaturesType("cmd");

@@ -6,14 +6,15 @@ import { getFeatureSpec } from "../../../state/features.js";
 import { runtimeDataError } from '../user_msgs.js';
 import { readPromptFile } from '../utils.js';
 
-function openTaskSpec(name: string): { taskFileSpec: LmTaskFileSpec, taskPath: string } {
-    const { found, path } = getFeatureSpec(name, "task" as FeatureType);
+function openTaskSpec(name: string, isAgent = false): { taskFileSpec: LmTaskFileSpec, taskPath: string } {
+    const ft = isAgent ? "agent" : "task";
+    const { found, path } = getFeatureSpec(name, ft as FeatureType);
     if (!found) {
-        throw new Error(`Task ${name} not found`);
+        throw new Error(`${ft} ${name} not found`);
     }
     const res = readTask(path);
     if (!res.found) {
-        throw new Error(`Task ${name}, ${path} not found`)
+        throw new Error(`${ft} ${name}, ${path} not found`)
     }
     const taskFileSpec = YAML.parse(res.ymlTask);
     taskFileSpec.name = name;

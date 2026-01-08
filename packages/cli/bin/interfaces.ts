@@ -10,6 +10,7 @@ interface FeatureSpec {
 }
 
 interface Features {
+    agent: Array<{ name: string, path: string, ext: AgentExtension }>;
     task: Array<{ name: string, path: string, ext: TaskExtension }>;
     cmd: Array<{ name: string, path: string, ext: CmdExtension }>;
     action: Array<{ name: string, path: string, ext: ActionExtension }>;
@@ -133,15 +134,16 @@ type RunMode = "cli" | "cmd";
 type FormatMode = "text" | "markdown";
 type VerbosityMode = "quiet" | "verbose" | "debug";
 
-type FeatureType = "task" | "action" | "cmd" | "workflow" | "adaptater";
-type ToolType = "task" | "action" | "cmd" | "workflow";
+type FeatureType = "task" | "agent" | "action" | "cmd" | "workflow" | "adaptater";
+type ToolType = "task" | "agent" | "action" | "cmd" | "workflow";
 type ActionExtension = "js" | "mjs" | "py" | "yml";
 type TaskExtension = "yml";
+type AgentExtension = "yml";
 type AdaptaterExtension = "js";
 type WorkflowExtension = "yml";
 type CmdExtension = "js";
-type FeatureExtension = TaskExtension | CmdExtension | ActionExtension | WorkflowExtension;
-type AliasType = "task" | "action" | "workflow";
+type FeatureExtension = TaskExtension | AgentExtension | CmdExtension | ActionExtension | WorkflowExtension;
+type AliasType = "task" | "agent" | "action" | "workflow";
 
 type FeatureExecutor<I = any, O = any> = (params: I, options: Record<string, any>) => Promise<O>;
 
@@ -154,6 +156,7 @@ export {
     FeatureType,
     ActionExtension,
     TaskExtension,
+    AgentExtension,
     WorkflowExtension,
     AdaptaterExtension,
     CmdExtension,

@@ -22,7 +22,7 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
     const finalTaskIndex = stepNames.length - 1;
     let taskRes: Record<string, any> = { cmdArgs: args };
     //console.log("WPARAMS", taskRes);
-    let prevStepType: "task" | "adaptater" | "action" | null = null;
+    let prevStepType: "agent" | "task" | "adaptater" | "action" | null = null;
     for (const step of workflow) {
         if (isDebug || isVerbose) {
             console.log(i + 1, step.name, colors.dim(step.type))
@@ -30,30 +30,46 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
         switch (step.type) {
             case "task":
                 try {
-                    //console.log("WF BEFORE TASK res:", name, taskRes);
-
-                    let pr: string | null = null;
+                    let tdata: Record<string, any> = {};
                     if (i == 0) {
-                        pr = await getTaskPrompt(step.name, taskRes.cmdArgs, options);
+                        tdata.prompt = await getTaskPrompt(step.name, taskRes.cmdArgs, options);
                     } else {
                         if (prevStepType) {
                             if (prevStepType == "task") {
-                                pr = taskRes.answer.text;
+                                tdata.prompt = taskRes.answer.text;
                             }
                         }
-                        if (!pr) {
-                            if (taskRes?.prompt) {
-                                pr = taskRes.prompt;
-                            }
-                        }
+                        tdata = taskRes;
                     }
-                    if (!pr) {
+                    if (!tdata?.prompt) {
                         throw new Error(`Workflow ${wname} step ${i + 1}: provide a prompt for the task ${step.name}`)
                     }
-                    const tr = await executeTask(step.name, { prompt: pr }, options);
-                    //console.log("WF AFTER TASK RES", tr);
+                    const tr = await executeTask(step.name, tdata, options);
                     taskRes = { ...tr, ...taskRes };
-                    //console.log("WF TASK NEXT ARGS", taskRes);
+                } catch (e) {
+                    throw new Error(`workflow task ${i + 1}: ${e}`)
+                }
+                break;
+            case "agent":
+                try {
+                    let tdata: Record<string, any> = {};
+                    if (i == 0) {
+                        tdata.prompt = await getTaskPrompt(step.name, taskRes.cmdArgs, options);
+                    } else {
+                        if (prevStepType) {
+                            if (prevStepType == "task") {
+                                tdata.prompt = taskRes.answer.text;
+                            }
+                        }
+                        tdata = taskRes;
+                    }
+                    if (!tdata?.prompt) {
+                        throw new Error(`Workflow ${wname} step ${i + 1}: provide a prompt for the task ${step.name}`)
+                    }
+                    options.isAgent = true;
+                    const tr = await executeTask(step.name, tdata, options);
+                    options.isAgent = false;
+                    taskRes = { ...tr, ...taskRes };
                 } catch (e) {
                     throw new Error(`workflow task ${i + 1}: ${e}`)
                 }

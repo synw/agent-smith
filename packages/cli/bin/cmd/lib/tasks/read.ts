@@ -30,7 +30,7 @@ async function readTask(
         console.log("Payload:", payload);
         console.log("Task options:", options);
     }
-    const { taskFileSpec, taskPath } = openTaskSpec(name);
+    const { taskFileSpec, taskPath } = openTaskSpec(name, options?.isAgent);
     const taskDir = path.dirname(taskPath);
     // merge passed options from payload
     const opts = payload?.inferParams ? { ...options, ...payload.inferParams } : options;
@@ -125,10 +125,21 @@ async function readTask(
                             return res
                         case "task":
                             options.isToolCall = true;
+                            options.isAgent = false;
                             const tres = await executeTask(toolName, params as Record<string, any>, options);
                             options.isToolCall = false;
                             //console.log("WFTRESP", tres.answer.text);
                             return tres.answer.text
+                        case "agent":
+                            options.isToolCall = true;
+                            options.isAgent = true;
+                            const agres = await executeTask(toolName, params as Record<string, any>, options);
+                            options.isToolCall = false;
+                            //console.log("WFTRESP", tres.answer.text);
+                            if (agres?.answer?.text) {
+                                return agres.answer.text
+                            }
+                            return agres
                         case "workflow":
                             const wres = await executeWorkflow(toolName, params, options);
                             return wres

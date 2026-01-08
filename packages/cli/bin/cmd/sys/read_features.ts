@@ -1,4 +1,4 @@
-import { ActionExtension, AdaptaterExtension, CmdExtension, Features, TaskExtension, WorkflowExtension } from "../../interfaces.js";
+import { ActionExtension, AdaptaterExtension, CmdExtension, Features, TaskExtension, WorkflowExtension, type AgentExtension } from "../../interfaces.js";
 import { default as fs } from "fs";
 import { default as path } from "path";
 
@@ -9,10 +9,8 @@ function _readDir(dir: string, ext: Array<string>): Array<string> {
         //console.log("F", filepath);
         const isDir = fs.statSync(filepath).isDirectory();
         if (!isDir) {
-            for (let extension of ext) {
-                if (filename.endsWith(extension)) {
-                    fileNames.push(filename)
-                }
+            if (ext.includes(path.extname(filename))) {
+                fileNames.push(filename);
             }
         }
     });
@@ -26,6 +24,7 @@ function readFeaturesDir(dir: string): Features {
         cmd: [],
         workflow: [],
         adaptater: [],
+        agent: [],
     }
     let dirpath = path.join(dir, "tasks");
     if (fs.existsSync(dirpath)) {
@@ -38,6 +37,20 @@ function readFeaturesDir(dir: string): Features {
                 name: name,
                 path: path.join(dirpath),
                 ext: ext as TaskExtension,
+            })
+        });
+    }
+    dirpath = path.join(dir, "agents");
+    if (fs.existsSync(dirpath)) {
+        const data = _readDir(dirpath, [".yml"]);
+        data.forEach((filename) => {
+            const parts = filename.split(".");
+            const ext = parts.pop()!;
+            const name = parts.join("");
+            feats.agent.push({
+                name: name,
+                path: path.join(dirpath),
+                ext: ext as AgentExtension,
             })
         });
     }
