@@ -105,7 +105,7 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
                         taskRes.args = adres;
                         //console.log("WF AD IT RES", taskRes);
                     } else {
-                        taskRes = { ...adres, ...taskRes };
+                        taskRes = { ...adres };
                     }
                     //console.log("WF AD FINAL RES", taskRes);
                     //console.log("LAST ACT", i, finalTaskIndex);
@@ -124,6 +124,8 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
                     throw new Error(`Wokflow ${i + 1} error: ${e}`)
                 }
                 break;*/
+            case "command":
+                console.log("CMD WF")
             default:
                 throw new Error(`unknown task type ${step.type} in workflow ${name}`)
         }

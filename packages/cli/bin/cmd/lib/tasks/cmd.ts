@@ -34,11 +34,13 @@ async function executeTask(
     if (options?.backend) {
         if (options.backend in backends) {
             agent.lm = backends[options.backend]
+            //console.log("SET AGENT BACKEND TO", backends[options.backend]);
         } else {
             const bks = await listBackends(false);
             runtimeDataError(`The backend ${options.backend} is not registered in config. Available backends:\n`, bks)
         }
     } else if (settings?.backend) {
+        //console.log("SET AGENT BACKEND TO", backends[options.backend]);
         agent.lm = backends[settings.backend]
     }
     if (options?.debug || options?.backend) {
@@ -310,7 +312,8 @@ async function executeTask(
             runtimeWarning("Error formating stats:", `${e}`)
         }
     }
-    if (options?.backend) {
+    if (options?.backend || settings?.backend) {
+        //console.log("SET BACK AGENT BACKEND TO", backend.value);
         // set back the default backend
         agent.lm = backend.value!;
     }
