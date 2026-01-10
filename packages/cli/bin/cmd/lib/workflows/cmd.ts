@@ -1,4 +1,5 @@
-import { WorkflowStep } from "../../../interfaces.js";
+import { program } from "commander";
+import { WorkflowStep, type FeatureType } from "../../../interfaces.js";
 import { executeAction } from "../actions/cmd.js";
 import { executeAdaptater } from "../adaptaters/cmd.js";
 import { parseCommandArgs } from "../options_parsers.js";
@@ -6,6 +7,9 @@ import { executeTask } from "../tasks/cmd.js";
 import { getTaskPrompt } from "../tasks/utils.js";
 import { readWorkflow } from "./read.js";
 import colors from "ansi-colors";
+import { getFeatureSpec } from "../../../state/features.js";
+import { pathToFileURL } from "node:url";
+import { runtimeError } from "../user_msgs.js";
 
 async function executeWorkflow(wname: string, args: any, options: Record<string, any> = {}): Promise<any> {
     const { workflow, found } = await readWorkflow(wname);
@@ -22,7 +26,7 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
     const finalTaskIndex = stepNames.length - 1;
     let taskRes: Record<string, any> = { cmdArgs: args };
     //console.log("WPARAMS", taskRes);
-    let prevStepType: "agent" | "task" | "adaptater" | "action" | null = null;
+    let prevStepType: "cmd" | "agent" | "task" | "adaptater" | "action" | null = null;
     for (const step of workflow) {
         if (isDebug || isVerbose) {
             console.log(i + 1, step.name, colors.dim(step.type))
@@ -30,7 +34,7 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
         switch (step.type) {
             case "task":
                 try {
-                    let tdata: Record<string, any> = {};
+                    let tdata: Record<string, any> = taskRes;
                     if (i == 0) {
                         tdata.prompt = await getTaskPrompt(step.name, taskRes.cmdArgs, options);
                     } else {
@@ -39,7 +43,6 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
                                 tdata.prompt = taskRes.answer.text;
                             }
                         }
-                        tdata = taskRes;
                     }
                     if (!tdata?.prompt) {
                         throw new Error(`Workflow ${wname} step ${i + 1}: provide a prompt for the task ${step.name}`)
@@ -52,7 +55,7 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
                 break;
             case "agent":
                 try {
-                    let tdata: Record<string, any> = {};
+                    let tdata: Record<string, any> = taskRes;
                     if (i == 0) {
                         tdata.prompt = await getTaskPrompt(step.name, taskRes.cmdArgs, options);
                     } else {
@@ -61,7 +64,6 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
                                 tdata.prompt = taskRes.answer.text;
                             }
                         }
-                        tdata = taskRes;
                     }
                     if (!tdata?.prompt) {
                         throw new Error(`Workflow ${wname} step ${i + 1}: provide a prompt for the task ${step.name}`)
@@ -117,17 +119,30 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
                     throw new Error(`workflow adaptater ${i + 1}: ${e}`)
                 }
                 break;
-            /*case "cmd":
+            case "cmd":
                 try {
-                    taskRes = await executeCmd(args, options);
+                    const { found, path } = getFeatureSpec(step.name, "cmd" as FeatureType);
+                    if (!found) {
+                        throw new Error(`Command ${step.name} not found`)
+                    }
+                    const url = pathToFileURL(path).href;
+                    const jsa = await import(url);
+                    if (!jsa?.runCmd) {
+                        runtimeError(`workflow ${wname}: can not import the runCmd function from step ${i} for command ${step.name}: please add a runCmd function export`)
+                        return
+                    }
+                    const cres = await jsa.runCmd(args, options);
+                    if (typeof cres == "string" || Array.isArray(cres)) {
+                        taskRes.args = cres;
+                    } else {
+                        taskRes = { ...cres, ...taskRes };
+                    }
                 } catch (e) {
-                    throw new Error(`Wokflow ${i + 1} error: ${e}`)
+                    throw new Error(`workflow command ${i + 1}: ${e}`)
                 }
-                break;*/
-            case "command":
-                console.log("CMD WF")
+                break
             default:
-                throw new Error(`unknown task type ${step.type} in workflow ${name}`)
+                throw new Error(`unknown workflow step type ${step.type} in workflow ${wname}`)
         }
         prevStepType = step.type;
         //console.log("WF NODE RES", step.type, taskRes);

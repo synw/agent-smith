@@ -122,6 +122,20 @@ async function _createWorkflowFromSpec(
                 run: tsk.run as FeatureExecutor<any, any>,
             };
             steps.push(wf);
+        } else if (type == "command") {
+            const { found, path } = getFeatureSpec(name, "cmd" as FeatureType);
+            if (!found) {
+                throw new Error(`Adaptater ${name} not found`)
+            }
+            const url = pathToFileURL(path).href;
+            const jsa = await import(url);
+            //const act = createJsAction(jsa.action);
+            const wf: WorkflowStep = {
+                name: name,
+                type: "cmd",
+                run: jsa.runCmd,
+            };
+            steps.push(wf);
         }
         ++i
     }
