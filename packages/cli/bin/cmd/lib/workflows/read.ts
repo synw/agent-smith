@@ -1,143 +1,22 @@
-import { Agent } from '@agent-smith/agent';
-import { Task } from '@agent-smith/task';
 import { default as fs } from "fs";
 import YAML from 'yaml';
-import { FeatureExecutor, FeatureType, WorkflowStep } from '../../../interfaces.js';
-import { backend } from '../../../state/backends.js';
+import { FeatureType, WorkflowStep } from '../../../interfaces.js';
 import { getFeatureSpec } from '../../../state/features.js';
-import { readTask } from "../../sys/read_task.js";
-import { pythonAction, systemAction } from '../actions/cmd.js';
-import { createJsAction } from '../actions/read.js';
-import { pathToFileURL } from 'url';
 
 async function _createWorkflowFromSpec(
     spec: Record<string, any>
 ): Promise<Array<WorkflowStep>> {
     const steps: Array<WorkflowStep> = [];
     //console.log("Create WF. Steps:", spec);
-    let i = 1;
     for (const step of spec.steps) {
         const type = Object.keys(step)[0];
         const sval = step[type];
         const name = sval;
-        //console.log("WF", type, name);
-        //const params = step?.params;
-        //console.log("TASK SPEC", t);        
-        if (type == "action") {
-            const { found, path, ext } = getFeatureSpec(name, "action" as FeatureType);
-            if (!found) {
-                throw new Error(`Action ${name} not found`)
-            }
-            switch (ext) {
-                case "js":
-                    const url = pathToFileURL(path).href;
-                    const { action } = await import(url);
-                    const at = action as FeatureExecutor<any, any>;
-                    const wf: WorkflowStep = {
-                        name: name,
-                        type: "action",
-                        run: at,
-                    };
-                    steps.push(wf);
-                    break;
-                case "mjs":
-                    const url2 = pathToFileURL(path).href;
-                    const mjsa = await import(url2);
-                    const act = createJsAction(mjsa.action);
-                    const wf2: WorkflowStep = {
-                        name: name,
-                        type: "action",
-                        run: act,
-                    };
-                    steps.push(wf2);
-                    break
-                case "yml":
-                    const _t1 = systemAction(path);
-                    const wf3: WorkflowStep = {
-                        name: name,
-                        type: "action",
-                        run: _t1 as FeatureExecutor<any, any>,
-                    };
-                    steps.push(wf3);
-                    break
-                case "py":
-                    const _t = pythonAction(path);
-                    const wf4: WorkflowStep = {
-                        name: name,
-                        type: "action",
-                        run: _t as FeatureExecutor<any, any>,
-                    };
-                    steps.push(wf4);
-                    break
-                default:
-                    throw new Error(`Unknown feature extension ${ext}`)
-            }
-        } else if (type == "adaptater") {
-            const { found, path } = getFeatureSpec(name, "adaptater" as FeatureType);
-            if (!found) {
-                throw new Error(`Adaptater ${name} not found`)
-            }
-            const url = pathToFileURL(path).href;
-            const jsa = await import(url);
-            const act = createJsAction(jsa.action);
-            const wf: WorkflowStep = {
-                name: name,
-                type: "adaptater",
-                run: act,
-            };
-            steps.push(wf);
-        }
-        else if (type == "task") {
-            const { found, path } = getFeatureSpec(name, "task" as FeatureType);
-            if (!found) {
-                throw new Error(`Task ${name} not found`)
-            }
-            const res = readTask(path);
-            if (!res.found) {
-                throw new Error(`Unable to read task ${name} ${path}`)
-            }
-            const agent = new Agent(backend.value!);
-            const tsk = Task.fromYaml(agent, res.ymlTask);
-            const wf: WorkflowStep = {
-                name: name,
-                type: "task",
-                run: tsk.run as FeatureExecutor<any, any>,
-            };
-            steps.push(wf);
-        }
-        else if (type == "agent") {
-            const { found, path } = getFeatureSpec(name, "agent" as FeatureType);
-            if (!found) {
-                throw new Error(`Agent ${name} not found`)
-            }
-            const res = readTask(path);
-            if (!res.found) {
-                throw new Error(`Unable to read agent ${name} ${path}`)
-            }
-            const agent = new Agent(backend.value!);
-            const tsk = Task.fromYaml(agent, res.ymlTask);
-            const wf: WorkflowStep = {
-                name: name,
-                type: "agent",
-                run: tsk.run as FeatureExecutor<any, any>,
-            };
-            steps.push(wf);
-        } else if (type == "command") {
-            const { found, path } = getFeatureSpec(name, "cmd" as FeatureType);
-            if (!found) {
-                throw new Error(`Adaptater ${name} not found`)
-            }
-            const url = pathToFileURL(path).href;
-            const jsa = await import(url);
-            //const act = createJsAction(jsa.action);
-            const wf: WorkflowStep = {
-                name: name,
-                type: "cmd",
-                run: jsa.runCmd,
-            };
-            steps.push(wf);
-        }
-        ++i
+        const wf: WorkflowStep = {
+            name: name,
+            type: type == "command" ? "cmd" : type,
+        };
+        steps.push(wf);
     }
     //console.log("STEPS", Object.keys(steps).length, steps);
     return steps

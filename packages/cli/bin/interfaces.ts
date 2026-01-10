@@ -96,7 +96,6 @@ interface FinalLmTaskConfig {
 interface WorkflowStep {
     name: string;
     type: string;
-    run: FeatureExecutor;
 }
 
 interface McpServerSpec {
