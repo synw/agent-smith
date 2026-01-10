@@ -17,8 +17,8 @@ function createCacheFileContent(cmdFeats: Array<FeatureSpec>): string {
         ++i
     });
     const finalImports = imports.join("\n");
-    const cmds = `const cmds = [ ${cmdNames.join(", ")} ]`;
-    const end = "export { cmds }"
+    const cmds = `const cmds = [ ${cmdNames.join(", ")} ];\nconst isCacheReady = true;`;
+    const end = "export { isCacheReady, cmds }"
     return `${finalImports}\n\n${cmds}\n\n${end}`;
 }
 

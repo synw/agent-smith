@@ -1,17 +1,16 @@
 import colors from "ansi-colors";
 import { Command } from 'commander';
 import path from "path";
-import { pathToFileURL } from 'url';
 import YAML from 'yaml';
 import { cacheFilePath, dbPath } from "../../conf.js";
 import { readFeaturePaths, readFeaturesType, readTaskSetting } from "../../db/read.js";
 import { cleanupFeaturePaths, deleteTaskSetting, updateAliases, updateFeatures, upsertTaskSettings } from "../../db/write.js";
 import { FeatureSpec, FeatureType } from '../../interfaces.js';
+import { isCacheReady, cmds } from "../../state/auto/usercmds.js";
 import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
 import { readPluginsPaths } from "../../state/plugins.js";
 import { runMode } from "../../state/state.js";
 import { initTaskSettings, isTaskSettingsInitialized, tasksSettings } from '../../state/tasks.js';
-import { cmds } from "../../state/auto/usercmds.js";
 import { deleteFileIfExists } from "../sys/delete_file.js";
 import { readCmd } from "../sys/read_cmds.js";
 import { readTask } from "../sys/read_task.js";
@@ -19,42 +18,23 @@ import { updateUserCmdsCache } from './cache.js';
 
 async function initUserCmds(cmdFeats: Record<string, FeatureSpec>): Promise<Array<Command>> {
     const features = Object.values(cmdFeats);
-    if (features.length == 0) {
-        return []
-    }
     let endCmds: Array<Command> = cmds;
-    if (cmds.length == 0) {
+    if (!isCacheReady) {
         //console.log("Sync user cmds:", features.length, cmds.length);
-        // user commands are not sync
+        // user commands are not sync, this is an update or a new install
         updateUserCmdsCache(cacheFilePath, features);
-        const url = pathToFileURL(cacheFilePath).href;
-        //console.log("IMPORT CACHE", url);
-        //const usrCmds = await import(url);
-        const usrCmds = new Array<Command>();
+        const usrCmds: Array<Command> = [];
+        // load the command manually for this run
         for (const feat of features) {
             const cmdPath = path.join(feat.path, feat.name + "." + feat.ext);
             const c = await readCmd(feat.name, cmdPath);
             usrCmds.push(c)
         }
-        //console.log("USRCMDS", usrCmds);
-        endCmds = usrCmds;
+        endCmds = usrCmds
     }
+    //console.log("USRCMDS", endCmds.length);
     return endCmds
 }
-
-/*async function initUserCmds(cmdFeats: Record<string, FeatureSpec>): Promise<Array<Command>> {
-    const userCmdsPath = path.join(confDir, "usercmds.js");
-    const url = pathToFileURL(userCmdsPath).href;
-    try {
-        const perf = usePerfTimer();
-        const { cmds } = await import(url);
-        perf.final("import user cmds")
-        return cmds as Array<Command>
-    } catch (err) {
-        ensureUserCmdsCacheFileExists();
-        return new Array<Command>()
-    }
-}*/
 
 async function resetDbCmd(): Promise<any> {
     if (runMode.value == "cli") {
