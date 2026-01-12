@@ -115,9 +115,9 @@ async function readTask(
             );
             //console.log("MCP", mcp);
             mcpServers.push(mcp);
-            await mcp.start();
+            /*await mcp.start();
             const tools = await mcp.extractTools();
-            tools.forEach(t => taskSpec.tools?.push(t))
+            tools.forEach(t => taskSpec.tools?.push(t))*/
         }
     }
     // tools

@@ -21,7 +21,6 @@ const isChatMode = ref(false);
 const promptfilePath = ref("");
 const dataDirPath = ref("");
 const isStateReady = ref(false);
-let agent: Agent;
 
 const lastCmd = reactive<{ name: string, args: Array<string> }>({
     name: "",
@@ -52,8 +51,6 @@ async function init() {
         runtimeDataError("No backend found, can not initialize agent")
         return
     }
-    agent = new Agent(backend.value);
-    //perf.measure("create agent");
     //perf.final("init")
     //console.log("Agent", agent);
 }
@@ -105,5 +102,4 @@ export {
     init,
     //setVerbosity,
     pyShell,
-    agent,
 }

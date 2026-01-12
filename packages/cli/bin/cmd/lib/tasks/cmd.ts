@@ -27,7 +27,7 @@ async function executeTask(
     if (!isTaskSettingsInitialized.value) {
         initTaskSettings()
     }
-    const agent = new Agent(backend.value!);
+    const agent = new Agent(backend.value!, name);
     const hasSettings = Object.keys(tasksSettings).includes(name);
     let settings: TaskSettings = {};
     if (hasSettings) {
@@ -46,9 +46,15 @@ async function executeTask(
         agent.lm = backends[settings.backend]
     }
     if (options?.debug || options?.backend) {
-        console.log("Agent:", colors.bold(agent.lm.name), "( " + agent.lm.providerType + " backend type)");
+        console.log("Agent:", colors.bold(agent.name), "( " + agent.lm.providerType + " backend type)");
     }
     const { task, model, conf, vars, mcpServers, taskDir } = await readTask(name, payload, options, agent);
+    for (const mcp of mcpServers) {
+        await mcp.start();
+        const tools = await mcp.extractTools();
+        tools.forEach(t => task.def.tools?.push(t));
+        console.log("MCP start", mcp.name);
+    }
     //console.log("TASKCONF IP", conf.inferParams);
     if (hasSettings) {
         if (!model?.inferParams) {
@@ -276,12 +282,16 @@ async function executeTask(
     if (!out.answer.text.endsWith("\n")) {
         console.log()
     }
+    console.log("END", name, "ISCM", isChatMode.value, "isTC", options?.isToolCall)
     if (!isChatMode.value && !options?.isToolCall) {
         // close mcp connections
         if (options?.debug) {
             console.log("Closing", mcpServers.length, "mcp server(s)")
         }
-        mcpServers.forEach((s) => s.stop());
+        mcpServers.forEach((s) => {
+            s.stop();
+            console.log("MCP stop", s.name);
+        });
     }
     await processOutput(out);
     // chat mode
@@ -306,7 +316,7 @@ async function executeTask(
             options.assistant = task.def.template.assistant
         }
         setChatInferenceParams(initialInferParams);
-        await chat(program, options, mcpServers);
+        await chat(program, options, agent, mcpServers);
     }
     if (options?.debug === true || options?.verbose === true) {
         try {
