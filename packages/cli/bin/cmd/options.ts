@@ -17,6 +17,7 @@ const inferenceOptions: Array<Option> = [
     new Option("-t, --temperature <number>", "adjusts randomness in sampling; higher values mean more randomness").argParser(parseFloatValue),
     new Option("-r, --repeat_penalty <number>", "adjusts penalty for repeated tokens").argParser(parseFloatValue),
     new Option("-b, --backend <name>", "use a given backend. It must be registered in config").argParser(parseString),
+    new Option("--mcp [args...]", "extra arguments for mcp server arguments: --mcp servername:arg1,arg2"),
 ];
 
 const ioOptions: Array<Option> = [

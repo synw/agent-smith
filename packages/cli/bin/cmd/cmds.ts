@@ -8,11 +8,12 @@ import { agent, isChatMode, runMode } from "../state/state.js";
 import { initCommandsFromAliases } from "./clicmds/aliases.js";
 import { initBaseCommands } from "./clicmds/base.js";
 import { initUserCmds } from "./clicmds/cmds.js";
+import type { McpClient } from "../main.js";
 //import { usePerfTimer } from "../main.js";
 
 const program = new Command();
 
-async function chat(program: Command, options: InferenceOptions) {
+async function chat(program: Command, options: InferenceOptions, mcpServers: Array<McpClient>) {
     //console.log("CHAT OPTS", options);
     const data = { message: '>', default: "" };
     const prompt = await input(data);
@@ -21,6 +22,7 @@ async function chat(program: Command, options: InferenceOptions) {
         if (runMode.value == "cmd") {
             process.exit(0)
         } else {
+            mcpServers.forEach(async (s) => await s.stop());
             await query(program)
         }
     }
@@ -29,7 +31,7 @@ async function chat(program: Command, options: InferenceOptions) {
     //console.log("RUN W PROMPT", prompt);
     await agent.run(prompt, chatInferenceParams, options, chatTemplate ? chatTemplate : undefined);
     console.log();
-    await chat(program, options);
+    await chat(program, options, mcpServers);
 }
 
 async function buildCmds(): Promise<Command> {

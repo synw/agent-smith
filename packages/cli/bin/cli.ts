@@ -10,7 +10,7 @@ async function query(program: Command) {
     const args = q.split(" ")
     await program.parseAsync(args, { from: "user" });
     if (isChatMode.value) {
-        await chat(program, {})
+        await chat(program, {}, [])
     }
     await query(program)
 }

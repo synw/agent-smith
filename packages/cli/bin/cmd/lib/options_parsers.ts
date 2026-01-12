@@ -5,6 +5,7 @@ function parseCommandArgs(args: Array<any>): {
     args: Array<string>,
     options: Record<string, any>,
 } {
+    //return { args: program.args, options: program.opts() }
     //discard the command (last arg)
     args.pop();
     //console.log("Raw command args:", args);

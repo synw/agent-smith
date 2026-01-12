@@ -8,7 +8,7 @@ import { TaskSettings } from "../../../interfaces.js";
 import { usePerfTimer } from "../../../main.js";
 import { backend, backends, listBackends } from "../../../state/backends.js";
 import { setChatInferenceParams, setChatTemplate } from "../../../state/chat.js";
-import { agent, isChatMode } from "../../../state/state.js";
+import { isChatMode } from "../../../state/state.js";
 import { initTaskSettings, isTaskSettingsInitialized, tasksSettings } from "../../../state/tasks.js";
 import { chat, program } from "../../cmds.js";
 import { parseCommandArgs } from "../options_parsers.js";
@@ -16,6 +16,7 @@ import { runtimeDataError, runtimeError, runtimeWarning } from "../user_msgs.js"
 import { processOutput } from "../utils.js";
 import { readTask } from "./read.js";
 import { getTaskPrompt } from "./utils.js";
+import { Agent } from "@agent-smith/agent";
 
 async function executeTask(
     name: string, payload: Record<string, any>, options: Record<string, any>
@@ -26,6 +27,7 @@ async function executeTask(
     if (!isTaskSettingsInitialized.value) {
         initTaskSettings()
     }
+    const agent = new Agent(backend.value!);
     const hasSettings = Object.keys(tasksSettings).includes(name);
     let settings: TaskSettings = {};
     if (hasSettings) {
@@ -274,8 +276,13 @@ async function executeTask(
     if (!out.answer.text.endsWith("\n")) {
         console.log()
     }
-    // close mcp connections
-    mcpServers.forEach(async (s) => await s.stop());
+    if (!isChatMode.value && !options?.isToolCall) {
+        // close mcp connections
+        if (options?.debug) {
+            console.log("Closing", mcpServers.length, "mcp server(s)")
+        }
+        mcpServers.forEach((s) => s.stop());
+    }
     await processOutput(out);
     // chat mode
     //console.log("CLI CONF IP", initialInferParams);
@@ -299,7 +306,7 @@ async function executeTask(
             options.assistant = task.def.template.assistant
         }
         setChatInferenceParams(initialInferParams);
-        await chat(program, options);
+        await chat(program, options, mcpServers);
     }
     if (options?.debug === true || options?.verbose === true) {
         try {
@@ -326,6 +333,7 @@ async function executeTaskCmd(
     targs: Array<any> = []
 ): Promise<TaskOutput> {
     const ca = parseCommandArgs(targs);
+    //console.log("ARGS", ca);
     const prompt = await getTaskPrompt(name, ca.args, ca.options);
     return await executeTask(name, { prompt: prompt }, ca.options)
 }

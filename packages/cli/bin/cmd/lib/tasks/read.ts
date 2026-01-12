@@ -70,6 +70,22 @@ async function readTask(
     if (!taskSpec?.tools) {
         taskSpec.tools = []
     }
+    const mcpServersArgs: Record<string, Array<string>> = {};
+    if (options?.mcp) {
+        (options.mcp as Array<string>).forEach(v => {
+            const s = v.split(":");
+            if (s.length < 2) {
+                throw new Error(`Malformed mcp option ${v}: use --mcp servername:arg1,arg2`)
+            }
+            const sn = s[0];
+            const sa = s[1];
+            const _margs = sa.split(",");
+            mcpServersArgs[sn] = _margs;
+        });
+        if (options?.debug) {
+            console.log("Opening", options.mcp.length, "server(s)")
+        }
+    }
     // mcp tools
     if (taskFileSpec?.mcp) {
         for (const [servername, tool] of Object.entries(taskFileSpec.mcp)) {
@@ -86,6 +102,10 @@ async function readTask(
                     authorizedTools.push(tn)
                 });
             }
+            const margs = tool.arguments;
+            if (servername in mcpServersArgs) {
+                margs.push(...mcpServersArgs[servername])
+            }
             const mcp = new McpClient(
                 servername,
                 tool.command,
@@ -93,6 +113,7 @@ async function readTask(
                 authorizedTools.length > 0 ? authorizedTools : null,
                 askUserTools.length > 0 ? askUserTools : null,
             );
+            //console.log("MCP", mcp);
             mcpServers.push(mcp);
             await mcp.start();
             const tools = await mcp.extractTools();
