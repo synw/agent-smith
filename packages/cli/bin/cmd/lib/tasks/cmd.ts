@@ -49,11 +49,16 @@ async function executeTask(
         console.log("Agent:", colors.bold(agent.name), "( " + agent.lm.providerType + " backend type)");
     }
     const { task, model, conf, vars, mcpServers, taskDir } = await readTask(name, payload, options, agent);
+    if (options?.debug && mcpServers.length > 0) {
+        console.log("Starting", mcpServers.length, "mcp servers")
+    }
     for (const mcp of mcpServers) {
         await mcp.start();
         const tools = await mcp.extractTools();
         tools.forEach(t => task.def.tools?.push(t));
-        console.log("MCP start", mcp.name);
+        if (options?.debug) {
+            console.log("MCP start", mcp.name);
+        }
     }
     //console.log("TASKCONF IP", conf.inferParams);
     if (hasSettings) {
@@ -279,18 +284,22 @@ async function executeTask(
         }
     }
     //console.log("END TASK", out);
-    if (!out.answer.text.endsWith("\n")) {
-        console.log()
+    if (!options?.isToolCall) {
+        if (!out.answer.text.endsWith("\n")) {
+            console.log()
+        }
     }
-    console.log("END", name, "ISCM", isChatMode.value, "isTC", options?.isToolCall)
-    if (!isChatMode.value && !options?.isToolCall) {
+    //console.log("END", name, "ISCM", isChatMode.value, "isTC", options?.isToolCall)
+    if (!isChatMode.value || options?.isToolCall) {
         // close mcp connections
         if (options?.debug) {
             console.log("Closing", mcpServers.length, "mcp server(s)")
         }
         mcpServers.forEach((s) => {
             s.stop();
-            console.log("MCP stop", s.name);
+            if (options?.debug) {
+                console.log("MCP stop", s.name);
+            }
         });
     }
     await processOutput(out);
