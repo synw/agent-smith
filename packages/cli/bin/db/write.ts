@@ -225,7 +225,7 @@ function updateFeatures(feats: Features) {
     upsertAndCleanFeatures(feats.action, "action");
     feats.action.forEach((feat) => {
         const { found, toolDoc } = extractToolDoc(feat.name, feat.ext, feat.path);
-        //console.log(`ACTION ${feat.name} TOOL DOC`, toolDoc);
+        //console.log(`ACTION ${feat.name} TOOL DOC`, found, toolDoc);
         if (found) {
             upsertTool(feat.name, "action", toolDoc)
         }
