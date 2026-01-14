@@ -16,24 +16,28 @@ const rl = createInterface({
     output
 });
 
-async function askUser(question) {
+async function askUser (question)
+{
     const answer = await rl.question(question);
     return answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes';
 }
 
-async function canExecuteTool(tool) {
-    const msg = `Execute tool ${tool.name} with arguments ${Object.keys(tool.arguments).join(", ")}`;
+async function canExecuteTool (tool)
+{
+    const msg = `Execute tool ${tool.name} with arguments ${tool.arguments}`;
     return await askUser(msg + ' (y/n): ');
 }
 
-function run_get_current_weather(args) {
+function run_get_current_weather (args)
+{
     console.log("Running the get_current_weather tool with args", args);
-    return '{ "temp": 20.5, "weather": "rain" }'
+    return '{ "temp": 20.5, "weather": "rain" }';
 }
 
-function run_get_current_traffic(args) {
+function run_get_current_traffic (args)
+{
     console.log("Running the get_current_traffic tool with args", args);
-    return '{ "trafic": "normal" }'
+    return '{ "trafic": "normal" }';
 }
 
 const get_current_weather = {
@@ -62,7 +66,8 @@ const get_current_traffic = {
     //canRun: canExecuteTool
 };
 
-async function main() {
+async function main ()
+{
     const lm = new Lm({
         providerType: "openai",
         serverUrl: serverUrl,
@@ -87,10 +92,11 @@ async function main() {
             system: system,
             tools: [get_current_weather, get_current_traffic]
         });
-    console.log()
+    console.log();
 }
 
-(async () => {
+(async () =>
+{
     await main();
 })();
 

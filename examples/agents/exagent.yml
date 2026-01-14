@@ -1,0 +1,14 @@
+description: An example agent
+prompt: |-
+    {prompt}
+ctx: 16384
+model:
+  name: qwen4b
+  template: chatml-tools
+inferParams:
+  top_p: 0.95
+  top_k: 40
+  min_p: 0.05
+  temperature: 0.5
+toolsList:
+  - exfs
