@@ -4,12 +4,16 @@ import { PromptTemplate } from 'modprompt';
 import { splitThinking } from "./utils.js";
 
 class Agent {
+    name: string = "unamed";
     lm: Lm;
     tools: Record<string, ToolSpec> = {};
     history: Array<HistoryTurn> = [];
 
-    constructor(lm: Lm) {
+    constructor(lm: Lm, name?: string) {
         this.lm = lm;
+        if (name) {
+            this.name = name
+        }
     }
 
     async run(
@@ -20,8 +24,8 @@ class Agent {
     ): Promise<InferenceResult> {
         let tpl: PromptTemplate;
         if (options?.debug) {
-            console.log("Agent inference params:", params);
-            console.log("Agent options:", options);
+            console.log("Agent", this.name, "inference params:", params);
+            console.log("Agent", this.name, "options:", options);
             //console.log("Agent template:", template);
             //console.log("Agent prompt:", prompt);
         }
@@ -118,9 +122,6 @@ class Agent {
                 }
             }
             this.history.push({ tools: toolsResults });
-            if (options?.tools) {
-                options.tools = Object.values(this.tools);
-            }
             if (options?.isToolsRouter) {
                 const fres: InferenceResult = {
                     text: JSON.stringify(toolsResults.map(tr => tr.response)),
@@ -136,7 +137,10 @@ class Agent {
                 options.verbose = true;
             }*/
             //console.log("HISTORY:");
-            //console.dir(options.history, {depth: 8});            
+            //console.dir(options.history, {depth: 8});         
+            if (options?.tools) {
+                options.tools = Object.values(this.tools);
+            }
             _res = await this.runAgentNoTemplate(nit, "", params, options);
         } else {
             this.history.push({ assistant: res.text });
@@ -160,10 +164,11 @@ class Agent {
         tpl.history = this.history;
         //console.log("TPL", tpl);
         //console.log("TPL HIST", tpl.history);
-        //console.log("Agent no template raw prompt:", prompt);
-        //console.log("Agent no template options", options);
+        //console.log("Agent template raw prompt:", prompt);
+        //console.log("Agent template options", options);
+        //console.log(it, this.name, `${options.isToolsRouter ? "tools router " : ""}agent (template) tools`, this.tools);
         const pr = tpl.prompt(prompt);
-        //console.log("Agent no template tpl prompt:", pr);
+        //console.log(it, "agent template tpl prompt:", pr);
         //console.log("Agent no template tpl render:", tpl.render());
         let res = await this.lm.infer(pr, params, options);
         if (typeof params?.model == "string") {
@@ -243,7 +248,7 @@ class Agent {
                     tools: toolResults,
                 });
             }
-            if (options?.isToolsRouter) {
+            if (options?.isToolsRouter && isToolCall) {
                 const fres: InferenceResult = {
                     text: JSON.stringify(toolResults.map(tr => tr.response)),
                     stats: res.stats,
