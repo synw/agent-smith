@@ -143,6 +143,7 @@ function pythonAction(
             try {
                 final = JSON.parse(txt)
             } catch (e) {
+                console.warn("Can not parse json from python action", path, e)
                 //throw new Error(`python error: ${error}`) 
             }
         }

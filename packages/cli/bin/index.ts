@@ -1,10 +1,10 @@
 #!/usr/bin/env node
 import { argv } from 'process';
 import { query } from "./cli.js";
+import { resetDbCmd } from './cmd/clicmds/cmds.js';
+import { updateConfCmd } from './cmd/clicmds/updateconf.js';
 import { buildCmds, parseCmd } from './cmd/cmds.js';
 import { formatMode, init, inputMode, isChatMode, outputMode, runMode } from './state/state.js';
-import { updateConfCmd } from './cmd/clicmds/updateconf.js';
-import { resetDbCmd } from './cmd/clicmds/cmds.js';
 //import { usePerfTimer } from './main.js';
 
 async function main() {

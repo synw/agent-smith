@@ -7,6 +7,7 @@ let db: Database;
 const debugDb = false;
 
 function initDb(isVerbose: boolean, execSchema: boolean) {
+    //console.log("DBP", dbPath);
     if (execSchema) {
         createDirectoryIfNotExists(confDir, true);
         db = new DatabaseConstructor(dbPath, { fileMustExist: false, verbose: debugDb ? console.log : undefined });
@@ -17,7 +18,7 @@ function initDb(isVerbose: boolean, execSchema: boolean) {
             }
         });
     } else {
-        db = new DatabaseConstructor(dbPath);
+        db = new DatabaseConstructor(dbPath, { fileMustExist: true });
     }
 }
 

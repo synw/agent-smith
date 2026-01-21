@@ -1,15 +1,14 @@
-import { program } from "commander";
-import { WorkflowStep, type FeatureType } from "../../../interfaces.js";
+import colors from "ansi-colors";
+import { pathToFileURL } from "node:url";
+import { type FeatureType } from "../../../interfaces.js";
+import { getFeatureSpec } from "../../../state/features.js";
 import { executeAction } from "../actions/cmd.js";
 import { executeAdaptater } from "../adaptaters/cmd.js";
 import { parseCommandArgs } from "../options_parsers.js";
 import { executeTask } from "../tasks/cmd.js";
 import { getTaskPrompt } from "../tasks/utils.js";
-import { readWorkflow } from "./read.js";
-import colors from "ansi-colors";
-import { getFeatureSpec } from "../../../state/features.js";
-import { pathToFileURL } from "node:url";
 import { runtimeError } from "../user_msgs.js";
+import { readWorkflow } from "./read.js";
 
 async function executeWorkflow(wname: string, args: any, options: Record<string, any> = {}): Promise<any> {
     const { workflow, found } = await readWorkflow(wname);
@@ -41,6 +40,12 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
                         if (prevStepType) {
                             if (prevStepType == "task") {
                                 tdata.prompt = taskRes.answer.text;
+                            } else if (prevStepType == "action") {
+                                if (taskRes?.args) {
+                                    if (typeof taskRes.args == "string") {
+                                        tdata.prompt = taskRes.args
+                                    }
+                                }
                             }
                         }
                     }
@@ -62,6 +67,12 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
                         if (prevStepType) {
                             if (prevStepType == "task") {
                                 tdata.prompt = taskRes.answer.text;
+                            } else if (prevStepType == "action") {
+                                if (taskRes?.args) {
+                                    if (typeof taskRes.args == "string") {
+                                        tdata.prompt = taskRes.args
+                                    }
+                                }
                             }
                         }
                     }
@@ -165,5 +176,6 @@ async function executeWorkflowCmd(name: string, wargs: Array<any>): Promise<any>
 
 export {
     executeWorkflow,
-    executeWorkflowCmd,
+    executeWorkflowCmd
 };
+

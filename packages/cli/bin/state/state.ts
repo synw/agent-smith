@@ -59,7 +59,7 @@ async function initState() {
     if (isStateReady.value) {
         return
     }
-    //sconsole.log("INIT STATE");
+    //sconsole.log("INIT STATE");    
     initDb(false, false);
     initFilepaths();
     isStateReady.value = true;

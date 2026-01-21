@@ -206,9 +206,9 @@ async function executeTask(
                     return
                 }
             }
-            //if (!quiet) {
-            printToken(t);
-            //}
+            if (!options?.quiet) {
+                printToken(t);
+            }
         }
         ++emittedTokens;
     };
@@ -292,7 +292,7 @@ async function executeTask(
     //console.log("END", name, "ISCM", isChatMode.value, "isTC", options?.isToolCall)
     if (!isChatMode.value || options?.isToolCall) {
         // close mcp connections
-        if (options?.debug) {
+        if (options?.debug && mcpServers.length > 0) {
             console.log("Closing", mcpServers.length, "mcp server(s)")
         }
         mcpServers.forEach((s) => {
