@@ -1,7 +1,7 @@
-import { InferenceOptions, InferenceResult, ToolSpec } from '@locallm/types';
+import { Agent } from "@agent-smith/agent";
+import { InferenceOptions, InferenceResult } from '@locallm/types';
 import { PromptTemplate } from 'modprompt';
 import YAML from 'yaml';
-import { Agent } from "@agent-smith/agent";
 import { formatInferParams } from './inferparams.js';
 import { TaskConf, TaskDef, TaskInput, TaskOutput } from "./interfaces.js";
 import { formatTaskTemplate } from './templates.js';
@@ -70,6 +70,7 @@ class Task {
             }
         }
         if (useTemplates) {
+            this.def.model = model;
             tpl = formatTaskTemplate(this.def, model?.template ? model.template : undefined);
             this.def.inferParams = formatInferParams(this.def.inferParams ?? {}, conf ?? {}, tpl);
             //tpl.replacePrompt(this.def.prompt);
