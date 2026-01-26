@@ -192,6 +192,7 @@ class Agent {
                     //throw new Error(`tool call does not includes arguments in it's response:\n${toolCall}`);
                 }
                 //const tool = this.tools.find((t) => t.name === toolCall.name);
+                toolCall.name = toolCall.name.trim();
                 const tool = toolCall.name in this.tools ? this.tools[toolCall.name] : null;
                 if (!tool) {
                     const buf = new Array<string>(
