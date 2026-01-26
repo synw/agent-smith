@@ -10,10 +10,17 @@ import { readClipboard } from "../../sys/clipboard.js";
 import { processOutput, readPromptFile } from "../utils.js";
 import { parseCommandArgs } from "../options_parsers.js";
 import { pathToFileURL } from 'url';
+import { getInputFromOptions } from '../tasks/utils.js';
 
 async function executeAction(name: string, payload: any, options: Record<string, any>, quiet = false) {
     let run: FeatureExecutor<any, any>;
     //console.log("GET ACTION", name, payload);
+    const inputData = await getInputFromOptions(options);
+    if (inputData) {
+        if (Array.isArray(payload)) {
+            payload.push(inputData)
+        }
+    }
     const { found, path, ext } = getFeatureSpec(name, "action" as FeatureType);
     if (!found) {
         throw new Error(`Action ${name} not found at ${path}`);

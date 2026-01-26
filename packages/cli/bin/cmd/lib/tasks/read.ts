@@ -139,7 +139,7 @@ async function readTask(
             const lmTool: ToolSpec = {
                 ...tool,
                 execute: async (params) => {
-                    //console.log("EXEC TOOL:", toolName, params);
+                    //console.log("EXEC TOOL:", type, toolName, params);
                     switch (type) {
                         case "action":
                             const res = await executeAction(toolName, params as Record<string, any>, options, quiet);
@@ -155,6 +155,7 @@ async function readTask(
                             options.isToolCall = true;
                             options.isAgent = true;
                             const agres = await executeTask(toolName, params as Record<string, any>, options);
+                            options.isAgent = false;
                             options.isToolCall = false;
                             //console.log("WFTRESP", tres.answer.text);
                             if (agres?.answer?.text) {
@@ -162,7 +163,9 @@ async function readTask(
                             }
                             return agres
                         case "workflow":
+                            options.isToolCall = true;
                             const wres = await executeWorkflow(toolName, params, options);
+                            options.isToolCall = false;
                             return wres
                         default:
                             throw new Error(`unknown tool execution function type: ${type} for ${toolName}`)

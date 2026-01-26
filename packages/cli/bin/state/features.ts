@@ -3,7 +3,7 @@ import { readFeaturesDir } from "../cmd/sys/read_features.js";
 import { FeatureExtension, FeatureType, Features } from "../interfaces.js";
 import { readFeature } from "../db/read.js";
 
-function readFeaturesDirs(featuresPaths: Array<string>): Features {
+function readFeaturesDirs(featuresPaths: Array<string>, isverbose = false): Features {
     const feats: Features = {
         task: [],
         action: [],
@@ -13,7 +13,9 @@ function readFeaturesDirs(featuresPaths: Array<string>): Features {
         agent: [],
     };
     featuresPaths.forEach((dir: string) => {
-        //console.log("Reading feats in", dir);
+        if (isverbose) {
+            console.log("Reading feats in", dir);
+        }
         const _f = readFeaturesDir(dir);
         _f.agent.forEach((item) => feats.agent.push(item));
         _f.task.forEach((item) => feats.task.push(item));

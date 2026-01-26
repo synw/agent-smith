@@ -6,7 +6,6 @@ import { cacheFilePath, dbPath } from "../../conf.js";
 import { readFeaturePaths, readFeaturesType, readTaskSetting } from "../../db/read.js";
 import { cleanupFeaturePaths, deleteTaskSetting, updateAliases, updateFeatures, upsertTaskSettings } from "../../db/write.js";
 import { FeatureSpec, FeatureType } from '../../interfaces.js';
-//import { isCacheReady, cmds } from "../../state/auto/usercmds.js";
 import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
 import { readPluginsPaths } from "../../state/plugins.js";
 import { runMode } from "../../state/state.js";
@@ -14,7 +13,6 @@ import { initTaskSettings, isTaskSettingsInitialized, tasksSettings } from '../.
 import { deleteFileIfExists } from "../sys/delete_file.js";
 import { readCmd } from "../sys/read_cmds.js";
 import { readTask } from "../sys/read_task.js";
-import { updateUserCmdsCache } from './cache.js';
 
 async function initUserCmds(cmdFeats: Record<string, FeatureSpec>): Promise<Array<Command>> {
     const features = Object.values(cmdFeats);
@@ -56,19 +54,17 @@ async function resetDbCmd(): Promise<any> {
     console.log("Config database reset ok. Run the conf command to recreate it")
 }
 
-async function updateFeaturesCmd(): Promise<any> {
+async function updateFeaturesCmd(options: Record<string, any>): Promise<any> {
     const fp = readFeaturePaths();
     const pp = await readPluginsPaths();
     const paths = [...fp, ...pp];
-    const feats = readFeaturesDirs(paths);
-    //console.log("CMD FEATS", feats);
+    const feats = readFeaturesDirs(paths, options?.debug ?? false);
     updateFeatures(feats);
     updateAliases(feats);
     const deleted = cleanupFeaturePaths(paths);
     for (const el of deleted) {
         console.log("- [feature path]", el)
     }
-    updateUserCmdsCache(cacheFilePath, feats.cmd)
 }
 
 async function processTasksCmd(args: Array<string>, options: Record<string, any>) {

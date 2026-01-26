@@ -21,30 +21,42 @@ function openTaskSpec(name: string, isAgent = false): { taskFileSpec: LmTaskFile
     return { taskFileSpec: taskFileSpec as LmTaskFileSpec, taskPath: path }
 }
 
+async function getInputFromOptions(
+    options: Record<string, any>,
+): Promise<string | null> {
+    let out: string | null = null;
+    if (options?.clipboardInput === true) {
+        out = await readClipboard();
+        options.clipboardInput = false;
+    } else if (options?.inputFile === true) {
+        out = readPromptFile();
+        options.inputFile = false;
+    }
+    return out
+}
+
 async function getTaskPrompt(
     name: string,
     args: Array<string>,
     options: Record<string, any>,
 ): Promise<string> {
-
+    const ic = await getInputFromOptions(options);
+    if (ic) {
+        return ic
+    }
     let pr: string;
-    //console.log("TOPT", options);
-    if (options?.clipboardInput === true) {
-        pr = await readClipboard()
-    } else if (options?.inputFile === true) {
-        pr = readPromptFile()
-    } else {
-        if (args[0] !== undefined) {
-            pr = args[0]
-        }
-        else {
-            runtimeDataError("task", name, "provide a prompt or use input options")
-            throw new Error()
-        }
+    if (args[0] !== undefined) {
+        pr = args[0]
+    }
+    else {
+        runtimeDataError(options?.isAgent ? "agent" : "task", name, "provide a prompt or use input options")
+        throw new Error()
     }
     return pr
 }
 
 export {
-    getTaskPrompt, openTaskSpec
+    getTaskPrompt,
+    getInputFromOptions,
+    openTaskSpec,
 };

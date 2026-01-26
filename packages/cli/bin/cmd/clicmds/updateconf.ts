@@ -5,7 +5,6 @@ import { cleanupFeaturePaths, updateAliases, updateDataDirPath, updateFeatures, 
 import { readFeaturesDirs } from "../../state/features.js";
 import { dataDirPath, promptfilePath } from "../../state/state.js";
 import { runtimeDataError, runtimeInfo } from '../lib/user_msgs.js';
-import { updateUserCmdsCache } from "./cache.js";
 
 async function updateConfCmd(args: Array<string>): Promise<any> {
     initDb(false, true);
@@ -36,14 +35,13 @@ async function updateConfCmd(args: Array<string>): Promise<any> {
         updateDataDirPath(dd);
         dataDirPath.value = dd;
     }
-    const feats = readFeaturesDirs(paths);
+    const feats = readFeaturesDirs(paths, true);
     updateFeatures(feats);
     updateAliases(feats);
     const deleted = cleanupFeaturePaths(paths);
     for (const el of deleted) {
         console.log("- [feature path]", el)
     }
-    updateUserCmdsCache(cacheFilePath, feats.cmd)
 }
 
 export {

@@ -7,7 +7,10 @@ function createJsAction(action: CallableFunction): FeatureExecutor {
             const res = await action(args, options);
             return res
         }
-        catch (e) {
+        catch (e: any) {
+            /*if (e?.text) {
+                throw new Error(`executing action:${e.text()}. Args: ${args}`);
+            }*/
             throw new Error(`executing action:${e}. Args: ${args}`);
         }
     };

@@ -64,17 +64,31 @@ class McpClient {
                     continue
                 }
             }
-            const args: { [key: string]: { description: string } } = {};
+            const defargs: { [key: string]: { description: string } } = {};
+            const argsTypes: Record<string, string> = {};
             if (tool.inputSchema.properties) {
                 for (const [k, v] of Object.entries(tool.inputSchema.properties)) {
                     const vv = v as Record<string, any>;
-                    args[k] = { description: vv.description + " (" + vv.type + ")" }
+                    defargs[k] = { description: vv.description + " (" + vv.type + ")" };
+                    argsTypes[k] = vv.type;
                 }
             }
+            //console.log("MCP ARGS TYPES", argsTypes);
             const exec = async (args: any): Promise<any> => {
+                //console.log("MCP EXEC ARGS", args);
+                const _iargs = args as Record<string, string>;
+                for (const [k, v] of Object.entries(_iargs)) {
+                    if (argsTypes[k] == "array") {
+                        try {
+                            _iargs[k] = JSON.parse(v)
+                        } catch (e) {
+                            console.warn("Error parsing array data from model for tool call", k, "Data:", v);
+                        }
+                    }
+                };
                 const payload = {
                     name: tool.name,
-                    arguments: args,
+                    arguments: _iargs,
                 };
                 //console.log("PAY", payload);
                 const res = await this.client.callTool(payload);
@@ -83,7 +97,7 @@ class McpClient {
             const t: ToolSpec = {
                 name: tool.name,
                 description: tool.description ?? "",
-                arguments: args,
+                arguments: defargs,
                 execute: exec
             }
             if (this.askUserTools) {

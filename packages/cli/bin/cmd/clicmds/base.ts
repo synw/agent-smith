@@ -3,7 +3,7 @@ import { listBackends, setBackend } from "../../state/backends.js";
 import { parseCommandArgs } from "../lib/options_parsers.js";
 import { processTaskCmd, processTasksCmd, resetDbCmd, updateFeaturesCmd } from "./cmds.js";
 import { updateConfCmd } from "./updateconf.js";
-import { inferenceOptions } from "../options.js";
+import { displayOptions, inferenceOptions } from "../options.js";
 
 function initBaseCommands(program: Command): Command {
     /*program.command("ping")
@@ -40,11 +40,13 @@ function initBaseCommands(program: Command): Command {
         .action(async (...args: Array<any>) => {
             await listBackends()
         });
-    program.command("update")
+    const updateCmd = program.command("update")
         .description("update the available features: run this after adding a new feature")
         .action(async (...args: Array<any>) => {
-            await updateFeaturesCmd()
+            const ca = parseCommandArgs(args);
+            await updateFeaturesCmd(ca.options)
         });
+    displayOptions.forEach(o => updateCmd.addOption(o));
     program.command("conf <path>")
         .description("process config file")
         .action(async (...args: Array<any>) => {

@@ -2,6 +2,7 @@ import { getFeatureSpec } from "../../../state/features.js";
 import { FeatureExecutor, FeatureType } from "../../../interfaces.js";
 import { createJsAction } from "../actions/read.js";
 import { pathToFileURL } from 'url';
+import { getInputFromOptions } from "../tasks/utils.js";
 
 async function executeAdaptater(
     name: string,
@@ -14,6 +15,12 @@ async function executeAdaptater(
     const { found, path } = getFeatureSpec(name, "adaptater" as FeatureType);
     if (!found) {
         throw new Error(`adaptater ${name} not found`);
+    }
+    const inputData = await getInputFromOptions(options);
+    if (inputData) {
+        if (Array.isArray(params)) {
+            params.push(inputData)
+        }
     }
     let run: FeatureExecutor<any, any>;
     const url = pathToFileURL(path).href;

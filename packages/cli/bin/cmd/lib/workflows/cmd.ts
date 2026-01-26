@@ -6,7 +6,7 @@ import { executeAction } from "../actions/cmd.js";
 import { executeAdaptater } from "../adaptaters/cmd.js";
 import { parseCommandArgs } from "../options_parsers.js";
 import { executeTask } from "../tasks/cmd.js";
-import { getTaskPrompt } from "../tasks/utils.js";
+import { getInputFromOptions, getTaskPrompt } from "../tasks/utils.js";
 import { runtimeError } from "../user_msgs.js";
 import { readWorkflow } from "./read.js";
 
@@ -23,7 +23,7 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
     }
     let i = 0;
     const finalTaskIndex = stepNames.length - 1;
-    let taskRes: Record<string, any> = { cmdArgs: args };
+    let taskRes: Record<string, any> = { cmdArgs: args as Array<string> };
     //console.log("WPARAMS", taskRes);
     let prevStepType: "cmd" | "agent" | "task" | "adaptater" | "action" | null = null;
     for (const step of workflow) {
@@ -52,6 +52,7 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
                     if (!tdata?.prompt) {
                         throw new Error(`Workflow ${wname} step ${i + 1}: provide a prompt for the task ${step.name}`)
                     }
+                    options.isAgent = false;
                     const tr = await executeTask(step.name, tdata, options);
                     taskRes = { ...tr, ...taskRes };
                 } catch (e) {
@@ -90,18 +91,29 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
             case "action":
                 try {
                     //console.log("EXEC ACTION ARGS", taskRes);
-                    const actArgs = i == 0 ? taskRes.cmdArgs : taskRes;
+                    //const actArgs = i == 0 ? taskRes.cmdArgs : taskRes;
+                    let actArgs: any;
+                    if (i == 0) {
+                        actArgs = taskRes.cmdArgs;
+                        const inputData = await getInputFromOptions(options);
+                        if (inputData) {
+                            actArgs.push(inputData)
+                        }
+                    } else {
+                        actArgs = taskRes
+                    }
                     const ares = await executeAction(step.name, actArgs, options, true);
                     //console.log("WF ACTION RES", typeof ares, ares);
+                    //console.log("LAST ACT", i, finalTaskIndex);
+                    if (i == finalTaskIndex && !options?.isToolCall && !options?.quiet) {
+                        console.log(ares);
+                        break
+                    }
                     if (typeof ares == "string" || Array.isArray(ares)) {
                         taskRes.args = ares;
                         //console.log("ARRAY ACTION RES", taskRes)
                     } else {
                         taskRes = { ...ares, ...taskRes };
-                    }
-                    //console.log("LAST ACT", i, finalTaskIndex);
-                    if (i == finalTaskIndex) {
-                        console.log(taskRes);
                     }
                 } catch (e) {
                     throw new Error(`workflow action ${i + 1}: ${e}`)
@@ -111,19 +123,31 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
                 try {
                     //console.log("WF AD ARGS IN", taskRes);
                     //console.log("AD OPTS IN", options);
-                    const actArgs = i == 0 ? taskRes.cmdArgs : taskRes;
+                    let actArgs: any;
+                    if (i == 0) {
+                        //console.log("TR", taskRes);
+                        actArgs = taskRes.cmdArgs;
+                        //console.log("ACT ARGS", actArgs);
+                        const inputData = await getInputFromOptions(options);
+                        if (inputData) {
+                            actArgs.push(inputData)
+                        }
+                    } else {
+                        actArgs = taskRes
+                    }
                     const adres = await executeAdaptater(step.name, actArgs, options);
+                    //console.log("WF AD FINAL RES", taskRes);
+                    //console.log("LAST ACT", i, finalTaskIndex);
+                    if (i == finalTaskIndex && !options?.isToolCall && !options?.quiet) {
+                        console.log(adres);
+                        break
+                    }
                     //console.log("WF AD RES", typeof adres, adres);
                     if (typeof adres == "string" || Array.isArray(adres)) {
                         taskRes.args = adres;
                         //console.log("WF AD IT RES", taskRes);
                     } else {
                         taskRes = { ...adres };
-                    }
-                    //console.log("WF AD FINAL RES", taskRes);
-                    //console.log("LAST ACT", i, finalTaskIndex);
-                    if (i == finalTaskIndex) {
-                        console.log(taskRes);
                     }
                     //console.log("WF ADAPT RES", typeof ares, Array.isArray(ares) ? ares.length : "NA");
                 } catch (e) {
@@ -142,7 +166,17 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
                         runtimeError(`workflow ${wname}: can not import the runCmd function from step ${i} for command ${step.name}: please add a runCmd function export`)
                         return
                     }
-                    const cres = await jsa.runCmd(args, options);
+                    let cArgs: any;
+                    if (i == 0) {
+                        cArgs = taskRes.cmdArgs;
+                        const inputData = await getInputFromOptions(options);
+                        if (inputData) {
+                            cArgs.push(inputData)
+                        }
+                    } else {
+                        cArgs = taskRes
+                    }
+                    const cres = await jsa.runCmd(cArgs, options);
                     if (typeof cres == "string" || Array.isArray(cres)) {
                         taskRes.args = cres;
                     } else {

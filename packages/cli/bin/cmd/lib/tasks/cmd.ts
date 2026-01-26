@@ -2,7 +2,7 @@ import { TaskConf, TaskOutput } from "@agent-smith/task";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 import { InferenceParams } from "@locallm/types";
 import { default as color, default as colors } from "ansi-colors";
-import { PromptTemplate } from "modprompt";
+import { PromptTemplate, templates } from "modprompt";
 import ora from 'ora';
 import { TaskSettings } from "../../../interfaces.js";
 import { usePerfTimer } from "../../../main.js";
@@ -107,7 +107,11 @@ async function executeTask(
     let tpl: PromptTemplate | null = null;
     //console.log("Use templates:", useTemplates);
     if (useTemplates) {
-        tpl = new PromptTemplate(model.template ?? "none");
+        try {
+            tpl = new PromptTemplate(model.template ?? "none");
+        } catch (e) {
+            throw new Error(`Can not load template ${model.template}\nAvailable templates: ${Object.keys(templates)}\n`)
+        }
         //console.log("TPL:", tpl.id);
         hasThink = tpl.tags?.think ? true : false;
         //console.log("HT", hasThink);
@@ -137,7 +141,7 @@ async function executeTask(
             process.stdout.write(t);
             //}
         }
-        ++emittedTokens;
+
     };
     let hasTools = false;
     if (task.def?.tools) {
@@ -189,25 +193,36 @@ async function executeTask(
         if (hasTools && tpl) {
             // check for tool call and silence the output
             if (t == tpl.tags.toolCall?.start) {
-                continueWrite = false;
-                return
+                if (!options?.debug) {
+                    continueWrite = false;
+                    if (emittedTokens > 0) {
+                        console.log()
+                    }
+                    return
+                }
             } else if (t == tpl.tags.toolCall?.end) {
-                //if (options?.verbose === true) {
                 skipNextEmptyLinesToken = true;
                 continueWrite = true;
-                // }
-                return
+                if (!options?.debug) {
+                    return
+                }
             }
         }
         if (continueWrite) {
             if (skipNextEmptyLinesToken) {
-                if (t == "\n\n") {
+                if (t == "\n\n" || t == "\n") {
                     skipNextEmptyLinesToken = false
                     return
                 }
             }
             if (!options?.quiet) {
-                printToken(t);
+                if (!options?.isToolCall) {
+                    printToken(t);
+                } else {
+                    if (options?.debug) {
+                        printToken(t);
+                    }
+                }
             }
         }
         ++emittedTokens;
@@ -262,7 +277,7 @@ async function executeTask(
     //console.log("CLI EXEC TASK", payload.prompt, "\nVARS:", vars, "\nOPTS", tconf)
     try {
         out = await task.run({ prompt: payload.prompt, ...vars }, tconf);
-    } catch (e) {
+    } catch (e: any) {
         const errMsg = `${e}`;
         if (errMsg.includes("502 Bad Gateway")) {
             runtimeError("The server answered with a 502 Bad Gateway error. It might be down or misconfigured. Check your inference server.")
@@ -272,7 +287,11 @@ async function executeTask(
             //@ts-ignore
             return
         } else if (errMsg.includes("404 Not Found")) {
-            runtimeError("The server answered with a 404 Not Found error. That usually mean that the model you are requesting does not exist on the server.")
+            runtimeError("The server answered with a 404 Not Found error. That might mean that the model you are requesting does not exist on the server.")
+            //@ts-ignore
+            return
+        } else if (errMsg.includes("400 Bad Request")) {
+            runtimeError("The server answered with a 400 Bad Request error. That might mean that the model you are requesting does not exist on the server or a parameter is missing in your request.")
             //@ts-ignore
             return
         } else if (errMsg.includes("fetch failed")) {
@@ -280,6 +299,7 @@ async function executeTask(
             //@ts-ignore
             return
         } else {
+
             throw new Error(errMsg)
         }
     }
