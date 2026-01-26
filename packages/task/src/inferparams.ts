@@ -1,5 +1,5 @@
 import { InferenceParams } from "@locallm/types";
-import { PromptTemplate } from "modprompt/dist/cls";
+import { PromptTemplate } from "modprompt";
 import { TaskConf } from "./interfaces";
 
 function formatInferParams(ip: InferenceParams, conf: TaskConf, tpl?: PromptTemplate): InferenceParams {

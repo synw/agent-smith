@@ -1,4 +1,4 @@
-import { HistoryTurn } from "@locallm/types/dist/history.js";
+import { HistoryTurn } from "@locallm/types";
 import { TaskDef, TaskInput } from "./interfaces.js";
 
 function applyVariables(taskDef: TaskDef, taskInput: TaskInput): TaskDef {
