@@ -5,23 +5,23 @@
     "type": "git",
     "url": "git+https://github.com/synw/agent-smith.git"
   },
-  "version": "0.2.1",
+  "version": "0.2.2",
   "scripts": {
     "buildrl": "rm -rf dist/* && rollup -c",
     "build": "rm -rf dist/* && tsc"
   },
   "dependencies": {
     "@locallm/api": "^0.7.3",
-    "modprompt": "^0.12.6",
+    "modprompt": "0.13.1",
     "restmix": "^0.6.1"
   },
   "devDependencies": {
     "@locallm/types": "^0.6.7",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-typescript": "^12.3.0",
-    "@types/node": "^25.0.8",
+    "@types/node": "^25.0.10",
     "openai": "^6.16.0",
-    "rollup": "^4.55.1",
+    "rollup": "^4.56.0",
     "ts-node": "^10.9.2",
     "tslib": "2.8.1",
     "typescript": "^5.9.3"
