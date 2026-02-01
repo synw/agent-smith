@@ -1,8 +1,8 @@
 import { Command, Option } from "commander";
 import { listBackends, setBackend } from "../../state/backends.js";
 import { parseCommandArgs } from "../lib/options_parsers.js";
-import { processTaskCmd, processTasksCmd, resetDbCmd, updateFeaturesCmd } from "./cmds.js";
-import { updateConfCmd } from "./updateconf.js";
+import { processTaskCmd, processTasksCmd, resetDbCmd } from "./cmds.js";
+import { updateConfCmd, updateFeaturesCmd } from "./updateconf.js";
 import { displayOptions, inferenceOptions } from "../options.js";
 
 function initBaseCommands(program: Command): Command {

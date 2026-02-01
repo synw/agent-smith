@@ -157,8 +157,13 @@ function upsertAndCleanFeatures(feats: Array<FeatureSpec>, type: FeatureType): A
     feats.forEach((feat) => {
         if (!names.includes(feat.name)) {
             //console.log("ADD", type, feat);
-            const insertStmt = db.prepare(`INSERT INTO ${type} (name, path, ext) VALUES (?, ?, ?)`);
-            insertStmt.run(feat.name, feat.path, feat.ext);
+            if (feat?.variables) {
+                const insertStmt = db.prepare(`INSERT INTO ${type} (name, path, ext, variables) VALUES (?, ?, ?, ?)`);
+                insertStmt.run(feat.name, feat.path, feat.ext, JSON.stringify(feat.variables, null, 2));
+            } else {
+                const insertStmt2 = db.prepare(`INSERT INTO ${type} (name, path, ext) VALUES (?, ?, ?)`);
+                insertStmt2.run(feat.name, feat.path, feat.ext);
+            }
             console.log("+", "[" + type + "]", feat.name, feat.path);
             newFeatures.push(feat)
         }
@@ -176,6 +181,17 @@ function updateVariables(name: string, variableDoc: string) {
     const updateStmt = db.prepare("UPDATE task SET variables = ? WHERE id = ?");
     updateStmt.run(variableDoc, result.id);
     //console.log("~", "[task variables] updated for", name);
+}
+
+function updateUserCmd(feat: FeatureSpec) {
+    const stmt1 = db.prepare("SELECT id FROM cmd WHERE name = ?");
+    const result = stmt1.get(feat.name) as Record<string, any>;
+    //console.log("UV res", result);
+    if (!result?.id) {
+        return;
+    }
+    const updateStmt = db.prepare("UPDATE cmd SET variables = ? WHERE id = ?");
+    updateStmt.run(JSON.stringify(feat.variables, null, 2), result.id);
 }
 
 function upsertTool(name: string, type: FeatureType, toolDoc: string) {
@@ -240,6 +256,7 @@ function updateFeatures(feats: Features) {
     });
     upsertAndCleanFeatures(feats.adaptater, "adaptater");
     upsertAndCleanFeatures(feats.cmd, "cmd");
+    feats.cmd.forEach(c => updateUserCmd(c))
 }
 
 function upsertFilePath(name: string, newPath: string): boolean {

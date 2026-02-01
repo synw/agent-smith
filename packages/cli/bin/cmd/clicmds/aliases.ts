@@ -61,14 +61,14 @@ function initCommandsFromAliases(program: Command, aliases: {
                     }
                 }
                 break;
-            case "action":
+            /*case "action":
                 const acmd = program.command(`${alias.name} [args...]`)
                     .description("action: " + alias.name)
                     .action(async (...args: Array<any>) => {
                         await executeActionCmd(alias.name, args)
                     });
                 allOptions.forEach(o => acmd.addOption(o));
-                break;
+                break;*/
             case "workflow":
                 const wcmd = program.command(`${alias.name} [args...]`)
                     .description("workflow: " + alias.name)

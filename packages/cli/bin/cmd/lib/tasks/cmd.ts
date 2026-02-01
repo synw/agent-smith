@@ -291,7 +291,7 @@ async function executeTask(
             //@ts-ignore
             return
         } else if (errMsg.includes("400 Bad Request")) {
-            runtimeError("The server answered with a 400 Bad Request error. That might mean that the model you are requesting does not exist on the server or a parameter is missing in your request.")
+            runtimeError("The server answered with a 400 Bad Request error. That might mean that the model you are requesting does not exist on the server, a parameter is wrong or missing in your request.")
             //@ts-ignore
             return
         } else if (errMsg.includes("fetch failed")) {

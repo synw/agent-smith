@@ -1,10 +1,49 @@
-import { cacheFilePath, processConfPath } from "../../conf.js";
+import path from "path";
+import { processConfPath } from "../../conf.js";
 import { initDb } from "../../db/db.js";
-import { readFilePath } from "../../db/read.js";
+import { readFeaturePaths, readFilePath } from "../../db/read.js";
 import { cleanupFeaturePaths, updateAliases, updateDataDirPath, updateFeatures, updatePromptfilePath, upsertFilePath } from "../../db/write.js";
+import type { Features } from "../../interfaces.js";
 import { readFeaturesDirs } from "../../state/features.js";
+import { readPluginsPaths } from "../../state/plugins.js";
 import { dataDirPath, promptfilePath } from "../../state/state.js";
 import { runtimeDataError, runtimeInfo } from '../lib/user_msgs.js';
+import { readUserCmd } from "../sys/read_cmds.js";
+
+async function getUserCmdsData(feats: Features): Promise<Features> {
+    for (const feat of feats.cmd) {
+        const cmdPath = path.join(feat.path, feat.name + "." + feat.ext);
+        const { found, userCmd } = await readUserCmd(feat.name, cmdPath);
+        if (found) {
+            feat.variables = {
+                description: userCmd.description,
+                name: userCmd.name,
+            }
+            if (userCmd?.options) {
+                feat.variables.options = userCmd.options
+            }
+        }
+    }
+    return feats
+}
+
+async function updateAllFeatures(paths: Array<string>) {
+    let feats = readFeaturesDirs(paths, true);
+    feats = await getUserCmdsData(feats);
+    updateFeatures(feats);
+    updateAliases(feats);
+    const deleted = cleanupFeaturePaths(paths);
+    for (const el of deleted) {
+        console.log("- [feature path]", el)
+    }
+}
+
+async function updateFeaturesCmd(options: Record<string, any>): Promise<any> {
+    const fp = readFeaturePaths();
+    const pp = await readPluginsPaths();
+    const paths = [...fp, ...pp];
+    updateAllFeatures(paths)
+}
 
 async function updateConfCmd(args: Array<string>): Promise<any> {
     initDb(false, true);
@@ -35,15 +74,10 @@ async function updateConfCmd(args: Array<string>): Promise<any> {
         updateDataDirPath(dd);
         dataDirPath.value = dd;
     }
-    const feats = readFeaturesDirs(paths, true);
-    updateFeatures(feats);
-    updateAliases(feats);
-    const deleted = cleanupFeaturePaths(paths);
-    for (const el of deleted) {
-        console.log("- [feature path]", el)
-    }
+    updateAllFeatures(paths);
 }
 
 export {
     updateConfCmd,
+    updateFeaturesCmd,
 }

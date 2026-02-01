@@ -6,16 +6,26 @@ interface FeatureSpec {
     name: string;
     path: string;
     ext: FeatureExtension;
-    variables?: TaskVariables;
+    variables?: TaskVariables | Record<string, any>;
 }
 
 interface Features {
     agent: Array<{ name: string, path: string, ext: AgentExtension }>;
     task: Array<{ name: string, path: string, ext: TaskExtension }>;
-    cmd: Array<{ name: string, path: string, ext: CmdExtension }>;
+    cmd: Array<{
+        name: string, path: string, ext: CmdExtension,
+        variables?: { name: string, options?: Array<Array<string> | string>, description: string }
+    }>;
     action: Array<{ name: string, path: string, ext: ActionExtension }>;
     workflow: Array<{ name: string, path: string, ext: WorkflowExtension }>;
     adaptater: Array<{ name: string, path: string, ext: AdaptaterExtension }>;
+}
+
+interface UserCmdDef {
+    name: string;
+    description: string;
+    run: (args: any, options: Record<string, any>) => Promise<any>;
+    options?: Array<Array<string> | string>;
 }
 
 interface ConfInferenceBackend {
@@ -180,4 +190,5 @@ export {
     FeatureExecutor,
     WorkflowStep,
     TaskSettings,
+    UserCmdDef,
 }

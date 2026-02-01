@@ -1,45 +1,73 @@
 import colors from "ansi-colors";
-import { Command } from 'commander';
+import { Command, Option } from 'commander';
 import path from "path";
 import YAML from 'yaml';
-import { cacheFilePath, dbPath } from "../../conf.js";
-import { readFeaturePaths, readFeaturesType, readTaskSetting } from "../../db/read.js";
-import { cleanupFeaturePaths, deleteTaskSetting, updateAliases, updateFeatures, upsertTaskSettings } from "../../db/write.js";
+import { dbPath } from "../../conf.js";
+import { readFeaturesType, readTaskSetting } from "../../db/read.js";
+import { deleteTaskSetting, upsertTaskSettings } from "../../db/write.js";
 import { FeatureSpec, FeatureType } from '../../interfaces.js';
-import { getFeatureSpec, readFeaturesDirs } from "../../state/features.js";
-import { readPluginsPaths } from "../../state/plugins.js";
+import { getFeatureSpec } from "../../state/features.js";
 import { runMode } from "../../state/state.js";
 import { initTaskSettings, isTaskSettingsInitialized, tasksSettings } from '../../state/tasks.js';
 import { deleteFileIfExists } from "../sys/delete_file.js";
-import { readCmd } from "../sys/read_cmds.js";
 import { readTask } from "../sys/read_task.js";
+import { parseCommandArgs } from "../lib/options_parsers.js";
+import { readCmd } from "../sys/read_cmds.js";
+import { runtimeDataError } from "../lib/user_msgs.js";
+import { allOptions, displayOptions, inferenceOptions, ioOptions } from "../options.js";
 
-async function initUserCmds(cmdFeats: Record<string, FeatureSpec>): Promise<Array<Command>> {
+async function initUserCmds(cmdFeats: Record<string, FeatureSpec>, program: Command): Promise<Array<Command>> {
     const features = Object.values(cmdFeats);
-    /*let endCmds: Array<Command> = cmds;
-    if (!isCacheReady) {
-        //console.log("Sync user cmds:", features.length, cmds.length);
-        // user commands are not sync, this is an update or a new install
-        updateUserCmdsCache(cacheFilePath, features);
-        const usrCmds: Array<Command> = [];
-        // load the command manually for this run
-        for (const feat of features) {
-            const cmdPath = path.join(feat.path, feat.name + "." + feat.ext);
-            const c = await readCmd(feat.name, cmdPath);
-            usrCmds.push(c)
-        }
-        endCmds = usrCmds
-    }
-    //console.log("USRCMDS", endCmds.length);
-    return endCmds*/
     const usrCmds: Array<Command> = [];
-    // load the command manually for this run
     for (const feat of features) {
-        const cmdPath = path.join(feat.path, feat.name + "." + feat.ext);
-        const c = await readCmd(feat.name, cmdPath);
-        if (c) {
-            usrCmds.push(c)
+        //console.log("Init cmd", feat);
+        const hasVariables = feat?.variables ? true : false;
+        const vars = hasVariables ? feat.variables as Record<string, any> : {};
+        let desc = "";
+        if (hasVariables) {
+            desc = vars.description;
         }
+        // @ts-ignore
+        const cmd = program.command(feat.variables.name)
+            .description(desc)
+            .action(async (...args: Array<any>) => {
+                const ca = parseCommandArgs(args);
+                const cmdPath = path.join(feat.path, feat.name + "." + feat.ext);
+                const c = await readCmd(feat.name, cmdPath);
+                if (!c) {
+                    runtimeDataError(`can not import command ${feat.name}`);
+                    throw new Error()
+                }
+                await c.run(ca.args, ca.options)
+            });
+        if (hasVariables) {
+            if (vars?.options) {
+                for (const opt of (vars.options as Array<Array<string>>)) {
+                    if (Array.isArray(opt)) {
+                        cmd.addOption(new Option(opt[0], opt[1]));
+                    } else {
+                        // predefined option
+                        switch (opt) {
+                            case "all":
+                                allOptions.forEach(o => cmd.addOption(o));
+                                break;
+                            case "display":
+                                displayOptions.forEach(o => cmd.addOption(o));
+                                break
+                            case "inference":
+                                inferenceOptions.forEach(o => cmd.addOption(o));
+                                break
+                            case "io":
+                                ioOptions.forEach(o => cmd.addOption(o));
+                            default:
+                                break;
+                        }
+                    }
+
+                }
+            }
+        }
+        usrCmds.push(cmd)
     }
     //console.log("USRCMDS", usrCmds.map(c => c.name()))
     return usrCmds
@@ -52,19 +80,6 @@ async function resetDbCmd(): Promise<any> {
     }
     deleteFileIfExists(dbPath);
     console.log("Config database reset ok. Run the conf command to recreate it")
-}
-
-async function updateFeaturesCmd(options: Record<string, any>): Promise<any> {
-    const fp = readFeaturePaths();
-    const pp = await readPluginsPaths();
-    const paths = [...fp, ...pp];
-    const feats = readFeaturesDirs(paths, options?.debug ?? false);
-    updateFeatures(feats);
-    updateAliases(feats);
-    const deleted = cleanupFeaturePaths(paths);
-    for (const el of deleted) {
-        console.log("- [feature path]", el)
-    }
 }
 
 async function processTasksCmd(args: Array<string>, options: Record<string, any>) {
@@ -123,8 +138,9 @@ async function processTaskCmd(args: Array<string>, options: Record<string, any>)
 }
 
 export {
-    initUserCmds, processTaskCmd,
-    processTasksCmd, resetDbCmd,
-    updateFeaturesCmd
+    initUserCmds,
+    processTaskCmd,
+    processTasksCmd,
+    resetDbCmd,
 };
 

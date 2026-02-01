@@ -1,10 +1,11 @@
 import { Command } from "commander";
 import { pathToFileURL } from 'url';
 import { runtimeWarning } from "../lib/user_msgs.js";
+import type { UserCmdDef } from "../../interfaces.js";
 
-async function readCmd(name: string, cmdPath: string): Promise<Command | null> {
+async function readCmd(name: string, cmdPath: string): Promise<UserCmdDef | null> {
     const url = pathToFileURL(cmdPath).href;
-    let _cmd: Command | null = null;
+    let _cmd: UserCmdDef;
     try {
         const mod = await import(url);
         _cmd = mod.cmd;
@@ -17,4 +18,26 @@ async function readCmd(name: string, cmdPath: string): Promise<Command | null> {
     return _cmd
 }
 
-export { readCmd }
+async function readUserCmd(name: string, cmdPath: string): Promise<{ found: boolean, userCmd: UserCmdDef }> {
+    const url = pathToFileURL(cmdPath).href;
+    try {
+        const mod = await import(url);
+        const cmdMod = mod.cmd;
+        const uc: UserCmdDef = {
+            name: cmdMod.name,
+            description: cmdMod.description,
+            run: cmdMod.run,
+            options: cmdMod?.options ? cmdMod.options : undefined,
+        }
+        return { found: true, userCmd: uc }
+    }
+    catch (e) {
+        runtimeWarning(`command ${name} not found at ${cmdPath}, ${e}`);
+        return { found: false, userCmd: { name: "", description: "", run: async (a, b) => null } }
+    }
+}
+
+export {
+    readCmd,
+    readUserCmd,
+}

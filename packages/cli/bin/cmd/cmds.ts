@@ -46,12 +46,8 @@ async function buildCmds(): Promise<Command> {
     //perf.measure("readFeatures");
     initCommandsFromAliases(program, aliases, feats);
     //perf.measure("initCommandsFromAliases");
-    const cmds = await initUserCmds(feats.cmd);
+    await initUserCmds(feats.cmd, program);
     //perf.measure("initUserCmds");
-    cmds.forEach(c => {
-        //console.log("Add cmd", c.name());
-        program.addCommand(c)
-    });
     //perf.measure("cmds for each");
     //perf.final("buildCmds");
     return program
