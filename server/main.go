@@ -29,9 +29,6 @@ func main() {
 		fmt.Println("Debug mode is on")
 		state.IsDebug = true
 	}
-	if !*quiet {
-		state.IsVerbose = *quiet
-	}
 	state.IsVerbose = !*quiet
 	state.Conf = conf.InitConf()
 	//fmt.Println("Conf", config)

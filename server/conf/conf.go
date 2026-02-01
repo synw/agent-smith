@@ -30,16 +30,21 @@ func InitConf() types.Conf {
 	groupsData := viper.GetStringMap("groups")
 	apiKeys := []types.GroupApiKey{}
 	for key, value := range groupsData {
-		if cmdSlice, ok := value.([]interface{}); ok {
-			authorizedCmds := make([]string, len(cmdSlice))
-			for i, cmd := range cmdSlice {
-				if cmdStr, ok := cmd.(string); ok {
-					authorizedCmds[i] = cmdStr
-				}
-			}
-			groups[types.GroupApiKey(key)] = authorizedCmds
-			apiKeys = append(apiKeys, types.GroupApiKey(key))
+		// Safely handle potential type assertion issues
+		cmdSlice, ok := value.([]interface{})
+		if !ok {
+			// Skip invalid group entries instead of panicking
+			continue
 		}
+		authorizedCmds := make([]string, len(cmdSlice))
+		for i, cmd := range cmdSlice {
+			// Ensure cmd is a string before type assertion
+			if cmdStr, ok := cmd.(string); ok {
+				authorizedCmds[i] = cmdStr
+			}
+		}
+		groups[types.GroupApiKey(key)] = authorizedCmds
+		apiKeys = append(apiKeys, types.GroupApiKey(key))
 	}
 
 	return types.Conf{

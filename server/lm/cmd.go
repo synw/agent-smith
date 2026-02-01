@@ -60,7 +60,7 @@ func RunCmd(
 		token := scanner.Text()
 		buf = append(buf, token)
 		if state.IsVerbose {
-			go fmt.Print(token)
+			fmt.Print(token)
 		}
 		StreamMsg(createMsg(token, i), c, enc)
 	}

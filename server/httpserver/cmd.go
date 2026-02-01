@@ -23,16 +23,35 @@ func ExecuteCmdHandler(c echo.Context) error {
 		msg := "Provide a 'cmd' string parameter"
 		return echo.NewHTTPError(http.StatusBadRequest, msg)
 	}
-	apiKey := c.Get("apiKey")
-	authorizedCmds := state.Conf.Groups[types.GroupApiKey(apiKey.(string))]
+	// Check if the command exists in any of the configured groups
+	cmdExists := false
+	apiKey := c.Get("apiKey").(string)
+
+	// Check if it's the main command API key
+	if apiKey == state.Conf.CmdApiKey.Key {
+		cmdExists = true // Allow all commands for main API key
+	} else {
+		// Check if command exists in user's authorized groups
+		authorizedCmds := state.Conf.Groups[types.GroupApiKey(apiKey)]
+		if slices.Contains(authorizedCmds, cmd) {
+			cmdExists = true
+		}
+	}
+
+	if !cmdExists {
+		return echo.NewHTTPError(http.StatusUnauthorized, "Command not found or not authorized")
+	}
+
+	apiKey = c.Get("apiKey").(string)
+	authorizedCmds := state.Conf.Groups[types.GroupApiKey(apiKey)]
 	isCmdAuthorized := false
 	isCmdUnauthorized := false
-	unauthorizedCmds := []string{"conf", "reset"}
+	unauthorizedCmds := []string{"conf", "reset", "update"}
 	if slices.Contains(unauthorizedCmds, cmd) {
 		isCmdUnauthorized = true
 	}
 	if !isCmdUnauthorized {
-		if apiKey == state.Conf.CmdApiKey {
+		if apiKey == state.Conf.CmdApiKey.Key {
 			isCmdAuthorized = true
 		} else {
 			if slices.Contains(authorizedCmds, cmd) {
@@ -54,6 +73,14 @@ func ExecuteCmdHandler(c echo.Context) error {
 
 	var wg sync.WaitGroup
 	wg.Add(1)
+
+	// Ensure cleanup happens regardless of execution path
+	defer func() {
+		close(ch)
+		close(errCh)
+		wg.Wait()
+	}()
+
 	go func() {
 		defer wg.Done()
 		rawParams := params.([]interface{})
@@ -64,7 +91,6 @@ func ExecuteCmdHandler(c echo.Context) error {
 	select {
 	case res, ok := <-ch:
 		if ok {
-			fmt.Println("ch", res)
 			if state.IsDebug {
 				fmt.Println("-------- result ----------")
 				for key, value := range res.Data {
@@ -73,9 +99,6 @@ func ExecuteCmdHandler(c echo.Context) error {
 				fmt.Println("--------------------------")
 			}
 		}
-		wg.Wait()
-		close(ch)
-		close(errCh)
 		return nil
 	case err, ok := <-errCh:
 		if ok {
@@ -84,31 +107,15 @@ func ExecuteCmdHandler(c echo.Context) error {
 			if err != nil {
 				if state.IsDebug {
 					fmt.Println("Streaming error", err)
-					errCh <- types.StreamedMessage{
-						Content: "Streaming error",
-						MsgType: types.ErrorMsgType,
-					}
 				}
-				wg.Wait()
-				close(ch)
-				close(errCh)
 				return c.NoContent(http.StatusInternalServerError)
 			}
 		} else {
-			wg.Wait()
-			close(ch)
-			close(errCh)
 			return c.JSON(http.StatusInternalServerError, err)
 		}
-		wg.Wait()
-		close(ch)
-		close(errCh)
 		return nil
 	case <-c.Request().Context().Done():
 		fmt.Println("\nRequest canceled")
-		wg.Wait()
-		close(ch)
-		close(errCh)
 		return c.NoContent(http.StatusNoContent)
 	}
 }
