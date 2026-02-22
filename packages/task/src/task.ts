@@ -57,6 +57,18 @@ class Task {
         if (conf?.onToolCallEnd) {
             options.onToolCallEnd = conf.onToolCallEnd
         }
+        if (conf?.onToolsTurnStart) {
+            options.onToolsTurnStart = conf.onToolsTurnStart
+        }
+        if (conf?.onToolsTurnEnd) {
+            options.onToolsTurnEnd = conf.onToolsTurnEnd
+        }
+        if (conf?.onTurnEnd) {
+            options.onTurnEnd = conf.onTurnEnd
+        }
+        if (conf?.onAssistant) {
+            options.onAssistant = conf.onAssistant
+        }
         let hasTools = false;
         // add task tools to the agent
         if (this.def?.tools) {
@@ -96,6 +108,13 @@ class Task {
             options.tools = this.def.tools;
         }
         if (conf?.debug) {
+            if (this.agent?.history) {
+                this.agent.history.forEach(t => {
+                    if (t?.assistant || t?.tools) {
+                        tpl.pushToHistory(t);
+                    }
+                });
+            }
             console.log("-----------", model.name, "- Template:", tpl.name, "- Ctx:", ctx, "-----------");
             console.log(useTemplates ? tpl.prompt(finalPrompt) : finalPrompt);
             console.log("----------------------------------------------")
@@ -115,7 +134,7 @@ class Task {
             // cut debug here. TODO: debug log levels
             options.debug = false
         }
-        const isRoutingAgent = this.def.description.includes("routing agent");
+        const isRoutingAgent = this.def?.description?.includes("routing agent") ?? false;
         if (isRoutingAgent) {
             options.isToolsRouter = true
         }
@@ -124,7 +143,7 @@ class Task {
                 options.system = this.def.template.system;
             }
             if (this.def?.shots) {
-                options.history = this.def.shots;
+                options.history = options?.history ? [...options.history, ...this.def.shots] : this.def.shots;
             }
             //console.log("RUN AGENT (TASK) params:", this.def.inferParams);
             //console.log("RUN AGENT (TASK) options:", options);

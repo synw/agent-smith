@@ -1,4 +1,4 @@
-import type { InferenceParams, InferenceResult, InferenceOptions, ToolSpec, HistoryTurn, ToolCallSpec } from "@locallm/types";
+import type { InferenceParams, InferenceResult, InferenceOptions, ToolSpec, HistoryTurn, ToolCallSpec, ToolTurn } from "@locallm/types";
 import type { PromptTemplate } from "modprompt";
 
 interface ModelSpec {
@@ -38,8 +38,13 @@ interface TaskConf {
     debug?: boolean;
     verbose?: boolean;
     baseDir?: string;
+    history?: Array<HistoryTurn>;
     onToolCall?: (tc: ToolCallSpec) => void;
     onToolCallEnd?: (tr: any) => void;
+    onToolsTurnStart?: (tc: Array<ToolCallSpec>) => void;
+    onToolsTurnEnd?: (tr: Array<ToolTurn>) => void;
+    onTurnEnd?: (ht: HistoryTurn) => void;
+    onAssistant?: (txt: string) => void;
 }
 
 /**
