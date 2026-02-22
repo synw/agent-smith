@@ -91,6 +91,9 @@ class Agent {
         let _res = res;
         //console.log("RES", res);
         if (res?.toolCalls) {
+            if (options?.onToolsTurnStart) {
+                options.onToolsTurnStart(res.toolCalls);
+            }
             const toolsResults = new Array<ToolTurn>();
             const toolNames = Object.keys(this.tools);
             for (const tc of res.toolCalls) {
@@ -113,13 +116,16 @@ class Agent {
                     }
                     toolsResults.push({ call: tc, response: JSON.stringify(toolCallResult) });
                     if (options?.onToolCallEnd) {
-                        options.onToolCallEnd(toolCallResult);
+                        options.onToolCallEnd(tc.id, toolCallResult);
                     }
                 } else {
                     if (options?.debug || options?.verbose) {
                         console.log("[-] Tool", tool.name, "execution refused");
                     }
                 }
+            }
+            if (options?.onToolsTurnEnd) {
+                options.onToolsTurnEnd(toolsResults);
             }
             this.history.push({ tools: toolsResults });
             if (options?.isToolsRouter) {
@@ -141,9 +147,15 @@ class Agent {
             if (options?.tools) {
                 options.tools = Object.values(this.tools);
             }
+            if (options?.onTurnEnd) {
+                options.onTurnEnd(this.history[this.history.length - 1])
+            }
             _res = await this.runAgentNoTemplate(nit, "", params, options);
         } else {
             this.history.push({ assistant: res.text });
+            if (options?.onTurnEnd) {
+                options.onTurnEnd(this.history[this.history.length - 1])
+            }
         }
         return _res
     }
@@ -174,14 +186,22 @@ class Agent {
         if (typeof params?.model == "string") {
             params.model = { name: params.model }
         }
-        const { isToolCall, toolsCall, error } = tpl.processAnswer(res.text);
+        const { isToolCall, toolsCall, assistant, error } = tpl.processAnswer(res.text);
         if (error) {
-            throw new Error(`error processing tool call answer:\n, ${error}`);
+            throw new Error(`error processing model answer:\n, ${error}`);
+        }
+        if (assistant) {
+            if (options?.onAssistant) {
+                options.onAssistant(assistant)
+            }
         }
         //console.log("\nProcessed answer", isToolCall, toolsCall, error);
         //const toolsUsed: Record<string, ToolTurn> = {};
         const toolResults = new Array<ToolTurn>();
         if (isToolCall) {
+            if (options?.onToolsTurnStart) {
+                options.onToolsTurnStart(toolsCall);
+            }
             for (const toolCall of toolsCall) {
                 // get the tool
                 if (!("name" in toolCall)) {
@@ -204,17 +224,23 @@ class Agent {
                     throw new Error(buf.join("\n"));
                 }
                 let canRun = true;
+                //console.log("CAN RUN", tool?.canRun);
                 if (tool?.canRun) {
+                    //console.log("WAIT TOOL CONFIRM");
                     canRun = await tool.canRun(toolCall);
                 }
                 if (!canRun) {
                     if (options?.debug || options?.verbose) {
                         console.log("[-] Tool", tool.name, "execution refused");
                     }
+                    const toolResp = "tool execution denied";
                     toolResults.push({
                         call: toolCall,
-                        response: "tool execution denied"
+                        response: toolResp,
                     });
+                    if (options?.onToolCallEnd) {
+                        options.onToolCallEnd(toolCall.id, toolResp);
+                    }
                 } else {
                     if (options?.onToolCall) {
                         options.onToolCall(toolCall);
@@ -231,23 +257,33 @@ class Agent {
                         call: toolCall,
                         response: toolResp
                     });
+                    //console.log("ONTCE")
                     if (options?.onToolCallEnd) {
-                        options.onToolCallEnd(toolResp);
+                        options.onToolCallEnd(toolCall.id, toolResp);
                     }
                 }
             }
+            if (options?.onToolsTurnEnd) {
+                options.onToolsTurnEnd(toolResults);
+            }
             if (it == 1) {
                 //console.log("PROMPT HIST", prompt);
-                this.history.push({
+                const t: HistoryTurn = {
                     user: prompt,
-                    assistant: res.text,
                     tools: toolResults,
-                });
+                };
+                if (assistant) {
+                    t.assistant = assistant
+                }
+                this.history.push(t);
             } else {
-                this.history.push({
-                    assistant: res.text,
+                const t: HistoryTurn = {
                     tools: toolResults,
-                });
+                };
+                if (assistant) {
+                    t.assistant = assistant
+                }
+                this.history.push(t);
             }
             if (options?.isToolsRouter && isToolCall) {
                 const fres: InferenceResult = {
@@ -257,6 +293,9 @@ class Agent {
                     toolCalls: res.toolCalls,
                 }
                 return fres
+            }
+            if (options?.onTurnEnd) {
+                options.onTurnEnd(this.history[this.history.length - 1])
             }
             return await this.runAgentWithTemplate(it + 1, prompt, params, options, tpl)
         } else {
@@ -282,6 +321,9 @@ class Agent {
                 }
                 turn.assistant = final;
                 this.history.push(turn)
+            }
+            if (options?.onTurnEnd) {
+                options.onTurnEnd(this.history[this.history.length - 1])
             }
             return res
         }

@@ -17,7 +17,7 @@ export default {
       main: true,
     }),
   ],
-  external: ["@agent-smith/brain",
+  external: [
     "@locallm/api"
   ]
 };
