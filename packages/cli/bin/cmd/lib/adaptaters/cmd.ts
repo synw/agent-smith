@@ -24,7 +24,7 @@ async function executeAdaptater(
     }
     let run: FeatureExecutor<any, any>;
     const url = pathToFileURL(path).href;
-    const jsa = await import(url);
+    const jsa = await import(/* @vite-ignore */ url);
     run = createJsAction(jsa.action);
     let res;
     try {

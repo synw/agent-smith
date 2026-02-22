@@ -21,6 +21,7 @@ const isChatMode = ref(false);
 const promptfilePath = ref("");
 const dataDirPath = ref("");
 const isStateReady = ref(false);
+const isReady = ref(false);
 
 const lastCmd = reactive<{ name: string, args: Array<string> }>({
     name: "",
@@ -45,12 +46,15 @@ async function init() {
     //const perf = usePerfTimer();
     await initState();
     //perf.measure("initState");
-    await initBackends();
+    if (!isReady.value) {
+        await initBackends();
+    }
     //perf.measure("initBackends");
     if (!backend.value) {
         runtimeDataError("No backend found, can not initialize agent")
         return
     }
+    isReady.value = true;
     //perf.final("init")
     //console.log("Agent", agent);
 }

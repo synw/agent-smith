@@ -12,7 +12,24 @@ import { extractBetweenTags, splitThinking } from "./utils/text.js";
 import { displayOptions, ioOptions, inferenceOptions, allOptions } from "./cmd/options.js";
 import { McpClient } from "./cmd/lib/mcp.js";
 import { readTask } from "./cmd/lib/tasks/read.js";
-import { FeatureType } from "./interfaces.js";
+import { FeatureType, TaskSettings } from "./interfaces.js";
+import { getConfigPath } from "./conf.js";
+import { readFeaturesType, readFilePaths } from "./db/read.js";
+import { readConf } from "./cmd/sys/read_conf.js";
+import { backend } from "./state/backends.js";
+import { getTaskSettings } from "./state/tasks.js";
+import { upsertTaskSettings } from "./db/write.js";
+
+const db = {
+    readFilePaths,
+    readFeaturesType,
+    getTaskSettings,
+    upsertTaskSettings,
+};
+
+const fs = {
+    openTaskSpec,
+}
 
 export {
     execute,
@@ -35,8 +52,13 @@ export {
     inferenceOptions,
     allOptions,
     isStateReady,
+    backend,
     McpClient,
     readTask,
     FeatureType,
-
+    getConfigPath,
+    readConf,
+    TaskSettings,
+    db,
+    fs,
 }

@@ -10,7 +10,8 @@ async function executeAgentCmd(
     const ca = parseCommandArgs(targs);
     const prompt = await getTaskPrompt(name, ca.args, ca.options);
     ca.options.isAgent = true;
-    return await executeTask(name, { prompt: prompt }, ca.options)
+    const res = await executeTask(name, { prompt: prompt }, ca.options)
+    return res
 }
 
 export {

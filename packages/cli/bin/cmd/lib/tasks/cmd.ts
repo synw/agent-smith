@@ -1,6 +1,6 @@
 import { TaskConf, TaskOutput } from "@agent-smith/task";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
-import { InferenceParams } from "@locallm/types";
+import { InferenceParams, type ToolCallSpec } from "@locallm/types";
 import { default as color, default as colors } from "ansi-colors";
 import { PromptTemplate, templates } from "modprompt";
 import ora from 'ora';
@@ -159,8 +159,15 @@ async function executeTask(
         return `${ts} ${color.bold(i.toString())} ${te}`
     };
     const perfTimer = usePerfTimer(false);
+    let abort = options?.abort ? options.abort as AbortController : new AbortController();
+    setInterval(() => {
+        //console.log("ABS", abort.signal.aborted);
+        if (abort.signal.aborted) {
+            agent.lm.abort();
+            abort = new AbortController()
+        }
+    }, 200);
     const processToken = (t: string) => {
-        //console.log("T", t);
         if (emittedTokens == 0) { perfTimer.start() }
         spinner.text = formatTokenCount(emittedTokens)
         if (!options?.verbose && !options?.debug) {
@@ -230,22 +237,21 @@ async function executeTask(
 
     //const spinnerInit = (name: string) => ora(`Executing the ${name} tool ...\n`);
     //let tcspinner: Ora;
-    const onToolCall = (tc: Record<string, any>) => {
+    const _onToolCall = (tc: Record<string, any>) => {
         //console.log("TC START");
         console.log("⚒️ ", color.bold(name), "=>", `${color.yellowBright(tc.name)}`, tc.arguments);
-        /*if (options?.verbose) {
-            tcspinner = spinnerInit(tc.name);
-            tcspinner.start();
-        }*/
-    }
-    const onToolCallEnd = (tr: any) => {
+    };
+    const onToolCall = options?.onToolCall as (tc: Record<string, any>) => void ?? _onToolCall;
+    const _onToolCallEnd = (tr: any) => {
         if (options?.debug) {
             console.log(tr)
         }
-        /*if (options?.verbose) {
-            tcspinner.stop();
-        }*/
     }
+    const onToolCallEnd = options?.onToolCallEnd as (tc: Record<string, any>) => void ?? _onToolCallEnd;
+    const onToolsTurnStart = options?.onToolsTurnStart ?? undefined;
+    const onToolsTurnEnd = options?.onToolsTurnEnd ?? undefined;
+    const onTurnEnd = options?.onTurnEnd ?? undefined;
+    const onAssistant = options?.onAssistant ?? undefined;
     //console.log("OOT", options?.onToken, "/", processToken);
     if (options?.onToken) {
         task.agent.lm.onToken = options.onToken;
@@ -265,7 +271,14 @@ async function executeTask(
         //debug: options?.debug ?? false,
         onToolCall: onToolCall,
         onToolCallEnd: onToolCallEnd,
+        onToolsTurnStart: onToolsTurnStart,
+        onToolsTurnEnd: onToolsTurnEnd,
+        onTurnEnd: onTurnEnd,
+        onAssistant: onAssistant,
         ...conf,
+    }
+    if (options?.history) {
+        agent.history = options.history;
     }
     const initialInferParams: InferenceParams = Object.assign({}, conf.inferParams);
     initialInferParams.model = tconf.model;
@@ -278,6 +291,7 @@ async function executeTask(
     try {
         out = await task.run({ prompt: payload.prompt, ...vars }, tconf);
     } catch (e: any) {
+        console.log("ERR CATCH", e);
         const errMsg = `${e}`;
         if (errMsg.includes("502 Bad Gateway")) {
             runtimeError("The server answered with a 502 Bad Gateway error. It might be down or misconfigured. Check your inference server.")
@@ -298,8 +312,13 @@ async function executeTask(
             runtimeError("The server is not responding. Check if your inference backend is running.")
             //@ts-ignore
             return
-        } else {
-
+        } else if (e instanceof DOMException && e.name === 'AbortError') {
+            if (options?.debug || options?.verbose) {
+                console.log("The request was canceled by the user");
+            }
+            return {} as TaskOutput
+        }
+        else {
             throw new Error(errMsg)
         }
     }
@@ -333,7 +352,7 @@ async function executeTask(
             options.tools = task.def.tools
         }
         if (task.def.shots) {
-            options.history = task.def.shots
+            options.history = options?.history ? [...options.history, ...task.def.shots] : task.def.shots;
         }
         if (task.def.template?.system) {
             options.system = task.def.template.system
@@ -374,7 +393,10 @@ async function executeTaskCmd(
     const ca = parseCommandArgs(targs);
     //console.log("ARGS", ca);
     const prompt = await getTaskPrompt(name, ca.args, ca.options);
-    return await executeTask(name, { prompt: prompt }, ca.options)
+    const tr = await executeTask(name, { prompt: prompt }, ca.options)
+    //console.log("TR", tr);
+    return tr
+
 }
 
 export {

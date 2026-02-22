@@ -30,7 +30,7 @@ async function executeAction(name: string, payload: any, options: Record<string,
         case "js":
             const url = pathToFileURL(path).href;
             //console.log("CR JSA", url);
-            const mjsa = await import(url);
+            const mjsa = await import(/* @vite-ignore */ url);
             run = createJsAction(mjsa.action);
             //console.log("END CR JSA")
             break;

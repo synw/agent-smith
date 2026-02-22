@@ -4,15 +4,16 @@ import { FeatureExtension } from '../../interfaces.js';
 import { ToolSpec, type ToolCallSpec } from '@locallm/types';
 import { readYmlFile } from '../sys/read_yml_file.js';
 import { confirm } from '@inquirer/prompts';
+import colors from "ansi-colors";
 
 async function confirmToolUsage(toolCall: ToolCallSpec) {
-    let args: string;
+    console.log("Tool call:", colors.bold(toolCall.name));
     if (toolCall?.arguments) {
-        args = `with arguments ${JSON.stringify(toolCall.arguments)}`
+        console.log("Arguments:", toolCall.arguments);
     } else {
-        args = "with no arguments"
+        console.log("No arguments")
     }
-    return await confirm({ message: `Execute tool ${toolCall.name} ${args}?` });
+    return await confirm({ message: `Execute tool ${toolCall.name}?` });
 }
 
 function _extractToolDoc(filePath: string, startComment: string, endComment: string): { found: boolean, doc: string } {

@@ -23,8 +23,16 @@ function initTaskSettings() {
     isTaskSettingsInitialized.value = true;
 }
 
+function getTaskSettings(force: boolean = false): Record<string, TaskSettings> {
+    if (!isTaskSettingsInitialized.value === true || force) {
+        initTaskSettings()
+    }
+    return tasksSettings;
+}
+
 export {
     tasksSettings,
-    initTaskSettings,
     isTaskSettingsInitialized,
+    initTaskSettings,
+    getTaskSettings
 }

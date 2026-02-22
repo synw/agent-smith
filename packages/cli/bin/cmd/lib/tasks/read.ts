@@ -3,7 +3,7 @@ import { Agent } from "@agent-smith/agent";
 import { ModelSpec, TaskConf, TaskDef } from "@agent-smith/task";
 import { NodeTask } from "@agent-smith/nodetask";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
-import { ToolSpec } from "@locallm/types";
+import { ToolSpec, type ToolCallSpec } from "@locallm/types";
 import { readTool } from "../../../db/read.js";
 import { executeAction } from "../actions/cmd.js";
 import { McpClient } from "../mcp.js";
@@ -173,12 +173,17 @@ async function readTask(
                 }
             }
             if (!autoRunTool) {
-                lmTool.canRun = confirmToolUsage
+                lmTool.canRun = options?.confirmToolUsage ?
+                    options.confirmToolUsage as (tool: ToolCallSpec) => Promise<boolean> :
+                    confirmToolUsage;
             }
             taskSpec.tools.push(lmTool)
         }
         delete taskSpec.toolsList
     };
+    if (options?.chatMode) {
+        taskSpec.prompt = "{prompt}";
+    }
     //console.log("TASK SPEC:", JSON.stringify(taskSpec, null, "  "));
     const task = new NodeTask(agent, taskSpec);
     //task.addTools(taskSpec.tools);

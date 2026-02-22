@@ -324,6 +324,7 @@ function upsertTaskSettings(taskName: string, settings: TaskSettings): boolean {
             qvalues.push(settings.backend)
         }
         const q = `UPDATE tasksettings SET ${qparams.join(", ")} WHERE name = ?`;
+        //console.log("Q", q);
         const stmt = db.prepare(q);
         const updateResult = stmt.run(...qvalues, taskName);
         return updateResult.changes > 0;

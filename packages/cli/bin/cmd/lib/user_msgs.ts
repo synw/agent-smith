@@ -3,7 +3,7 @@ import chalk from 'chalk';
 
 function runtimeError(...msg: string[]) {
     console.warn("💥", chalk.dim("Runtime error:"), ...msg);
-    exit(1)
+    //exit(1)
 }
 
 function runtimeWarning(...msg: string[]) {
@@ -13,7 +13,7 @@ function runtimeWarning(...msg: string[]) {
 
 function runtimeDataError(...msg: string[]) {
     console.warn("❌", chalk.dim("Runtime data error:"), ...msg);
-    exit(1)
+    //exit(1)
 }
 
 function runtimeInfo(...msg: string[]) {

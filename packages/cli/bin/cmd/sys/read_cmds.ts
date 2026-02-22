@@ -7,7 +7,7 @@ async function readCmd(name: string, cmdPath: string): Promise<UserCmdDef | null
     const url = pathToFileURL(cmdPath).href;
     let _cmd: UserCmdDef;
     try {
-        const mod = await import(url);
+        const mod = await import(/* @vite-ignore */ url);
         _cmd = mod.cmd;
     }
     catch (e) {
@@ -21,7 +21,7 @@ async function readCmd(name: string, cmdPath: string): Promise<UserCmdDef | null
 async function readUserCmd(name: string, cmdPath: string): Promise<{ found: boolean, userCmd: UserCmdDef }> {
     const url = pathToFileURL(cmdPath).href;
     try {
-        const mod = await import(url);
+        const mod = await import(/* @vite-ignore */ url);
         const cmdMod = mod.cmd;
         const uc: UserCmdDef = {
             name: cmdMod.name,

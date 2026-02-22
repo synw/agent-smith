@@ -10,6 +10,7 @@ import { initBaseCommands } from "./clicmds/base.js";
 import { initUserCmds } from "./clicmds/cmds.js";
 import type { McpClient } from "../main.js";
 import type { Agent } from "@agent-smith/agent";
+import { exit } from "node:process";
 //import { usePerfTimer } from "../main.js";
 
 const program = new Command();
@@ -109,6 +110,7 @@ async function parseCmd(program: Command) {
     program.name('Agent Smith terminal client');
     program.description('Terminal agents toolkit');
     await program.parseAsync();
+    exit(0)
     /*if (isChatMode.value) {
         await chat(program)
     }*/

@@ -125,4 +125,5 @@ export {
     confDir,
     dbPath,
     processConfPath,
+    getConfigPath,
 }
