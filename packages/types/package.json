@@ -1,0 +1,28 @@
+{
+  "name": "@agent-smith/types",
+  "version": "0.0.1",
+  "description": "Agent Smith Nodejs server types",
+  "repository": "https://github.com/synw/agent-smith",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rm -rf dist && tsc",
+    "start": "node dist/index.js",
+    "server": "node --loader ts-node/esm src/index.ts",
+    "devserver": "node  --loader ts-node/esm --watch src/index.ts"
+  },
+  "type": "module",
+  "main": "./dist/main.js",
+  "types": "./dist/main.d.ts",
+  "files": [
+    "dist"
+  ],
+  "devDependencies": {
+    "@types/node": "^25.2.3",
+    "typescript": "^5.9.3"
+  },
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "license": "MIT"
+}
