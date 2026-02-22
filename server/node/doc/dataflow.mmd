@@ -1,0 +1,19 @@
+sequenceDiagram
+    autonumber
+    participant Client
+    participant Server
+    participant InferenceBackend
+
+    Note over Client, InferenceBackend: Request Flow
+    Client->>Server: WebSocket Message (Request)
+    Server->>InferenceBackend: HTTP Request
+    InferenceBackend-->>Server: SSE Stream (Tokens & Tool Calls)
+    Server-->>Client: WebSocket Message (Stream Relay)
+
+    Note over Client, InferenceBackend: Cancel Flow
+    Client->>Server: WebSocket Message (Cancel Request)
+    Server->>InferenceBackend: HTTP Request (Cancel)
+
+    Note over Client, InferenceBackend: Tool Execution Flow
+    Client->>Server: WebSocket Message (Tool Execution Confirmation)
+    Server-->>Client: WebSocket Message (Tool Execution Result)
