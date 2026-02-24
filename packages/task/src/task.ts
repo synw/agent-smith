@@ -134,7 +134,10 @@ class Task {
             // cut debug here. TODO: debug log levels
             options.debug = false
         }
-        const isRoutingAgent = this.def?.description?.includes("routing agent") ?? false;
+        let isRoutingAgent = false;
+        if (this.def?.description) {
+            isRoutingAgent = this.def.description.includes("routing agent")
+        }
         if (isRoutingAgent) {
             options.isToolsRouter = true
         }
