@@ -195,7 +195,11 @@ class Agent {
                 options.onAssistant(assistant)
             }
         }
-        //console.log("\nProcessed answer", isToolCall, toolsCall, error);
+        /*console.log("--------------- RAW -------------------");
+        console.log(res.text);
+        console.log("---------------------------------------");
+        console.log("\nProcessed answer", "assistant", !assistant === undefined, "err:", error);
+        console.log("--------------- END -------------------");*/
         //const toolsUsed: Record<string, ToolTurn> = {};
         const toolResults = new Array<ToolTurn>();
         if (isToolCall) {
@@ -266,6 +270,13 @@ class Agent {
             if (options?.onToolsTurnEnd) {
                 options.onToolsTurnEnd(toolResults);
             }
+            let thinking = "";
+            let final = "";
+            if (tpl?.tags?.think) {
+                const { think, finalAnswer } = splitThinking(res.text, tpl.tags.think.start, tpl.tags.think.end);
+                thinking = think;
+                final = finalAnswer;
+            }
             if (it == 1) {
                 //console.log("PROMPT HIST", prompt);
                 const t: HistoryTurn = {
@@ -273,7 +284,10 @@ class Agent {
                     tools: toolResults,
                 };
                 if (assistant) {
-                    t.assistant = assistant
+                    t.assistant = final
+                }
+                if (thinking.length > 0) {
+                    t.think = thinking
                 }
                 this.history.push(t);
             } else {
@@ -281,7 +295,10 @@ class Agent {
                     tools: toolResults,
                 };
                 if (assistant) {
-                    t.assistant = assistant
+                    t.assistant = final
+                }
+                if (thinking.length > 0) {
+                    t.think = thinking
                 }
                 this.history.push(t);
             }
