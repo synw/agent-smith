@@ -110,7 +110,8 @@ async function parseCmd(program: Command) {
     program.name('Agent Smith terminal client');
     program.description('Terminal agents toolkit');
     await program.parseAsync();
-    exit(0)
+    //console.log("CMD END");
+    //exit(0)
     /*if (isChatMode.value) {
         await chat(program)
     }*/

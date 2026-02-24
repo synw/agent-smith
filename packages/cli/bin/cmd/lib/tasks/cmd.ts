@@ -160,7 +160,7 @@ async function executeTask(
     };
     const perfTimer = usePerfTimer(false);
     let abort = options?.abort ? options.abort as AbortController : new AbortController();
-    setInterval(() => {
+    const abortTicker = setInterval(() => {
         //console.log("ABS", abort.signal.aborted);
         if (abort.signal.aborted) {
             agent.lm.abort();
@@ -291,7 +291,7 @@ async function executeTask(
     try {
         out = await task.run({ prompt: payload.prompt, ...vars }, tconf);
     } catch (e: any) {
-        console.log("ERR CATCH", e);
+        //console.log("ERR CATCH", e);
         const errMsg = `${e}`;
         if (errMsg.includes("502 Bad Gateway")) {
             runtimeError("The server answered with a 502 Bad Gateway error. It might be down or misconfigured. Check your inference server.")
@@ -322,6 +322,7 @@ async function executeTask(
             throw new Error(errMsg)
         }
     }
+    clearInterval(abortTicker);
     //console.log("END TASK", out);
     if (!options?.isToolCall) {
         if (!out.answer.text.endsWith("\n")) {

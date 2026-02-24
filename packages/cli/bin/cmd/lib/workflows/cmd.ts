@@ -118,6 +118,7 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
                 } catch (e) {
                     throw new Error(`workflow action ${i + 1}: ${e}`)
                 }
+                //console.log("END ACTION", step.name)
                 break;
             case "adaptater":
                 try {
@@ -161,7 +162,12 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
                         throw new Error(`Command ${step.name} not found`)
                     }
                     const url = pathToFileURL(path).href;
-                    const jsa = await import(/* @vite-ignore */ url);
+                    let jsa: any;
+                    try {
+                        jsa = await import(/* @vite-ignore */ url);
+                    } catch (e) {
+                        throw new Error(`cmd import error ${e}`)
+                    }
                     if (!jsa?.runCmd) {
                         runtimeError(`workflow ${wname}: can not import the runCmd function from step ${i} for command ${step.name}: please add a runCmd function export`)
                         return
@@ -197,6 +203,7 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
         //console.log("WFR", taskRes)
         ++i
     }
+    //console.log("WF RES")
     return taskRes
 }
 

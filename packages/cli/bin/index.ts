@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { argv } from 'process';
+import { argv, exit } from 'process';
 import { query } from "./cli.js";
 import { resetDbCmd } from './cmd/clicmds/cmds.js';
 import { updateConfCmd } from './cmd/clicmds/updateconf.js';
@@ -54,8 +54,10 @@ async function main() {
             break;
         default:
             await parseCmd(program);
+            //console.log("PARSE CMD END")
             break;
     }
+    //console.log("END");
 }
 
 (async () => {
