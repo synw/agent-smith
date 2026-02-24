@@ -9,7 +9,7 @@ import websockify from 'koa-websocket';
 import route from 'koa-route';
 import serve from "koa-static";
 import { executeTask, executeWorkflow, init } from '@agent-smith/cli';
-import type { ClientMsg } from '@agent-smith/types';
+import type { WsClientMsg, WsRawServerMsg } from '@agent-smith/types';
 import type { Context } from "node:vm";
 import type { HistoryTurn } from "@locallm/types";
 /* import { argv } from 'process';
@@ -63,7 +63,7 @@ function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
     app.use(serve(staticDir));
   }
   const router = useRouter(routes);
-  const sep = "<|xmsgtype|>";
+  const sendTokensInterval = 100;
 
   const confirmToolCalls: Record<string, (value: boolean) => void> = {};
 
@@ -71,7 +71,7 @@ function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
     //ctx.websocket.send('Hello World');
     let abort = new AbortController();
     ctx.websocket.on('message', async function(message: string) {
-      const msg = JSON.parse(message) as ClientMsg;
+      const msg = JSON.parse(message) as WsClientMsg;
       if (!msg?.options) {
         msg.options = {}
       }
@@ -86,7 +86,11 @@ function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
           return
         } else if (msg.command == "confirmtool") {
           if (!(msg.payload.id in confirmToolCalls)) {
-            ctx.websocket.send(`error${sep}can not confirm tool call: unknown tool id ${msg.payload.id}`);
+            const rsm: WsRawServerMsg = {
+              type: "error",
+              msg: `can not confirm tool call: unknown tool id ${msg.payload.id}`,
+            }
+            ctx.websocket.send(JSON.stringify(rsm));
             return
           }
           if (msg.payload.confirm == true) {
@@ -101,24 +105,33 @@ function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
         }
       } else {
         if (!msg?.payload) {
-          ctx.websocket.send(`error${sep}provide a payload`);
+          const rsm: WsRawServerMsg = {
+            type: "error",
+            msg: "provide a payload",
+          }
+          ctx.websocket.send(JSON.stringify(rsm));
           return
         }
         await init();
         if (msg.feature == "task") {
           let buf = "";
           msg.options.onToken = (t: string) => {
-            //process.stdout.write(t);
-            buf += t
+            buf += t;
+            process.stdout.write(t);
           };
           try {
             const it = setInterval(() => {
-              const m = `token${sep}${buf}`;
-              ctx.websocket.send(m);
+              const rsm: WsRawServerMsg = {
+                type: "token",
+                msg: buf,
+              }
+              ctx.websocket.send(JSON.stringify(rsm));
               buf = "";
-            }, 100);
+            }, sendTokensInterval);
             const res = await executeTask(msg.command, msg.payload, msg.options);
-            clearInterval(it);
+            setTimeout(() => {
+              clearInterval(it);
+            }, sendTokensInterval);
             //console.dir(res, { depth: 3 });
             let r: HistoryTurn;
             if (res.template.id == "none") {
@@ -126,34 +139,57 @@ function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
             } else {
               r = res.template.history.pop() as HistoryTurn
             }
-            ctx.websocket.send(`finalresult${sep}` + JSON.stringify(r))
+            const rsm: WsRawServerMsg = {
+              type: "finalresult",
+              msg: JSON.stringify(r),
+            }
+            ctx.websocket.send(JSON.stringify(rsm));
           } catch (e) {
-            ctx.websocket.send(`error${sep}${e}`);
+            const rsm: WsRawServerMsg = {
+              type: "error",
+              msg: `${e}`,
+            }
+            ctx.websocket.send(JSON.stringify(rsm));
           }
         } else if (msg.feature == "agent") {
           msg.options.onToolsTurnStart = (tcs: Record<string, any>) => {
-            const m = `toolsturnstart${sep}` + JSON.stringify(tcs);
-            ctx.websocket.send(m);
+            const rsm: WsRawServerMsg = {
+              type: "finalresult",
+              msg: JSON.stringify(tcs),
+            }
+            ctx.websocket.send(JSON.stringify(rsm));
           };
           msg.options.onToolsTurnEnd = (tr: Record<string, any>) => {
-            const m = `toolsturnend${sep}` + JSON.stringify(tr);
-            ctx.websocket.send(m);
+            const rsm: WsRawServerMsg = {
+              type: "toolsturnend",
+              msg: JSON.stringify(tr),
+            }
+            ctx.websocket.send(JSON.stringify(rsm));
           };
           msg.options.onTurnEnd = (ht: Record<string, any>) => {
-            const m = `turnend${sep}` + JSON.stringify(ht);
-            ctx.websocket.send(m);
+            const rsm: WsRawServerMsg = {
+              type: "turnend",
+              msg: JSON.stringify(ht),
+            }
+            ctx.websocket.send(JSON.stringify(rsm));
           };
           msg.options.onAssistant = (txt: string) => {
-            const m = `assistant${sep}` + txt;
-            ctx.websocket.send(m);
+            const rsm: WsRawServerMsg = {
+              type: "assistant",
+              msg: txt,
+            }
+            ctx.websocket.send(JSON.stringify(rsm));
           };
           msg.options.onToolCall = (tc: Record<string, any>) => {
             if (!tc?.id) {
               tc.id = crypto.randomUUID()
             }
-            const m = `toolcall${sep}` + JSON.stringify(tc);
-            ctx.websocket.send(m);
-            console.log("⚒️ ", color.bold(msg.command), "=>", `${color.yellowBright(tc.name)}`, tc.arguments);
+            const rsm: WsRawServerMsg = {
+              type: "toolcall",
+              msg: JSON.stringify(tc),
+            }
+            ctx.websocket.send(JSON.stringify(rsm));
+            console.log("\n⚒️ ", color.bold(msg.command), "=>", `${color.yellowBright(tc.name)}`, tc.arguments);
           };
           msg.options.onToolCallEnd = (id: string, tr: any) => {
             let toolResData: any;
@@ -165,19 +201,25 @@ function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
                 toolResData = JSON.stringify(tr)
               }
             } else {
-              toolResData = tr;
+              toolResData = tr.toString();
             }
-            const m = `toolcallend${sep}${id}<|xtool_call_id|>` + toolResData;
-            ctx.websocket.send(m);
+            const rsm: WsRawServerMsg = {
+              type: "toolcallend",
+              msg: `${id}<|xtool_call_id|>` + toolResData,
+            }
+            ctx.websocket.send(JSON.stringify(rsm));
           }
           msg.options.confirmToolUsage = async (tc: Record<string, any>) => {
             if (!tc?.id) {
               tc.id = crypto.randomUUID()
             }
-            const m = `toolcallconfirm${sep}` + JSON.stringify(tc);
-            const { promise, resolve, reject } = createManualPromise<boolean>();
+            const rsm: WsRawServerMsg = {
+              type: "toolcallconfirm",
+              msg: JSON.stringify(tc),
+            }
+            const { promise, resolve } = createManualPromise<boolean>();
             confirmToolCalls[tc.id] = resolve;
-            ctx.websocket.send(m);
+            ctx.websocket.send(JSON.stringify(rsm));
             const res = await promise;
             return res
           }
@@ -185,28 +227,50 @@ function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
           try {
             let buf = "";
             msg.options.onToken = (t: string) => {
+              buf += t;
               process.stdout.write(t);
-              buf += t
             };
             const it = setInterval(() => {
-              const m = `token${sep}${buf}`;
-              ctx.websocket.send(m);
+              if (buf == "") { return };
+              const rsm: WsRawServerMsg = {
+                type: "token",
+                msg: buf,
+              }
+              ctx.websocket.send(JSON.stringify(rsm));
               buf = "";
-            }, 150);
+            }, sendTokensInterval);
             const res = await executeTask(msg.command, msg.payload, msg.options);
-            clearInterval(it);
+            setTimeout(() => {
+              clearInterval(it);
+            }, sendTokensInterval);
             const ht = JSON.stringify(res.template.history.pop());
             //console.log("FINAL MSG", ht)
-            ctx.websocket.send(`finalresult${sep}` + ht)
+            const rsm: WsRawServerMsg = {
+              type: "finalresult",
+              msg: ht,
+            }
+            ctx.websocket.send(JSON.stringify(rsm));
           } catch (e) {
-            ctx.websocket.send(`error${sep}${e}`);
+            const rsm: WsRawServerMsg = {
+              type: "error",
+              msg: `${e}`
+            }
+            ctx.websocket.send(JSON.stringify(rsm));
           }
         } else if (msg.feature == "workflow") {
           try {
             const res = await executeWorkflow(msg.command, msg.payload, msg.options);
-            ctx.websocket.send(`finalresult${sep}${res}`)
+            const rsm: WsRawServerMsg = {
+              type: "finalresult",
+              msg: res,
+            }
+            ctx.websocket.send(JSON.stringify(rsm));
           } catch (e) {
-            ctx.websocket.send(`error${sep}${e}`);
+            const rsm: WsRawServerMsg = {
+              type: "error",
+              msg: `${e}`
+            }
+            ctx.websocket.send(JSON.stringify(rsm));
           }
         }
         /*else if (msg.type == "cmd") {
@@ -218,7 +282,11 @@ function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
           await executeCmd(msg.name, msg.payload, msg.options);
         }*/
         else {
-          ctx.websocket.send("command type " + msg.feature + " not supported");
+          const rsm: WsRawServerMsg = {
+            type: "error",
+            msg: "command type " + msg.feature + " not supported"
+          }
+          ctx.websocket.send(JSON.stringify(rsm));
         }
       }
       abort = new AbortController();

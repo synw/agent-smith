@@ -1,11 +1,19 @@
 import { backend } from '@agent-smith/cli';
 import type Router from '@koa/router';
+import type { ModelConf } from '@locallm/types';
 import type { Next, Context } from 'koa';
 
 function getModelsCmd(r: Router) {
     r.get('/models', async (ctx: Context, next: Next) => {
-        const mi = await backend.value?.modelsInfo();
-        console.log("MODELS", mi);
+        let mi: ModelConf<Record<string, any>>[] | undefined;
+        try {
+            mi = await backend.value?.modelsInfo();
+        } catch (e) {
+            ctx.body = "error reading the models";
+            ctx.status = 502;
+            await next();
+            return
+        }
         const ms: Record<string, { status: string, ctx: number }> = {};
         mi?.forEach(m => {
             let prevArg = "";
