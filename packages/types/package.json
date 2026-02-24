@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/types",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Agent Smith Nodejs server types",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {

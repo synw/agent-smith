@@ -1,11 +1,3 @@
-interface ClientMsg {
-    command: string;
-    type: ClientMsgType;
-    payload?: any;
-    feature?: FeatureType;
-    options?: Record<string, any>;
-}
-
 /**
  * Represents a tool call specification.
  *
@@ -28,15 +20,45 @@ interface ToolCallSpec {
     };
 }
 
-type ClientMsgType = "command" | "system";
-type ServerMsgType = "token" | "system" | "error";
+interface WsClientMsg {
+    command: string;
+    type: WsClientMsgType;
+    feature?: FeatureType;
+    payload?: any;
+    options?: Record<string, any>;
+}
+
+interface WsRawClientMsg {
+    type: WsClientMsgType;
+    msg: string;
+}
+
+interface WsRawServerMsg {
+    type: WsServerMsgType;
+    msg: string;
+}
+
+type WsServerMsgType =
+    | 'error'
+    | 'token'
+    | 'turnend'
+    | 'assistant'
+    | 'toolsturnstart'
+    | 'toolsturnend'
+    | 'toolcall'
+    | 'toolcallend'
+    | 'toolcallconfirm'
+    | 'finalresult';
+type WsClientMsgType = "command" | "system";
 
 type FeatureType = "task" | "agent" | "action" | "cmd" | "workflow" | "adaptater";
 
 export {
-    ClientMsg,
-    ClientMsgType,
-    ServerMsgType,
+    WsClientMsg,
+    WsClientMsgType,
+    WsServerMsgType,
     FeatureType,
     ToolCallSpec,
+    WsRawClientMsg,
+    WsRawServerMsg,
 }
