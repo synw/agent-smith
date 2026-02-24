@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/wscli",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "An websockets client for the Agent Smith server",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {
@@ -9,7 +9,7 @@
     "docs": "typedoc --entryPointStrategy expand"
   },
   "devDependencies": {
-    "@agent-smith/types": "^0.0.1",
+    "@agent-smith/types": "^0.0.2",
     "@locallm/types": "^0.7.0",
     "@rollup/plugin-node-resolve": "^16.0.0",
     "@rollup/plugin-terser": "^0.4.4",

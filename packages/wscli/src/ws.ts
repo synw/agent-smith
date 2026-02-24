@@ -1,13 +1,13 @@
 import type { ServerParams } from "./interfaces.js";
-import type { ClientMsg, FeatureType, ToolCallSpec } from "@agent-smith/types";
+import type { WsClientMsg, FeatureType, ToolCallSpec, WsRawServerMsg } from "@agent-smith/types";
 import { HistoryTurn } from "@locallm/types";
 
 const useWsServer = (params: ServerParams) => {
+    //console.log("WS PARAMS", params);
     let url = "ws://localhost:5184/ws";
-    if (params.url) {
+    if (params?.url) {
         url = params.url;
     }
-    const sep = "<|xmsgtype|>";
     const ws = new WebSocket(url);
     let onToken = params.onToken;
     let onToolCall = params.onToolCall;
@@ -17,7 +17,7 @@ const useWsServer = (params: ServerParams) => {
     let onTurnEnd = params.onTurnEnd;
     let onAssistant = params.onAssistant;
     let onError = params.onError;
-    let confirmToolUsage = params.confirmToolUsage;
+    let onConfirmToolUsage = params.onConfirmToolUsage;
 
     ws.onopen = function(event) {
         console.log('Connected to WebSocket server');
@@ -25,10 +25,18 @@ const useWsServer = (params: ServerParams) => {
 
     ws.onmessage = function(event: MessageEvent) {
         //console.log('Received message:', typeof event.data, event.data);
-        const s = event.data.split(sep);
+        let data: WsRawServerMsg;
+        try {
+            data = JSON.parse(event.data) as WsRawServerMsg;
+        } catch (e) {
+            throw new Error(`can not parse data: ${e}\nMSG: ${event.data}`)
+        }
+        const type = data.type;
+        const msg = data.msg;
+        /*const s = event.data.split(sep);
         const type = s[0];
         const msg = s[1];
-        /*if (type != "token") {
+        if (type != "token") {
             console.log(type, msg)
         }*/
         switch (type) {
@@ -40,8 +48,7 @@ const useWsServer = (params: ServerParams) => {
                 }
                 break;
             case "token":
-                const m = params?.format == "html" ? msg.replace("\n", "<br />") : msg;
-                onToken(m);
+                onToken(msg);
                 break
             case "turnend":
                 if (onTurnEnd) {
@@ -77,10 +84,10 @@ const useWsServer = (params: ServerParams) => {
                 }
                 break
             case "toolcallconfirm":
-                if (confirmToolUsage) {
+                if (onConfirmToolUsage) {
                     const tm = JSON.parse(msg) as ToolCallSpec;
-                    confirmToolUsage(tm).then(c => {
-                        const m: ClientMsg = {
+                    onConfirmToolUsage(tm).then(c => {
+                        const m: WsClientMsg = {
                             type: "system",
                             command: "confirmtool",
                             payload: { confirm: c, id: tm.id }
@@ -90,21 +97,10 @@ const useWsServer = (params: ServerParams) => {
                 }
                 break
             case "finalresult":
-                console.log("FINAL RES", msg);
-                const history = JSON.parse(msg.replaceAll("\`", "`")) as HistoryTurn;
+                //console.log("FINAL RES", msg);
+                const history = JSON.parse(msg) as HistoryTurn;
                 //console.log("HIST", history);
                 if (params?.onFinalResult) {
-                    if (params.format == "html") {
-                        if (history?.user) {
-                            history.user = history.user.replace("\n", "<br />");
-                        }
-                        if (history?.assistant) {
-                            history.assistant = history.assistant.replace("\n", "<br />");
-                        }
-                        if (history?.think) {
-                            history.think = history.think.replace("\n", "<br />");
-                        }
-                    }
                     params.onFinalResult(history)
                 }
                 break
@@ -130,7 +126,7 @@ const useWsServer = (params: ServerParams) => {
     }
 
     const _executeFeature = async (name: string, feat: FeatureType, payload: any, options: Record<string, any> = {}) => {
-        const cmd: ClientMsg = {
+        const cmd: WsClientMsg = {
             type: "command",
             command: name,
             feature: feat,
@@ -153,7 +149,7 @@ const useWsServer = (params: ServerParams) => {
     ) => _executeFeature(name, "agent", payload, options);
 
     const cancel = async () => {
-        const cmd: ClientMsg = {
+        const cmd: WsClientMsg = {
             type: "system",
             command: "stop",
         };
@@ -169,7 +165,7 @@ const useWsServer = (params: ServerParams) => {
         onToolCall,
         onToolCallEnd,
         onError,
-        confirmToolUsage,
+        onConfirmToolUsage,
     }
 }
 

@@ -11,10 +11,10 @@ interface ServerParams {
     onFinalResult?: (hist: HistoryTurn) => void;
     onTurnEnd?: (ht: HistoryTurn) => void;
     onAssistant?: (txt: string) => void;
-    confirmToolUsage?: (tool: ToolCallSpec) => Promise<boolean>;
+    onConfirmToolUsage?: (tool: ToolCallSpec) => Promise<boolean>;
+    onInferenceResult?: (ht: HistoryTurn) => void;
     url?: string;
     isVerbose?: boolean;
-    format?: FormatType,
 }
 
 interface StreamedMessage {
@@ -25,10 +25,8 @@ interface StreamedMessage {
 }
 
 type MsgType = "token" | "system" | "error";
-type FormatType = "text" | "html";
 
 export {
     ServerParams,
     StreamedMessage,
-    FormatType,
 }
