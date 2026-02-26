@@ -1,3 +1,37 @@
+import { LmProviderType } from "@locallm/types";
+
+interface ConfInferenceBackend {
+    type: LmProviderType;
+    url: string;
+    apiKey?: string;
+}
+
+interface BackendEntries {
+    [key: string]: ConfInferenceBackend | string | Array<"llamacpp" | "koboldcpp" | "ollama">;
+}
+
+interface TaskSettings {
+    model?: string;
+    template?: string;
+    ctx?: number;
+    max_tokens?: number;
+    top_k?: number;
+    top_p?: number;
+    min_p?: number;
+    temperature?: number;
+    repeat_penalty?: number;
+    backend?: string;
+}
+
+interface ConfigFile {
+    promptfile?: string;
+    datadir?: string;
+    features?: Array<string>;
+    plugins?: Array<string>;
+    backends?: BackendEntries;
+    tasks?: Record<string, TaskSettings>;
+}
+
 /**
  * Represents a tool call specification.
  *
@@ -38,8 +72,7 @@ interface WsRawServerMsg {
     msg: string;
 }
 
-type WsServerMsgType =
-    | 'error'
+type WsServerMsgType = 'error'
     | 'token'
     | 'turnend'
     | 'assistant'
@@ -48,12 +81,17 @@ type WsServerMsgType =
     | 'toolcall'
     | 'toolcallend'
     | 'toolcallconfirm'
-    | 'finalresult';
+    | 'finalresult'
+    | "think";
 type WsClientMsgType = "command" | "system";
 
 type FeatureType = "task" | "agent" | "action" | "cmd" | "workflow" | "adaptater";
 
 export {
+    ConfigFile,
+    TaskSettings,
+    BackendEntries,
+    ConfInferenceBackend,
     WsClientMsg,
     WsClientMsgType,
     WsServerMsgType,

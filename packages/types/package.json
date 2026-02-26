@@ -1,14 +1,11 @@
 {
   "name": "@agent-smith/types",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Agent Smith Nodejs server types",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rm -rf dist && tsc",
-    "start": "node dist/index.js",
-    "server": "node --loader ts-node/esm src/index.ts",
-    "devserver": "node  --loader ts-node/esm --watch src/index.ts"
+    "build": "rm -rf dist && tsc"
   },
   "type": "module",
   "main": "./dist/main.js",
@@ -17,6 +14,7 @@
     "dist"
   ],
   "devDependencies": {
+    "@locallm/types": "^0.7.0",
     "@types/node": "^25.2.3",
     "typescript": "^5.9.3"
   },
