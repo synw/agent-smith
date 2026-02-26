@@ -69,6 +69,9 @@ class Task {
         if (conf?.onAssistant) {
             options.onAssistant = conf.onAssistant
         }
+        if (conf?.onThink) {
+            options.onThink = conf.onThink
+        }
         let hasTools = false;
         // add task tools to the agent
         if (this.def?.tools) {

@@ -45,6 +45,7 @@ interface TaskConf {
     onToolsTurnEnd?: (tr: Array<ToolTurn>) => void;
     onTurnEnd?: (ht: HistoryTurn) => void;
     onAssistant?: (txt: string) => void;
+    onThink?: (txt: string) => void;
 }
 
 /**
