@@ -4,16 +4,25 @@ import { TemplateForModel } from "./tfminterfaces.js";
 const useTemplateForModel = (): TemplateForModel => {
     const list = () => Object.keys(templates);
 
-    const guess = (model: string): string => {
+    const guess = (model: string, tools: boolean = false): string => {
         const _model = model.toLowerCase();
         switch (true) {
             case _model.includes("deephermes"):
                 return "llama3"
-            case _model.includes("hermes") || _model.includes("dolphin") || _model.includes("qwen"):
+            case _model.includes("hermes") || _model.includes("dolphin"):
                 return "chatml";
+            case _model.includes("qwen"):
+                let n = "chatml";
+                if (tools) {
+                    n = "chatml-tools";
+                    if (_model.includes("coder") || _model.includes("next") || _model.includes("3.5")) {
+                        n = "chatml-xmltools";
+                    }
+                }
+                return n
             case _model.includes("deepseek"):
                 return "deepseek3";
-            case _model.includes("mistral") || _model.includes("mixtral"):
+            case _model.includes("mistral") || _model.includes("mixtral") || _model.includes("ministral"):
                 return "mistral-system";
             case _model.includes("codestral"):
                 return "codestral";
@@ -42,9 +51,14 @@ const useTemplateForModel = (): TemplateForModel => {
             case _model.includes("minimax"):
                 return "minimax";
             case _model.includes("glm"):
+                if (tools) {
+                    return "glm-tools"
+                }
                 return "glm";
             case (_model.includes("gpt") && _model.includes("oss")):
                 return "gptoss";
+            case _model.includes("aescoder"):
+                return "chatml";
             default:
                 return "none";
         }

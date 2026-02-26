@@ -10,7 +10,7 @@
  */
 interface TemplateForModel {
     list: () => string[];
-    guess: (model: string) => string;
+    guess: (model: string, tools?: boolean) => string;
 }
 
 export { TemplateForModel }

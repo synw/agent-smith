@@ -14,8 +14,7 @@
     "removeComments": false,
     "strictFunctionTypes": true,
     "types": [
-      "node",
-      "jest"
+      "node"
     ],
     "lib": [
       "ES2020",
@@ -41,14 +40,5 @@
     "node_modules",
     "dist",
     "test"
-  ],
-  "typedocOptions": {
-    "name": "Agent Smith documentation",
-    "readme": "none",
-    "entryPoints": [
-      "src/interfaces.ts",
-      "src/main.ts",
-    ],
-    "out": "docsite/public/apidoc/auto",
-  }
+  ]
 }
