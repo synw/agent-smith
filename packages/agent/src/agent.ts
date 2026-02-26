@@ -191,8 +191,39 @@ class Agent {
             throw new Error(`error processing model answer:\n, ${error}`);
         }
         if (assistant) {
-            if (options?.onAssistant) {
-                options.onAssistant(assistant)
+            /*console.log("--------------- ASSISTANT -------------------");
+            console.log(assistant);
+            console.log("--------------- END ASSISTANT -----------------");*/
+            if (tpl.tags?.think?.start) {
+                let t = res.text;
+                if (toolsCall.length > 0) {
+                    if (tpl?.tags?.toolCall?.start) {
+                        t = res.text.split(tpl.tags.toolCall.start)[0].trim()
+                    } else {
+                        console.warn("Model called tools but not tool call tags found in template")
+                    }
+                }
+                const { think, finalAnswer } = splitThinking(t, tpl.tags.think.start, tpl.tags.think.end);
+                /*console.log("=> THINK:", think);
+                console.log("=> FA:", finalAnswer);
+                console.log("=> TC:", isToolCall);
+                console.log("=> TCS:", toolsCall);*/
+                if (think.length > 0) {
+                    //console.log("AGENT ON THINK", think);
+                    if (options?.onThink) {
+                        options.onThink(think)
+                    }
+                }
+                if (finalAnswer.length > 0) {
+                    //console.log("AGENT ON ASSISTANT FA", finalAnswer);
+                    if (options?.onAssistant) {
+                        options.onAssistant(finalAnswer)
+                    }
+                }
+            } else {
+                if (options?.onAssistant) {
+                    options.onAssistant(assistant)
+                }
             }
         }
         /*console.log("--------------- RAW -------------------");

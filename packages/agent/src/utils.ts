@@ -33,7 +33,7 @@ function splitThinking(text: string, startTag: string, endTag: string): { think:
     let answer = "";
     const st = text.split(endTag);
     if (st.length > 1) {
-        think = extractBetweenTags(text, startTag, endTag);
+        think = extractBetweenTags(text, startTag, endTag).trim();
         answer = st[1].trim()
     } else {
         answer = text
