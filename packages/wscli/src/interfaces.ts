@@ -11,6 +11,7 @@ interface ServerParams {
     onFinalResult?: (hist: HistoryTurn) => void;
     onTurnEnd?: (ht: HistoryTurn) => void;
     onAssistant?: (txt: string) => void;
+    onThink?: (txt: string) => void;
     onConfirmToolUsage?: (tool: ToolCallSpec) => Promise<boolean>;
     onInferenceResult?: (ht: HistoryTurn) => void;
     url?: string;

@@ -18,6 +18,7 @@ const useWsServer = (params: ServerParams) => {
     let onAssistant = params.onAssistant;
     let onError = params.onError;
     let onConfirmToolUsage = params.onConfirmToolUsage;
+    let onThink = params.onThink;
 
     ws.onopen = function(event) {
         console.log('Connected to WebSocket server');
@@ -60,6 +61,11 @@ const useWsServer = (params: ServerParams) => {
                     onAssistant(msg)
                 }
                 break
+            case "think":
+                if (onThink) {
+                    onThink(msg)
+                }
+                break
             case "toolsturnstart":
                 if (onToolsTurnStart) {
                     onToolsTurnStart(JSON.parse(msg))
@@ -100,8 +106,8 @@ const useWsServer = (params: ServerParams) => {
                 //console.log("FINAL RES", msg);
                 const history = JSON.parse(msg) as HistoryTurn;
                 //console.log("HIST", history);
-                if (params?.onFinalResult) {
-                    params.onFinalResult(history)
+                if (params?.onInferenceResult) {
+                    params.onInferenceResult(history)
                 }
                 break
             default:
@@ -125,7 +131,7 @@ const useWsServer = (params: ServerParams) => {
         }
     }
 
-    const _executeFeature = async (name: string, feat: FeatureType, payload: any, options: Record<string, any> = {}) => {
+    const _executeFeature = (name: string, feat: FeatureType, payload: any, options: Record<string, any> = {}) => {
         const cmd: WsClientMsg = {
             type: "command",
             command: name,
@@ -136,15 +142,15 @@ const useWsServer = (params: ServerParams) => {
         _sendMsg(JSON.stringify(cmd));
     };
 
-    const executeTask = async (
+    const executeTask = (
         name: string, payload: any, options: Record<string, any> = {}
     ) => _executeFeature(name, "task", payload, options);
 
-    const executeWorkflow = async (
+    const executeWorkflow = (
         name: string, payload: any, options: Record<string, any> = {}
     ) => _executeFeature(name, "workflow", payload, options);
 
-    const executeAgent = async (
+    const executeAgent = (
         name: string, payload: any, options: Record<string, any> = {}
     ) => _executeFeature(name, "agent", payload, options);
 
