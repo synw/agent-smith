@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { argv, exit } from 'process';
+import { argv } from 'process';
 import { query } from "./cli.js";
 import { resetDbCmd } from './cmd/clicmds/cmds.js';
 import { updateConfCmd } from './cmd/clicmds/updateconf.js';

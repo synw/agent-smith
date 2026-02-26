@@ -252,6 +252,7 @@ async function executeTask(
     const onToolsTurnEnd = options?.onToolsTurnEnd ?? undefined;
     const onTurnEnd = options?.onTurnEnd ?? undefined;
     const onAssistant = options?.onAssistant ?? undefined;
+    const onThink = options?.onThink ?? undefined;
     //console.log("OOT", options?.onToken, "/", processToken);
     if (options?.onToken) {
         task.agent.lm.onToken = options.onToken;
@@ -275,6 +276,7 @@ async function executeTask(
         onToolsTurnEnd: onToolsTurnEnd,
         onTurnEnd: onTurnEnd,
         onAssistant: onAssistant,
+        onThink: onThink,
         ...conf,
     }
     if (options?.history) {

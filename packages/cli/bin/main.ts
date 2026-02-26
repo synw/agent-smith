@@ -13,16 +13,20 @@ import { displayOptions, ioOptions, inferenceOptions, allOptions } from "./cmd/o
 import { McpClient } from "./cmd/lib/mcp.js";
 import { readTask } from "./cmd/lib/tasks/read.js";
 import { FeatureType, TaskSettings } from "./interfaces.js";
-import { getConfigPath } from "./conf.js";
-import { readFeaturesType, readFilePaths } from "./db/read.js";
+import { getConfigPath, createConfigFile } from "./conf.js";
+import { readFeaturesType, readFilePaths, readTool } from "./db/read.js";
 import { readConf } from "./cmd/sys/read_conf.js";
 import { backend } from "./state/backends.js";
 import { getTaskSettings } from "./state/tasks.js";
 import { upsertTaskSettings } from "./db/write.js";
+import { initDb } from "./db/db.js";
+import { updateConfCmd } from "./cmd/clicmds/updateconf.js";
 
 const db = {
+    init: initDb,
     readFilePaths,
     readFeaturesType,
+    readTool,
     getTaskSettings,
     upsertTaskSettings,
 };
@@ -61,4 +65,6 @@ export {
     TaskSettings,
     db,
     fs,
+    createConfigFile,
+    updateConfCmd,
 }

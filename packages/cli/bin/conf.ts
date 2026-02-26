@@ -1,13 +1,16 @@
+import fs from "node:fs";
 import { readConf } from "./cmd/sys/read_conf.js";
 import { upsertBackends, insertFeaturesPathIfNotExists, insertPluginIfNotExists, upsertTaskSettings, deleteTaskSettings } from "./db/write.js";
 import { buildPluginsPaths } from "./state/plugins.js";
 import { runtimeError } from "./cmd/lib/user_msgs.js";
-import { ConfInferenceBackend, InferenceBackend } from "./interfaces.js";
+import { ConfInferenceBackend, InferenceBackend, type ConfigFile } from "./interfaces.js";
 import { localBackends } from "./const.js";
 import { homedir } from 'os';
 import { join } from 'path';
 import { createDirectoryIfNotExists } from "./cmd/sys/dirs.js";
 import { initTaskSettings, tasksSettings } from "./state/tasks.js";
+import path from "node:path";
+import yaml from "yaml";
 
 function getConfigPath(appName: string, filename: string): { confDir: string, dbPath: string } {
     let confDir: string;
@@ -26,6 +29,33 @@ function getConfigPath(appName: string, filename: string): { confDir: string, db
 }
 
 const { confDir, dbPath } = getConfigPath("agent-smith", "config.db");
+
+function createConfigFile(cfp?: string): string {
+    createDirectoryIfNotExists(confDir);
+    const fp = cfp ? cfp : path.join(confDir, "config.yml")
+    const fc: ConfigFile = {
+        promptfile: "",
+        backends: {
+            default: "llamacpp",
+            local: ["llamacpp", "koboldcpp", "ollama"],
+            llamacpp_oai: {
+                type: "openai",
+                url: "http://localhost:8080/v1"
+            }
+        }
+    }
+    const txt = yaml.stringify(fc);
+    try {
+        if (fs.existsSync(fp)) {
+            const err = `Config file ${fp} already exists`;
+            throw new Error(err)
+        }
+        fs.writeFileSync(fp, txt)
+    } catch (e) {
+        throw new Error(`Error creating config file at ${fp}: ${e}`)
+    }
+    return fp
+}
 
 async function processConfPath(confPath: string): Promise<{ paths: Array<string>, pf: string, dd: string }> {
     createDirectoryIfNotExists(confDir);
@@ -126,4 +156,5 @@ export {
     dbPath,
     processConfPath,
     getConfigPath,
+    createConfigFile,
 }
