@@ -42,7 +42,7 @@ app.ws.use(function(ctx, next) {
   return next();
 });
 
-function createManualPromise<T>() {
+function createAwaiter<T>() {
   let resolveFn: (value: T) => void;
   let rejectFn: (reason?: any) => void;
 
@@ -119,19 +119,43 @@ function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
             buf += t;
             process.stdout.write(t);
           };
+          msg.options.onTurnEnd = (ht: Record<string, any>) => {
+            const rsm: WsRawServerMsg = {
+              type: "turnend",
+              msg: JSON.stringify(ht),
+            }
+            ctx.websocket.send(JSON.stringify(rsm));
+          };
+          msg.options.onAssistant = (txt: string) => {
+            const rsm: WsRawServerMsg = {
+              type: "assistant",
+              msg: txt,
+            }
+            ctx.websocket.send(JSON.stringify(rsm));
+          };
+          msg.options.onThink = (txt: string) => {
+            const rsm: WsRawServerMsg = {
+              type: "think",
+              msg: txt,
+            }
+            ctx.websocket.send(JSON.stringify(rsm));
+          };
           try {
             const it = setInterval(() => {
               const rsm: WsRawServerMsg = {
                 type: "token",
                 msg: buf,
               }
-              ctx.websocket.send(JSON.stringify(rsm));
+              if (buf !== "") {
+                // model is loading if no buffer
+                ctx.websocket.send(JSON.stringify(rsm));
+              }
               buf = "";
             }, sendTokensInterval);
             const res = await executeTask(msg.command, msg.payload, msg.options);
-            setTimeout(() => {
-              clearInterval(it);
-            }, sendTokensInterval);
+            //setTimeout(() => {
+            clearInterval(it);
+            //}, sendTokensInterval);
             //console.dir(res, { depth: 3 });
             let r: HistoryTurn;
             if (res.template.id == "none") {
@@ -178,6 +202,15 @@ function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
               type: "assistant",
               msg: txt,
             }
+            //console.log("SRV ON ASSISTANT", txt);
+            ctx.websocket.send(JSON.stringify(rsm));
+          };
+          msg.options.onThink = (txt: string) => {
+            const rsm: WsRawServerMsg = {
+              type: "think",
+              msg: txt,
+            }
+            //console.log("SRV ON THINK", txt);
             ctx.websocket.send(JSON.stringify(rsm));
           };
           msg.options.onToolCall = (tc: Record<string, any>) => {
@@ -217,7 +250,7 @@ function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
               type: "toolcallconfirm",
               msg: JSON.stringify(tc),
             }
-            const { promise, resolve } = createManualPromise<boolean>();
+            const { promise, resolve } = createAwaiter<boolean>();
             confirmToolCalls[tc.id] = resolve;
             ctx.websocket.send(JSON.stringify(rsm));
             const res = await promise;
@@ -240,9 +273,9 @@ function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
               buf = "";
             }, sendTokensInterval);
             const res = await executeTask(msg.command, msg.payload, msg.options);
-            setTimeout(() => {
-              clearInterval(it);
-            }, sendTokensInterval);
+            //setTimeout(() => {
+            clearInterval(it);
+            //}, sendTokensInterval);
             const ht = JSON.stringify(res.template.history.pop());
             //console.log("FINAL MSG", ht)
             const rsm: WsRawServerMsg = {
@@ -294,8 +327,18 @@ function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
   }));
 
   app.use(router.routes()).use(router.allowedMethods());
+  // 404 middleware - runs after router
+  /*app.use((ctx) => {
+    if (!ctx.matched || ctx.matched.length === 0) {
+      ctx.status = 404;
+      ctx.body = {
+        error: 'Not Found',
+        path: ctx.path
+      };
+    }
+  });*/
   app.listen(5184, () => {
-    console.log('Please open localhost:5184 in a browser');
+    console.log('Please open url localhost:5184 in a browser');
   });
 }
 

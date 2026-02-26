@@ -7,6 +7,7 @@ const useRouter = (
   const router = new Router();
 
   routes.forEach((f) => f(router));
+  //console.log("R", router.routes())
 
   router.get('/ping', async (ctx: Context, next: Next) => {
     ctx.body = { ok: true };
