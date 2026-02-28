@@ -5,14 +5,14 @@
     "type": "git",
     "url": "git+https://github.com/synw/agent-smith.git"
   },
-  "version": "0.3.2",
+  "version": "0.3.3",
   "scripts": {
     "buildrl": "rm -rf dist/* && rollup -c",
     "build": "rm -rf dist/* && tsc"
   },
   "dependencies": {
     "@locallm/api": "^0.7.3",
-    "modprompt": "^0.14.1",
+    "modprompt": "^0.14.2",
     "restmix": "^0.6.1"
   },
   "devDependencies": {

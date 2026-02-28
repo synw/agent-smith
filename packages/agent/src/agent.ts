@@ -190,24 +190,25 @@ class Agent {
         if (error) {
             throw new Error(`error processing model answer:\n, ${error}`);
         }
+        /*console.log("\nHas assistant:", assistant !== undefined, "resp:\n", res.text);
+        console.log("--------------- ASSISTANT -------------------");
+        console.log(assistant);
+        console.log("--------------- END ASSISTANT -----------------");
+        console.log("=> TC:", isToolCall);
+        console.log("=> TCS:", toolsCall);*/
         if (assistant) {
-            /*console.log("--------------- ASSISTANT -------------------");
-            console.log(assistant);
-            console.log("--------------- END ASSISTANT -----------------");*/
             if (tpl.tags?.think?.start) {
-                let t = res.text;
+                /*let t = res.text;
                 if (toolsCall.length > 0) {
                     if (tpl?.tags?.toolCall?.start) {
                         t = res.text.split(tpl.tags.toolCall.start)[0].trim()
                     } else {
                         console.warn("Model called tools but not tool call tags found in template")
                     }
-                }
-                const { think, finalAnswer } = splitThinking(t, tpl.tags.think.start, tpl.tags.think.end);
+                }*/
+                const { think, finalAnswer } = splitThinking(assistant, tpl.tags.think.start, tpl.tags.think.end);
                 /*console.log("=> THINK:", think);
-                console.log("=> FA:", finalAnswer);
-                console.log("=> TC:", isToolCall);
-                console.log("=> TCS:", toolsCall);*/
+                console.log("=> FA:", finalAnswer);*/
                 if (think.length > 0) {
                     //console.log("AGENT ON THINK", think);
                     if (options?.onThink) {
