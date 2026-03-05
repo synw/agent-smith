@@ -64,8 +64,8 @@ async function updateConfCmd(args: Array<string>): Promise<any> {
     } else {
         confPath = path;
     }
-    console.log("Using", confPath, "to update features");
     const { paths, pf, dd } = await processConfPath(confPath);
+    console.log("Using", confPath, "to update features at", paths);
     if (pf.length > 0) {
         updatePromptfilePath(pf);
         promptfilePath.value = pf;

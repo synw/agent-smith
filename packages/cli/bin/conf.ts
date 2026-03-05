@@ -30,11 +30,25 @@ function getConfigPath(appName: string, filename: string): { confDir: string, db
 
 const { confDir, dbPath } = getConfigPath("agent-smith", "config.db");
 
+function updateConfigFile(conf: ConfigFile, cfp?: string): string {
+    const fp = cfp ? cfp : path.join(confDir, "config.yml");
+    const txt = yaml.stringify(conf);
+    if (!fs.existsSync(fp)) {
+        const err = `Config file ${fp} does not exist`;
+        throw new Error(err)
+    }
+    try {
+        fs.writeFileSync(fp, txt, { encoding: 'utf8' })
+    } catch (e) {
+        throw new Error(`Error creating config file at ${fp}: ${e}`)
+    }
+    return fp
+}
+
 function createConfigFile(cfp?: string): string {
     createDirectoryIfNotExists(confDir);
     const fp = cfp ? cfp : path.join(confDir, "config.yml")
     const fc: ConfigFile = {
-        promptfile: "",
         backends: {
             default: "llamacpp",
             local: ["llamacpp", "koboldcpp", "ollama"],
@@ -42,15 +56,16 @@ function createConfigFile(cfp?: string): string {
                 type: "openai",
                 url: "http://localhost:8080/v1"
             }
-        }
+        },
+        promptfile: "",
     }
     const txt = yaml.stringify(fc);
+    if (fs.existsSync(fp)) {
+        const err = `Config file ${fp} already exists`;
+        throw new Error(err)
+    }
     try {
-        if (fs.existsSync(fp)) {
-            const err = `Config file ${fp} already exists`;
-            throw new Error(err)
-        }
-        fs.writeFileSync(fp, txt)
+        fs.writeFileSync(fp, txt, { encoding: 'utf8' })
     } catch (e) {
         throw new Error(`Error creating config file at ${fp}: ${e}`)
     }
@@ -157,4 +172,5 @@ export {
     processConfPath,
     getConfigPath,
     createConfigFile,
+    updateConfigFile,
 }

@@ -244,7 +244,7 @@ async function executeTask(
     const onToolCall = options?.onToolCall as (tc: Record<string, any>) => void ?? _onToolCall;
     const _onToolCallEnd = (tr: any) => {
         if (options?.debug) {
-            console.log(tr)
+            console.log("TOOL RESULT", tr)
         }
     }
     const onToolCallEnd = options?.onToolCallEnd as (tc: Record<string, any>) => void ?? _onToolCallEnd;

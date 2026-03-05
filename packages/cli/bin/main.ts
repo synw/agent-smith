@@ -21,6 +21,7 @@ import { getTaskSettings } from "./state/tasks.js";
 import { upsertTaskSettings } from "./db/write.js";
 import { initDb } from "./db/db.js";
 import { updateConfCmd } from "./cmd/clicmds/updateconf.js";
+import { updateConfigFile, processConfPath } from "./conf.js";
 
 const db = {
     init: initDb,
@@ -67,4 +68,6 @@ export {
     fs,
     createConfigFile,
     updateConfCmd,
+    updateConfigFile,
+    processConfPath,
 }

@@ -1,7 +1,7 @@
 {
   "name": "@agent-smith/cli",
   "description": "Agent Smith: terminal client for language model agents",
-  "version": "0.0.113",
+  "version": "0.0.114",
   "scripts": {
     "build": "rm -rf dist/* && tsc",
     "cli": "node --loader ts-node/esm bin/index.ts",
