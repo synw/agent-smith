@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/wscli",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "description": "An websockets client for the Agent Smith server",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {
