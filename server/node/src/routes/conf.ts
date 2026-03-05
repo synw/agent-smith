@@ -1,30 +1,17 @@
 import { createConfigFile, db, readConf, updateConfCmd } from '@agent-smith/cli';
 import type Router from '@koa/router';
 import type { Context, Next } from 'koa';
+import { getConfig } from '../utils.js';
 
 function getConfRoute(r: Router) {
     r.get('/conf', async (ctx: Context, next: Next) => {
-        const fp = db.readFilePaths();
-        let confFilePath = "";
-        //let promptFilePath = "";
-        for (const p of fp) {
-            if (p.name == "conf") {
-                confFilePath = p.path;
-                break
-            }
-        }
-        if (confFilePath == "") {
+        const { found, conf } = getConfig()
+        if (!found) {
             ctx.body = "can not find config path in db";
             ctx.status = 400;
         } else {
-            const { found, data } = readConf(confFilePath);
-            if (!found) {
-                ctx.status = 400;
-                ctx.body = "config file not found at " + confFilePath;
-            } else {
-                ctx.body = data;
-                ctx.status = 200;
-            }
+            ctx.body = conf;
+            ctx.status = 200;
         }
         await next()
     })

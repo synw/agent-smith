@@ -6,6 +6,8 @@ import { getAgentRoute, getAgentsRoute } from "./agents.js";
 import { createConfRoute, getConfRoute } from "./conf.js";
 import { getToolsRoute } from "./tools.js";
 import { getStateRoute } from "./state.js";
+import { installPluginRoute } from "./plugins.js";
+import { addFolderRoute } from "./folders.js";
 
 const baseRoutes = new Array<((r: Router) => void)>(
     getConfRoute,
@@ -19,6 +21,8 @@ const baseRoutes = new Array<((r: Router) => void)>(
     getStateRoute,
     createConfRoute,
     updateTaskSettingsCmd,
+    installPluginRoute,
+    addFolderRoute,
 );
 
 export { baseRoutes }
