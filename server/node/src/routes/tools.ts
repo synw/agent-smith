@@ -28,7 +28,6 @@ function getToolsRoute(r: Router) {
             ctx.body = tools;
             ctx.status = 200;
         }
-        await next()
     })
 }
 

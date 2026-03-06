@@ -7,7 +7,8 @@ function getAgentsRoute(r: Router) {
         const agents = db.readFeaturesType("agent");
         ctx.body = agents;
         ctx.status = 200;
-        await next()
+        //console.log("AGENTS", ctx.status);
+        //await next()
     })
 }
 
@@ -17,7 +18,7 @@ function getAgentRoute(r: Router) {
         const taskSpec = fs.openTaskSpec(ctx.params.id, true);
         ctx.body = taskSpec.taskFileSpec;
         ctx.status = 200;
-        await next()
+        //await next()
     })
 }
 

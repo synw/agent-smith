@@ -7,7 +7,6 @@ function getTaskSettingsCmd(r: Router) {
         const ts = db.getTaskSettings();
         ctx.body = ts;
         ctx.status = 200;
-        await next();
     })
 }
 
@@ -21,7 +20,6 @@ function updateTaskSettingsCmd(r: Router) {
         db.getTaskSettings(true);
         ctx.body = ts;
         ctx.status = 200;
-        await next();
     })
 }
 

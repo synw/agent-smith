@@ -29,7 +29,6 @@ function installPluginRoute(r: Router) {
         console.log("Updating db features from config file");
         await updateConfCmd([path])
         ctx.status = 202;
-        await next()
     })
 }
 

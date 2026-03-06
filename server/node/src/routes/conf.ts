@@ -13,7 +13,6 @@ function getConfRoute(r: Router) {
             ctx.body = conf;
             ctx.status = 200;
         }
-        await next()
     })
 }
 
@@ -32,7 +31,6 @@ function createConfRoute(r: Router) {
             ctx.status = 201;
             await updateConfCmd([cfp]);
         }
-        await next()
     })
 }
 

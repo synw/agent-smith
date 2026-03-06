@@ -7,7 +7,6 @@ function getTasksRoute(r: Router) {
         const tasks = db.readFeaturesType("task");
         ctx.body = tasks;
         ctx.status = 200;
-        await next()
     })
 }
 
@@ -17,7 +16,6 @@ function getTaskRoute(r: Router) {
         const taskSpec = fs.openTaskSpec(ctx.params.id);
         ctx.body = taskSpec.taskFileSpec;
         ctx.status = 200;
-        await next()
     })
 }
 function saveTasksRoute(r: Router) {
@@ -26,7 +24,6 @@ function saveTasksRoute(r: Router) {
 
         ctx.body = "ok";
         ctx.status = 200;
-        await next()
     })
 }
 

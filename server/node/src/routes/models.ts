@@ -11,7 +11,6 @@ function getModelsCmd(r: Router) {
         } catch (e) {
             ctx.body = "error reading the models";
             ctx.status = 502;
-            await next();
             return
         }
         const ms: Record<string, { status: string, ctx: number }> = {};
@@ -34,7 +33,6 @@ function getModelsCmd(r: Router) {
         })
         ctx.body = ms;
         ctx.status = 200;
-        await next();
     })
 }
 

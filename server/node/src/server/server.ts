@@ -25,20 +25,22 @@ if (argv.length > 2) {
 }*/
 
 const logger = async (ctx: Context, next: Next) => {
-  const start = Date.now(); await next();
+  const start = Date.now();
+  //console.log('LOGGER BEFORE URL --> ' + ctx.request.url);
+  await next();
   const duration = Date.now() - start;
   console.log(`${ctx.method} ${ctx.url} - ${ctx.status} - ${duration}ms`);
+  //console.log('LOGGER AFTER URL --> ' + ctx.request.url);
 };
 
 const app = websockify(new Koa());
 
 app.use(bodyParser());
-app.use(logger);
 app.use(cors({
   credentials: true
 }));
 
-app.ws.use(function(ctx, next) {
+app.ws.use((ctx: Context, next: Next) => {
   return next();
 });
 
@@ -59,9 +61,6 @@ function createAwaiter<T>() {
 }
 
 function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
-  if (staticDir) {
-    app.use(serve(staticDir));
-  }
   const router = useRouter(routes);
   const sendTokensInterval = 100;
 
@@ -326,17 +325,26 @@ function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
     });
   }));
 
+  if (staticDir) {
+    app.use(serve(staticDir));
+  }
+
+  app.use(logger);
+
   app.use(router.routes()).use(router.allowedMethods());
+
   // 404 middleware - runs after router
-  /*app.use((ctx) => {
+  app.use((ctx) => {
     if (!ctx.matched || ctx.matched.length === 0) {
       ctx.status = 404;
+      //console.log("404 ROUTE", ctx);
       ctx.body = {
         error: 'Not Found',
         path: ctx.path
       };
     }
-  });*/
+  });
+
   app.listen(5184, () => {
     console.log('Please open url localhost:5184 in a browser');
   });
