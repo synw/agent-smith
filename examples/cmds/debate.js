@@ -6,10 +6,10 @@ import color from "ansi-colors";
 
 const participants = [
     { name: "senior", model: "qwen4b", template: "chatml", role: "senior", nothink: true },
-    { name: "ideas", model: "qwen2b", template: "chatml", role: "brainstorm ideas", nothink: true },
-    { name: "perspective", model: "lfm8b", template: "chatml", role: "take distance and provide a larger general dialectical and philosophical perspective about the debate" },
-    { name: "critic", model: "lfm8b", template: "lfm", role: "review and critic, check if clarifications are needed (we can ask the user), take a broader perspective and help you partners getting to a conclusion", nothink: true },
-    //{ name: "metrics", model: "lfm1b", template: "lfm", role: "evaluate the debate's progress and metrics to help leading to a conclusion" },
+    { name: "ideas", model: "lfm8b", template: "lfm", role: "brainstorm ideas" },
+    { name: "perspective", model: "lfm8b", template: "chatml", role: "take distance and provide a larger general dialectical and philosophical perspective about the debate while helping getting to a conclusion" },
+    { name: "critic", model: "lfm8b", template: "lfm", role: "review and critic, check if clarifications are needed (we can ask the user), take a broader perspective and help you partners getting to a conclusion" },
+    { name: "orientation", model: "qwen2b", template: "chatml", role: "evaluate the debate's progress and orientation to help leading to a conclusion", nothink: true },
 ];
 const advisors = [
     {
