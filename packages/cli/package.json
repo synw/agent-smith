@@ -10,7 +10,7 @@
   "dependencies": {
     "@agent-smith/agent": "^0.3.3",
     "@agent-smith/nodetask": "^0.2.1",
-    "@agent-smith/task": "^0.3.3",
+    "@agent-smith/task": "file:/home/ggg/dev/js/agent-smith/packages/task",
     "@agent-smith/tfm": "^0.2.0",
     "@inquirer/prompts": "^8.3.0",
     "@intrinsicai/gbnfgen": "^0.12.0",

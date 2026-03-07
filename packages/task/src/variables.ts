@@ -38,9 +38,13 @@ function applyVariables(taskDef: TaskDef, taskInput: TaskInput): TaskDef {
     }
     // apply variables
     for (const [k, v] of Object.entries(taskInput)) {
+        //console.log("APPLY", k, v);
         taskDef.prompt = taskDef.prompt.replaceAll(`{${k}}`, v);
         if (taskDef.template?.system) {
             taskDef.template.system = taskDef.template.system.replaceAll(`{${k}}`, v);
+        }
+        if (taskDef.template?.afterSystem) {
+            taskDef.template.afterSystem = taskDef.template.afterSystem.replaceAll(`{${k}}`, v);
         }
         if (taskDef?.shots) {
             const nshots = new Array<HistoryTurn>();
@@ -54,6 +58,7 @@ function applyVariables(taskDef: TaskDef, taskInput: TaskInput): TaskDef {
             taskDef.shots = nshots;
         }
     }
+    //console.log("TD FINAL", taskDef);
     return taskDef;
 }
 

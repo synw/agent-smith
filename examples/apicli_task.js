@@ -7,24 +7,24 @@ name: infer
 description: Run a raw inference query
 prompt: |-
     {prompt}
+ctx: 8192
 model:
-    name: llama3.1:latest
-    ctx: 8192
-    template: llama3
+    name: qwen4b
+    template: chatml
 inferParams:
-    top_k: 1
-    top_p: 0
+    top_k: 40
+    top_p: 0.95
     min_p: 0.05
     temperature: 0.2
-    max_tokens: 4096
 */
 
 async function main() {
     const api = useServer({
         apiKey: "30f224ea6b45af61356b8eb0bd84d2011f6f85dec6d49716c686cff66510efba",
         onToken: (t) => process.stdout.write(t),
+        isVerbose: true,
     });
-    await api.executeCmd("infer", ["Which is the largest planet of the solar system?"])
+    await api.executeTask("infer", "Which is the largest planet of the solar system?", { debug: true });
 }
 
-(async () => { await main() })()
+(async () => { await main(); })();

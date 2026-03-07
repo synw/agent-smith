@@ -8,14 +8,15 @@ async function main() {
     });
     const abortController = new AbortController();
     setTimeout(() => {
-        console.log("\n\n------------------------------ ABORT\n\n")
-        abortController.abort()
+        console.log("\n\n------------------------------ ABORT\n\n");
+        abortController.abort();
     }, 5000);
     await api.executeCmd(
         "infer",
         ["Describe the Jupiter moons and their characteristics"],
+        //{ debug: true, model: "glmflash" },
         abortController.signal
-    )
+    );
 }
 
-(async () => { await main() })()
+(async () => { await main(); })();

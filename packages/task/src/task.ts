@@ -48,7 +48,8 @@ class Task {
         if (this.agent.lm.providerType == "ollama") {
             await this.agent.lm.loadModel(model.name, ctx);
         }
-        this.def = applyVariables(this.def, params);
+        //console.log("PARAMS", params);
+        //console.log("DEF PR", this.def.prompt);
         let tpl: PromptTemplate = new PromptTemplate("none");
         const options: InferenceOptions = {};
         if (conf?.onToolCall) {
@@ -84,6 +85,7 @@ class Task {
                 );
             }
         }
+        applyVariables(this.def, params);
         if (useTemplates) {
             this.def.model = model;
             tpl = formatTaskTemplate(this.def, model?.template ? model.template : undefined);
@@ -99,7 +101,9 @@ class Task {
         } else {
             this.def.inferParams = formatInferParams(this.def.inferParams ?? {}, conf ?? {});
         }
-        //console.log("DEF", this.def);
+        /*console.log("-------------------------");
+        console.log("DEF", this.def);
+        console.log("-------------------------");*/
         //console.log("P", params.prompt);
         const finalPrompt = this.def.prompt.replace("{prompt}", params.prompt);
         //console.log("FP", finalPrompt);
@@ -149,7 +153,7 @@ class Task {
                 options.system = this.def.template.system;
             }
             if (this.def?.shots) {
-                options.history = options?.history ? [...options.history, ...this.def.shots] : this.def.shots;
+                options.history = options?.history ? [...this.def.shots, ...options.history] : this.def.shots;
             }
             //console.log("RUN AGENT (TASK) params:", this.def.inferParams);
             //console.log("RUN AGENT (TASK) options:", options);
