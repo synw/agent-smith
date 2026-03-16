@@ -1,4 +1,6 @@
-import { LmProviderType } from "@locallm/types";
+import { LmProviderType, type HistoryTurn, type InferenceParams, type ToolDefSpec, type ToolTurn } from "@locallm/types";
+import type { TaskVariables } from "@agent-smith/task";
+import type { Ref, Reactive } from "vue";
 
 interface ConfInferenceBackend {
     type: LmProviderType;
@@ -30,6 +32,7 @@ interface ConfigFile {
     plugins?: Array<string>;
     backends?: BackendEntries;
     tasks?: Record<string, TaskSettings>;
+    apps?: Record<string, string>;
 }
 
 /**
@@ -72,6 +75,85 @@ interface WsRawServerMsg {
     msg: string;
 }
 
+interface StreamedMessage {
+    content: string;
+    type: MsgType;
+    num: number;
+    data?: Record<string, any>;
+}
+
+interface UserTaskVariables extends TaskVariables {
+    values: {
+        required: Record<string, string>,
+        optional: Record<string, string>,
+    }
+}
+
+interface TaskService {
+    isReady: Ref<boolean>;
+    task: Ref<Record<string, any>>;
+    variables: Reactive<UserTaskVariables>;
+    inferParams: Reactive<{ data: InferenceParams }>;
+    mcp: Reactive<{ servers: Record<string, any> }>;
+    loadModels: () => Promise<Record<string, any>>;
+    loadTaskSettings: () => Promise<Record<string, Record<string, any>>>;
+    load: (name: string, isAgent?: boolean) => Promise<void>;
+    loadWorkflow: (name: string) => Promise<Record<string, any>>;
+    loadBackends: () => Promise<Record<string, any>>;
+    setBackend: (name: string) => Promise<boolean>;
+    exec: (prompt: string, opts?: Record<string, any>, isAgent?: boolean) => Promise<void>;
+    execSync: (prompt: string, opts?: Record<string, any>, isAgent?: boolean, isSync?: boolean) => Promise<void>;
+    cancel: () => Promise<void>;
+    getTools: (tools: Array<string>) => Promise<Array<{ def: ToolDefSpec, type: string }>>;
+    checkState: () => Promise<{ found: boolean, config: ConfigFile }>;
+}
+
+interface ServerParams {
+    onToken: (token: string) => void;
+    onError?: (msg: string) => void;
+    onToolCall?: (tc: ToolCallSpec) => void;
+    onToolCallEnd?: (id: string, tr: any) => void;
+    onToolsTurnStart?: (tc: Array<ToolCallSpec>) => void;
+    onToolsTurnEnd?: (tr: Array<ToolTurn>) => void;
+    onFinalResult?: (hist: HistoryTurn) => void;
+    onTurnEnd?: (ht: HistoryTurn) => void;
+    onAssistant?: (txt: string) => void;
+    onThink?: (txt: string) => void;
+    onConfirmToolUsage?: (tool: ToolCallSpec) => Promise<boolean>;
+    onInferenceResult?: (ht: HistoryTurn) => void;
+    url?: string;
+    isVerbose?: boolean;
+    defaultInferenceParams?: InferenceParams,
+}
+
+interface UiHistoryTurn extends HistoryTurn {
+    state: {
+        showThinking: boolean;
+        showToolResponses: Array<string>;
+        confirmRestartAtTurn: number | null;
+        confirmToolCalls: Record<string, {
+            resolve: (value: boolean) => void,
+            reject: (reason?: any) => void
+        }>;
+    }
+}
+
+interface ModelInfo {
+    status: string;
+    ctx: number;
+}
+
+interface TaskState {
+    isReady: boolean,
+    onReady: Promise<boolean>,
+    hasConfig: boolean,
+    history: Array<UiHistoryTurn>,
+    models: Record<string, ModelInfo>,
+    tasksSettings: Record<string, Record<string, any>>,
+    backends: Record<string, Record<string, any>>,
+    currentFeature: { name: string, type: string },
+}
+
 type WsServerMsgType = 'error'
     | 'token'
     | 'turnend'
@@ -84,7 +166,7 @@ type WsServerMsgType = 'error'
     | 'finalresult'
     | "think";
 type WsClientMsgType = "command" | "system";
-
+type MsgType = "token" | "system" | "error";
 type FeatureType = "task" | "agent" | "action" | "cmd" | "workflow" | "adaptater";
 
 export {
@@ -99,4 +181,12 @@ export {
     ToolCallSpec,
     WsRawClientMsg,
     WsRawServerMsg,
+    MsgType,
+    ServerParams,
+    StreamedMessage,
+    TaskService,
+    TaskState,
+    UserTaskVariables,
+    ModelInfo,
+    UiHistoryTurn,
 }
