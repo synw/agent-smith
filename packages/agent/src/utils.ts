@@ -31,12 +31,21 @@ function extractBetweenTags(
 function splitThinking(text: string, startTag: string, endTag: string): { think: string, finalAnswer: string } {
     let think = "";
     let answer = "";
-    const st = text.split(endTag);
-    if (st.length > 1) {
-        think = extractBetweenTags(text, startTag, endTag).trim();
-        answer = st[1].trim()
-    } else {
-        answer = text
+    text = text.trim();
+    /*console.log("----------")
+    console.log("INITIAL TEXT", text);
+    console.log("----------")*/
+    if (!text.includes(startTag)) {
+        return { think: "", finalAnswer: text }
+    }
+    think = extractBetweenTags(text, startTag, endTag).trim();
+    //console.log("EX T", think);
+    if (!text.endsWith(endTag)) {
+        const st = text.split(endTag);
+        //console.log("ST", st);
+        answer = st[1].trim();
+        //console.log("Ans:", answer)
+        //console.log("Th:", think)
     }
     return { think: think, finalAnswer: answer }
 }

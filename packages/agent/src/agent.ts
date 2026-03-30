@@ -23,6 +23,7 @@ class Agent {
         template?: PromptTemplate | string,
     ): Promise<InferenceResult> {
         let tpl: PromptTemplate;
+        //console.log("Agent template:", template);
         if (options?.debug) {
             console.log("Agent", this.name, "inference params:", params);
             console.log("Agent", this.name, "options:", options);
@@ -33,6 +34,19 @@ class Agent {
             this.history = options.history;
             options.history = undefined;
         }
+        if (!template) {
+            if (params?.template) {
+                tpl = new PromptTemplate(params.template);
+            } else {
+                throw new Error(`A template is required for provider ${this.lm.provider.name}`)
+            }
+        } else {
+            if (typeof template == "string") {
+                tpl = new PromptTemplate(template);
+            } else {
+                tpl = template
+            }
+        }
         if (this.lm.providerType == "openai") {
             // update tools
             this.tools = {};
@@ -41,22 +55,9 @@ class Agent {
                     this.tools[t.name] = t;
                 });
             }
-            const res = await this.runAgentNoTemplate(1, prompt, params, options)
+            const res = await this.runAgentNoTemplate(1, prompt, params, options, tpl)
             return res
         } else {
-            if (!template) {
-                if (params?.template) {
-                    tpl = new PromptTemplate(params.template);
-                } else {
-                    throw new Error(`A template is required for provider ${this.lm.provider.name}`)
-                }
-            } else {
-                if (typeof template == "string") {
-                    tpl = new PromptTemplate(template);
-                } else {
-                    tpl = template
-                }
-            }
             // update tools
             this.tools = {};
             if (options?.tools) {
@@ -76,6 +77,7 @@ class Agent {
         prompt: string,
         params: InferenceParams,
         options: InferenceOptions = {},
+        tpl: PromptTemplate,
     ) {
         //console.log("AGENT PROMPT NO TPL", prompt);
         //console.log("(AGENT) RUN NO TEMPLATE params:", JSON.stringify(params, null, 2));
@@ -90,6 +92,40 @@ class Agent {
         }
         let _res = res;
         //console.log("RES", res);
+        if (_res.text) {
+            if (tpl.tags?.think?.start) {
+                /*let t = res.text;
+                if (toolsCall.length > 0) {
+                    if (tpl?.tags?.toolCall?.start) {
+                        t = res.text.split(tpl.tags.toolCall.start)[0].trim()
+                    } else {
+                        console.warn("Model called tools but not tool call tags found in template")
+                    }
+                }*/
+                /*console.log("----------")
+                console.log("OUTPUT TEXT", res.text);
+                console.log("----------")*/
+                const { think, finalAnswer } = splitThinking(res.text, tpl.tags.think.start, tpl.tags.think.end);
+                //console.log("=> THINK:", think);
+                //console.log("=> FA:", finalAnswer);
+                if (think.length > 0) {
+                    //console.log("AGENT ON THINK", think);
+                    if (options?.onThink) {
+                        options.onThink(think)
+                    }
+                }
+                if (finalAnswer) {
+                    //console.log("AGENT ON ASSISTANT FA", finalAnswer);
+                    if (options?.onAssistant) {
+                        options.onAssistant(finalAnswer)
+                    }
+                }
+            } else {
+                if (options?.onAssistant) {
+                    options.onAssistant(res.text)
+                }
+            }
+        }
         if (res?.toolCalls) {
             if (options?.onToolsTurnStart) {
                 options.onToolsTurnStart(res.toolCalls);
@@ -150,7 +186,7 @@ class Agent {
             if (options?.onTurnEnd) {
                 options.onTurnEnd(this.history[this.history.length - 1])
             }
-            _res = await this.runAgentNoTemplate(nit, "", params, options);
+            _res = await this.runAgentNoTemplate(nit, "", params, options, tpl);
         } else {
             this.history.push({ assistant: res.text });
             if (options?.onTurnEnd) {
@@ -293,7 +329,7 @@ class Agent {
                         call: toolCall,
                         response: toolResp
                     });
-                    //console.log("ONTCE")
+                    //console.log("ONTCE", toolCall.id, toolResp);
                     if (options?.onToolCallEnd) {
                         options.onToolCallEnd(toolCall.id, toolResp);
                     }
