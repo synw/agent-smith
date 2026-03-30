@@ -8,6 +8,9 @@ import { getToolsRoute } from "./tools.js";
 import { getStateRoute } from "./state.js";
 import { installPluginRoute } from "./plugins.js";
 import { addFolderRoute } from "./folders.js";
+import { getWorkflowRoute, getWorkflowsRoute } from "./workflows.js";
+import { getBackendsRoute, setBackendRoute } from "./backends.js";
+import { getOrCreateAppConfigFileRoute, updateAppConfigFileRoute } from "./apps.js";
 
 const baseRoutes = new Array<((r: Router) => void)>(
     getConfRoute,
@@ -23,6 +26,12 @@ const baseRoutes = new Array<((r: Router) => void)>(
     updateTaskSettingsCmd,
     installPluginRoute,
     addFolderRoute,
+    getWorkflowRoute,
+    getWorkflowsRoute,
+    getBackendsRoute,
+    setBackendRoute,
+    getOrCreateAppConfigFileRoute,
+    updateAppConfigFileRoute,
 );
 
 export { baseRoutes }

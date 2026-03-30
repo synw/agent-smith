@@ -2,6 +2,7 @@ import { getConfigPath, init } from '@agent-smith/cli';
 import type Router from '@koa/router';
 import type { Next, Context } from 'koa';
 import fs from "node:fs";
+import { getConfig } from '../utils.js';
 
 function getStateRoute(r: Router) {
     r.get('/state', async (ctx: Context, next: Next) => {
@@ -13,8 +14,15 @@ function getStateRoute(r: Router) {
             ctx.body = "no db found at " + dbPath;
             ctx.status = 202;
         } else {
-            ctx.status = 200;
-            await init()
+            await init();
+            const { found, conf } = getConfig()
+            if (!found) {
+                ctx.body = "can not find config path in db";
+                ctx.status = 400;
+            } else {
+                ctx.body = conf;
+                ctx.status = 200;
+            }
         }
         //console.log("STATE", ctx.status)
         //return next()

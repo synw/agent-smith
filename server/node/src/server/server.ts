@@ -74,6 +74,7 @@ function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
       if (!msg?.options) {
         msg.options = {}
       }
+      msg.options.nocli = true;
       //console.log("ABO", abort);
       msg.options.abort = abort;
       //console.log(msg)
@@ -177,7 +178,7 @@ function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
         } else if (msg.feature == "agent") {
           msg.options.onToolsTurnStart = (tcs: Record<string, any>) => {
             const rsm: WsRawServerMsg = {
-              type: "finalresult",
+              type: "toolsturnstart",
               msg: JSON.stringify(tcs),
             }
             ctx.websocket.send(JSON.stringify(rsm));
@@ -238,7 +239,8 @@ function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
             const rsm: WsRawServerMsg = {
               type: "toolcallend",
               msg: `${id}<|xtool_call_id|>` + toolResData,
-            }
+            };
+            //console.log("TOOL CALL END", toolResData);
             ctx.websocket.send(JSON.stringify(rsm));
           }
           msg.options.confirmToolUsage = async (tc: Record<string, any>) => {
@@ -257,12 +259,17 @@ function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
           }
           msg.options.isAgent = true;
           try {
-            let buf = "";
+            //let buf = "";
             msg.options.onToken = (t: string) => {
-              buf += t;
+              const rsm2: WsRawServerMsg = {
+                type: "token",
+                msg: t,
+              }
+              ctx.websocket.send(JSON.stringify(rsm2));
+              //buf += t;
               process.stdout.write(t);
             };
-            const it = setInterval(() => {
+            /*const it = setInterval(() => {
               if (buf == "") { return };
               const rsm: WsRawServerMsg = {
                 type: "token",
@@ -270,10 +277,10 @@ function runserver(routes?: ((r: Router) => void)[], staticDir?: string) {
               }
               ctx.websocket.send(JSON.stringify(rsm));
               buf = "";
-            }, sendTokensInterval);
+            }, sendTokensInterval);*/
             const res = await executeTask(msg.command, msg.payload, msg.options);
             //setTimeout(() => {
-            clearInterval(it);
+            //clearInterval(it);
             //}, sendTokensInterval);
             const ht = JSON.stringify(res.template.history.pop());
             //console.log("FINAL MSG", ht)
