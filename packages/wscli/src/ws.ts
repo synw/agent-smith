@@ -1,6 +1,6 @@
-import type { ServerParams } from "./interfaces.js";
-import type { WsClientMsg, FeatureType, ToolCallSpec, WsRawServerMsg } from "@agent-smith/types";
+import type { WsClientMsg, FeatureType, ToolCallSpec, WsRawServerMsg, ServerParams } from "@agent-smith/types";
 import { HistoryTurn } from "@locallm/types";
+import ReconnectingWebSocket from 'reconnecting-websocket';
 
 const useWsServer = (params: ServerParams) => {
     //console.log("WS PARAMS", params);
@@ -8,7 +8,7 @@ const useWsServer = (params: ServerParams) => {
     if (params?.url) {
         url = params.url;
     }
-    const ws = new WebSocket(url);
+    let ws = new ReconnectingWebSocket(url);
     let onToken = params.onToken;
     let onToolCall = params.onToolCall;
     let onToolCallEnd = params.onToolCallEnd;
@@ -123,11 +123,18 @@ const useWsServer = (params: ServerParams) => {
         console.error('WebSocket error:', error);
     };
 
-    const _sendMsg = (m: string) => {
+    const _sendMsg = (m: string, t = 1000) => {
         if (ws.readyState === WebSocket.OPEN) {
             ws.send(m);
         } else {
             console.warn('Cannot send message - not connected');
+            console.log("Trying to reconnect ...");
+            if (t < 5000) {
+                t = t + 500;
+            }
+            setTimeout(() => {
+                _sendMsg(m);
+            }, t);
         }
     }
 
