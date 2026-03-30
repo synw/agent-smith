@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "node",
+    "target": "esnext",
+    "module": "nodenext",
+    "moduleResolution": "nodenext",
     "strict": true,
     "sourceMap": false,
     "resolveJsonModule": true,
@@ -13,6 +13,8 @@
     "allowJs": true,
     "removeComments": false,
     "strictFunctionTypes": true,
+    "rootDir": "./src",
+    "ignoreDeprecations": "6.0",
     "types": [
       "node"
     ],
@@ -20,7 +22,7 @@
       "ESNext",
       "dom"
     ],
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
       "@/*": [
         "src/*"
