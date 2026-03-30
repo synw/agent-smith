@@ -1,27 +1,27 @@
-import { execute, run } from "./cmd/sys/execute.js";
-import { executeTask } from "./cmd/lib/tasks/cmd.js";
-import { executeAction } from "./cmd/lib/actions/cmd.js";
-import { executeWorkflow } from "./cmd/lib/workflows/cmd.js";
-import { writeToClipboard } from "./cmd/sys/clipboard.js";
-import { initState, pluginDataDir, init, isStateReady } from "./state/state.js";
-import { usePerfTimer } from "./utils/perf.js";
-import { parseCommandArgs } from "./cmd/lib/options_parsers.js";
-import { extractToolDoc } from "./cmd/lib/tools.js";
-import { openTaskSpec } from "./cmd/lib/tasks/utils.js";
-import { extractBetweenTags, splitThinking } from "./utils/text.js";
-import { displayOptions, ioOptions, inferenceOptions, allOptions } from "./cmd/options.js";
-import { McpClient } from "./cmd/lib/mcp.js";
-import { readTask } from "./cmd/lib/tasks/read.js";
-import { FeatureType, TaskSettings } from "./interfaces.js";
-import { getConfigPath, createConfigFile } from "./conf.js";
-import { readFeaturesType, readFilePaths, readTool } from "./db/read.js";
-import { readConf } from "./cmd/sys/read_conf.js";
-import { backend } from "./state/backends.js";
-import { getTaskSettings } from "./state/tasks.js";
-import { upsertTaskSettings } from "./db/write.js";
-import { initDb } from "./db/db.js";
 import { updateConfCmd } from "./cmd/clicmds/updateconf.js";
-import { updateConfigFile, processConfPath } from "./conf.js";
+import { executeAction } from "./cmd/lib/actions/cmd.js";
+import { McpClient } from "./cmd/lib/mcp.js";
+import { parseCommandArgs } from "./cmd/lib/options_parsers.js";
+import { executeTask } from "./cmd/lib/tasks/cmd.js";
+import { readTask } from "./cmd/lib/tasks/read.js";
+import { openTaskSpec } from "./cmd/lib/tasks/utils.js";
+import { extractToolDoc } from "./cmd/lib/tools.js";
+import { executeWorkflow } from "./cmd/lib/workflows/cmd.js";
+import { readWorkflow } from "./cmd/lib/workflows/read.js";
+import { allOptions, displayOptions, inferenceOptions, ioOptions } from "./cmd/options.js";
+import { writeToClipboard } from "./cmd/sys/clipboard.js";
+import { execute, run } from "./cmd/sys/execute.js";
+import { readConf } from "./cmd/sys/read_conf.js";
+import { createConfigFile, getConfigPath, processConfPath, updateConfigFile } from "./conf.js";
+import { initDb } from "./db/db.js";
+import { readBackends, readFeaturesType, readFilePaths, readTool } from "./db/read.js";
+import { upsertTaskSettings } from "./db/write.js";
+import { FeatureType, TaskSettings } from "./interfaces.js";
+import { backend, setBackend } from "./state/backends.js";
+import { init, initState, isStateReady, pluginDataDir } from "./state/state.js";
+import { getTaskSettings } from "./state/tasks.js";
+import { usePerfTimer } from "./utils/perf.js";
+import { extractBetweenTags, splitThinking } from "./utils/text.js";
 
 const db = {
     init: initDb,
@@ -30,44 +30,19 @@ const db = {
     readTool,
     getTaskSettings,
     upsertTaskSettings,
+    readBackends,
 };
 
 const fs = {
     openTaskSpec,
+    readWorkflow,
 }
 
 export {
-    execute,
-    run,
-    executeTask,
-    executeAction,
-    executeWorkflow,
-    writeToClipboard,
-    initState,
-    init,
-    pluginDataDir,
-    usePerfTimer,
-    parseCommandArgs,
-    extractToolDoc,
-    openTaskSpec,
-    extractBetweenTags,
-    splitThinking,
-    displayOptions,
-    ioOptions,
-    inferenceOptions,
-    allOptions,
-    isStateReady,
-    backend,
-    McpClient,
-    readTask,
-    FeatureType,
-    getConfigPath,
-    readConf,
-    TaskSettings,
-    db,
-    fs,
-    createConfigFile,
-    updateConfCmd,
-    updateConfigFile,
-    processConfPath,
-}
+    allOptions, backend, createConfigFile, db, displayOptions, execute, executeAction,
+    executeTask, executeWorkflow, extractBetweenTags, extractToolDoc, FeatureType, fs, getConfigPath,
+    inferenceOptions, init, initState, ioOptions, isStateReady, McpClient, openTaskSpec,
+    parseCommandArgs, pluginDataDir, processConfPath, readConf, readTask, run, setBackend,
+    splitThinking, TaskSettings, updateConfCmd,
+    updateConfigFile, usePerfTimer, writeToClipboard,
+};

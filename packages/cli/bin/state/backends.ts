@@ -34,6 +34,8 @@ async function initBackends() {
             serverUrl: bk.url,
             apiKey: apiKey.length > 0 ? apiKey : undefined,
         });
+        lm.name = bk.name;
+        //console.log("ADD BK", lm);
         backends[name] = lm;
         if (bk.isDefault) {
             defaultBackendName = bk.name
@@ -53,19 +55,20 @@ async function initBackends() {
 async function setBackend(name: string, isVerbose = false) {
     if (!(Object.keys(backends).includes(name))) {
         runtimeDataError(`Backend ${name} not found. Available backends: ${Object.keys(backends)}`);
-        return
+        return false
     }
     backend.value = backends[name];
     setDefaultBackend(name);
     console.log("Default backend set to", name);
     isBackendUp.value = await probeBackend(backend.value, isVerbose);
+    return isBackendUp.value
 }
 
 async function listBackends(printResult = true): Promise<string> {
     //console.log("DEFB", backend.value?.name);
     const allBk = new Array<string>();
     for (const [name, lm] of Object.entries(backends)) {
-        const bcn = name == backend.value?.name ? colors.bold(name) : name;
+        const bcn = (name == backend.value?.name) ? colors.bold(name) : name;
         //const isUp = await probeBackend(lm, false);
         const buf = new Array<string>("-", bcn, colors.dim("(" + lm.providerType + ") " + lm.serverUrl), /*isUp ? "🟢" : ""*/);
         const str = buf.join(" ");

@@ -102,20 +102,20 @@ async function executeTask(
     }
     //let i = 0;
     let c = false;
-    const useTemplates = agent.lm.providerType !== "openai";
+    //const useTemplates = agent.lm.providerType !== "openai";
     let hasThink = false;
     let tpl: PromptTemplate | null = null;
     //console.log("Use templates:", useTemplates);
-    if (useTemplates) {
-        try {
-            tpl = new PromptTemplate(model.template ?? "none");
-        } catch (e) {
-            throw new Error(`Can not load template ${model.template}\nAvailable templates: ${Object.keys(templates)}\n`)
-        }
-        //console.log("TPL:", tpl.id);
-        hasThink = tpl.tags?.think ? true : false;
-        //console.log("HT", hasThink);
+    //if (useTemplates) {
+    try {
+        tpl = new PromptTemplate(model.template ?? "none");
+    } catch (e) {
+        throw new Error(`Can not load template ${model.template}\nAvailable templates: ${Object.keys(templates)}\n`)
     }
+    //console.log("TPL:", tpl.id);
+    hasThink = tpl.tags?.think ? true : false;
+    //console.log("HT", hasThink);
+    //}
     if (options?.debug) {
         console.log("Task model:", model);
         console.log("Task vars:", vars);
@@ -296,28 +296,42 @@ async function executeTask(
         //console.log("ERR CATCH", e);
         const errMsg = `${e}`;
         if (errMsg.includes("502 Bad Gateway")) {
+            clearInterval(abortTicker);
             runtimeError("The server answered with a 502 Bad Gateway error. It might be down or misconfigured. Check your inference server.")
-            if (options?.debug) {
+            if (options?.nocli) {
                 throw new Error(errMsg)
             }
             //@ts-ignore
             return
         } else if (errMsg.includes("404 Not Found")) {
+            clearInterval(abortTicker);
             runtimeError("The server answered with a 404 Not Found error. That might mean that the model you are requesting does not exist on the server.")
+            if (options?.nocli) {
+                throw new Error(errMsg)
+            }
             //@ts-ignore
             return
         } else if (errMsg.includes("400 Bad Request")) {
+            clearInterval(abortTicker);
             runtimeError("The server answered with a 400 Bad Request error. That might mean that the model you are requesting does not exist on the server, a parameter is wrong or missing in your request.")
+            if (options?.nocli) {
+                throw new Error(errMsg)
+            }
             //@ts-ignore
             return
         } else if (errMsg.includes("fetch failed")) {
+            clearInterval(abortTicker);
             runtimeError("The server is not responding. Check if your inference backend is running.")
+            if (options?.nocli) {
+                throw new Error(errMsg)
+            }
             //@ts-ignore
             return
         } else if (e instanceof DOMException && e.name === 'AbortError') {
             if (options?.debug || options?.verbose) {
-                console.log("The request was canceled by the user");
+                console.warn("\n*** The request was canceled by the user ***");
             }
+            clearInterval(abortTicker);
             return {} as TaskOutput
         }
         else {
@@ -348,9 +362,7 @@ async function executeTask(
     // chat mode
     //console.log("CLI CONF IP", initialInferParams);
     if (!options?.isToolCall && isChatMode.value) {
-        if (tpl) {
-            setChatTemplate(tpl);
-        }
+        setChatTemplate(tpl);
         if (task.def.tools) {
             options.tools = task.def.tools
         }

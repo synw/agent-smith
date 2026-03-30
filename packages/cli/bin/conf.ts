@@ -45,13 +45,13 @@ function updateConfigFile(conf: ConfigFile, cfp?: string): string {
     return fp
 }
 
-function createConfigFile(cfp?: string): string {
+function createConfigFile(cfp?: string, local: Array<"llamacpp" | "koboldcpp" | "ollama"> = ["llamacpp", "koboldcpp", "ollama"]): string {
     createDirectoryIfNotExists(confDir);
     const fp = cfp ? cfp : path.join(confDir, "config.yml")
     const fc: ConfigFile = {
         backends: {
             default: "llamacpp",
-            local: ["llamacpp", "koboldcpp", "ollama"],
+            local: local,
             llamacpp_oai: {
                 type: "openai",
                 url: "http://localhost:8080/v1"

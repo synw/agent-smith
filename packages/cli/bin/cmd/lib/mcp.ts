@@ -1,6 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { ToolSpec } from "@locallm/types/dist/tools";
+import { ToolSpec } from "@locallm/types";
 import { confirmToolUsage } from "./tools.js";
 
 class McpClient {
