@@ -110,21 +110,6 @@ class Task {
         if (hasTools) {
             options.tools = this.def.tools;
         }
-        if (conf?.debug) {
-            if (this.agent?.history) {
-                this.agent.history.forEach(t => {
-                    if (t?.assistant || t?.tools) {
-                        tpl.pushToHistory(t);
-                    }
-                });
-            }
-            console.log("-----------", model.name, "- Template:", tpl.name, "- Ctx:", ctx, "-----------");
-            console.log(this.agent.lm.providerType != 'openai' ? tpl.prompt(finalPrompt) : finalPrompt);
-            console.log("----------------------------------------------")
-            console.log("Infer params:", this.def.inferParams);
-            console.log("----------------------------------------------")
-            //options.debug = true
-        }
         if (this.agent.lm.providerType == "ollama") {
             if (!this.def.inferParams?.extra) {
                 this.def.inferParams["extra"] = {}
@@ -147,8 +132,35 @@ class Task {
         if (this.def.template?.system) {
             options.system = this.def.template.system;
         }
+        if (this.def.template?.afterSystem) {
+            if (options?.system) {
+                options.system = options.system + this.def.template.afterSystem;
+            } else {
+                options.system = this.def.template.afterSystem;
+            }
+        }
         if (this.def?.shots) {
             options.history = options?.history ? [...this.def.shots, ...options.history] : this.def.shots;
+        }
+        if (conf?.debug) {
+            if (this.agent?.history) {
+                this.agent.history.forEach(t => {
+                    if (t?.assistant || t?.tools) {
+                        tpl.pushToHistory(t);
+                    }
+                });
+            }
+            console.log("-----------", model.name, "- Template:", tpl.name, "- Ctx:", ctx, "-----------");
+            if (this.agent.lm.providerType == 'openai') {
+                if (options?.system) {
+                    console.log("SYSTEM:", options.system, "\n");
+                }
+            }
+            console.log(this.agent.lm.providerType != 'openai' ? tpl.prompt(finalPrompt) : finalPrompt);
+            console.log("----------------------------------------------")
+            console.log("Infer params:", this.def.inferParams);
+            console.log("----------------------------------------------")
+            //options.debug = true
         }
         //console.log("RUN AGENT (TASK) params:", this.def.inferParams);
         //console.log("RUN AGENT (TASK) options:", options);
