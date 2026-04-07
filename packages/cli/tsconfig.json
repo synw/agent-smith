@@ -10,6 +10,8 @@
     "declaration": true,
     "allowSyntheticDefaultImports": true,
     "outDir": "./dist",
+    "rootDir": "./bin",
+    "ignoreDeprecations": "6.0",
     "allowJs": true,
     "removeComments": false,
     "strictFunctionTypes": true,

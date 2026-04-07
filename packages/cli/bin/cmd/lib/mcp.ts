@@ -1,6 +1,6 @@
 import { Client } from "@modelcontextprotocol/sdk/client/index.js";
 import { StdioClientTransport } from "@modelcontextprotocol/sdk/client/stdio.js";
-import { ToolSpec } from "@locallm/types";
+import { ToolSpec, type ToolCallSpec } from "@locallm/types";
 import { confirmToolUsage } from "./tools.js";
 
 class McpClient {
@@ -55,7 +55,7 @@ class McpClient {
         await this.client.close()
     }
 
-    async extractTools(): Promise<Array<ToolSpec>> {
+    async extractTools(options: Record<string, any>): Promise<Array<ToolSpec>> {
         const toolSpecs = new Array<ToolSpec>();
         const serverToolsList = await this.client.listTools();
         for (const tool of serverToolsList.tools) {
@@ -102,7 +102,10 @@ class McpClient {
             }
             if (this.askUserTools) {
                 if (this.askUserTools.includes(tool.name)) {
-                    t.canRun = confirmToolUsage;
+                    t.canRun = options?.confirmToolUsage ?
+                        options.confirmToolUsage as (tool: ToolCallSpec) => Promise<boolean> :
+                        confirmToolUsage;
+                    //t.canRun = confirmToolUsage;
                 }
             }
             this.tools[tool.name] = t;

@@ -54,7 +54,7 @@ async function executeTask(
     }
     for (const mcp of mcpServers) {
         await mcp.start();
-        const tools = await mcp.extractTools();
+        const tools = await mcp.extractTools(options);
         tools.forEach(t => task.def.tools?.push(t));
         if (options?.debug) {
             console.log("MCP start", mcp.name);
@@ -313,7 +313,7 @@ async function executeTask(
             return
         } else if (errMsg.includes("400 Bad Request")) {
             clearInterval(abortTicker);
-            runtimeError("The server answered with a 400 Bad Request error. That might mean that the model you are requesting does not exist on the server, a parameter is wrong or missing in your request.")
+            runtimeError("The server answered with a 400 Bad Request error. That might mean that:\n- The model you are requesting does not exist on the server\n- A parameter is wrong or missing in your request\n- The request size exceeds the available context window size")
             if (options?.nocli) {
                 throw new Error(errMsg)
             }
