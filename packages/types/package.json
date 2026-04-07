@@ -1,7 +1,7 @@
 {
   "name": "@agent-smith/types",
-  "version": "0.0.3",
-  "description": "Agent Smith Nodejs server types",
+  "version": "0.0.4",
+  "description": "Agent Smith Nodejs types",
   "repository": "https://github.com/synw/agent-smith",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
@@ -14,12 +14,12 @@
     "dist"
   ],
   "devDependencies": {
-    "@agent-smith/task": "^0.3.3",
-    "@locallm/types": "^0.7.0",
-    "@types/node": "^25.4.0",
-    "openai": "^6.27.0",
-    "typescript": "^5.9.3",
-    "vue": "3.5.29"
+    "@agent-smith/task": "^0.4.0",
+    "@locallm/types": "^0.7.1",
+    "@types/node": "^25.5.2",
+    "openai": "^6.33.0",
+    "typescript": "^6.0.2",
+    "vue": "3.5.32"
   },
   "publishConfig": {
     "access": "public",
