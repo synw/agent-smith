@@ -10,9 +10,11 @@
     "declaration": true,
     "allowSyntheticDefaultImports": true,
     "outDir": "./dist",
+    "rootDir": "./src",
     "allowJs": true,
     "removeComments": true,
     "strictFunctionTypes": true,
+    "ignoreDeprecations": "6.0",
     "types": [
       "node"
     ],
