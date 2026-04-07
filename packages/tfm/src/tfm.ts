@@ -2,7 +2,11 @@ import { templates } from "modprompt";
 import { TemplateForModel } from "./tfminterfaces.js";
 
 const useTemplateForModel = (): TemplateForModel => {
-    const list = () => Object.keys(templates);
+    const list = () => {
+        const l = Object.keys(templates)
+        //console.log("Tfm templates:", l);
+        return l
+    };
 
     const guess = (model: string, tools: boolean = false): string => {
         const _model = model.toLowerCase();
@@ -37,6 +41,9 @@ const useTemplateForModel = (): TemplateForModel => {
             case _model.includes("command-r") || _model.includes("aya"):
                 return "command-r";
             case _model.includes("gemma"):
+                if (_model.includes("gemma4") || tools) {
+                    return "gemma4"
+                }
                 return "gemma";
             case _model.includes("granite"):
                 return "granite";
