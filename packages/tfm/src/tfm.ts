@@ -18,10 +18,10 @@ const useTemplateForModel = (): TemplateForModel => {
             case _model.includes("qwen"):
                 let n = "chatml";
                 if (tools) {
-                    n = "chatml-tools";
-                    if (_model.includes("coder") || _model.includes("next") || _model.includes("3.5")) {
+                    n = "chatml-xmltools";
+                    /*if (_model.includes("coder") || _model.includes("next") || _model.includes("3.5")) {
                         n = "chatml-xmltools";
-                    }
+                    }*/
                 }
                 return n
             case _model.includes("deepseek"):
@@ -41,10 +41,10 @@ const useTemplateForModel = (): TemplateForModel => {
             case _model.includes("command-r") || _model.includes("aya"):
                 return "command-r";
             case _model.includes("gemma"):
-                if (_model.includes("gemma4") || tools) {
-                    return "gemma4"
+                if (_model.includes("gemma3") && !tools) {
+                    return "gemma"
                 }
-                return "gemma";
+                return "gemma4"
             case _model.includes("granite"):
                 return "granite";
             case _model.includes("nemotron"):
