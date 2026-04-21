@@ -1,6 +1,6 @@
 {
   "name": "@agent-smith/task",
-  "version": "0.4.1",
+  "version": "0.4.2",
   "description": "A toolkit to create human friendly agents: the language model tasks module",
   "repository": {
     "type": "git",

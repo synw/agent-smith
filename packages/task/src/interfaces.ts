@@ -95,6 +95,8 @@ interface TaskDef {
     variables?: TaskVariables;
     tools?: Array<ToolSpec>;
     toolsList?: Array<string>;
+    type?: string;
+    category?: string;
 }
 
 interface TaskOutput {
