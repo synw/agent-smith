@@ -11,16 +11,15 @@
     "build": "rm -rf dist/* && tsc"
   },
   "dependencies": {
-    "@locallm/api": "^0.8.0",
-    "modprompt": "^0.14.3",
+    "eventsource-parser": "^3.0.8",
     "restmix": "^0.6.1"
   },
   "devDependencies": {
-    "@locallm/types": "^0.7.1",
+    "@agent-smith/types": "../types",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-typescript": "^12.3.0",
     "@types/node": "^25.5.2",
-    "openai": "^6.33.0",
+    "openai": "^6.34.0",
     "rollup": "^4.60.1",
     "ts-node": "^10.9.2",
     "tslib": "2.8.1",

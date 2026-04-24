@@ -18,6 +18,6 @@ export default {
     }),
   ],
   external: [
-    "@locallm/api"
+    "restmix"
   ]
 };

@@ -1,0 +1,531 @@
+import type {
+    InferenceOptions,
+    InferenceParams,
+    InferenceResult,
+    InferenceStats,
+    IngestionStats,
+    LmProvider,
+    LmProviderParams,
+    OnLoadProgress,
+    ToolCallSpec,
+    ToolSpec,
+    ModelInfo,
+} from "@agent-smith/types";
+import { createParser } from 'eventsource-parser';
+import {
+    type ChatCompletionContentPart,
+    type ChatCompletionCreateParamsNonStreaming,
+    type ChatCompletionCreateParamsStreaming,
+    type ChatCompletionMessageFunctionToolCall,
+    type ChatCompletionMessageParam,
+    type ChatCompletionMessageToolCall,
+    type ChatCompletionTool
+} from "openai/resources/index.js";
+import { useApi } from "restmix";
+import { useStats } from "./stats.js";
+import { convertToolCallSpec, generateId } from './tools.js';
+
+class Lm implements LmProvider {
+    name: string;
+    api: ReturnType<typeof useApi>;
+    onToken?: (t: string) => void;
+    onThinkingToken?: (t: string) => void;
+    onStartEmit?: (data: IngestionStats) => void;
+    onEndEmit?: (result: InferenceResult) => void;
+    onError?: (err: string) => void;
+    // state
+    model = "";
+    models = new Array<ModelInfo>();
+    abortController = new AbortController();
+    apiKey: string;
+    serverUrl: string;
+    tools: Record<string, ToolSpec> = {};
+
+    /**
+ * Creates a new instance of the OpenaiCompatibleProvider.
+ *
+ * @param {LmProviderParams} params - Configuration parameters for initializing the provider.
+ */
+    constructor(params: LmProviderParams) {
+        this.name = params.name;
+        this.onToken = params.onToken;
+        this.onThinkingToken = params.onThinkingToken;
+        this.onStartEmit = params.onStartEmit;
+        this.onEndEmit = params.onEndEmit;
+        this.onError = params.onError;
+        this.apiKey = params.apiKey ?? "";
+        this.serverUrl = params.serverUrl;
+        this.api = useApi({
+            serverUrl: params.serverUrl,
+            credentials: "omit",
+        });
+    }
+
+    async modelsInfo(): Promise<Array<ModelInfo>> {
+        const res = await this.api.get<Record<string, any>>("/models");
+        if (res.ok) {
+            (res.data.data as Array<Record<string, any>>).forEach(row => this.models.push(row.id))
+        }
+        return this.models
+    }
+
+    async modelInfo(): Promise<ModelInfo> {
+        console.warn("Not implemented for this provider")
+        return { status: "", ctx: -1 }
+    }
+
+    /**
+   * Use a specified model for inferences.
+   *
+   * @param {string} name - The name of the model to load.
+   * @param {number | undefined} [ctx] - The optional context window length, defaults to the model ctx.
+   * @returns {Promise<void>}
+   */
+    async loadModel(name: string, ctx?: number, urls?: string | string[], onLoadProgress?: OnLoadProgress): Promise<void> {
+        this.model = name
+    }
+
+    /**
+  * Unloads a specified model
+  *
+  * @param {string} name - The name of the model to unload.
+  * @returns {Promise<void>}
+  */
+    async unloadModel(name: string): Promise<void> {
+        throw new Error("Not implemented for this provider");
+    }
+
+    async tokenize(text: string): Promise<Array<number>> {
+        const tokens = new Array<number>();
+        const res = await this.api.post<{ tokens: Array<number> }>("/tokenize", { content: text });
+        if (res.ok) {
+            tokens.push(...res.data.tokens)
+        } else {
+            throw new Error(`Error ${res.status} tokenizing text ${res.text}`);
+        }
+        return tokens
+    }
+
+    async detokenize(tokens: Array<number>): Promise<string> {
+        let text = "";
+        const res = await this.api.post<string>("/tokenize", { tokens: tokens });
+        if (res.ok) {
+            text = res.text
+        } else {
+            throw new Error(`Error ${res.status} detokenizing text ${res.text}`);
+        }
+        return text
+    }
+
+    /**
+     * Makes an inference based on the provided prompt and parameters.
+     *
+     * @param {string} prompt - The input text to base the inference on.
+     * @param {InferenceParams} params - Parameters for customizing the inference behavior.
+     * @returns {Promise<InferenceResult>} - The result of the inference.
+     */
+    async infer(
+        prompt: string,
+        params: InferenceParams,
+        options?: InferenceOptions,
+    ): Promise<InferenceResult> {
+        this.abortController = new AbortController();
+        let inferenceParams: Record<string, any> = Object.assign({}, params);
+        if ("max_tokens" in params) {
+            inferenceParams.max_completion_tokens = params.max_tokens;
+            delete inferenceParams.max_tokens;
+        }
+        if ("model" in inferenceParams) {
+            this.model = inferenceParams.model;
+            delete inferenceParams.model;
+        }
+        if (options?.debug) {
+            console.log("Options", options);
+        }
+        inferenceParams.stream = params?.stream ?? true;
+        //console.log("STREAM", inferenceParams.stream, params?.stream)
+        const stats = useStats();
+        stats.start();
+        let finalStats = {} as InferenceStats;
+        let serverStats: Record<string, any> = {};
+        let msgs: Array<ChatCompletionMessageParam> = [];
+        if (options?.system) {
+            msgs = [{ role: "system", content: options.system }];
+        }
+        if (options?.history) {
+            options.history.forEach(
+                // @ts-ignore
+                row => {
+                    if (row?.user) {
+                        msgs.push({
+                            role: "user",
+                            content: row.user,
+                        });
+                    }
+                    if (row?.assistant) {
+                        msgs.push({
+                            role: "assistant",
+                            content: row.assistant,
+                        });
+                    }
+                    if (row?.tools) {
+                        const toolCalls = new Array<ChatCompletionMessageToolCall>();
+                        const toolResponses = new Array<ChatCompletionMessageParam>();
+
+                        // @ts-ignore
+                        row.tools.forEach(tt => {
+                            toolCalls.push({
+                                id: tt.call.id ?? "",
+                                type: "function",
+                                "function": {
+                                    name: tt.call.name,
+                                    arguments: JSON.stringify(tt.call.arguments)
+                                }
+                            });
+                            toolResponses.push({
+                                role: "tool",
+                                tool_call_id: tt.call.id,
+                                content: tt.response,
+                            })
+                        });
+                        msgs.push({
+                            role: "assistant",
+                            content: null,
+                            tool_calls: toolCalls,
+                        })
+                        for (const tr of toolResponses) {
+                            msgs.push(tr)
+                        }
+                    }
+                }
+            );
+        }
+        if (inferenceParams?.images) {
+            const usermsgs = new Array<ChatCompletionContentPart>();
+            usermsgs.push(
+                { type: "text", text: prompt }
+            );
+            (inferenceParams.images as Array<string>).forEach(imgStr => {
+                usermsgs.push(
+                    { type: "image_url", image_url: { url: `data:image/jpeg;base64,${imgStr}`, detail: "auto" } }
+                )
+            });
+            delete inferenceParams.images;
+            msgs.push({ role: "user", content: usermsgs })
+        } else {
+            msgs.push({ role: "user", content: prompt });
+        }
+        let tools: Array<ChatCompletionTool> = [];
+        this.tools = {};
+        if (options?.tools) {
+            // @ts-ignore
+            options.tools.forEach(t => {
+                this.tools[t.name] = t;
+                const finalToolCall = convertToolCallSpec(t);
+                //console.log("Tool call def:")
+                //console.dir(finalToolCall, { depth: 5 });
+                tools.push(finalToolCall);
+            });
+        }
+        if (options?.assistant) {
+            msgs.push({ role: "assistant", content: options.assistant });
+        }
+        if (params?.extra) {
+            inferenceParams = { ...inferenceParams, ...params.extra };
+            delete inferenceParams.extra;
+        }
+        if (options?.debug || options?.verbose) {
+            const tn = Object.keys(this.tools);
+            console.log(tn.length, "available tools:", tn);
+        }
+        if (options?.debug) {
+            console.dir(tools, { depth: 6 })
+        }
+        if (options?.debug || options?.verbose) {
+            console.log("Messages ----------\n");
+            console.dir(msgs, { depth: 6 });
+            console.log("-------------------");
+        }
+        let i = 1;
+        let text: string;
+        let thinkingText = "";
+        const toolCalls = new Array<ToolCallSpec>();
+        if (!inferenceParams.stream) {
+            const ip: ChatCompletionCreateParamsNonStreaming = {
+                messages: msgs,
+                model: this.model,
+                parallel_tool_calls: true,
+                ...inferenceParams,
+            };
+            if (options?.debug || options?.verbose) {
+                console.log("Inference parameters:");
+                console.dir(inferenceParams, { depth: 4 });
+            }
+            if (tools.length > 0) {
+                ip.tools = tools;
+                ip.tool_choice = "auto";
+            }
+            //console.log("IP", JSON.stringify(ip, null, 2));
+            this.api.addHeader('Content-Type', 'application/json')
+            if (this.apiKey.length > 0) {
+                this.api.addHeader("Authorization", `Bearer ${this.apiKey}`);
+            }
+            const _url = `/chat/completions`;
+            //console.log("URL", _url);
+            const res = await this.api.post<Record<string, any>>(_url, ip, false, true);
+            if (!res.ok) {
+                throw new Error(`${res.statusText} ${res.status}`);
+            }
+            //const completion = await this.openai.chat.completions.create(ip);
+            //console.log("RESP", JSON.stringify(res, null, "  "));
+            const completion = res.data;
+            text = res.data.choices[0].message.content ?? "";
+            i = text.length > 0 ? text.length : (completion.usage?.completion_tokens ?? 0);
+            serverStats = completion?.usage ?? {};
+            if (completion.choices[0].finish_reason == "tool_calls") {
+                //console.log("TOOL CALLS NO STREAM:");
+                //console.dir(completion.choices[0].message.tool_calls, { depth: 8 })
+                const tcs = completion.choices[0].message.tool_calls as Array<ChatCompletionMessageFunctionToolCall> ?? [];
+                tcs?.forEach(tc => {
+                    const toolCall: ToolCallSpec = {
+                        id: tc.id ?? generateId(),
+                        name: tc.function.name,
+                    }
+                    if (tc?.function?.arguments) {
+                        try {
+                            const parsedTc = JSON.parse(tc.function.arguments);
+                            toolCall.arguments = parsedTc
+                        } catch (e) {
+                            throw new Error(`${e}\n\nTool call arguments parsing error: \n${tc.function.arguments}`)
+                        }
+                    }
+                    toolCalls.push(toolCall)
+                });
+            }
+        } else {
+            const ip: ChatCompletionCreateParamsStreaming = {
+                messages: msgs,
+                model: this.model,
+                parallel_tool_calls: true,
+                ...inferenceParams,
+                stream: true,
+            };
+            if (options?.debug || options?.verbose) {
+                console.log("Inference parameters:");
+                console.dir(inferenceParams, { depth: 4 });
+            }
+            if (tools.length > 0) {
+                ip.tools = tools;
+                ip.tool_choice = "auto";
+            }
+            const headers: Record<string, string> = {
+                'Content-Type': 'application/json',
+                //'Accept': 'text/event-stream',
+            };
+            if (this.apiKey.length > 0) {
+                headers["Authorization"] = `Bearer ${this.apiKey}`
+            }
+            const _url = `${this.serverUrl}/chat/completions`;
+            const body = JSON.stringify(ip);
+            if (options?.debug) {
+                console.log("Locallm: request body -------------");
+                console.log(ip);
+                console.log("-----------------------------------");
+            }
+            //console.log("IP", JSON.stringify(ip, null, 2));
+            const response = await fetch(_url, {
+                method: 'POST',
+                headers: headers,
+                body: body,
+                signal: this.abortController.signal,
+            });
+            if (!response.ok) {
+                throw new Error(`Inference server error: ${response.status} ${response.statusText}, ${JSON.stringify(response, null, 2)}`)
+            }
+            if (!response.body) {
+                throw new Error("No response body")
+            }
+            let buf = new Array<string>();
+            const reader = response.body.getReader();
+            let i = 1;
+            let accumulatedToolCalls: Array<{
+                id: string;
+                function: {
+                    name: string;
+                    arguments: string;
+                };
+                type: string;
+                index: number;
+            }> = [];
+            let hasToolCallStarted = false;
+            const parser = createParser({
+                onEvent: (event) => {
+                    const done = event.data === '[DONE]';
+                    if (!done) {
+                        if (i == 1) {
+                            const ins = stats.inferenceStarts();
+                            if (this.onStartEmit) {
+                                this.onStartEmit(ins)
+                            }
+                        }
+                        if (this.onToken) {
+                            const payload = JSON.parse(event.data);
+                            //console.dir("PAYLOAD:");
+                            //console.dir(payload, { depth: 5 });
+                            if (i == 0) {
+                                const ins = stats.inferenceStarts();
+                                if (this.onStartEmit) {
+                                    this.onStartEmit(ins)
+                                }
+                            }
+                            const modelRawToolCalls: Record<string, { name: string, arguments: Array<string> }> = {};
+
+                            const choice = payload.choices[0];
+                            if (!choice) return;
+
+                            const delta = choice.delta;
+                            if (!delta) return;
+
+                            // Check for tool calls in the delta
+                            if (delta.tool_calls && delta.tool_calls.length > 0) {
+                                if (!hasToolCallStarted) {
+                                    console.log("START TC")
+                                }
+                                hasToolCallStarted = true;
+                                console.log("DELTA TC", delta.tool_calls);
+                                for (const toolCallDelta of delta.tool_calls) {
+                                    const index = toolCallDelta.index;
+                                    // Ensure the array is large enough
+                                    if (!accumulatedToolCalls[index]) {
+                                        accumulatedToolCalls[index] = {
+                                            id: toolCallDelta.id || '',
+                                            function: {
+                                                name: toolCallDelta.function?.name || '',
+                                                arguments: toolCallDelta.function?.arguments || ''
+                                            },
+                                            type: toolCallDelta.type || 'function',
+                                            index: index
+                                        };
+                                    } else {
+                                        // Update existing tool call with new information
+                                        if (toolCallDelta.id) {
+                                            accumulatedToolCalls[index].id = toolCallDelta.id;
+                                        }
+                                        if (toolCallDelta.function?.name) {
+                                            accumulatedToolCalls[index].function.name = toolCallDelta.function.name;
+                                        }
+                                        if (toolCallDelta.function?.arguments) {
+                                            accumulatedToolCalls[index].function.arguments += toolCallDelta.function.arguments;
+                                        }
+                                    }
+                                }
+                            }
+                            // Check for finish_reason if the tool call is complete
+                            const finishReason = choice.finish_reason;
+                            if (finishReason) {
+                                console.log("FINISH REASON", finishReason);
+                            }
+                            if (finishReason === 'tool_calls') {
+                                console.log("FINISH TC", accumulatedToolCalls);
+                                hasToolCallStarted = false;
+                                //console.log('\n--- Tool Call Ready ---');
+                                for (const toolCall of accumulatedToolCalls) {
+                                    //console.log('Tool Name:', toolCall.function.name);
+                                    //console.log('Arguments:', toolCall.function.arguments);
+                                    if (!(toolCall.function.name in modelRawToolCalls)) {
+                                        modelRawToolCalls[toolCall.id] = {
+                                            name: toolCall.function.name,
+                                            arguments: new Array<string>()
+                                        };
+                                        if (options?.debug || options?.verbose) {
+                                            console.log("* Initiating tool call", toolCall.function.name)
+                                        }
+                                    }
+                                    //modelRawToolCalls[currentToolCallName].id = toolCall.id;
+                                    modelRawToolCalls[toolCall.id].arguments.push(toolCall.function.arguments);
+                                }
+                                reader.cancel();
+                            }
+                            if (delta?.reasoning_content) {
+                                thinkingText += delta.reasoning_content;
+                                if (this.onThinkingToken) {
+                                    this.onThinkingToken(delta.reasoning_content);
+                                }
+                            } else {
+                                const t = delta?.content;
+                                if (t) {
+                                    if (this.onToken) {
+                                        this.onToken(t);
+                                    }
+                                    buf.push(t);
+                                }
+                            }
+                            ++i
+                            for (const [k, v] of Object.entries(modelRawToolCalls)) {
+                                let args: any;
+                                try {
+                                    //console.log("TRY", `parsing tool call args:\n${k}: ${v.arguments}`);
+                                    //console.log(`TRY MRTC:\n${typeof modelRawToolCalls} ${JSON.stringify(modelRawToolCalls, null, 2)}`);
+                                    args = JSON.parse(v.arguments.join(""));
+                                } catch (e) {
+                                    throw new Error(`parsing tool call args:\n${v.arguments}\nMRTC:\n${typeof modelRawToolCalls} ${JSON.stringify(modelRawToolCalls, null, 2)}`)
+                                }
+                                const toolCall: ToolCallSpec = {
+                                    id: k ?? generateId(),
+                                    name: v.name,
+                                    arguments: args,
+                                }
+                                toolCalls.push(toolCall)
+                            }
+                        }
+                        ++i
+                    } else {
+                        reader.cancel();
+                        return;
+                    }
+                }
+            });
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) {
+                    break;
+                }
+                // Enqueue the raw chunk bytes into the parser
+                const chunk = new TextDecoder().decode(value);
+                parser.feed(chunk);
+            }
+            text = buf.join("");
+        }
+        finalStats = stats.inferenceEnds(i);
+        const ir: InferenceResult = {
+            text: text,
+            thinkingText: thinkingText,
+            stats: finalStats,
+            serverStats: serverStats,
+        };
+        if (toolCalls.length > 0) {
+            ir.toolCalls = toolCalls;
+            if (options?.debug) {
+                console.log("=> Tools calls:");
+                console.dir(toolCalls, { depth: 6 })
+            }
+        }
+        if (this.onEndEmit) {
+            this.onEndEmit(ir)
+        }
+        return ir
+    }
+
+    /**
+   * Aborts a currently running inference task.
+   *
+   * @returns {Promise<void>}
+   */
+    async abort(): Promise<void> {
+        this.abortController.abort();
+    }
+}
+
+export {
+    Lm
+};

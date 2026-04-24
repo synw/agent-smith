@@ -1,8 +1,7 @@
+import { Lm } from "./client.js";
 import { Agent } from "./agent.js";
-import { extractBetweenTags, splitThinking } from "./utils.js";
 
 export {
+    Lm,
     Agent,
-    extractBetweenTags,
-    splitThinking,
 }
