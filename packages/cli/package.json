@@ -1,7 +1,7 @@
 {
   "name": "@agent-smith/cli",
   "description": "Agent Smith: terminal client for language model agents",
-  "version": "0.0.116",
+  "version": "0.0.117",
   "scripts": {
     "build": "rm -rf dist/* && tsc",
     "cli": "node --loader ts-node/esm bin/index.ts",
@@ -11,7 +11,7 @@
     "@agent-smith/agent": "^0.4.1",
     "@agent-smith/nodetask": "^0.3.1",
     "modprompt": "^0.14.3",
-    "@agent-smith/task": "^0.4.1",
+    "@agent-smith/task": "^0.4.2",
     "@agent-smith/tfm": "^0.3.1",
     "@inquirer/prompts": "^8.4.0",
     "@intrinsicai/gbnfgen": "^0.12.0",

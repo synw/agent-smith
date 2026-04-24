@@ -91,10 +91,12 @@ function _parseTaskVariables(data: Record<string, any>): { required: Array<strin
 
 function extractTaskToolDocAndVariables(
     name: string, ext: FeatureExtension, dirPath: string
-): { toolDoc: string, variables: { required: Array<string>, optional: Array<string> } } {
+): {
+    toolDoc: string, variables: { required: Array<string>, optional: Array<string> }, type: string | null, category: string | null
+} {
     const fp = dirPath + "/" + name + "." + ext;
     const { data, found } = readYmlFile(fp);
-    const res = { variables: { required: new Array<string>(), optional: new Array<string>() }, toolDoc: "" };
+    const res = { variables: { required: new Array<string>(), optional: new Array<string>() }, toolDoc: "", type: null, category: null };
     // tools
     let tspec: ToolSpec;
     if (!found) {
@@ -109,6 +111,14 @@ function extractTaskToolDocAndVariables(
     const { required, optional } = _parseTaskVariables(data);
     res.variables.required = required;
     res.variables.optional = optional;
+    // type
+    if (data?.type) {
+        res.type = data.type
+    }
+    // category
+    if (data?.category) {
+        res.category = data.category
+    }
     return res
 }
 

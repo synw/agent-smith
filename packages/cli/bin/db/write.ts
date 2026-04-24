@@ -1,5 +1,5 @@
 import { extractTaskToolDocAndVariables, extractToolDoc } from "../cmd/lib/tools.js";
-import { AliasType, FeatureSpec, FeatureType, Features, DbModelDef, InferenceBackend, TaskSettings } from "../interfaces.js";
+import { AliasType, FeatureSpec, FeatureType, Features, InferenceBackend, TaskSettings } from "../interfaces.js";
 import { db } from "./db.js";
 
 function updatePromptfilePath(pf: string) {
@@ -171,16 +171,16 @@ function upsertAndCleanFeatures(feats: Array<FeatureSpec>, type: FeatureType): A
     return newFeatures
 }
 
-function updateVariables(name: string, variableDoc: string) {
-    const stmt1 = db.prepare("SELECT id FROM task WHERE name = ?");
+function updateVariablesAndInfo(name: string, type: string, variableDoc: string, itemType: string | null, itemCat: string | null) {
+    const stmt1 = db.prepare(`SELECT id FROM ${type} WHERE name = ?`);
     const result = stmt1.get(name) as Record<string, any>;
     //console.log("UV res", result);
     if (!result?.id) {
         return;
     }
-    const updateStmt = db.prepare("UPDATE task SET variables = ? WHERE id = ?");
-    updateStmt.run(variableDoc, result.id);
-    //console.log("~", "[task variables] updated for", name);
+    const updateStmt = db.prepare(`UPDATE ${type} SET variables = ?, type = ?, category = ? WHERE id = ?`);
+    //console.log("~", "task variables and info updated for", name, "/", itemType, itemCat);
+    updateStmt.run(variableDoc, itemType, itemCat, result.id);
 }
 
 function updateUserCmd(feat: FeatureSpec) {
@@ -214,28 +214,28 @@ function updateFeatures(feats: Features) {
     //console.log("FEATS", feats);
     upsertAndCleanFeatures(feats.agent, "agent");
     feats.agent.forEach((feat) => {
-        const { toolDoc, variables } = extractTaskToolDocAndVariables(feat.name, feat.ext, feat.path);
+        const { toolDoc, variables, type, category } = extractTaskToolDocAndVariables(feat.name, feat.ext, feat.path);
         //const { found, toolDoc } = extractToolDoc(feat.name, feat.ext, feat.path);
         //console.log(`TASK ${feat.name} TOOL DOC`, toolDoc);
         if (toolDoc.length > 0) {
             upsertTool(feat.name, "agent", toolDoc)
         }
-        if (Object.keys(variables.required).length > 0 || Object.keys(variables.optional).length > 0) {
+        if (Object.keys(variables.required).length > 0 || Object.keys(variables.optional).length > 0 || type !== null || category !== null) {
             //console.log("UPDATE VARS", feat.name, ":", variables)
-            updateVariables(feat.name, JSON.stringify(variables, null, "  "))
+            updateVariablesAndInfo(feat.name, "agent", JSON.stringify(variables, null, "  "), type, category)
         }
     });
     upsertAndCleanFeatures(feats.task, "task");
     feats.task.forEach((feat) => {
-        const { toolDoc, variables } = extractTaskToolDocAndVariables(feat.name, feat.ext, feat.path);
+        const { toolDoc, variables, type, category } = extractTaskToolDocAndVariables(feat.name, feat.ext, feat.path);
         //const { found, toolDoc } = extractToolDoc(feat.name, feat.ext, feat.path);
         //console.log(`TASK ${feat.name} TOOL DOC`, toolDoc);
         if (toolDoc.length > 0) {
             upsertTool(feat.name, "task", toolDoc)
         }
-        if (Object.keys(variables.required).length > 0 || Object.keys(variables.optional).length > 0) {
+        if (Object.keys(variables.required).length > 0 || Object.keys(variables.optional).length > 0 || type !== null || category !== null) {
             //console.log("UPDATE VARS", feat.name, ":", variables)
-            updateVariables(feat.name, JSON.stringify(variables, null, "  "))
+            updateVariablesAndInfo(feat.name, "task", JSON.stringify(variables, null, "  "), type, category)
         }
     });
     upsertAndCleanFeatures(feats.action, "action");

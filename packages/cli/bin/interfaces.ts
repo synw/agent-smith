@@ -7,6 +7,8 @@ interface FeatureSpec {
     path: string;
     ext: FeatureExtension;
     variables?: TaskVariables | Record<string, any>;
+    type?: string;
+    category?: string;
 }
 
 interface Features {

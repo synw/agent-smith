@@ -50,7 +50,7 @@ function createConfigFile(cfp?: string, local: Array<"llamacpp" | "koboldcpp" | 
     const fp = cfp ? cfp : path.join(confDir, "config.yml")
     const fc: ConfigFile = {
         backends: {
-            default: "llamacpp",
+            default: "llamacpp_oai",
             local: local,
             llamacpp_oai: {
                 type: "openai",

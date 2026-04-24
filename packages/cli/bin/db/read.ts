@@ -35,7 +35,10 @@ function readPlugins(): Array<Record<string, string>> {
 
 function readFeaturesType(type: FeatureType): Record<string, FeatureSpec> {
     //console.log(`SELECT name, path, ext, variables FROM ${type}`)
-    const stmt = db.prepare(`SELECT name, path, ext, variables FROM ${type}`);
+    let stmt = db.prepare(`SELECT name, path, ext, variables FROM ${type}`);
+    if (["agent", "task"].includes(type)) {
+        stmt = db.prepare(`SELECT name, path, ext, variables, type, category FROM ${type}`);
+    }
     const data = stmt.all() as Array<Record<string, any>>;
     const res: Record<string, FeatureSpec> = {};
     data.forEach((row) => {
@@ -45,6 +48,10 @@ function readFeaturesType(type: FeatureType): Record<string, FeatureSpec> {
             path: row.path,
             ext: row.ext,
             variables: vars,
+        }
+        if (["agent", "task"].includes(type)) {
+            res[row.name].type = row.type;
+            res[row.name].category = row.category;
         }
     });
     return res

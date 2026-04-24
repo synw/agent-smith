@@ -1,6 +1,7 @@
+import { Agent } from "@agent-smith/agent";
 import { TaskConf, TaskOutput } from "@agent-smith/task";
 import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
-import { InferenceParams, type ToolCallSpec } from "@locallm/types";
+import { InferenceParams } from "@locallm/types";
 import { default as color, default as colors } from "ansi-colors";
 import { PromptTemplate, templates } from "modprompt";
 import ora from 'ora';
@@ -16,7 +17,6 @@ import { runtimeDataError, runtimeError, runtimeWarning } from "../user_msgs.js"
 import { processOutput } from "../utils.js";
 import { readTask } from "./read.js";
 import { getTaskPrompt } from "./utils.js";
-import { Agent } from "@agent-smith/agent";
 
 async function executeTask(
     name: string, payload: Record<string, any>, options: Record<string, any>

@@ -1,4 +1,4 @@
-import { ActionExtension, AdaptaterExtension, CmdExtension, Features, TaskExtension, WorkflowExtension, type AgentExtension } from "../../interfaces.js";
+import { ActionExtension, AdaptaterExtension, CmdExtension, Features, TaskExtension, WorkflowExtension, type AgentExtension, type FeatureSpec } from "../../interfaces.js";
 import { default as fs } from "fs";
 import { default as path } from "path";
 

@@ -1,5 +1,5 @@
 import path from "path";
-import { processConfPath } from "../../conf.js";
+import { confDir, processConfPath } from "../../conf.js";
 import { initDb } from "../../db/db.js";
 import { readFeaturePaths, readFilePath } from "../../db/read.js";
 import { cleanupFeaturePaths, updateAliases, updateDataDirPath, updateFeatures, updatePromptfilePath, upsertFilePath } from "../../db/write.js";
@@ -47,14 +47,8 @@ async function updateFeaturesCmd(options: Record<string, any>): Promise<any> {
 
 async function updateConfCmd(args: Array<string>): Promise<any> {
     initDb(false, true);
-    // try to find a conf path in db
-    const { found, path } = readFilePath("conf");
-    const userProvidedConfPath = (args[0] != "conf") ? args[0] : null;
-    if (!found && !userProvidedConfPath) {
-        runtimeDataError("conf file path not found in db: please provide a conf path parameter to the command")
-    }
-
     let confPath: string;
+    const userProvidedConfPath = (args[0] != "conf") ? args[0] : null;
     if (userProvidedConfPath) {
         confPath = userProvidedConfPath;
         const isu = upsertFilePath("conf", confPath);
@@ -62,7 +56,15 @@ async function updateConfCmd(args: Array<string>): Promise<any> {
             runtimeInfo("Config path", confPath, "updated")
         }
     } else {
-        confPath = path;
+        // try to find a conf path in db
+        const cf = readFilePath("conf");
+        if (cf.found) {
+            confPath = cf.path;
+        } else {
+            // use default conf path
+            confPath = path.join(confDir, "config.yml");
+            upsertFilePath("conf", confPath);
+        }
     }
     const { paths, pf, dd } = await processConfPath(confPath);
     console.log("Using", confPath, "to update features at", paths);

@@ -20,7 +20,9 @@ const tasks = `CREATE TABLE IF NOT EXISTS task (
     name TEXT UNIQUE NOT NULL,
     path TEXT NOT NULL,
     variables TEXT,
-    ext TEXT NOT NULL CHECK ( ext IN ('yml') )
+    ext TEXT NOT NULL CHECK ( ext IN ('yml') ),
+    type TEXT,
+    category TEXT
 );`;
 
 const agents = `CREATE TABLE IF NOT EXISTS agent (
@@ -28,7 +30,9 @@ const agents = `CREATE TABLE IF NOT EXISTS agent (
     name TEXT UNIQUE NOT NULL,
     path TEXT NOT NULL,
     variables TEXT,
-    ext TEXT NOT NULL CHECK ( ext IN ('yml') )
+    ext TEXT NOT NULL CHECK ( ext IN ('yml') ),
+    type TEXT,
+    category TEXT
 );`;
 
 const workflow = `CREATE TABLE IF NOT EXISTS workflow (
