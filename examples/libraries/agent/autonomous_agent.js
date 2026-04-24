@@ -1,8 +1,7 @@
 #!/usr/bin/env node
-import { Agent } from "../packages/agent/dist/main.js";
-import { Lm } from "@locallm/api";
+import { Agent, Lm } from "../../../packages/agent/dist/main.js";
 
-let model = "qwen4b-t";
+let model = "qwen4b";
 const serverUrl = "http://localhost:8080/v1"; // Local Llama.cpp
 const apiKey = "";
 const system = "You are a helpful touristic assistant";
@@ -10,14 +9,17 @@ const _prompt = `I am landing in Barcelona in one hour: I plan to reach my hotel
 How are the conditions in the city?`;
 //const _prompt = "What is the current weather in Barcelona?"
 
+const onToolCall = (tc) => console.log("TOOL CALL", tc);
+const onToolCallEnd = (id, tce) => console.log("TOOL CALL END", id);
+
 function run_get_current_weather(args) {
     console.log("Running the get_current_weather tool with args", args);
-    return '{ "temp": 20.5, "weather": "rain" }'
+    return '{ "temp": 20.5, "weather": "rain" }';
 }
 
 function run_get_current_traffic(args) {
     console.log("Running the get_current_traffic tool with args", args);
-    return '{ "trafic": "normal" }'
+    return '{ "trafic": "normal" }';
 }
 
 const get_current_weather = {
@@ -46,7 +48,6 @@ const get_current_traffic = {
 
 async function main() {
     const lm = new Lm({
-        providerType: "openai",
         serverUrl: serverUrl,
         apiKey: apiKey,
         onToken: (t) => process.stdout.write(t),
@@ -60,16 +61,18 @@ async function main() {
             top_p: 0.95,
             min_p: 0,
             max_tokens: 4096,
-            model: { name: model }
+            model: model
         },
         // query options
         {
-            debug: false,
-            verbose: true,
+            //debug: false,
+            //verbose: true,
             system: system,
-            tools: [get_current_weather, get_current_traffic]
+            tools: [get_current_weather, get_current_traffic],
+            onToolCall: onToolCall,
+            onToolCallEnd: onToolCallEnd,
         });
-    console.log()
+    console.log();
 }
 
 (async () => {

@@ -1,21 +1,13 @@
 #!/usr/bin/env node
-import { Lm } from "@locallm/api";
-import { Agent } from "../packages/agent/dist/main.js";
+import { Agent, Lm } from "../../../packages/agent/dist/main.js";
 
 const _prompt = "Give me a short list of the planets names in the solar system";
 const _prompt2 = "Sort the planets by mass";
-const model = {
-    name: "qwen4b",
-    //name: "oss20b"
-};
-const _template = "chatml";
-//const _template = "gptoss";
+const model = "qwen4b";
 
-async function main ()
-{
+async function main() {
     const lm = new Lm({
-        providerType: "llamacpp",
-        serverUrl: "http://localhost:8080",
+        serverUrl: "http://localhost:8080/v1",
         onToken: (t) => process.stdout.write(t),
     });
     const agent = new Agent(lm);
@@ -45,15 +37,12 @@ async function main ()
         inferParams,
         // query options
         options,
-        // manual prompt template
-        _template
     );
     console.dir(result2, { depth: 6 });
     console.log("----------- history ------------");
     console.log(agent.history);
 }
 
-(async () =>
-{
+(async () => {
     await main();
 })();

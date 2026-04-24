@@ -1,12 +1,11 @@
 #!/usr/bin/env node
-import { Agent } from "../packages/agent/dist/main.js";
-import { Lm } from "@locallm/api";
+import { Agent, Lm } from "../../../packages/agent/dist/main.js";
 import { createInterface } from 'readline/promises';
 import { stdin as input, stdout as output } from 'process';
 
 const serverUrl = "http://localhost:8080/v1"; // Local Llama.cpp
 const apiKey = "";
-const model = "qwen4b-t";
+const model = "qwen4b";
 const system = "You are a helpful touristic assistant";
 const _prompt = `I am landing in Barcelona in one hour: I plan to reach my hotel and then go for outdoor sport. 
 How are the conditions in the city?`;
@@ -16,26 +15,22 @@ const rl = createInterface({
     output
 });
 
-async function askUser (question)
-{
+async function askUser(question) {
     const answer = await rl.question(question);
     return answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes';
 }
 
-async function canExecuteTool (tool)
-{
-    const msg = `Execute tool ${tool.name} with arguments ${tool.arguments}`;
+async function canExecuteTool(tool) {
+    const msg = `Execute tool ${tool.name} with arguments ${JSON.stringify(tool.arguments)}`;
     return await askUser(msg + ' (y/n): ');
 }
 
-function run_get_current_weather (args)
-{
+function run_get_current_weather(args) {
     console.log("Running the get_current_weather tool with args", args);
     return '{ "temp": 20.5, "weather": "rain" }';
 }
 
-function run_get_current_traffic (args)
-{
+function run_get_current_traffic(args) {
     console.log("Running the get_current_traffic tool with args", args);
     return '{ "trafic": "normal" }';
 }
@@ -63,13 +58,11 @@ const get_current_traffic = {
         }
     },
     execute: run_get_current_traffic,
-    //canRun: canExecuteTool
+    canRun: canExecuteTool
 };
 
-async function main ()
-{
+async function main() {
     const lm = new Lm({
-        providerType: "openai",
         serverUrl: serverUrl,
         apiKey: apiKey,
         onToken: (t) => process.stdout.write(t),
@@ -83,7 +76,7 @@ async function main ()
             top_p: 0.95,
             min_p: 0,
             max_tokens: 4096,
-            model: { name: model }
+            model: model
         },
         // query options
         {
@@ -95,8 +88,7 @@ async function main ()
     console.log();
 }
 
-(async () =>
-{
+(async () => {
     await main();
 })();
 
