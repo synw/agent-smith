@@ -1,11 +1,23 @@
 import { db, fs } from '@agent-smith/cli';
+import type { FeatureSpec } from '@agent-smith/cli/dist/interfaces';
 import type Router from '@koa/router';
 import type { Next, Context } from 'koa';
+import { excludedTaskTypes } from '../utils.js';
 
 function getAgentsRoute(r: Router) {
     r.get('/agents', async (ctx: Context, next: Next) => {
         const agents = db.readFeaturesType("agent");
-        ctx.body = agents;
+        let ag: Record<string, FeatureSpec> = {};
+        for (const [name, feat] of Object.entries(agents)) {
+            if (feat?.type) {
+                if (!excludedTaskTypes.includes(feat.type)) {
+                    ag[name] = feat;
+                }
+            } else {
+                ag[name] = feat;
+            }
+        }
+        ctx.body = ag;
         ctx.status = 200;
         //console.log("AGENTS", ctx.status);
         //await next()

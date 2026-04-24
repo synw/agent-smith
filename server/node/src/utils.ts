@@ -18,6 +18,9 @@ function getConfig(): { found: boolean, conf: ConfigFile, path: string } {
     return { found: c.found, conf: c.data, path: confFilePath }
 }
 
+const excludedTaskTypes = ["app", "workflow", "terminal"];
+
 export {
     getConfig,
+    excludedTaskTypes,
 }
