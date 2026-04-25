@@ -1,5 +1,6 @@
+import type { AgentInferenceOptions } from "@agent-smith/types/dist/inference.js";
 import { Lm } from "./client.js";
-import type { InferenceParams, ToolSpec, HistoryTurn, InferenceOptions, InferenceResult, ToolTurn, AgentParams, ToolCallSpec } from "@agent-smith/types";
+import type { InferenceParams, ToolSpec, HistoryTurn, InferenceOptions, InferenceResult, ToolTurn, AgentParams, ToolCallSpec, InferenceCallbacks, AgentCallbacks } from "@agent-smith/types";
 
 class Agent {
     name: string = "unamed";
@@ -74,14 +75,43 @@ class Agent {
     async runAgent(
         it: number,
         prompt: string,
-        options: InferenceOptions = {},
+        options: AgentInferenceOptions = {},
     ) {
         //console.log("AGENT PROMPT NO TPL", prompt);
         //console.log("(AGENT) RUN NO TEMPLATE params:", JSON.stringify(params, null, 2));
         //console.log("(AGENT) RUN NO TEMPLATE options:", JSON.stringify(options, null, 2));
         //console.log("(AGENT) RUN NO TEMPLATE provider:", this.lm.providerType);
+        const clientEvents: InferenceCallbacks = {
+            onToken: options?.onToken,
+            onThinkingToken: options?.onThinkingToken,
+            onStartEmit: options?.onStartEmit,
+            onEndEmit: options?.onEndEmit,
+            onError: options?.onEndEmit,
+            onToolCallInProgress: options?.onToolCallInProgress,
+        };
+        const events: AgentCallbacks = {
+            onToolCall: options?.onToolCall ?? this.onToolCall,
+            onToolCallEnd: options?.onToolCallEnd ?? this.onToolCallEnd,
+            onToolsTurnStart: options?.onToolsTurnStart ?? this.onToolsTurnStart,
+            onToolsTurnEnd: options?.onToolsTurnEnd ?? this.onToolsTurnEnd,
+            onTurnEnd: options?.onTurnEnd ?? this.onTurnEnd,
+            onAssistant: options?.onAssistant ?? this.onAssistant,
+            onThink: options?.onThink ?? this.onThink,
+        }
+        const baseOpts = {
+            debug: options?.debug,
+            verbose: options?.verbose,
+            model: options?.model,
+            tools: options?.tools,
+            history: options?.history,
+            system: options?.system,
+            assistant: options?.assistant,
+            isToolsRouter: options?.isToolsRouter,
+            params: options?.params,
+        }
+        const clientOpts = { ...baseOpts, ...clientEvents };
         options.history = this.history;
-        const res = await this.lm.infer(prompt, options);
+        const res = await this.lm.infer(prompt, clientOpts);
         //console.log("(AGENT) RUN RES:");
         //console.dir(res, {depth: 8})
         if (it == 1) {
@@ -90,18 +120,18 @@ class Agent {
         let _res = res;
         //console.log("RES", res);
         if (_res.thinkingText.length > 0) {
-            if (this?.onThink) {
-                this.onThink(_res.thinkingText)
+            if (events.onThink) {
+                events.onThink(_res.thinkingText)
             }
         }
         if (_res.text.length > 0) {
-            if (this?.onAssistant) {
-                this.onAssistant(_res.text)
+            if (events.onAssistant) {
+                events.onAssistant(_res.text)
             }
         }
         if (res?.toolCalls) {
-            if (this?.onToolsTurnStart) {
-                this.onToolsTurnStart(res.toolCalls);
+            if (events.onToolsTurnStart) {
+                events.onToolsTurnStart(res.toolCalls);
             }
             const toolsResults = new Array<ToolTurn>();
             const toolNames = Object.keys(this.tools);

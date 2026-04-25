@@ -10,6 +10,7 @@ import type {
     ToolCallSpec,
     ToolSpec,
     ModelInfo,
+    InferenceCallbacks,
 } from "@agent-smith/types";
 import { createParser } from 'eventsource-parser';
 import {
@@ -24,6 +25,7 @@ import {
 import { useApi } from "restmix";
 import { useStats } from "./stats.js";
 import { convertToolCallSpec, generateId } from './tools.js';
+import type { ClientInferenceOptions } from "@agent-smith/types/dist/inference.js";
 
 class Lm implements LmProvider {
     name: string;
@@ -32,7 +34,7 @@ class Lm implements LmProvider {
     onThinkingToken?: (t: string) => void;
     onStartEmit?: (data: IngestionStats) => void;
     onEndEmit?: (result: InferenceResult) => void;
-    onError?: (err: string) => void;
+    onError?: (err: any) => void;
     onToolCallInProgress?: (tc: Array<ToolCallSpec>) => void;
     // state
     model = "";
@@ -128,8 +130,17 @@ class Lm implements LmProvider {
      */
     async infer(
         prompt: string,
-        options: InferenceOptions = {},
+        options: ClientInferenceOptions = {},
     ): Promise<InferenceResult> {
+        const events: InferenceCallbacks = {
+            onToken: options?.onToken ?? this.onToken,
+            onThinkingToken: options?.onThinkingToken ?? this.onThinkingToken,
+            onStartEmit: options?.onStartEmit ?? this.onStartEmit,
+            onEndEmit: options?.onEndEmit ?? this.onEndEmit,
+            onError: options?.onEndEmit ?? this.onError,
+            onToolCallInProgress: options?.onToolCallInProgress ?? this.onToolCallInProgress,
+        };
+        //console.log("CLI OPTS", options);
         this.abortController = new AbortController();
         const params = options?.params ?? {};
         let inferenceParams: Record<string, any> = Object.assign({}, params);
@@ -219,7 +230,6 @@ class Lm implements LmProvider {
         let tools: Array<ChatCompletionTool> = [];
         this.tools = {};
         if (options?.tools) {
-            // @ts-ignore
             options.tools.forEach(t => {
                 this.tools[t.name] = t;
                 const finalToolCall = convertToolCallSpec(t);
@@ -246,6 +256,11 @@ class Lm implements LmProvider {
             console.log("Messages ----------\n");
             console.dir(msgs, { depth: 6 });
             console.log("-------------------");
+            if (options?.tools) {
+                console.log("Tools ----------\n");
+                console.dir(options.tools, { depth: 6 });
+                console.log("-------------------");
+            }
         }
         let i = 1;
         let text: string;
@@ -282,7 +297,7 @@ class Lm implements LmProvider {
             const completion = res.data;
             text = res.data.choices[0].message.content ?? "";
             i = text.length > 0 ? text.length : (completion.usage?.completion_tokens ?? 0);
-            serverStats = completion?.usage ?? {};
+            serverStats = completion?.timings ?? {};
             if (completion.choices[0].finish_reason == "tool_calls") {
                 //console.log("TOOL CALLS NO STREAM:");
                 //console.dir(completion.choices[0].message.tool_calls, { depth: 8 })
@@ -341,9 +356,19 @@ class Lm implements LmProvider {
                 signal: this.abortController.signal,
             });
             if (!response.ok) {
-                throw new Error(`Inference server error: ${response.status} ${response.statusText}, ${JSON.stringify(response, null, 2)}`)
+                const jerr = await response.json();
+                const err = jerr?.error ?? await response.text();
+                if (this?.onError) {
+                    this.onError(err);
+                    return {} as InferenceResult;
+                } else {
+                    throw new Error(`Inference server error: ${JSON.stringify(err, null, 2)}`)
+                }
             }
             if (!response.body) {
+                if (this?.onError) {
+                    this.onError(new Error("No response body"));
+                };
                 throw new Error("No response body")
             }
             let buf = new Array<string>();
@@ -365,18 +390,18 @@ class Lm implements LmProvider {
                     if (!done) {
                         if (i == 1) {
                             const ins = stats.inferenceStarts();
-                            if (this.onStartEmit) {
-                                this.onStartEmit(ins)
+                            if (events.onStartEmit) {
+                                events.onStartEmit(ins)
                             }
                         }
-                        if (this.onToken) {
+                        if (events.onToken) {
                             const payload = JSON.parse(event.data);
-                            //console.dir("PAYLOAD:");
+                            //console.dir("PAYLOAD:", payload);
                             //console.dir(payload, { depth: 5 });
                             if (i == 0) {
                                 const ins = stats.inferenceStarts();
-                                if (this.onStartEmit) {
-                                    this.onStartEmit(ins)
+                                if (events.onStartEmit) {
+                                    events.onStartEmit(ins)
                                 }
                             }
                             const modelRawToolCalls: Record<string, { name: string, arguments: Array<string> }> = {};
@@ -420,8 +445,8 @@ class Lm implements LmProvider {
                                             name: toolCallDelta.function?.name,
                                             arguments: {},
                                         };
-                                        if (this?.onToolCallInProgress) {
-                                            this.onToolCallInProgress(toolsCallsInProgress);
+                                        if (events.onToolCallInProgress) {
+                                            events.onToolCallInProgress(toolsCallsInProgress);
                                         }
                                     } else {
                                         // Update existing tool call with new information
@@ -461,14 +486,14 @@ class Lm implements LmProvider {
                             }
                             if (delta?.reasoning_content) {
                                 thinkingText += delta.reasoning_content;
-                                if (this.onThinkingToken) {
-                                    this.onThinkingToken(delta.reasoning_content);
+                                if (events.onThinkingToken) {
+                                    events.onThinkingToken(delta.reasoning_content);
                                 }
                             } else {
                                 const t = delta?.content;
                                 if (t) {
-                                    if (this.onToken) {
-                                        this.onToken(t);
+                                    if (events.onToken) {
+                                        events.onToken(t);
                                     }
                                     buf.push(t);
                                 }
@@ -481,8 +506,8 @@ class Lm implements LmProvider {
                                     //console.log(`TRY MRTC:\n${typeof modelRawToolCalls} ${JSON.stringify(modelRawToolCalls, null, 2)}`);
                                     args = JSON.parse(v.arguments.join(""));
                                 } catch (e) {
-                                    if (this?.onError) {
-                                        this.onError(`${e}`)
+                                    if (events.onError) {
+                                        events.onError(`${e}`)
                                     } else {
                                         throw new Error(`parsing tool call args:\n${v.arguments}\nMRTC:\n${typeof modelRawToolCalls} ${JSON.stringify(modelRawToolCalls, null, 2)}`)
                                     }
@@ -511,6 +536,7 @@ class Lm implements LmProvider {
                 const chunk = new TextDecoder().decode(value);
                 parser.feed(chunk);
             }
+            //serverStats = completion?.timings ?? {};
             text = buf.join("");
         }
         finalStats = stats.inferenceEnds(i);
@@ -527,8 +553,8 @@ class Lm implements LmProvider {
                 console.dir(toolCalls, { depth: 6 })
             }
         }
-        if (this.onEndEmit) {
-            this.onEndEmit(ir)
+        if (events.onEndEmit) {
+            events.onEndEmit(ir)
         }
         return ir
     }
