@@ -1,10 +1,7 @@
 import { Agent } from "@agent-smith/agent";
-import { InferenceOptions, InferenceResult } from '@locallm/types';
-import { PromptTemplate } from 'modprompt';
+import { AgentInferenceOptions, InferenceResult, TaskInput, TaskDef } from '@agent-smith/types';
 import YAML from 'yaml';
 import { formatInferParams } from './inferparams.js';
-import { TaskConf, TaskDef, TaskInput, TaskOutput } from "./interfaces.js";
-import { formatTaskTemplate } from './templates.js';
 import { applyVariables } from './variables.js';
 
 class Task {
@@ -22,101 +19,36 @@ class Task {
     }
 
     async run(
-        params: TaskInput, conf?: TaskConf
-    ): Promise<TaskOutput> {
-        //console.log("TASK DEF", this.def);
-        //console.log("TASK CONF", conf);
-        //console.log("TOOLS", this.agent.tools);
+        params: TaskInput, options: AgentInferenceOptions = {}
+    ): Promise<InferenceResult> {
         if (!params?.prompt) {
             throw new Error(`Task ${this.def.name}: no prompt parameter provided. Parameters: ${JSON.stringify(params, null, 2)}`);
         }
         let model = this.def.model;
-        let ctx = this.def.ctx;
-        //const useTemplates = this.agent.lm.providerType !== "openai";
-        if (conf) {
-            if (conf?.model) {
-                model = conf.model;
-                if (model?.ctx) {
-                    ctx = model.ctx;
-                }
-            }
-            /*else {
-                throw new Error("No model found in task")
-            }*/
+        if (options?.model) {
+            model = options.model;
         }
-        //console.log("CONF", conf)
-        if (this.agent.lm.providerType == "ollama") {
-            await this.agent.lm.loadModel(model.name, ctx);
-        }
-        //console.log("PARAMS", params);
-        //console.log("DEF PR", this.def.prompt);
-        let tpl: PromptTemplate = new PromptTemplate("none");
-        const options: InferenceOptions = {};
-        if (conf?.onToolCall) {
-            options.onToolCall = conf.onToolCall
-        }
-        if (conf?.onToolCallEnd) {
-            options.onToolCallEnd = conf.onToolCallEnd
-        }
-        if (conf?.onToolsTurnStart) {
-            options.onToolsTurnStart = conf.onToolsTurnStart
-        }
-        if (conf?.onToolsTurnEnd) {
-            options.onToolsTurnEnd = conf.onToolsTurnEnd
-        }
-        if (conf?.onTurnEnd) {
-            options.onTurnEnd = conf.onTurnEnd
-        }
-        if (conf?.onAssistant) {
-            options.onAssistant = conf.onAssistant
-        }
-        if (conf?.onThink) {
-            options.onThink = conf.onThink
-        }
-        let hasTools = false;
         // add task tools to the agent
         if (this.def?.tools) {
+            if (!options?.tools) {
+                options.tools = []
+            }
             if (this.def?.tools.length > 0) {
-                hasTools = true;
-                this.def.tools.forEach(
-                    t => {
-                        this.agent.tools[t.name] = t;
-                    }
-                );
+                for (const t of this.def.tools) {
+                    options.tools.push(t);
+                }
             }
         }
         applyVariables(this.def, params);
-        this.def.model = model;
-        tpl = formatTaskTemplate(this.def, model?.template ? model.template : undefined);
-        this.def.inferParams = formatInferParams(this.def.inferParams ?? {}, conf ?? {}, tpl);
-        //tpl.replacePrompt(this.def.prompt);
-        if (hasTools) {
-            if (!tpl?.toolsDef) {
-                throw new Error(`The template ${tpl.name} does not have tools and the task ${this.def.name} specifies some`)
-            }
-            this.def.tools?.forEach((t) => tpl.addTool(t));
-        };
+        //tpl = formatTaskTemplate(this.def, model?.template ? model.template : undefined);
+        this.def.inferParams = formatInferParams(this.def.inferParams ?? {}, options ?? {});
         //finalPrompt = params.prompt;
         /*console.log("-------------------------");
         console.log("DEF", this.def);
         console.log("-------------------------");*/
         //console.log("P", params.prompt);
         const finalPrompt = this.def.prompt.replace("{prompt}", params.prompt);
-        //console.log("FP", finalPrompt);
-        // model
-        if (model) {
-            this.def.inferParams.model = model;
-        }
-        if (hasTools) {
-            options.tools = this.def.tools;
-        }
-        if (this.agent.lm.providerType == "ollama") {
-            if (!this.def.inferParams?.extra) {
-                this.def.inferParams["extra"] = {}
-            }
-            // tell Ollama to apply no template
-            this.def.inferParams["extra"]["raw"] = true
-        }
+        //console.log("FP", finalPrompt);        
         let answer: InferenceResult;
         if (options?.debug) {
             // cut debug here. TODO: debug log levels
@@ -142,21 +74,12 @@ class Task {
         if (this.def?.shots) {
             options.history = options?.history ? [...this.def.shots, ...options.history] : this.def.shots;
         }
-        if (conf?.debug) {
-            if (this.agent?.history) {
-                this.agent.history.forEach(t => {
-                    if (t?.assistant || t?.tools) {
-                        tpl.pushToHistory(t);
-                    }
-                });
+        if (options?.debug) {
+            console.log("-----------", model, "-----------");
+            if (options?.system) {
+                console.log("SYSTEM:", options.system, "\n");
             }
-            console.log("-----------", model.name, "- Template:", tpl.name, "- Ctx:", ctx, "-----------");
-            if (this.agent.lm.providerType == 'openai') {
-                if (options?.system) {
-                    console.log("SYSTEM:", options.system, "\n");
-                }
-            }
-            console.log(this.agent.lm.providerType != 'openai' ? tpl.prompt(finalPrompt) : finalPrompt);
+            console.log(finalPrompt);
             console.log("----------------------------------------------")
             console.log("Infer params:", this.def.inferParams);
             console.log("----------------------------------------------")
@@ -164,21 +87,22 @@ class Task {
         }
         //console.log("RUN AGENT (TASK) params:", this.def.inferParams);
         //console.log("RUN AGENT (TASK) options:", options);
-        answer = await this.agent.run(finalPrompt, this.def.inferParams, options, tpl);
-        if (this.agent.lm.providerType == "openai") {
-            tpl.history = this.agent.history;
+        const agentOpts: AgentInferenceOptions = {
+            ...options,
+            params: this.def.inferParams,
         }
+        answer = await this.agent.run(finalPrompt, agentOpts);
 
         // remove task tools from the agent
-        if (hasTools) {
+        /*if (hasTools) {
             this.def.tools?.forEach(
                 t => {
                     delete this.agent.tools[t.name];
                 }
             );
-        }
+        }*/
         //console.log("TASK: ANSWER FINAL:", { answer: answer.result, errors: {}, template: answer.template })
-        return { answer, template: tpl }
+        return answer
     }
 }
 

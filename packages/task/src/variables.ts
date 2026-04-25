@@ -1,5 +1,4 @@
-import { HistoryTurn } from "@locallm/types";
-import { TaskDef, TaskInput } from "./interfaces.js";
+import { HistoryTurn, TaskDef, TaskInput } from "@agent-smith/types";
 
 function applyVariables(taskDef: TaskDef, taskInput: TaskInput): TaskDef {
     //console.log("\n--------TD", typeof taskDef, Object.keys(taskDef))

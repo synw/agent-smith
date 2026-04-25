@@ -14,14 +14,11 @@
     "docs": "typedoc --entryPointStrategy expand"
   },
   "dependencies": {
-    "@agent-smith/agent": "^0.4.1",
-    "@agent-smith/tfm": "^0.3.1",
-    "modprompt": "^0.14.3",
+    "@agent-smith/agent": "file:../agent",
     "yaml": "^2.8.3"
   },
   "devDependencies": {
-    "@locallm/api": "^0.8.0",
-    "@locallm/types": "^0.7.1",
+    "@agent-smith/types": "file:../types",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-terser": "^1.0.0",
     "@rollup/plugin-typescript": "^12.3.0",
