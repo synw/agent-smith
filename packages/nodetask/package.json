@@ -13,12 +13,11 @@
     "docs": "typedoc --entryPointStrategy expand"
   },
   "dependencies": {
-    "@agent-smith/agent": "^0.4.1",
-    "@agent-smith/task": "^0.4.1"
+    "@agent-smith/agent": "file:../agent",
+    "@agent-smith/task": "file:../task"
   },
   "devDependencies": {
-    "@locallm/api": "^0.8.0",
-    "@locallm/types": "^0.7.1",
+    "@agent-smith/types": "file:../types",
     "@types/node": "^25.5.2",
     "openai": "6.33.0",
     "restmix": "^0.6.1",

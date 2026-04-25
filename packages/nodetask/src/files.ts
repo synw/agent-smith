@@ -1,6 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import type { TaskDef } from '@agent-smith/task';
+import type { TaskDef } from '@agent-smith/types';
 
 function _replaceFilePlaceholders(text: string, baseDir: string = ""): string {
     const fileRegex = /\{file:(.*?)\}/g;
