@@ -2,7 +2,7 @@ import type { ToolSpec } from "./tools.js";
 import type { HistoryTurn, ToolTurn } from "./history.js";
 import type { InferenceStats } from "./stats.js";
 import type { ToolCallSpec } from "./tools.js";
-import type { AgentCallbacks } from "./callbacks.js";
+import type { AgentCallbacks, AllCallbacks, InferenceCallbacks } from "./callbacks.js";
 
 /**
  * Describes the parameters for making an inference request.
@@ -100,6 +100,10 @@ interface InferenceOptions {
     params?: InferenceParams;
 }
 
+interface ClientInferenceOptions extends InferenceOptions, InferenceCallbacks { }
+
+interface AgentInferenceOptions extends InferenceOptions, AllCallbacks { }
+
 /**
  * Represents the result returned after an inference request.
  *
@@ -136,5 +140,7 @@ interface InferenceResult {
 export {
     InferenceParams,
     InferenceOptions,
+    ClientInferenceOptions,
+    AgentInferenceOptions,
     InferenceResult,
 }

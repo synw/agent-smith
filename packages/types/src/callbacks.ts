@@ -8,7 +8,7 @@ interface InferenceCallbacks {
     onThinkingToken?: (t: string) => void;
     onStartEmit?: (data: IngestionStats) => void;
     onEndEmit?: (result: InferenceResult) => void;
-    onError?: (err: string) => void;
+    onError?: (err: any) => void;
     onToolCallInProgress?: (tc: Array<ToolCallSpec>) => void;
 }
 

@@ -1,9 +1,10 @@
 import type { Reactive, Ref } from "vue";
-import type { InferenceParams } from "./inference.js";
-import type { ToolDefSpec } from "./tools.js";
+import type { AgentInferenceOptions, InferenceParams, InferenceResult } from "./inference.js";
+import type { ToolCallSpec, ToolDefSpec, ToolSpec } from "./tools.js";
 import type { ConfigFile } from "./conf.js";
 import type { ModelInfo } from "./model.js";
-import type { UiHistoryTurn } from "./history.js";
+import type { HistoryTurn, ToolTurn, UiHistoryTurn } from "./history.js";
+import type { AllCallbacks } from "./callbacks.js";
 
 /**
  * Settings for a task configuration.
@@ -171,6 +172,68 @@ interface TaskState {
 }
 
 /**
+ * Represents the input configuration for a language model task.
+ *
+ * @interface TaskInput
+ * @param {string} prompt - The user's input prompt for the task.
+ */
+interface TaskInput {
+    prompt: string;
+    [key: string]: any;
+}
+
+interface TaskVariableDef {
+    type: string | Array<string>; // array is for enums
+    description: string;
+}
+
+interface TaskOptionalVariableDef extends TaskVariableDef {
+    default?: any
+}
+
+interface TaskVariables {
+    required?: Record<string, TaskVariableDef>;
+    optional?: Record<string, TaskOptionalVariableDef>;
+}
+
+/**
+ * Represents a template specification for a language model task.
+ *
+ * @interface TemplateSpec
+ * @param {string} [system] - The system message for the template.
+ * @param {Array<string>} [stop] - Extra stop sequences for the template.
+ * @param {string} [assistant] - The assistant start message for the template.
+ * @example
+ * const template: TemplateSpec = {
+ *   system: "You are a helpful AI",
+ *   stop: ["\n", "</s>"],
+ * };
+ */
+interface TemplateSpec {
+    system?: string;
+    afterSystem?: string;
+    stop?: Array<string>;
+    assistant?: string;
+}
+
+interface TaskDef {
+    name: string;
+    prompt: string;
+    description: string;
+    model: string;
+    ctx: number;
+    template?: TemplateSpec;
+    inferParams?: InferenceParams;
+    models?: Array<string>;
+    shots?: Array<HistoryTurn>;
+    variables?: TaskVariables;
+    tools?: Array<ToolSpec>;
+    toolsList?: Array<string>;
+    type?: string;
+    category?: string;
+}
+
+/**
  * Feature types.
  *
  * @type {FeatureType}
@@ -188,4 +251,7 @@ export {
     TaskService,
     TaskState,
     FeatureType,
+    TaskInput,
+    TemplateSpec,
+    TaskDef,
 }

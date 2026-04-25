@@ -13,6 +13,8 @@ import {
     InferenceParams,
     InferenceOptions,
     InferenceResult,
+    AgentInferenceOptions,
+    ClientInferenceOptions,
 } from "./inference.js";
 import {
     OnLoadProgress,
@@ -49,6 +51,9 @@ import {
     TaskService,
     TaskState,
     FeatureType,
+    TaskInput,
+    TemplateSpec,
+    TaskDef,
 } from "./task.js";
 import {
     ToolCallSpec,
@@ -128,4 +133,9 @@ export {
     AgentCallbacks,
     AllCallbacks,
     AgentParams,
+    AgentInferenceOptions,
+    ClientInferenceOptions,
+    TaskInput,
+    TemplateSpec,
+    TaskDef,
 }
