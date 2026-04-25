@@ -15,7 +15,7 @@
     "restmix": "^0.6.1"
   },
   "devDependencies": {
-    "@agent-smith/types": "../types",
+    "@agent-smith/types": "file:../types",
     "@rollup/plugin-node-resolve": "^16.0.3",
     "@rollup/plugin-typescript": "^12.3.0",
     "@types/node": "^25.5.2",

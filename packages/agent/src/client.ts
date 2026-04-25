@@ -33,6 +33,7 @@ class Lm implements LmProvider {
     onStartEmit?: (data: IngestionStats) => void;
     onEndEmit?: (result: InferenceResult) => void;
     onError?: (err: string) => void;
+    onToolCallInProgress?: (tc: Array<ToolCallSpec>) => void;
     // state
     model = "";
     models = new Array<ModelInfo>();
@@ -53,6 +54,7 @@ class Lm implements LmProvider {
         this.onStartEmit = params.onStartEmit;
         this.onEndEmit = params.onEndEmit;
         this.onError = params.onError;
+        this.onToolCallInProgress = params.onToolCallInProgress;
         this.apiKey = params.apiKey ?? "";
         this.serverUrl = params.serverUrl;
         this.api = useApi({
@@ -126,18 +128,17 @@ class Lm implements LmProvider {
      */
     async infer(
         prompt: string,
-        params: InferenceParams,
-        options?: InferenceOptions,
+        options: InferenceOptions = {},
     ): Promise<InferenceResult> {
         this.abortController = new AbortController();
+        const params = options?.params ?? {};
         let inferenceParams: Record<string, any> = Object.assign({}, params);
-        if ("max_tokens" in params) {
+        if ("max_tokens" in inferenceParams) {
             inferenceParams.max_completion_tokens = params.max_tokens;
             delete inferenceParams.max_tokens;
         }
-        if ("model" in inferenceParams) {
-            this.model = inferenceParams.model;
-            delete inferenceParams.model;
+        if (options?.model) {
+            this.model = options.model;
         }
         if (options?.debug) {
             console.log("Options", options);
@@ -357,7 +358,7 @@ class Lm implements LmProvider {
                 type: string;
                 index: number;
             }> = [];
-            let hasToolCallStarted = false;
+            let toolsCallsInProgress = new Array<ToolCallSpec>();
             const parser = createParser({
                 onEvent: (event) => {
                     const done = event.data === '[DONE]';
@@ -388,15 +389,12 @@ class Lm implements LmProvider {
 
                             // Check for tool calls in the delta
                             if (delta.tool_calls && delta.tool_calls.length > 0) {
-                                if (!hasToolCallStarted) {
-                                    console.log("START TC")
-                                }
-                                hasToolCallStarted = true;
-                                console.log("DELTA TC", delta.tool_calls);
+                                //console.log("DELTA TC", delta.tool_calls);
                                 for (const toolCallDelta of delta.tool_calls) {
                                     const index = toolCallDelta.index;
                                     // Ensure the array is large enough
                                     if (!accumulatedToolCalls[index]) {
+                                        // new tool call                                        
                                         accumulatedToolCalls[index] = {
                                             id: toolCallDelta.id || '',
                                             function: {
@@ -406,11 +404,27 @@ class Lm implements LmProvider {
                                             type: toolCallDelta.type || 'function',
                                             index: index
                                         };
+                                        //console.log("INIT NEW TC", index, toolCallDelta.function?.name);
+                                        if (index > 0) {
+                                            // second or more tool call
+                                            //console.log("INIT SECOND+ TC", index, toolCallDelta.function?.name);
+                                            // update arguments in previous tool calls in progress
+                                            const rtcs = accumulatedToolCalls.slice(0, -1);
+                                            rtcs.forEach(rtc => {
+                                                toolsCallsInProgress[rtc.index].arguments = JSON.parse(rtc.function.arguments)
+                                            });
+                                        }
+                                        // register the new tool call
+                                        toolsCallsInProgress[index] = {
+                                            id: toolCallDelta.id,
+                                            name: toolCallDelta.function?.name,
+                                            arguments: {},
+                                        };
+                                        if (this?.onToolCallInProgress) {
+                                            this.onToolCallInProgress(toolsCallsInProgress);
+                                        }
                                     } else {
                                         // Update existing tool call with new information
-                                        if (toolCallDelta.id) {
-                                            accumulatedToolCalls[index].id = toolCallDelta.id;
-                                        }
                                         if (toolCallDelta.function?.name) {
                                             accumulatedToolCalls[index].function.name = toolCallDelta.function.name;
                                         }
@@ -422,12 +436,11 @@ class Lm implements LmProvider {
                             }
                             // Check for finish_reason if the tool call is complete
                             const finishReason = choice.finish_reason;
-                            if (finishReason) {
+                            /*if (finishReason) {
                                 console.log("FINISH REASON", finishReason);
-                            }
+                            }*/
                             if (finishReason === 'tool_calls') {
-                                console.log("FINISH TC", accumulatedToolCalls);
-                                hasToolCallStarted = false;
+                                //console.log("FINISH TC", accumulatedToolCalls);
                                 //console.log('\n--- Tool Call Ready ---');
                                 for (const toolCall of accumulatedToolCalls) {
                                     //console.log('Tool Name:', toolCall.function.name);
@@ -468,7 +481,11 @@ class Lm implements LmProvider {
                                     //console.log(`TRY MRTC:\n${typeof modelRawToolCalls} ${JSON.stringify(modelRawToolCalls, null, 2)}`);
                                     args = JSON.parse(v.arguments.join(""));
                                 } catch (e) {
-                                    throw new Error(`parsing tool call args:\n${v.arguments}\nMRTC:\n${typeof modelRawToolCalls} ${JSON.stringify(modelRawToolCalls, null, 2)}`)
+                                    if (this?.onError) {
+                                        this.onError(`${e}`)
+                                    } else {
+                                        throw new Error(`parsing tool call args:\n${v.arguments}\nMRTC:\n${typeof modelRawToolCalls} ${JSON.stringify(modelRawToolCalls, null, 2)}`)
+                                    }
                                 }
                                 const toolCall: ToolCallSpec = {
                                     id: k ?? generateId(),
