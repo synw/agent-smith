@@ -11,6 +11,17 @@ How are the conditions in the city?`;
 
 const onToolCall = (tc) => console.log("TOOL CALL", tc);
 const onToolCallEnd = (id, tce) => console.log("TOOL CALL END", id);
+const onToolCallInProgress = (tcs) => {
+    let i = 0;
+    tcs.forEach(tc => {
+        if (Object.keys(tc.arguments).length > 0) {
+            console.log("Tool call spec completed", i, tc.name, tc.arguments);
+        } else {
+            console.log("Tool call in progress", i, tc.name);
+        }
+        ++i;
+    });
+};
 
 function run_get_current_weather(args) {
     console.log("Running the get_current_weather tool with args", args);
@@ -50,27 +61,29 @@ async function main() {
     const lm = new Lm({
         serverUrl: serverUrl,
         apiKey: apiKey,
-        onToken: (t) => process.stdout.write(t),
     });
-    const agent = new Agent(lm);
+    const agent = new Agent({
+        lm: lm,
+        onToken: (t) => process.stdout.write(t),
+        onToolCallInProgress: onToolCallInProgress,
+        onToolCall: onToolCall,
+        onToolCallEnd: onToolCallEnd,
+    });
     await agent.run(_prompt,
-        //inference params
-        {
-            temperature: 0.5,
-            top_k: 40,
-            top_p: 0.95,
-            min_p: 0,
-            max_tokens: 4096,
-            model: model
-        },
-        // query options
         {
             //debug: false,
-            //verbose: true,
+            verbose: true,
+            model: model,
             system: system,
             tools: [get_current_weather, get_current_traffic],
-            onToolCall: onToolCall,
-            onToolCallEnd: onToolCallEnd,
+            params: {
+                //inference params
+                temperature: 0.5,
+                top_k: 40,
+                top_p: 0.95,
+                min_p: 0,
+                max_tokens: 4096,
+            }
         });
     console.log();
 }

@@ -1,0 +1,13 @@
+description: Tools use example
+prompt: |-
+    {prompt}
+template:
+    afterSystem: |-
+        
+        You are an AI touristic assistant
+model: qwen4b
+inferParams:
+    top_k: 20
+    top_p: 0.95
+    min_p: 0
+    temperature: 0.4

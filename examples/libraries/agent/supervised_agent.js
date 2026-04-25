@@ -68,9 +68,13 @@ async function main() {
         onToken: (t) => process.stdout.write(t),
     });
     const agent = new Agent(lm);
-    await agent.run(_prompt,
+    await agent.run(_prompt, {
+        debug: false,
+        verbose: true,
+        system: system,
+        tools: [get_current_weather, get_current_traffic],
         //inference params
-        {
+        params: {
             temperature: 0.5,
             top_k: 40,
             top_p: 0.95,
@@ -78,13 +82,7 @@ async function main() {
             max_tokens: 4096,
             model: model
         },
-        // query options
-        {
-            debug: false,
-            verbose: true,
-            system: system,
-            tools: [get_current_weather, get_current_traffic]
-        });
+    });
     console.log();
 }
 

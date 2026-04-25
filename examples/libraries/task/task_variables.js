@@ -1,31 +1,29 @@
 #!/usr/bin/env node
 import { default as fs } from "fs";
-import { Lm } from "@locallm/api";
-import { Agent } from "../packages/agent/dist/agent.js";
-import { Task } from "../packages/task/dist/task.js";
-
-// Run an Llama.cpp server
-// llama-server -fa -m Qwen3-4B-Instruct-2507-UD-Q6_K_XL.gguf --jinja --chat-template-file template.jinja -c 8192 --verbose-prompt
-// template.jinja content:
-// {{- messages[0].content -}}
+import { Agent, Lm } from "../../../packages/agent/dist/main.js";
+import { Task } from "../../../packages/task/dist/main.js";
 
 const lm = new Lm({
-    providerType: "llamacpp",
-    serverUrl: "http://localhost:8080",
-    onToken: (t) => process.stdout.write(t),
+    serverUrl: "http://localhost:8080/v1",
 });
-const agent = new Agent(lm);
+const model = "qwen4b";
 
-async function main()
-{
-    const taskPath = "./tasks/variables.yml";
+const agent = new Agent({
+    lm: lm,
+    onToken: (t) => process.stdout.write(t),
+    onThinkingToken: (t) => process.stdout.write(`\x1b[2m${t}\x1b[0m`),
+});
+
+async function main() {
+    const taskPath = "./variables.yml";
     const ymlTaskDef = fs.readFileSync(taskPath, 'utf8');
     const task = Task.fromYaml(agent, ymlTaskDef);
     //console.log("Running task...", task);
     // run the task    
     const conf = {
         debug: true,
-        inferParams: { stream: true, temperature: 0.8, model: { name: "qwen4b" } },
+        model: model,
+        params: { stream: true, temperature: 0.8 },
     };
     const answer = await task.run({
         prompt: "What are your favourite activities?",
@@ -36,7 +34,6 @@ async function main()
     console.log(answer.text);
 }
 
-(async () =>
-{
+(async () => {
     await main();
 })();
