@@ -1,8 +1,9 @@
 import type { useApi } from "restmix";
 import type { InferenceOptions, InferenceParams } from "./inference.js";
 import type { InferenceResult } from "./inference.js";
-import type { IngestionStats } from "./stats.js";
 import type { ModelInfo } from "./model.js";
+import type { InferenceCallbacks } from "./callbacks.js";
+import type { ToolSpec } from "./tools.js";
 
 /**
  * Represents the basic progress of a load operation.
@@ -103,15 +104,10 @@ interface LmDefaults {
  *   onError: (err) => console.error(err)
  * };
  */
-interface LmProviderParams {
+interface LmProviderParams extends InferenceCallbacks {
     name: string;
     serverUrl: string;
     apiKey?: string;
-    onToken?: (t: string) => void;
-    onThinkingToken?: (t: string) => void;
-    onStartEmit?: (data: IngestionStats) => void;
-    onEndEmit?: (result: InferenceResult) => void;
-    onError?: (err: string) => void;
     defaults?: LmDefaults;
 }
 
@@ -155,32 +151,23 @@ interface LmProviderParams {
  *   onError: (err) => console.error(err)
  * };
  */
-interface LmProvider {
+interface LmProvider extends InferenceCallbacks {
     name: string;
     api: ReturnType<typeof useApi>;
     serverUrl: string;
     apiKey: string;
     model: string;
     models: Array<ModelInfo>;
+    abortController: AbortController;
+    tools: Record<string, ToolSpec>;
     modelInfo: () => Promise<ModelInfo>;
     modelsInfo: () => Promise<Array<ModelInfo>>;
     loadModel: (name: string, ctx?: number, urls?: string | string[], onLoadProgress?: OnLoadProgress) => Promise<void>;
     unloadModel: (name: string) => Promise<void>;
-    /**
-     * Makes an inference based on provided prompt and parameters.
-     *
-     * @param {string} prompt - The input text for the model to generate a response from.
-     * @param {InferenceParams} params - Parameters that control the behavior of the inference process.
-     * @param {InferenceOptions | undefined} options - Some options for the inference query
-     * @returns {Promise<InferenceResult>} The result of the inference process.
-     */
-    infer: (prompt: string, params: InferenceParams, options?: InferenceOptions) => Promise<InferenceResult>;
+    tokenize(text: string): Promise<Array<number>>;
+    detokenize(tokens: Array<number>): Promise<string>;
+    infer: (prompt: string, options?: InferenceOptions) => Promise<InferenceResult>;
     abort: () => Promise<void>;
-    onToken?: (t: string) => void;
-    onThinkingToken?: (t: string) => void;
-    onStartEmit?: (data: IngestionStats) => void;
-    onEndEmit?: (result: InferenceResult) => void;
-    onError?: (err: string) => void;
     defaults?: LmDefaults;
 }
 

@@ -65,6 +65,14 @@ import {
     ServerParams,
     StreamedMessage,
 } from "./ws.js";
+import {
+    InferenceCallbacks,
+    AgentCallbacks,
+    AllCallbacks,
+} from "./callbacks.js";
+import {
+    AgentParams,
+} from "./agent.js";
 
 export {
     ConfInferenceBackend,
@@ -116,4 +124,8 @@ export {
     MsgType,
     ServerParams,
     StreamedMessage,
+    InferenceCallbacks,
+    AgentCallbacks,
+    AllCallbacks,
+    AgentParams,
 }
