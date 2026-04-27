@@ -51,7 +51,6 @@ import {
     TaskService,
     TaskState,
     FeatureType,
-    TaskInput,
     TemplateSpec,
     TaskDef,
 } from "./task.js";
@@ -163,7 +162,6 @@ export {
     AgentParams,
     AgentInferenceOptions,
     ClientInferenceOptions,
-    TaskInput,
     TemplateSpec,
     TaskDef,
     InputMode,

@@ -1,3 +1,4 @@
+
 import type { Reactive, Ref } from "vue";
 import type { AgentInferenceOptions, InferenceParams, InferenceResult } from "./inference.js";
 import type { ToolCallSpec, ToolDefSpec, ToolSpec } from "./tools.js";
@@ -40,15 +41,57 @@ interface TaskSettings {
     backend?: string;
 }
 
+/**
+ * Definition of a task variable.
+ *
+ * @interface TaskVariableDef
+ * @param {string | Array<string>} type - The type of the variable, can be a string or array for enums.
+ * @param {string} description - Description of the variable.
+ * @example
+ * const variableDef: TaskVariableDef = {
+ *   type: 'string',
+ *   description: 'User name'
+ * };
+ */
 interface TaskVariableDef {
     type: string | Array<string>; // array is for enums
     description: string;
 }
 
+/**
+ * Definition of an optional task variable.
+ *
+ * @interface TaskOptionalVariableDef
+ * @param {string | Array<string>} type - The type of the variable, can be a string or array for enums.
+ * @param {string} description - Description of the variable.
+ * @param {any} [default] - Default value for the variable.
+ * @example
+ * const optionalVariableDef: TaskOptionalVariableDef = {
+ *   type: 'string',
+ *   description: 'User age',
+ *   default: '25'
+ * };
+ */
 interface TaskOptionalVariableDef extends TaskVariableDef {
     default?: any
 }
 
+/**
+ * Task variables structure.
+ *
+ * @interface TaskVariables
+ * @param {Record<string, TaskVariableDef>} [required] - Required variable definitions.
+ * @param {Record<string, TaskOptionalVariableDef>} [optional] - Optional variable definitions.
+ * @example
+ * const taskVariables: TaskVariables = {
+ *   required: {
+ *     name: { type: 'string', description: 'User name' }
+ *   },
+ *   optional: {
+ *     age: { type: 'string', description: 'User age', default: '25' }
+ *   }
+ * };
+ */
 interface TaskVariables {
     required?: Record<string, TaskVariableDef>;
     optional?: Record<string, TaskOptionalVariableDef>;
@@ -172,41 +215,17 @@ interface TaskState {
 }
 
 /**
- * Represents the input configuration for a language model task.
- *
- * @interface TaskInput
- * @param {string} prompt - The user's input prompt for the task.
- */
-interface TaskInput {
-    prompt: string;
-    [key: string]: any;
-}
-
-interface TaskVariableDef {
-    type: string | Array<string>; // array is for enums
-    description: string;
-}
-
-interface TaskOptionalVariableDef extends TaskVariableDef {
-    default?: any
-}
-
-interface TaskVariables {
-    required?: Record<string, TaskVariableDef>;
-    optional?: Record<string, TaskOptionalVariableDef>;
-}
-
-/**
- * Represents a template specification for a language model task.
+ * Template specification for a language model task.
  *
  * @interface TemplateSpec
  * @param {string} [system] - The system message for the template.
+ * @param {string} [afterSystem] - The message that comes after the system message.
  * @param {Array<string>} [stop] - Extra stop sequences for the template.
  * @param {string} [assistant] - The assistant start message for the template.
  * @example
  * const template: TemplateSpec = {
  *   system: "You are a helpful AI",
- *   stop: ["\n", "</s>"],
+ *   stop: ["\n", "<tool_call>"],
  * };
  */
 interface TemplateSpec {
@@ -216,6 +235,33 @@ interface TemplateSpec {
     assistant?: string;
 }
 
+/**
+ * Task definition structure.
+ *
+ * @interface TaskDef
+ * @param {string} name - The name of the task.
+ * @param {string} prompt - The prompt for the task.
+ * @param {string} description - Description of the task.
+ * @param {string} model - The model to use for the task.
+ * @param {number} ctx - Context window size.
+ * @param {TemplateSpec} [template] - Template specification for the task.
+ * @param {InferenceParams} [inferParams] - Inference parameters for the task.
+ * @param {Array<string>} [models] - Available models for the task.
+ * @param {Array<HistoryTurn>} [shots] - Example turns for the task.
+ * @param {TaskVariables} [variables] - Variables for the task.
+ * @param {Array<ToolSpec>} [tools] - Tools available for the task.
+ * @param {Array<string>} [toolsList] - List of tool names for the task.
+ * @param {string} [type] - Type of the task.
+ * @param {string} [category] - Category of the task.
+ * @example
+ * const taskDef: TaskDef = {
+ *   name: 'chat',
+ *   prompt: 'Chat with the user',
+ *   description: 'A simple chat task',
+ *   model: 'llama3',
+ *   ctx: 2048
+ * };
+ */
 interface TaskDef {
     name: string;
     prompt: string;
@@ -251,7 +297,6 @@ export {
     TaskService,
     TaskState,
     FeatureType,
-    TaskInput,
     TemplateSpec,
     TaskDef,
 }
