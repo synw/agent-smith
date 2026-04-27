@@ -145,7 +145,7 @@ async function readTask(
                             const tres = await executeTask(toolName, params as Record<string, any>, options);
                             options.isToolCall = false;
                             //console.log("WFTRESP", tres.answer.text);
-                            return tres.answer.text
+                            return tres.text
                         case "agent":
                             options.isToolCall = true;
                             options.isAgent = true;
@@ -153,8 +153,8 @@ async function readTask(
                             options.isAgent = false;
                             options.isToolCall = false;
                             //console.log("WFTRESP", tres.answer.text);
-                            if (agres?.answer?.text) {
-                                return agres.answer.text
+                            if (agres?.text) {
+                                return agres.text
                             }
                             return agres
                         case "workflow":

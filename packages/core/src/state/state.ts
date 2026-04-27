@@ -1,4 +1,4 @@
-import { FormatMode, InputMode, OutputMode, RunMode } from "@agent-smith/types";
+import { FormatMode, InputMode, OutputMode } from "@agent-smith/types";
 import { reactive, ref } from "@vue/reactivity";
 import path from "path";
 import { PythonShell } from 'python-shell';
@@ -13,9 +13,7 @@ let pyShell: PythonShell;
 
 const inputMode = ref<InputMode>("manual");
 const outputMode = ref<OutputMode>("txt");
-const runMode = ref<RunMode>("cmd");
 const formatMode = ref<FormatMode>("text");
-const isChatMode = ref(false);
 //const verbosity = ref<VerbosityMode>("quiet");
 const promptfilePath = ref("");
 const dataDirPath = ref("");
@@ -90,7 +88,16 @@ function pluginDataDir(pluginName: string): string {
 
 
 export {
-    dataDirPath, formatMode, init, initFilepaths, initState, inputMode, isChatMode, isStateReady, lastCmd, outputMode, pluginDataDir, promptfilePath,
-    //setVerbosity,
-    pyShell, runMode
+    dataDirPath,
+    formatMode,
+    init,
+    initFilepaths,
+    initState,
+    inputMode,
+    isStateReady,
+    lastCmd,
+    outputMode,
+    pluginDataDir,
+    promptfilePath,
+    pyShell
 };

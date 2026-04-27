@@ -1,7 +1,7 @@
 import YAML from 'yaml';
 import { readClipboard } from '../utils/sys/clipboard.js';
 import { readTask } from "../utils/sys/read_task.js";
-import { FeatureType, LmTaskFileSpec } from "@agent-smith/types";
+import { FeatureType, LmTaskFileSpec, type InferenceResult } from "@agent-smith/types";
 import { getFeatureSpec } from "../state/features.js";
 import { runtimeDataError } from '../utils/user_msgs.js';
 import { initFilepaths, promptfilePath, outputMode, formatMode } from "../state/state.js";
@@ -19,14 +19,14 @@ function readPromptFile(): string {
     return readFile(promptfilePath.value)
 }
 
-async function processOutput(res: any) {
+async function processOutput(res: InferenceResult) {
     //if (!(outputMode.value == "clipboard")) { return }
     let data = "";
     //console.log("Process OUTPUT", typeof res);
     let hasTextData = false;
     if (typeof res == "object") {
         if (res?.text) {
-            data = res.answer.text;
+            data = res.text;
             hasTextData = true;
         } else {
             try {

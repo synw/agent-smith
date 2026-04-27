@@ -4,7 +4,6 @@ import type { FeatureType } from "@agent-smith/types";
 import { getFeatureSpec } from "../state/features.js";
 import { executeAction } from "../actions/cmd.js";
 import { executeAdaptater } from "../adaptaters/cmd.js";
-import { parseCommandArgs } from "../utils/options_parsers.js";
 import { executeTask } from "../tasks/cmd.js";
 import { getInputFromOptions, getTaskPrompt } from "../utils/io.js";
 import { runtimeError } from "../utils/user_msgs.js";
@@ -207,16 +206,7 @@ async function executeWorkflow(wname: string, args: any, options: Record<string,
     return taskRes
 }
 
-async function executeWorkflowCmd(name: string, wargs: Array<any>): Promise<any> {
-    //console.log("WF INITIAL ARGS", typeof wargs, wargs.slice(0, -1));
-    const { args, options } = parseCommandArgs(wargs);
-    //console.log("WF ARGS", typeof args, args);
-    //console.log("WF OPTS", options);
-    return await executeWorkflow(name, args, options)
-}
-
 export {
     executeWorkflow,
-    executeWorkflowCmd
 };
 

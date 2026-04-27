@@ -1,6 +1,5 @@
 import { FeatureExecutor, FeatureType } from "@agent-smith/types";
 import { pathToFileURL } from 'url';
-import { parseCommandArgs } from "../utils/options_parsers.js";
 import { getFeatureSpec } from '../state/features.js';
 import { pyShell } from "../state/state.js";
 import { processOutput, readPromptFile, getInputFromOptions } from "../utils/io.js";
@@ -52,25 +51,6 @@ async function executeAction(name: string, payload: any, options: Record<string,
     await processOutput(res);
     return res
 }
-
-async function executeActionCmd(
-    name: string, aargs: Array<any>, quiet = false
-): Promise<any> {
-    //console.log("AARGs", aargs)
-    const { args, options } = parseCommandArgs(aargs);
-    //console.log("CMDA", args)
-    const params = args;
-    if (options?.clipBoardInput) {
-        params.push(await readClipboard())
-    } else if (options?.inputFile) {
-        params.push(readPromptFile())
-    }
-    if (options?.debug) {
-        console.log("Action", name, "params", params);
-    }
-    return await executeAction(name, params, options, quiet)
-}
-
 
 function systemAction(path: string): FeatureExecutor<Array<string>, any> {
     const run: FeatureExecutor = async (params: any) => {
@@ -160,6 +140,7 @@ function pythonAction(
 
 export {
     executeAction,
-    executeActionCmd, pythonAction, systemAction
+    pythonAction,
+    systemAction,
 };
 

@@ -1,21 +1,18 @@
 import { Agent } from "@agent-smith/agent";
-import { InferenceParams, TaskSettings, type AgentInferenceOptions, type InferenceResult } from "@agent-smith/types";
-import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
-import { default as color } from "ansi-color";
-//import ora from 'ora';
-import { usePerfTimer } from "../utils/perf.js";
+import type { InferenceParams, TaskSettings, AgentInferenceOptions, InferenceResult, ToolCallSpec } from "@agent-smith/types";
+import { default as color } from "ansi-colors";
+import ora from 'ora';
 import { backend, backends, listBackends } from "../state/backends.js";
-import { setChatInferenceParams } from "../state/chat.js";
-import { isChatMode } from "../state/state.js";
 import { initTaskSettings, isTaskSettingsInitialized, tasksSettings } from "../state/tasks.js";
-import { parseCommandArgs } from "../utils/options_parsers.js";
+import { processOutput } from "../utils/io.js";
+import { usePerfTimer } from "../utils/perf.js";
 import { runtimeDataError, runtimeError, runtimeWarning } from "../utils/user_msgs.js";
-import { processOutput, getTaskPrompt } from "../utils/io.js";
 import { readTask } from "./read.js";
+import { compile, serializeGrammar } from "@intrinsicai/gbnfgen";
 //import { chat, program } from "../../cmds.js";
 
 async function executeTask(
-    name: string, payload: Record<string, any>, options: Record<string, any>
+    name: string, payload: Record<string, any>, options: Record<string, any> & AgentInferenceOptions
 ): Promise<InferenceResult> {
     //console.log("EXEC TASK", payload, options);
     //console.log("TN", name);
@@ -26,8 +23,7 @@ async function executeTask(
     const agent = new Agent({
         name: name,
         lm: backend.value!,
-    }
-    );
+    });
     const hasSettings = Object.keys(tasksSettings).includes(name);
     let settings: TaskSettings = {};
     if (hasSettings) {
@@ -48,7 +44,8 @@ async function executeTask(
     if (options?.debug || options?.backend) {
         console.log("Agent:", color.bold(agent.name));
     }
-    const { task, model, conf, vars, mcpServers, taskDir } = await readTask(name, payload, options, agent);
+    const { task, model, conf, vars, mcpServers } = await readTask(name, payload, options, agent);
+    let _model = model;
     if (options?.debug && mcpServers.length > 0) {
         console.log("Starting", mcpServers.length, "mcp servers")
     }
@@ -61,180 +58,121 @@ async function executeTask(
         }
     }
     //console.log("TASKCONF IP", conf.inferParams);
+    if (!options?.params) {
+        options.params = {}
+    }
     if (hasSettings) {
-        if (!settings?.inferParams) {
-            model.inferParams = {};
+        if (settings?.model) {
+            _model = settings.model;
         }
-        if (settings?.model && !conf?.model?.name) {
-            model.name = settings.model;
-        }
-        if (settings?.template && !conf?.model?.template) {
-            model.template = settings.template;
-        }
-        if (settings?.ctx && !conf?.model?.ctx) {
-            model.ctx = settings.ctx;
+        if (settings?.template) {
+            options.template = settings.template;
         }
         if (settings?.max_tokens && !conf?.inferParams?.max_tokens) {
-            model.inferParams.max_tokens = settings.max_tokens;
+            options.params.max_tokens = settings.max_tokens;
         }
         if (settings?.top_k && !conf?.inferParams?.top_k) {
-            model.inferParams.top_k = settings.top_k;
+            options.params.top_k = settings.top_k;
         }
         if (settings?.top_p && !conf?.inferParams?.top_p) {
-            model.inferParams.top_p = settings.top_p;
+            options.params.top_p = settings.top_p;
         }
         if (settings?.min_p && !conf?.inferParams?.min_p) {
-            model.inferParams.min_p = settings.min_p;
+            options.params.min_p = settings.min_p;
         }
         if (settings?.temperature && !conf?.inferParams?.temperature) {
-            model.inferParams.temperature = settings.temperature;
+            options.params.temperature = settings.temperature;
         }
         if (settings?.repeat_penalty && !conf?.inferParams?.repeat_penalty) {
-            model.inferParams.repeat_penalty = settings.repeat_penalty;
+            options.params.repeat_penalty = settings.repeat_penalty;
         }
     }
     //console.log("TASK MODEL", model);
     // check for grammars
-    if (model?.inferParams?.tsGrammar) {
+    if (options.params?.tsGrammar) {
         //console.log("TSG");
-        model.inferParams.grammar = serializeGrammar(await compile(model.inferParams.tsGrammar, "Grammar"));
-        delete model.inferParams.tsGrammar;
+        options.params.grammar = serializeGrammar(await compile(options.params.tsGrammar, "Grammar"));
+        delete options.params.tsGrammar;
     }
-    //let i = 0;
     let c = false;
-    //}
     if (options?.debug) {
         console.log("Task model:", model);
         console.log("Task vars:", vars);
     }
-    //const hasTools = ex.template?.tags?.toolCall;
-    //console.log("EX TPL", ex.template);
-    //console.log("ST", thinkStart);
-    //console.log("ET", thinkEnd);
-    //let fullTxt = ""
     let emittedTokens = 0;
-    const printToken = (t: string) => {
-        if (options?.tokens === true) {
-            let txt = t;
-            txt = c ? t : `\x1b[100m${t}\x1b[0m`
-            process.stdout.write(txt);
-            c = !c
+    let emittedThinkingTokens = 0;
+    const printToken = (t: string, dim = false) => {
+        if (dim === true) {
+            process.stdout.write(`\x1b[2m${t}\x1b[0m`);
         } else {
-            /*if (formatMode.value == "markdown") {
-                fullTxt += t;
-                process.stdout.write('\u001Bc\u001B[3J');
-                process.stdout.write(marked.parse(fullTxt) as string);*/
-            //} else {
-            process.stdout.write(t);
-            //}
+            if (options?.tokens === true) {
+                let txt = t;
+                txt = c ? t : `\x1b[100m${t}\x1b[0m`
+                process.stdout.write(txt);
+                c = !c
+            } else {
+                /*if (formatMode.value == "markdown") {
+                    fullTxt += t;
+                    process.stdout.write('\u001Bc\u001B[3J');
+                    process.stdout.write(marked.parse(fullTxt) as string);*/
+                //} else {
+                process.stdout.write(t);
+                //}
+            }
         }
 
     };
-    let hasTools = false;
-    if (task.def?.tools) {
-        if (task.def.tools.length > 0) {
-            hasTools = true
-        }
-    }
-    //console.log("HAS TOOLS", hasTools);
-    let continueWrite = true;
-    let skipNextEmptyLinesToken = false;
-    const spinner = ora("Thinking ...");
-    const ts = "Thinking";
-    const te = color.dim("tokens");
     const formatTokenCount = (i: number) => {
-        return `${ts} ${color.bold(i.toString())} ${te}`
+        return `Thinking ${color.bold(i.toString())} ${color.dim("tokens")}`
     };
     const perfTimer = usePerfTimer(false);
+    const spinner = ora({ text: "Thinking ...", discardStdin: false });
     let abort = options?.abort ? options.abort as AbortController : new AbortController();
     const abortTicker = setInterval(() => {
         //console.log("ABS", abort.signal.aborted);
         if (abort.signal.aborted) {
             agent.lm.abort();
-            abort = new AbortController()
+            spinner.stop();
+            abort = new AbortController();
+            return
         }
     }, 200);
     const processToken = (t: string) => {
         if (emittedTokens == 0) { perfTimer.start() }
-        spinner.text = formatTokenCount(emittedTokens)
-        if (!options?.verbose && !options?.debug) {
-            //console.log("TTTTTT", hasThink && tpl);
-            if (hasThink && tpl) {
-                if (t == tpl.tags.think?.start) {
-                    //console.log("Start thinking token", thinkStart);
-                    spinner.start();
-                    continueWrite = false;
-                    return
-                } else if (t == tpl.tags.think?.end) {
-                    //console.log("End thinking token", thinkEnd);
-                    continueWrite = true;
-                    skipNextEmptyLinesToken = true;
-                    let msg = color.dim("Thinking:") + ` ${emittedTokens} ${color.dim("tokens")}`;
-                    msg = msg + " " + color.dim(perfTimer.time())
-                    spinner.info(msg);
-                    return
-                }
-            }
-        } else {
-            if (tpl) {
-                if (t == tpl.tags.think?.end) {
-                    let msg = color.dim("Thinking:") + ` ${emittedTokens} ${color.dim("tokens")}`;
-                    msg = msg + " " + color.dim(perfTimer.time())
-                    console.log(msg)
-                }
-            }
-        }
-        if (hasTools && tpl) {
-            // check for tool call and silence the output
-            if (t == tpl.tags.toolCall?.start) {
-                if (!options?.debug) {
-                    continueWrite = false;
-                    if (emittedTokens > 0) {
-                        console.log()
-                    }
-                    return
-                }
-            } else if (t == tpl.tags.toolCall?.end) {
-                skipNextEmptyLinesToken = true;
-                continueWrite = true;
-                if (!options?.debug) {
-                    return
-                }
-            }
-        }
-        if (continueWrite) {
-            if (skipNextEmptyLinesToken) {
-                if (t == "\n\n" || t == "\n") {
-                    skipNextEmptyLinesToken = false
-                    return
-                }
-            }
-            if (!options?.quiet) {
-                if (!options?.isToolCall) {
-                    printToken(t);
-                } else {
-                    if (options?.debug) {
-                        printToken(t);
-                    }
-                }
-            }
-        }
+        //spinner.text = formatTokenCount(emittedTokens)
+        printToken(t);
         ++emittedTokens;
     };
-
-    //const spinnerInit = (name: string) => ora(`Executing the ${name} tool ...\n`);
-    //let tcspinner: Ora;
+    const onStartThinking = !(options?.debug || options?.verbose) ? () => {
+        spinner.start();
+        if (emittedTokens == 0) { perfTimer.start() };
+    } : undefined;
+    const onEndThinking = !(options?.debug || options?.verbose) ? () => {
+        spinner.stopAndPersist()
+    } : undefined;
+    const onThinkingToken = (t: string) => {
+        if (options?.debug || options?.verbose) {
+            printToken(t, true)
+        } else {
+            let msg = formatTokenCount(emittedThinkingTokens);
+            msg = msg + " " + color.dim(perfTimer.time())
+            spinner.text = msg;
+        }
+        emittedThinkingTokens++
+    };
+    const onToolCallInProgress = (tc: Array<ToolCallSpec>) => console.log(color.dim(`Preparing tool call ${tc[tc.length - 1].name} ...`));
     const _onToolCall = (tc: Record<string, any>) => {
         //console.log("TC START");
         console.log("⚒️ ", color.bold(name), "=>", `${color.yellowBright(tc.name)}`, tc.arguments);
     };
     const onToolCall = options?.onToolCall as (tc: Record<string, any>) => void ?? _onToolCall;
-    const _onToolCallEnd = (tr: any) => {
+    const _onToolCallEnd = (tc: ToolCallSpec, tr: any) => {
         if (options?.debug) {
-            console.log("TOOL RESULT", tr)
+            console.log(tc.name + ":\n", tr)
         }
     }
-    const onToolCallEnd = options?.onToolCallEnd as (id: string, tc: Record<string, any>) => void ?? _onToolCallEnd;
+    // const spinnerInit = (name: string) => ora(`Executing the ${name} tool ...\n`);
+    const onToolCallEnd = options?.onToolCallEnd ?? _onToolCallEnd;
     const onToolsTurnStart = options?.onToolsTurnStart ?? undefined;
     const onToolsTurnEnd = options?.onToolsTurnEnd ?? undefined;
     const onTurnEnd = options?.onTurnEnd ?? undefined;
@@ -253,10 +191,10 @@ async function executeTask(
     if (conf?.model) {
         delete conf.model
     }
-    const tconf: AgentInferenceOptions = {
+    const agentOptions: AgentInferenceOptions = {
         //baseDir: taskDir,
-        model: model,
-        //debug: options?.debug ?? false,
+        model: _model,
+        debug: options?.debug ?? false,
         onToolCall: onToolCall,
         onToolCallEnd: onToolCallEnd,
         onToolsTurnStart: onToolsTurnStart,
@@ -264,20 +202,21 @@ async function executeTask(
         onTurnEnd: onTurnEnd,
         onAssistant: onAssistant,
         onThink: onThink,
+        onThinkingToken: onThinkingToken,
+        onStartThinking: onStartThinking,
+        onEndThinking: onEndThinking,
+        onToolCallInProgress: onToolCallInProgress,
         ...conf,
     }
+    //console.log("AGENT OPTS", agentOptions);
     if (options?.history) {
         agent.history = options.history;
     }
-    const initialInferParams: InferenceParams = Object.assign({}, conf.inferParams);
-    //console.log("CONF", conf);
-    //console.log("TCONF", tconf);
-    //console.log("RUN", task);
     let out: InferenceResult;
 
     //console.log("CLI EXEC TASK", payload.prompt, "\nVARS:", vars, "\nOPTS", tconf)
     try {
-        out = await task.run({ prompt: payload.prompt, ...vars }, tconf);
+        out = await task.run({ prompt: payload.prompt, ...vars }, agentOptions);
     } catch (e: any) {
         //console.log("ERR CATCH", e);
         const errMsg = `${e}`;
@@ -332,7 +271,7 @@ async function executeTask(
         }
     }
     //console.log("END", name, "ISCM", isChatMode.value, "isTC", options?.isToolCall)
-    if (!isChatMode.value || options?.isToolCall) {
+    /*if (!isChatMode.value || options?.isToolCall) {
         // close mcp connections
         if (options?.debug && mcpServers.length > 0) {
             console.log("Closing", mcpServers.length, "mcp server(s)")
@@ -343,11 +282,11 @@ async function executeTask(
                 console.log("MCP stop", s.name);
             }
         });
-    }
+    }*/
     await processOutput(out);
     // chat mode
     //console.log("CLI CONF IP", initialInferParams);
-    if (!options?.isToolCall && isChatMode.value) {
+    /*if (!options?.isToolCall && isChatMode.value) {
         if (task.def.tools) {
             options.tools = task.def.tools
         }
@@ -357,15 +296,12 @@ async function executeTask(
         if (task.def.template?.system) {
             options.system = task.def.template.system
         }
-        /*if (task.def.template?.afterSystem) {
-            options.system = (tpl?.system ?? "") + task.def.template.afterSystem
-        }*/
         if (task.def.template?.assistant) {
             options.assistant = task.def.template.assistant
         }
         setChatInferenceParams(initialInferParams);
-        await chat(program, options, agent, mcpServers);
-    }
+        //await chat(program, options, agent, mcpServers);
+    }*/
     if (options?.debug === true || options?.verbose === true) {
         try {
             console.log(emittedTokens.toString(), color.dim("tokens"), out.stats.tokensPerSecond, color.dim("tps"));
@@ -386,21 +322,7 @@ async function executeTask(
     return out
 }
 
-async function executeTaskCmd(
-    name: string,
-    targs: Array<any> = []
-): Promise<InferenceResult> {
-    const ca = parseCommandArgs(targs);
-    //console.log("ARGS", ca);
-    const prompt = await getTaskPrompt(name, ca.args, ca.options);
-    const tr = await executeTask(name, { prompt: prompt }, ca.options)
-    //console.log("TR", tr);
-    return tr
-
-}
-
 export {
-    executeTask,
-    executeTaskCmd
+    executeTask
 };
 
