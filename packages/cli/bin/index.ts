@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 import { argv } from 'process';
 import { query } from "./cli.js";
-import { resetDbCmd } from './cmd/clicmds/cmds.js';
-import { updateConfCmd } from './cmd/clicmds/updateconf.js';
-import { buildCmds, parseCmd } from './cmd/cmds.js';
-import { formatMode, init, inputMode, isChatMode, outputMode, runMode } from './state/state.js';
-//import { usePerfTimer } from './main.js';
+import { resetDbCmd } from './cmd/cmds.js';
+import { state, conf } from "@agent-smith/core"
+import { isChatMode, runMode } from './state.js';
+import { buildCmds, parseCmd } from './cmd/build.js';
 
 async function main() {
     //const perf = usePerfTimer();
@@ -15,7 +14,7 @@ async function main() {
     }
     else if (nargs >= 3) {
         if (argv[2] == "conf") {
-            await updateConfCmd(argv.slice(-1));
+            await conf.updateConfCmd(argv.slice(-1));
             return
         } else if (argv[2] == "reset") {
             await resetDbCmd()
@@ -23,11 +22,12 @@ async function main() {
         }
     }
     //perf.measure("base");
-    await init();
+    await state.init();
     //perf.measure("init");
     const program = await buildCmds();
     //perf.measure("buildCmds");
     //perf.final("index start");
+    // @ts-ignore
     program.hook('preAction', async (thisCommand, actionCommand) => {
         const options = actionCommand.opts();
         //console.log("POPTS", options)
@@ -36,16 +36,16 @@ async function main() {
             isChatMode.value = true
         }
         if (options?.clipboardInput !== undefined) {
-            inputMode.value = "clipboard"
+            state.inputMode.value = "clipboard"
         }
         if (options?.inputFile !== undefined) {
-            inputMode.value = "promptfile"
+            state.inputMode.value = "promptfile"
         }
         if (options?.markdownOutput !== undefined) {
-            formatMode.value = "markdown"
+            state.formatMode.value = "markdown"
         }
         if (options?.clipboardOutput !== undefined) {
-            outputMode.value = "clipboard"
+            state.outputMode.value = "clipboard"
         }
     });
     switch (runMode.value) {

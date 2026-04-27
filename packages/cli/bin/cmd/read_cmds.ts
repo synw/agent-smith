@@ -1,7 +1,7 @@
 import { Command } from "commander";
 import { pathToFileURL } from 'url';
-import { runtimeWarning } from "../lib/user_msgs.js";
-import type { UserCmdDef } from "../../interfaces.js";
+import { runtimeWarning } from "../user_msgs.js";
+import type { UserCmdDef } from "@agent-smith/types";
 
 async function readCmd(name: string, cmdPath: string): Promise<UserCmdDef | null> {
     const url = pathToFileURL(cmdPath).href;

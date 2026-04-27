@@ -1,8 +1,7 @@
 import { Command, Option } from "commander";
-import { listBackends, setBackend } from "../../state/backends.js";
-import { parseCommandArgs } from "../lib/options_parsers.js";
+import { conf, state } from "@agent-smith/core";
+import { parseCommandArgs } from "../utils.js";
 import { processTaskCmd, processTasksCmd, resetDbCmd } from "./cmds.js";
-import { updateConfCmd, updateFeaturesCmd } from "./updateconf.js";
 import { displayOptions, inferenceOptions } from "../options.js";
 
 function initBaseCommands(program: Command): Command {
@@ -33,25 +32,25 @@ function initBaseCommands(program: Command): Command {
         .description("set the default backend")
         .action(async (...args: Array<any>) => {
             const ca = parseCommandArgs(args);
-            await setBackend(ca.args[0])
+            await state.setBackend(ca.args[0])
         });
     program.command("backends")
         .description("list the available backends")
         .action(async (...args: Array<any>) => {
-            await listBackends()
+            await state.listBackends()
         });
     const updateCmd = program.command("update")
         .description("update the available features: run this after adding a new feature")
         .action(async (...args: Array<any>) => {
             const ca = parseCommandArgs(args);
-            await updateFeaturesCmd(ca.options)
+            await conf.updateFeaturesCmd(ca.options)
         });
     displayOptions.forEach(o => updateCmd.addOption(o));
     program.command("conf <path>")
         .description("process config file")
         .action(async (...args: Array<any>) => {
             const ca = parseCommandArgs(args);
-            await updateConfCmd(ca.args)
+            await conf.updateConfCmd(ca.args)
         });
     program.command("reset")
         .description("reset the config database")

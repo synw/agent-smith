@@ -1,10 +1,7 @@
 import { Command } from "commander";
 import { allOptions } from "../options.js";
-import { executeTaskCmd } from "../lib/tasks/cmd.js";
-import { executeActionCmd } from "../lib/actions/cmd.js";
-import { executeWorkflowCmd } from "../lib/workflows/cmd.js";
-import { AliasType, FeatureSpec, FeatureType } from "../../interfaces.js";
-import { executeAgentCmd } from "../lib/agents/cmd.js";
+import { executeTaskCmd, executeWorkflowCmd, executeAgentCmd } from "./features.js";
+import type { AliasType, FeatureSpec, FeatureType } from "@agent-smith/types";
 
 function initCommandsFromAliases(program: Command, aliases: {
     name: string;

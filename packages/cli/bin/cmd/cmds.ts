@@ -1,125 +1,141 @@
-import { input } from "@inquirer/prompts";
-import { InferenceOptions } from "@locallm/types/dist/inference.js";
-import { Command } from "commander";
-import { query } from "../cli.js";
-import { readAliases, readFeatures } from "../db/read.js";
-import { chatInferenceParams, chatTemplate } from "../state/chat.js";
-import { isChatMode, runMode } from "../state/state.js";
-import { initCommandsFromAliases } from "./clicmds/aliases.js";
-import { initBaseCommands } from "./clicmds/base.js";
-import { initUserCmds } from "./clicmds/cmds.js";
-import type { McpClient } from "../main.js";
-import type { Agent } from "@agent-smith/agent";
-import { exit } from "node:process";
-//import { usePerfTimer } from "../main.js";
+import colors from "ansi-colors";
+import { Command, Option } from 'commander';
+import path from "path";
+import YAML from 'yaml';
+import { db, conf, utils, state, getFeatureSpec } from "@agent-smith/core";
+import type { FeatureSpec, FeatureType } from '@agent-smith/types';
+import { parseCommandArgs } from "../utils.js";
+import { readCmd } from "./read_cmds.js";
+import { runtimeDataError } from "../user_msgs.js";
+import { allOptions, displayOptions, inferenceOptions, ioOptions } from "../options.js";
+import { runMode } from "../state.js";
 
-const program = new Command();
-
-async function chat(program: Command, options: InferenceOptions, agent: Agent, mcpServers: Array<McpClient>) {
-    //console.log("CHAT OPTS", options);
-    const data = { message: '>', default: "" };
-    const prompt = await input(data);
-    if (prompt == "/q") {
-        isChatMode.value = false;
-        if (runMode.value == "cmd") {
-            process.exit(0)
-        } else {
-            mcpServers.forEach(async (s) => await s.stop());
-            await query(program)
+async function initUserCmds(cmdFeats: Record<string, FeatureSpec>, program: Command): Promise<Array<Command>> {
+    const features = Object.values(cmdFeats);
+    const usrCmds: Array<Command> = [];
+    for (const feat of features) {
+        //console.log("Init cmd", feat);
+        const hasVariables = feat?.variables ? true : false;
+        const vars = hasVariables ? feat.variables as Record<string, any> : {};
+        let desc = "";
+        if (hasVariables) {
+            desc = vars.description;
         }
+        //console.log("F", feat);
+        // @ts-ignore
+        const cmd = program.command(feat.name)
+            .description(desc)
+            .action(async (...args: Array<any>) => {
+                const ca = parseCommandArgs(args);
+                const cmdPath = path.join(feat.path, feat.name + "." + feat.ext);
+                const c = await readCmd(feat.name, cmdPath);
+                if (!c) {
+                    runtimeDataError(`can not import command ${feat.name}`);
+                    throw new Error()
+                }
+                await c.run(ca.args, ca.options)
+            });
+        if (hasVariables) {
+            if (vars?.options) {
+                for (const opt of (vars.options as Array<Array<string>>)) {
+                    if (Array.isArray(opt)) {
+                        cmd.addOption(new Option(opt[0], opt[1]));
+                    } else {
+                        // predefined option
+                        switch (opt) {
+                            case "all":
+                                allOptions.forEach(o => cmd.addOption(o));
+                                break;
+                            case "display":
+                                displayOptions.forEach(o => cmd.addOption(o));
+                                break
+                            case "inference":
+                                inferenceOptions.forEach(o => cmd.addOption(o));
+                                break
+                            case "io":
+                                ioOptions.forEach(o => cmd.addOption(o));
+                            default:
+                                break;
+                        }
+                    }
+
+                }
+            }
+        }
+        usrCmds.push(cmd)
     }
-    //console.log("CHAT HIST", agent.history);
-    //options.history = undefined;
-    //console.log("RUN W PROMPT", prompt);
-    await agent.run(prompt, chatInferenceParams, options, chatTemplate ? chatTemplate : undefined);
-    console.log();
-    await chat(program, options, agent, mcpServers);
+    //console.log("USRCMDS", usrCmds.map(c => c.name()))
+    return usrCmds
 }
 
-async function buildCmds(): Promise<Command> {
-    //program.allowUnknownOption(true);
-    //const perf = usePerfTimer();
-    initBaseCommands(program);
-    //perf.measure("initBaseCommands");
-    const aliases = readAliases();
-    //perf.measure("readAliases");
-    const feats = readFeatures();
-    //perf.measure("readFeatures");
-    initCommandsFromAliases(program, aliases, feats);
-    //perf.measure("initCommandsFromAliases");
-    await initUserCmds(feats.cmd, program);
-    //perf.measure("initUserCmds");
-    //perf.measure("cmds for each");
-    //perf.final("buildCmds");
-    return program
+async function resetDbCmd(): Promise<any> {
+    if (runMode.value == "cli") {
+        console.log("This command can not be run in cli mode")
+        return
+    }
+    utils.deleteFileIfExists(conf.dbPath);
+    console.log("Config database reset ok. Run the conf command to recreate it")
 }
 
-/*async function buildCmds(): Promise<Command> {
-    // Performance measurement start
-    const startTime = process.hrtime.bigint();
-    const measurements: { name: string; time: number; percentage: number }[] = [];
-    let lastTime = startTime;
-
-    function measureFunction(name: string) {
-        const currentTime = process.hrtime.bigint();
-        const elapsedNs = Number(currentTime - lastTime);
-        const elapsedSec = elapsedNs / 1_000_000_000;
-        measurements.push({ name, time: elapsedSec, percentage: 0 });
-        lastTime = currentTime;
+async function processTasksCmd(args: Array<string>, options: Record<string, any>) {
+    if (options?.conf) {
+        if (!state.isTaskSettingsInitialized.value) {
+            state.initTaskSettings()
+        }
+        //console.log("PTS", tasksSettings);
+        console.log(YAML.stringify({ "tasks": state.tasksSettings }));
+    } else {
+        const ts = Object.keys(db.readFeaturesType("task")).sort();
+        console.table(ts)
     }
+}
 
-    //program.allowUnknownOption(true);
-    measureFunction("start");
-    initBaseCommands(program);
-
-    measureFunction("initBaseCommands");
-    const aliases = readAliases();
-
-    measureFunction("readAliases");
-    const feats = readFeatures();
-
-    measureFunction("readFeatures");
-    initCommandsFromAliases(program, aliases, feats);
-
-    measureFunction("initCommandsFromAliases");
-    const cmds = await initUserCmds(feats.cmd);
-
-    measureFunction("initUserCmds");
-    cmds.forEach(c => {
-        //console.log("Add cmd", c.name());
-        program.addCommand(c)
-    });
-    measureFunction("cmds.forEach");
-
-    // Calculate percentages and display results
-    const totalTime = Number(process.hrtime.bigint() - startTime) / 1_000_000_000;
-    measurements.forEach(m => {
-        m.percentage = (m.time / totalTime) * 100;
-    });
-
-    console.log("\nPerformance Measurements for buildCmds:");
-    measurements.forEach(m => {
-        console.log(`${m.name}: ${m.time.toFixed(6)}s (${m.percentage.toFixed(2)}%)`);
-    });
-    console.log(`Total time: ${totalTime.toFixed(6)}s\n`);
-
-    return program
-}*/
-
-async function parseCmd(program: Command) {
-    program.name('Agent Smith terminal client');
-    program.description('Terminal agents toolkit');
-    await program.parseAsync();
-    //console.log("CMD END");
-    //exit(0)
-    /*if (isChatMode.value) {
-        await chat(program)
-    }*/
+async function processTaskCmd(args: Array<string>, options: Record<string, any>): Promise<any> {
+    //console.log("TASK OPTS", options);
+    if (args.length == 0) {
+        console.warn("Provide a task name");
+        return
+    }
+    const { found, path } = getFeatureSpec(args[0], "task" as FeatureType);
+    if (!found) {
+        console.warn(`Task ${args[0]} not found`)
+        return
+    }
+    if (options?.reset) {
+        db.deleteTaskSetting(args[0]);
+        console.log("Task", args[0], "reset ok")
+        return
+    }
+    //console.log("RT", path)
+    const res = utils.readTask(path);
+    if (!res.found) {
+        throw new Error(`Task ${args[0]}, ${path} not found`)
+    }
+    //const ts = JSON.parse(res.ymlTask);
+    console.log(res.ymlTask);
+    if (Object.keys(options).length > 0) {
+        db.upsertTaskSettings(args[0], options);
+    }
+    const s = db.readTaskSetting(args[0]);
+    if (s.found) {
+        const sts = s.settings;
+        delete sts.id;
+        delete sts.name;
+        const display: Record<string, any> = {}
+        for (const [k, v] of Object.entries(sts)) {
+            if (v) {
+                display[k] = v
+            }
+        }
+        console.log(colors.dim("Settings") + ":", display);
+    }
+    //console.log(JSON.stringify(ts, null, "  "));
 }
 
 export {
-    buildCmds,
-    chat,
-    parseCmd, program
+    initUserCmds,
+    processTaskCmd,
+    processTasksCmd,
+    resetDbCmd,
 };
 
