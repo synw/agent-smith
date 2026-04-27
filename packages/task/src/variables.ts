@@ -1,6 +1,6 @@
-import { HistoryTurn, TaskDef, TaskInput } from "@agent-smith/types";
+import { HistoryTurn, TaskDef } from "@agent-smith/types";
 
-function applyVariables(taskDef: TaskDef, taskInput: TaskInput): TaskDef {
+function applyVariables(taskDef: TaskDef, taskInput: { prompt: string } & Record<string, any>): TaskDef {
     //console.log("\n--------TD", typeof taskDef, Object.keys(taskDef))
     // check taskDef variables
     if (taskDef?.variables) {

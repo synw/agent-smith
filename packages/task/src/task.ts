@@ -1,5 +1,5 @@
 import { Agent } from "@agent-smith/agent";
-import { AgentInferenceOptions, InferenceResult, TaskInput, TaskDef } from '@agent-smith/types';
+import { AgentInferenceOptions, InferenceResult, TaskDef } from '@agent-smith/types';
 import YAML from 'yaml';
 import { formatInferParams } from './inferparams.js';
 import { applyVariables } from './variables.js';
@@ -19,7 +19,7 @@ class Task {
     }
 
     async run(
-        params: TaskInput, options: AgentInferenceOptions = {}
+        params: { prompt: string } & Record<string, any>, options: AgentInferenceOptions = {}
     ): Promise<InferenceResult> {
         if (!params?.prompt) {
             throw new Error(`Task ${this.def.name}: no prompt parameter provided. Parameters: ${JSON.stringify(params, null, 2)}`);
@@ -85,12 +85,12 @@ class Task {
             console.log("----------------------------------------------")
             //options.debug = true
         }
-        //console.log("RUN AGENT (TASK) params:", this.def.inferParams);
-        //console.log("RUN AGENT (TASK) options:", options);
+        //console.log("RUN AGENT (TASK) params:", this.def.inferParams);        
         const agentOpts: AgentInferenceOptions = {
             ...options,
             params: this.def.inferParams,
         }
+        //console.log("RUN AGENT (TASK) options:", agentOpts);
         answer = await this.agent.run(finalPrompt, agentOpts);
 
         // remove task tools from the agent

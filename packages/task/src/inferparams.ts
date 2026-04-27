@@ -1,4 +1,4 @@
-import { InferenceParams, TaskConf, type AgentInferenceOptions } from "@agent-smith/types";
+import type { InferenceParams, AgentInferenceOptions } from "@agent-smith/types";
 
 function formatInferParams(ip: InferenceParams, conf: AgentInferenceOptions): InferenceParams {
     const _ip = ip as Record<string, any>;
