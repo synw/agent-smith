@@ -8,7 +8,7 @@ class Agent {
     tools: Record<string, ToolSpec> = {};
     history: Array<HistoryTurn> = [];
     onToolCall?: (tc: ToolCallSpec) => void;
-    onToolCallEnd?: (id: string, tr: any) => void;
+    onToolCallEnd?: (tc: ToolCallSpec, tr: any) => void;
     onToolsTurnStart?: (tc: Array<ToolCallSpec>) => void;
     onToolsTurnEnd?: (tt: Array<ToolTurn>) => void;
     onTurnEnd?: (ht: HistoryTurn) => void;
@@ -51,7 +51,7 @@ class Agent {
 
     async run(
         prompt: string,
-        options: InferenceOptions = {},
+        options: AgentInferenceOptions = {},
     ): Promise<InferenceResult> {
         if (options?.debug) {
             console.log("Agent", this.name, "inference params:", options?.params);
@@ -77,11 +77,10 @@ class Agent {
         prompt: string,
         options: AgentInferenceOptions = {},
     ) {
-        //console.log("AGENT PROMPT NO TPL", prompt);
-        //console.log("(AGENT) RUN NO TEMPLATE params:", JSON.stringify(params, null, 2));
-        //console.log("(AGENT) RUN NO TEMPLATE options:", JSON.stringify(options, null, 2));
-        //console.log("(AGENT) RUN NO TEMPLATE provider:", this.lm.providerType);
+        //console.log("(AGENT) options:", options);
         const clientEvents: InferenceCallbacks = {
+            onStartThinking: options?.onStartThinking,
+            onEndThinking: options?.onEndThinking,
             onToken: options?.onToken,
             onThinkingToken: options?.onThinkingToken,
             onStartEmit: options?.onStartEmit,
@@ -144,18 +143,17 @@ class Agent {
                 if (tool?.canRun) {
                     canRun = await tool.canRun(tc);
                 }
-                //console.log(tool.name, "can run:", canRun)
                 if (canRun) {
-                    if (this?.onToolCall) {
-                        this.onToolCall(tc);
+                    if (events?.onToolCall) {
+                        events.onToolCall(tc);
                     }
                     const toolCallResult = await tool.execute(tc.arguments);
                     if (options?.debug || options?.verbose) {
                         console.log("[x] Executed tool", tool.name + ":", toolCallResult);
                     }
                     toolsResults.push({ call: tc, response: JSON.stringify(toolCallResult) });
-                    if (this?.onToolCallEnd) {
-                        this.onToolCallEnd(tc.id, toolCallResult);
+                    if (events?.onToolCallEnd) {
+                        events.onToolCallEnd(tc, toolCallResult);
                     }
                 } else {
                     if (options?.debug || options?.verbose) {
@@ -163,8 +161,8 @@ class Agent {
                     }
                 }
             }
-            if (this?.onToolsTurnEnd) {
-                this.onToolsTurnEnd(toolsResults);
+            if (events?.onToolsTurnEnd) {
+                events.onToolsTurnEnd(toolsResults);
             }
             this.history.push({ tools: toolsResults });
             if (options?.isToolsRouter) {
@@ -187,14 +185,14 @@ class Agent {
             if (options?.tools) {
                 options.tools = Object.values(this.tools);
             }
-            if (this?.onTurnEnd) {
-                this.onTurnEnd(this.history[this.history.length - 1])
+            if (events?.onTurnEnd) {
+                events.onTurnEnd(this.history[this.history.length - 1])
             }
             _res = await this.runAgent(nit, "", options);
         } else {
             this.history.push({ assistant: res.text });
-            if (this?.onTurnEnd) {
-                this.onTurnEnd(this.history[this.history.length - 1])
+            if (events?.onTurnEnd) {
+                events.onTurnEnd(this.history[this.history.length - 1])
             }
         }
         return _res

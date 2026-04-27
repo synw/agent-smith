@@ -32,6 +32,8 @@ class Lm implements LmProvider {
     api: ReturnType<typeof useApi>;
     onToken?: (t: string) => void;
     onThinkingToken?: (t: string) => void;
+    onStartThinking?: () => void;
+    onEndThinking?: () => void;
     onStartEmit?: (data: IngestionStats) => void;
     onEndEmit?: (result: InferenceResult) => void;
     onError?: (err: any) => void;
@@ -55,6 +57,8 @@ class Lm implements LmProvider {
         this.onThinkingToken = params.onThinkingToken;
         this.onStartEmit = params.onStartEmit;
         this.onEndEmit = params.onEndEmit;
+        this.onStartThinking = params.onStartThinking;
+        this.onEndThinking = params.onEndThinking;
         this.onError = params.onError;
         this.onToolCallInProgress = params.onToolCallInProgress;
         this.apiKey = params.apiKey ?? "";
@@ -133,6 +137,8 @@ class Lm implements LmProvider {
         options: ClientInferenceOptions = {},
     ): Promise<InferenceResult> {
         const events: InferenceCallbacks = {
+            onStartThinking: options?.onStartThinking ?? this.onStartThinking,
+            onEndThinking: options?.onEndThinking ?? this.onEndThinking,
             onToken: options?.onToken ?? this.onToken,
             onThinkingToken: options?.onThinkingToken ?? this.onThinkingToken,
             onStartEmit: options?.onStartEmit ?? this.onStartEmit,
@@ -140,6 +146,7 @@ class Lm implements LmProvider {
             onError: options?.onEndEmit ?? this.onError,
             onToolCallInProgress: options?.onToolCallInProgress ?? this.onToolCallInProgress,
         };
+        //console.log("EVENTS", events);
         //console.log("CLI OPTS", options);
         this.abortController = new AbortController();
         const params = options?.params ?? {};
@@ -384,6 +391,7 @@ class Lm implements LmProvider {
                 index: number;
             }> = [];
             let toolsCallsInProgress = new Array<ToolCallSpec>();
+            let isThinking = false;
             const parser = createParser({
                 onEvent: (event) => {
                     const done = event.data === '[DONE]';
@@ -396,14 +404,6 @@ class Lm implements LmProvider {
                         }
                         if (events.onToken) {
                             const payload = JSON.parse(event.data);
-                            //console.dir("PAYLOAD:", payload);
-                            //console.dir(payload, { depth: 5 });
-                            if (i == 0) {
-                                const ins = stats.inferenceStarts();
-                                if (events.onStartEmit) {
-                                    events.onStartEmit(ins)
-                                }
-                            }
                             const modelRawToolCalls: Record<string, { name: string, arguments: Array<string> }> = {};
 
                             const choice = payload.choices[0];
@@ -485,6 +485,12 @@ class Lm implements LmProvider {
                                 reader.cancel();
                             }
                             if (delta?.reasoning_content) {
+                                if (!isThinking) {
+                                    isThinking = true;
+                                    if (events.onStartThinking) {
+                                        events.onStartThinking()
+                                    }
+                                }
                                 thinkingText += delta.reasoning_content;
                                 if (events.onThinkingToken) {
                                     events.onThinkingToken(delta.reasoning_content);
@@ -492,10 +498,17 @@ class Lm implements LmProvider {
                             } else {
                                 const t = delta?.content;
                                 if (t) {
+                                    if (isThinking) {
+                                        isThinking = false;
+                                        if (events.onEndThinking) {
+                                            events.onEndThinking()
+                                        }
+                                    }
                                     if (events.onToken) {
                                         events.onToken(t);
                                     }
                                     buf.push(t);
+
                                 }
                             }
                             ++i
