@@ -1,6 +1,6 @@
 import { Agent } from "@agent-smith/agent";
 import { Task } from "@agent-smith/task";
-import { TaskDef, TaskInput, type AgentInferenceOptions, type InferenceResult } from "@agent-smith/types";
+import type { TaskDef, AgentInferenceOptions, InferenceResult } from "@agent-smith/types";
 import { applyFilePlaceholders } from './files.js';
 
 class NodeTask extends Task {
@@ -10,7 +10,8 @@ class NodeTask extends Task {
     }
 
     async run(
-        params: TaskInput, conf?: AgentInferenceOptions
+        params: { prompt: string } & Record<string, any>,
+        conf?: AgentInferenceOptions
     ): Promise<InferenceResult> {
         this.def = applyFilePlaceholders(this.def);
         return super.run(params, conf);
